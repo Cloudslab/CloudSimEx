@@ -1,5 +1,13 @@
 # Eclipse stuff #
 #################
+.settings/
+.classpath
+.project
+
+# MVN target #
+##############
+target/
+
 
 # Compiled source #
 ###################
