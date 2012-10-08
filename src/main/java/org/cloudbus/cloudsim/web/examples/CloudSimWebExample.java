@@ -10,19 +10,20 @@
 package org.cloudbus.cloudsim.web.examples;
 
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
+import java.util.logging.Level;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.Datacenter;
-import org.cloudbus.cloudsim.DatacenterBroker;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
 import org.cloudbus.cloudsim.Host;
-import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.UtilizationModel;
@@ -35,6 +36,7 @@ import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 import org.cloudbus.cloudsim.web.WebBroker;
+import org.cloudbus.cloudsimgoodies.util.CustomLog;
 
 
 /**
@@ -55,10 +57,17 @@ public class CloudSimWebExample {
 
 	/**
 	 * Creates main() to run this example
+	 * @throws IOException 
+	 * @throws SecurityException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws SecurityException, IOException {
 
-		Log.printLine("Starting CloudSimExample2...");
+		Properties props = new Properties();
+		props.load(CloudSimWebExample.class.getResourceAsStream("custom_log.properties"));
+		
+		CustomLog.configLogger(props);
+		
+		CustomLog.printLine("Starting CloudSimExample2...", null);
 
 	        try {
 	        	// First step: Initialize the CloudSim package. It should be called
@@ -149,11 +158,11 @@ public class CloudSimWebExample {
 	            	//Print the debt of each user to each datacenter
 	    	    	datacenter0.printDebts();
 
-	            	Log.printLine("CloudSimExample2 finished!");
+	    	    	CustomLog.printLine("CloudSimExample2 finished!", null);
 	        }
 	        catch (Exception e) {
 	            e.printStackTrace();
-	            Log.printLine("The simulation has been terminated due to an unexpected error");
+	            CustomLog.printLine("The simulation has been terminated due to an unexpected error", null);
 	        }
 	    }
 
@@ -243,22 +252,22 @@ public class CloudSimWebExample {
 	        Cloudlet cloudlet;
 
 	        String indent = "    ";
-	        Log.printLine();
-	        Log.printLine("========== OUTPUT ==========");
-	        Log.printLine("Cloudlet ID" + indent + "STATUS" + indent +
-	                "Data center ID" + indent + "VM ID" + indent + "Time" + indent + "Start Time" + indent + "Finish Time");
+	        CustomLog.printLine(CustomLog.NEW_LINE, null);
+	        CustomLog.printLine("========== OUTPUT ==========", null);
+	        CustomLog.printLine("Cloudlet ID" + indent + "STATUS" + indent +
+	                "Data center ID" + indent + "VM ID" + indent + "Time" + indent + "Start Time" + indent + "Finish Time", null);
 
 	        DecimalFormat dft = new DecimalFormat("###.##");
 	        for (int i = 0; i < size; i++) {
 	            cloudlet = list.get(i);
-	            Log.print(indent + cloudlet.getCloudletId() + indent + indent);
+	            CustomLog.print(indent + cloudlet.getCloudletId() + indent + indent, null);
 
 	            if (cloudlet.getCloudletStatus() == Cloudlet.SUCCESS){
-	                Log.print("SUCCESS");
+	            	CustomLog.print("SUCCESS", null);
 
-	            	Log.printLine( indent + indent + cloudlet.getResourceId() + indent + indent + indent + cloudlet.getVmId() +
+	            	CustomLog.printLine( indent + indent + cloudlet.getResourceId() + indent + indent + indent + cloudlet.getVmId() +
 	                     indent + indent + dft.format(cloudlet.getActualCPUTime()) + indent + indent + dft.format(cloudlet.getExecStartTime())+
-                             indent + indent + dft.format(cloudlet.getFinishTime()));
+                             indent + indent + dft.format(cloudlet.getFinishTime()), null);
 	            }
 	        }
 

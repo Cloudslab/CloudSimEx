@@ -1,9 +1,9 @@
 package org.cloudbus.cloudsim.web;
 
 import org.cloudbus.cloudsim.DatacenterBroker;
-import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsimgoodies.util.CustomLog;
 
 public class WebBroker extends DatacenterBroker {
 
@@ -33,7 +33,7 @@ public class WebBroker extends DatacenterBroker {
 	protected void processOtherEvent(SimEvent ev) {
 		switch (ev.getTag()) {
 		case TIMER_TAG:
-			Log.printLine("Event: " + getName() + "Time: " + CloudSim.clock());
+			CustomLog.printLine("Event: " + getName() + "Time: " + CloudSim.clock(), null);
 			if (CloudSim.clock() < lifeLength) {
 				send(getId(), refreshPeriod, TIMER_TAG);
 				updateSessions();
