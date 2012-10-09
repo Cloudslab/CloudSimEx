@@ -1,19 +1,26 @@
 package org.cloudbus.cloudsim.web;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 public class WebSession {
 
-	private Queue<WebCloudLet> appServerCloudLets = new LinkedList<WebCloudLet>();
-	private Queue<WebCloudLet> dbServerCloudLets = new LinkedList<WebCloudLet>();
+	private IGenerator<WebCloudlet> appServerCloudLets;
+	private IGenerator<WebCloudlet> dbServerCloudLets;
 
-	private WebCloudLet currentAppServerCloudLet = null;
-	private WebCloudLet currentDBServerCloudLet = null;
+	private WebCloudlet currentAppServerCloudLet = null;
+	private WebCloudlet currentDBServerCloudLet = null;
 
-	public WebCloudLet[] pollCloudlets(final double currTime) {
+	private int appVmId = -1;
+	private int dbVmId = -1;
 
-		WebCloudLet[] result = null;
+	public WebSession(IGenerator<WebCloudlet> appServerCloudLets,
+			IGenerator<WebCloudlet> dbServerCloudLets) {
+		super();
+		this.appServerCloudLets = appServerCloudLets;
+		this.dbServerCloudLets = dbServerCloudLets;
+	}
+
+	public WebCloudlet[] pollCloudlets(final double currTime) {
+
+		WebCloudlet[] result = null;
 		boolean appCloudletFinished = currentAppServerCloudLet == null
 				|| currentAppServerCloudLet.isFinished();
 		boolean dbCloudletFinished = currentDBServerCloudLet == null
@@ -25,12 +32,36 @@ public class WebSession {
 
 		if (appCloudletFinished && dbCloudletFinished && appServerNextReady
 				&& dbServerNextReady) {
-			result = new WebCloudLet[] { appServerCloudLets.poll(),
+			result = new WebCloudlet[] { appServerCloudLets.poll(),
 					dbServerCloudLets.poll() };
 			currentAppServerCloudLet = result[0];
-			currentDBServerCloudLet = result[0];
+			currentDBServerCloudLet = result[1];
+
+			currentAppServerCloudLet.setVmId(appVmId);
+			currentDBServerCloudLet.setVmId(dbVmId);
 		}
 		return result;
+	}
+
+	public void prefetch(final Double time) {
+		appServerCloudLets.prefetch(time);
+		dbServerCloudLets.prefetch(time);
+	}
+
+	public int getAppVmId() {
+		return appVmId;
+	}
+
+	public void setAppVmId(int appVmId) {
+		this.appVmId = appVmId;
+	}
+
+	public int getDbVmId() {
+		return dbVmId;
+	}
+
+	public void setDbVmId(int dbVmId) {
+		this.dbVmId = dbVmId;
 	}
 
 }

@@ -2,16 +2,13 @@ package org.cloudbus.cloudsim.web;
 
 import java.util.Iterator;
 
-import org.cloudbus.cloudsim.Cloudlet;
-
 public class IterableGenerator<T> implements
-		ICloudLetGenerator<T> {
+		IGenerator<T> {
 
 	private Iterator<T> iterator;
 	private T peeked;
 
 	public IterableGenerator(Iterable<T> collection) {
-		super();
 		this.iterator = collection.iterator();
 	}
 
@@ -20,19 +17,23 @@ public class IterableGenerator<T> implements
 		return peeked;
 	}
 
-	public T pop() {
-		if (peeked == null) {
+	public T poll() {
+		T result = peeked;
+		if (peeked != null) {
 			peeked = null;
-			return peeked;
 		} else {
-			return iterator.next();
+			result = iterator.next();
 		}
-
+		return result;
 	}
 
-	public boolean isEmpy() {
+	public boolean isEmpty() {
 		return peeked == null && !iterator.hasNext();
 	}
 
+	@Override
+	public void prefetch(final double time) {
+		// Do nothing
+	}
 
 }

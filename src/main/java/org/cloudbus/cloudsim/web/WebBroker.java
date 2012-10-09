@@ -1,5 +1,9 @@
 package org.cloudbus.cloudsim.web;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.cloudbus.cloudsim.DatacenterBroker;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEvent;
@@ -13,7 +17,10 @@ public class WebBroker extends DatacenterBroker {
 	private final double refreshPeriod;
 	private final double lifeLength;
 
-	public WebBroker(final String name, final double refreshPeriod, final double lifeLength) throws Exception {
+	private List<WebSession> sessions = new ArrayList<>();
+
+	public WebBroker(final String name, final double refreshPeriod,
+			final double lifeLength) throws Exception {
 		super(name);
 		this.refreshPeriod = refreshPeriod;
 		this.lifeLength = lifeLength;
@@ -29,11 +36,16 @@ public class WebBroker extends DatacenterBroker {
 		super.processEvent(ev);
 	}
 
+	public void submitSessions(final List<WebSession> webSessions) {
+		sessions.addAll(webSessions);
+	}
+	
 	@Override
 	protected void processOtherEvent(SimEvent ev) {
 		switch (ev.getTag()) {
 		case TIMER_TAG:
-			CustomLog.printLine("Event: " + getName() + "Time: " + CloudSim.clock(), null);
+			CustomLog.printLine(
+					"Event: " + getName() + "Time: " + CloudSim.clock(), null);
 			if (CloudSim.clock() < lifeLength) {
 				send(getId(), refreshPeriod, TIMER_TAG);
 				updateSessions();
@@ -46,7 +58,18 @@ public class WebBroker extends DatacenterBroker {
 	}
 
 	private void updateSessions() {
-		
+		for (WebSession sess : sessions) {
+			double currTime = CloudSim.clock();
+
+			sess.prefetch(currTime);
+			WebCloudlet[] webCloudlets = sess.pollCloudlets(currTime);
+			if (webCloudlets != null) {
+//				WebCloudlet asCloudLet = webCloudlets[0];
+//				WebCloudlet dbCloudLet = webCloudlets[1];
+				submitCloudletList(Arrays.asList(webCloudlets));
+			}
+		}
+
 	}
 
 }

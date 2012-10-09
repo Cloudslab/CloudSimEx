@@ -10,6 +10,20 @@
 	<name>cloudsimincubator</name>
 	<url>http://maven.apache.org</url>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.0.2</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -25,14 +39,6 @@
 			<artifactId>cloudsim-examples</artifactId>
 			<version>3.1-SNAPSHOT</version>
 		</dependency>
-
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.10</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-io</artifactId>
@@ -46,8 +52,15 @@
 		<dependency>
 			<groupId>org.uncommons.maths</groupId>
 			<artifactId>uncommons-maths</artifactId>
-			<version>1.2.1</version>
-			<classifier>test-sources</classifier>
+			<version>1.2.2a</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.10</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>
