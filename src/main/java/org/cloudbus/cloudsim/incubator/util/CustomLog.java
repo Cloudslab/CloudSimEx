@@ -1,9 +1,8 @@
-package org.cloudbus.cloudsimgoodies.util;
+package org.cloudbus.cloudsim.incubator.util;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
@@ -59,9 +58,7 @@ public class CustomLog {
 	 */
 	public static void print(Object message, Level level) {
 		logger.log(
-				level == null ? DEFAULT_LEVEL : level,
-				"[" + Double.toString(CloudSim.clock()) + "] "
-						+ String.valueOf(message));
+				level == null ? DEFAULT_LEVEL : level, String.valueOf(message));
 	}
 
 	public static String formatDate(Date cal) {
@@ -79,8 +76,9 @@ public class CustomLog {
 	}
 
 	public static String formatClockTime() {
-		DecimalFormat f = new DecimalFormat("#.##");
-		return "[Simulation time: " + f.format(CloudSim.clock()) + "]: ";
+//		DecimalFormat f = new DecimalFormat("#.##");
+//		return "[Simulation time: " + f.format(CloudSim.clock()) + "]: ";
+		return String.format("%2.2f", CloudSim.clock());
 	}
 
 	public static void configLogger(final Properties props)
@@ -131,6 +129,10 @@ public class CustomLog {
 		logger.log(level == null ? DEFAULT_LEVEL : level, msg);
 	}
 
+	public static void printf(String format, Level level, Object ... args) {
+		logger.log(level == null ? DEFAULT_LEVEL : level, String.format(format, args));
+	}
+	
 	private static class CustomFormatter extends Formatter {
 
 		private boolean prefixCloudSimClock;
@@ -147,7 +149,7 @@ public class CustomLog {
 			String[] methodCalls = format.split(";");
 			StringBuffer result = new StringBuffer();
 			if (prefixCloudSimClock) {
-				result.append(formatClockTime());
+				result.append(formatClockTime() + "\t");
 			}
 
 			int i = 0;
@@ -160,8 +162,8 @@ public class CustomLog {
 					e.printStackTrace(System.err);
 					System.exit(1);
 				}
-				if (++i < methodCalls.length - 1) {
-					result.append(" -:- ");
+				if (i++ < methodCalls.length - 1) {
+					result.append("\t");
 				}
 			}
 			result.append(NEW_LINE);
