@@ -37,6 +37,7 @@ import org.cloudbus.cloudsim.VmSchedulerTimeShared;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.incubator.util.CustomLog;
 import org.cloudbus.cloudsim.incubator.util.Id;
+import org.cloudbus.cloudsim.incubator.util.TextUtil;
 import org.cloudbus.cloudsim.incubator.web.ASStatGenerator;
 import org.cloudbus.cloudsim.incubator.web.IGenerator;
 import org.cloudbus.cloudsim.incubator.web.WebBroker;
@@ -67,9 +68,11 @@ public class CloudSimWebExample {
 	}
 	CustomLog.configLogger(props);
 
-	CustomLog.printLine("Example of Web session modelling.", null);
+	CustomLog.printLine("Example of Web session modelling.");
 
 	try {
+	    
+	    CustomLog.printLine(TextUtil.getCaptionLine(WebCloudlet.class));
 	    // Step1: Initialize the CloudSim package. It should be called
 	    // before creating any entities.
 	    int numBrokers = 1; // number of brokers we'll be using
@@ -110,7 +113,7 @@ public class CloudSimWebExample {
 	    // submit vm list to the broker
 	    broker.submitVmList(vmlist);
 
-	    List<WebSession> sessions = generateRandomSessions(broker, appServerVM, dbServerVM, 10);
+	    List<WebSession> sessions = generateRandomSessions(broker, appServerVM, dbServerVM, 50);
 	    broker.submitSessions(sessions);
 
 	    // Sixth step: Starts the simulation
@@ -126,13 +129,10 @@ public class CloudSimWebExample {
 	    // Print the debt of each user to each datacenter
 	    // datacenter0.printDebts();
 
-	    CustomLog.printLine("\n\nSimulation is finished!", null);
+	    System.err.println("\nSimulation is finished!");
 	} catch (Exception e) {
 	    e.printStackTrace();
-	    CustomLog
-		    .printLine(
-			    "The simulation has been terminated due to an unexpected error",
-			    null);
+	    System.err.println("The simulation has been terminated due to an unexpected error");
 	}
     }
 
@@ -143,11 +143,13 @@ public class CloudSimWebExample {
 	Map<String, NumberGenerator<Double>> generators = new HashMap<>();
 	generators.put(ASStatGenerator.CLOUDLET_LENGTH, gen);
 	generators.put(ASStatGenerator.CLOUDLET_RAM, gen);
-	IGenerator<WebCloudlet> testGenerator = new ASStatGenerator(broker, generators);
+	IGenerator<WebCloudlet> asGenerator = new ASStatGenerator(broker, generators);
+	IGenerator<WebCloudlet> dbGenerator = new ASStatGenerator(broker, generators);
 
+	
 	List<WebSession> sessions = new ArrayList<>();
 	for (int i = 0; i < sessionNum; i++) {
-	    WebSession session = new WebSession(testGenerator, testGenerator);
+	    WebSession session = new WebSession(asGenerator, dbGenerator);
 	    session.setAppVmId(appServerVM.getId());
 	    session.setDbVmId(dbServerVM.getId());
 	    sessions.add(session);
@@ -232,11 +234,10 @@ public class CloudSimWebExample {
 	Cloudlet cloudlet;
 
 	String indent = "    ";
-	CustomLog.printLine(CustomLog.NEW_LINE, null);
-	CustomLog.printLine("========== OUTPUT ==========", null);
+	CustomLog.printLine("\n\n========== OUTPUT ==========");
 	CustomLog.printLine("Cloudlet ID" + indent + "STATUS" + indent
 		+ "Data center ID" + indent + "VM ID" + indent + "Time"
-		+ indent + "Start Time" + indent + "Finish Time", null);
+		+ indent + "Start Time" + indent + "Finish Time");
 
 	DecimalFormat dft = new DecimalFormat("###.##");
 	for (int i = 0; i < size; i++) {
@@ -255,7 +256,7 @@ public class CloudSimWebExample {
 				+ indent + indent
 				+ dft.format(cloudlet.getExecStartTime())
 				+ indent + indent
-				+ dft.format(cloudlet.getFinishTime()), null);
+				+ dft.format(cloudlet.getFinishTime()));
 	    }
 	}
 

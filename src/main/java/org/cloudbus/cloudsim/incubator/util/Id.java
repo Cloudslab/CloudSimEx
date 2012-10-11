@@ -9,6 +9,14 @@ import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.incubator.web.WebSession;
 
+/**
+ * A factory for CloudSim entities' ids. CloudSim requires a lot of ids, that
+ * are provided by the end user. This class is a utility for automatically
+ * generating valid ids.
+ * 
+ * @author nikolay.grozev
+ * 
+ */
 public final class Id {
 
     private static final Map<Class<?>, Integer> COUNTERS = new LinkedHashMap<>();
@@ -25,6 +33,11 @@ public final class Id {
     private Id() {
     }
 
+    /**
+     * Returns a valid id for the specified class.
+     * @param clazz - the class of the object to get an id for. Must not be null.
+     * @return a valid id for the specified class.
+     */
     public static synchronized int pollId(Class<?> clazz) {
 	Class<?> matchClass = null;
 	if (COUNTERS.containsKey(clazz)) {
@@ -48,7 +61,7 @@ public final class Id {
 	return result;
     }
 
-    public static synchronized int pollGlobalId() {
+    private static synchronized int pollGlobalId() {
 	return globalCounter++;
     }
 

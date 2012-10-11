@@ -9,7 +9,17 @@ import org.cloudbus.cloudsim.DatacenterBroker;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.incubator.util.CustomLog;
+import org.cloudbus.cloudsim.incubator.util.TextUtil;
 
+/**
+ * A broker that takes care of the submission of web sessions to the data
+ * centers it handles. The broker submits the cloudlets of the provided web
+ * sessions continously over a specified period. Consequently clients must
+ * specify the endpoint (in terms of time) of the simulation.
+ * 
+ * @author nikolay.grozev
+ * 
+ */
 public class WebBroker extends DatacenterBroker {
 
     private static final int TIMER_TAG = 123456;
@@ -20,6 +30,19 @@ public class WebBroker extends DatacenterBroker {
 
     private List<WebSession> sessions = new ArrayList<>();
 
+    /**
+     * Creates a new web broker.
+     * 
+     * @param name
+     *            - the name of the broker.
+     * @param refreshPeriod
+     *            - the period of polling web sessions for new cloudlets.
+     * @param lifeLength
+     *            - the length of the simulation.
+     * @throws Exception
+     *             - if something goes wrong. See the documentation of the super
+     *             class.
+     */
     public WebBroker(final String name, final double refreshPeriod,
 	    final double lifeLength) throws Exception {
 	super(name);
@@ -27,6 +50,10 @@ public class WebBroker extends DatacenterBroker {
 	this.lifeLength = lifeLength;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.cloudbus.cloudsim.DatacenterBroker#processEvent(org.cloudbus.cloudsim.core.SimEvent)
+     */
     @Override
     public void processEvent(SimEvent ev) {
 	if (!isTimerRunning) {
@@ -37,10 +64,18 @@ public class WebBroker extends DatacenterBroker {
 	super.processEvent(ev);
     }
 
+    /**
+     * Submits new web sessions to this broker.
+     * @param webSessions - the new web sessions.
+     */
     public void submitSessions(final List<WebSession> webSessions) {
 	sessions.addAll(webSessions);
     }
 
+    /**
+     * (non-Javadoc)
+     * @see org.cloudbus.cloudsim.DatacenterBroker#processOtherEvent(org.cloudbus.cloudsim.core.SimEvent)
+     */
     @Override
     protected void processOtherEvent(SimEvent ev) {
 	switch (ev.getTag()) {
@@ -57,6 +92,7 @@ public class WebBroker extends DatacenterBroker {
     }
 
     private void updateSessions() {
+	// CustomLog.print("Updating sessions", null);
 	for (WebSession sess : sessions) {
 	    double currTime = CloudSim.clock();
 
@@ -70,21 +106,23 @@ public class WebBroker extends DatacenterBroker {
 	}
     }
 
-    @Override
-    protected void processCloudletReturn(SimEvent ev) {
-	super.processCloudletReturn(ev);
-
-	Cloudlet cloudlet = (Cloudlet) ev.getData();
-	CustomLog.print(cloudlet.toString(), null);
-    }
-
-    /**
-     * We do not want the datacenter to automatically stop our VMs. Thus we need
-     * to override this method.
+    /*
+     * (non-Javadoc)
+     * @see org.cloudbus.cloudsim.DatacenterBroker#processCloudletReturn(org.cloudbus.cloudsim.core.SimEvent)
      */
     @Override
-    protected void clearDatacenters() {
-	// super.clearDatacenters();
+    protected void processCloudletReturn(SimEvent ev) {
+	Cloudlet cloudlet = (Cloudlet) ev.getData();
+	if (CloudSim.clock() >= lifeLength) {
+	    // kill the broker only if it's life is over
+	    super.processCloudletReturn(ev);
+	} else {
+	    getCloudletReceivedList().add(cloudlet);
+	    cloudletsSubmitted--;
+	}
+
+	// CustomLog.print(cloudlet.toString(), null);
+	CustomLog.printLine(TextUtil.getTxtLine(cloudlet));
     }
 
 }

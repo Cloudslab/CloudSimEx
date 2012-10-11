@@ -30,9 +30,9 @@ public class WebSession {
 	boolean dbCloudletFinished = currentDBServerCloudLet == null
 		|| currentDBServerCloudLet.isFinished();
 	boolean appServerNextReady = !appServerCloudLets.isEmpty()
-		&& appServerCloudLets.peek().getIdealStartTime() >= currTime;
+		&& appServerCloudLets.peek().getIdealStartTime() <= currTime;
 	boolean dbServerNextReady = !dbServerCloudLets.isEmpty()
-		&& dbServerCloudLets.peek().getIdealStartTime() >= currTime;
+		&& dbServerCloudLets.peek().getIdealStartTime() <= currTime;
 
 	if (appCloudletFinished && dbCloudletFinished && appServerNextReady
 		&& dbServerNextReady) {
@@ -51,8 +51,8 @@ public class WebSession {
     }
 
     public void prefetch(final Double time) {
-	appServerCloudLets.prefetch(time);
-	dbServerCloudLets.prefetch(time);
+	appServerCloudLets.notifyOfTime(time);
+	dbServerCloudLets.notifyOfTime(time);
     }
 
     public int getAppVmId() {
