@@ -1,5 +1,6 @@
 package org.cloudbus.cloudsim.incubator.web;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -19,6 +20,14 @@ public class IterableGenerator<T> implements IGenerator<T> {
      * Creates the iterable generator with the list of prefetched instances.
      * @param collection
      */
+    public IterableGenerator(@SuppressWarnings("unchecked") T ... collection) {
+	this(Arrays.asList(collection));
+    }
+
+    /**
+     * Creates the iterable generator with the list of prefetched instances.
+     * @param collection
+     */
     public IterableGenerator(final Iterable<T> collection) {
 	this.iterator = collection.iterator();
     }
@@ -29,7 +38,7 @@ public class IterableGenerator<T> implements IGenerator<T> {
      */
     @Override
     public T peek() {
-	peeked = peeked == null ? iterator.next() : peeked;
+	peeked = peeked == null && iterator.hasNext() ? iterator.next() : peeked;
 	return peeked;
     }
 
@@ -42,7 +51,7 @@ public class IterableGenerator<T> implements IGenerator<T> {
 	T result = peeked;
 	if (peeked != null) {
 	    peeked = null;
-	} else {
+	} else if (iterator.hasNext()) {
 	    result = iterator.next();
 	}
 	return result;
@@ -54,7 +63,7 @@ public class IterableGenerator<T> implements IGenerator<T> {
      */
     @Override
     public boolean isEmpty() {
-	return peeked == null && !iterator.hasNext();
+	return peek() == null;
     }
 
     /**

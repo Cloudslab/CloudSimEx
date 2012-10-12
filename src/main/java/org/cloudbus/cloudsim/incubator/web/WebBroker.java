@@ -20,7 +20,7 @@ import org.cloudbus.cloudsim.incubator.util.TextUtil;
  * @author nikolay.grozev
  * 
  */
-public class WebBroker extends DatacenterBroker {
+public class WebBroker extends DatacenterBroker implements IWebBroker {
 
     private static final int TIMER_TAG = 123456;
 
@@ -96,11 +96,11 @@ public class WebBroker extends DatacenterBroker {
 	for (WebSession sess : sessions) {
 	    double currTime = CloudSim.clock();
 
-	    sess.prefetch(currTime);
+	    sess.notifyOfTime(currTime);
 	    WebCloudlet[] webCloudlets = sess.pollCloudlets(currTime);
 
 	    if (webCloudlets != null) {
-		submitCloudletList(Arrays.asList(webCloudlets));
+		getCloudletList().addAll(Arrays.asList(webCloudlets));
 		submitCloudlets();
 	    }
 	}

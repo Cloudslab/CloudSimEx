@@ -1,7 +1,9 @@
 package org.cloudbus.cloudsim.incubator.util;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.DatacenterBroker;
@@ -20,6 +22,7 @@ import org.cloudbus.cloudsim.incubator.web.WebSession;
 public final class Id {
 
     private static final Map<Class<?>, Integer> COUNTERS = new LinkedHashMap<>();
+    private static final Set<Class<?>> NO_COUNTERS = new HashSet<>();
     private static int globalCounter = 0;
 
     static {
@@ -35,17 +38,19 @@ public final class Id {
 
     /**
      * Returns a valid id for the specified class.
-     * @param clazz - the class of the object to get an id for. Must not be null.
+     * 
+     * @param clazz
+     *            - the class of the object to get an id for. Must not be null.
      * @return a valid id for the specified class.
      */
     public static synchronized int pollId(Class<?> clazz) {
 	Class<?> matchClass = null;
 	if (COUNTERS.containsKey(clazz)) {
 	    matchClass = clazz;
-	} else {
+	} else if (!NO_COUNTERS.contains(clazz)) {
 	    for (Class<?> key : COUNTERS.keySet()) {
 		if (key.isAssignableFrom(clazz)) {
-		    matchClass = clazz;
+		    matchClass = key;
 		    break;
 		}
 	    }
@@ -53,6 +58,7 @@ public final class Id {
 
 	int result = -1;
 	if (matchClass == null) {
+	    NO_COUNTERS.add(clazz);
 	    result = pollGlobalId();
 	} else {
 	    result = COUNTERS.get(matchClass);

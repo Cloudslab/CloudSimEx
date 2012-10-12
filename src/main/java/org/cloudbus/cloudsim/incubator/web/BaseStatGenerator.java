@@ -2,7 +2,6 @@ package org.cloudbus.cloudsim.incubator.web;
 
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.uncommons.maths.number.NumberGenerator;
@@ -17,8 +16,7 @@ import org.uncommons.maths.number.NumberGenerator;
  * @param <T>
  *            - the actual type of the generated CloudLets.
  */
-public abstract class BaseStatGenerator<T extends Cloudlet> implements
-	IGenerator<T> {
+public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerator<T> {
 
     /** A key for the statistical generator of CPU length of the cloudlet. */
     public static final String CLOUDLET_LENGTH = "CLOUDLET_MIS";
@@ -26,7 +24,9 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
     public static final String CLOUDLET_RAM = "CLOUDLET_RAM";
 
     protected Map<String, NumberGenerator<Double>> seqGenerators;
-    private Queue<Double> ticks = new LinkedList<>();
+    private LinkedList<Double> idealStartUpTimes = new LinkedList<>();
+    private double startTime = -1;
+    private double endTime = -1;
     private T peeked;
 
     /**
@@ -40,7 +40,30 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
      *            method. Must not be null.
      */
     public BaseStatGenerator(final Map<String, NumberGenerator<Double>> randomGenerators) {
-	this.seqGenerators = randomGenerators;
+	this(randomGenerators, -1, -1);
+    }
+
+    /**
+     * Creates a new generator with the specified statistical distributions.
+     * 
+     * @param randomGenerators
+     *            - the statistical distributions to be used for the generation
+     *            of CloudLets. See the standard keys provided above to see what
+     *            is usually expected from this map. Inheriting classes may
+     *            define their own key and values to be used in the factory
+     *            method. Must not be null.
+     * @param startTime
+     *            - the start time of the generation. If positive, no web
+     *            cloudlets with ideal start time before this will be generated.
+     * @param startTime
+     *            - the end time of the generation. If positive, no web
+     *            cloudlets with ideal start time after this will be generated.
+     */
+    public BaseStatGenerator(final Map<String, NumberGenerator<Double>> seqGenerators, final double startTime,
+	    final double endTime) {
+	this.seqGenerators = seqGenerators;
+	this.startTime = startTime;
+	this.endTime = endTime;
     }
 
     /**
@@ -50,8 +73,8 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
      */
     @Override
     public T peek() {
-	if (peeked == null && !ticks.isEmpty()) {
-	    peeked = create(ticks.poll());
+	if (peeked == null && !idealStartUpTimes.isEmpty()) {
+	    peeked = create(idealStartUpTimes.poll());
 	}
 	return peeked;
     }
@@ -66,8 +89,8 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
 	T result = peeked;
 	if (peeked != null) {
 	    peeked = null;
-	} else if (!ticks.isEmpty()) {
-	    result = create(ticks.poll());
+	} else if (!idealStartUpTimes.isEmpty()) {
+	    result = create(idealStartUpTimes.poll());
 	}
 	return result;
     }
@@ -89,9 +112,31 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
      */
     @Override
     public void notifyOfTime(final double time) {
-	if (ticks.isEmpty() || ticks.peek() < time) {
-	    ticks.offer(time);
+	if ((startTime < 0 || startTime <= time) &&
+		(endTime < 0 || endTime >= time) &&
+		(idealStartUpTimes.isEmpty() || idealStartUpTimes.getLast() < time)) {
+	    idealStartUpTimes.offer(time);
 	}
+    }
+
+    /**
+     * Returns the start time of this generator. If positive, no web cloudlets
+     * with ideal start time before this will be generated.
+     * 
+     * @return the start time of the generator.
+     */
+    public double getStartTime() {
+	return startTime;
+    }
+
+    /**
+     * Returns the end time of this generator. If positive, no web cloudlets
+     * with ideal start time after this will be generated.
+     * 
+     * @return the end time of the generator.
+     */
+    public double getEndTime() {
+	return endTime;
     }
 
     /**
@@ -99,7 +144,8 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
      * the provided in the constructor statistical distributions to create a new
      * cloudlet.
      * 
-     * @param idealStartTime - the ideal start time of the new CloudLet.
+     * @param idealStartTime
+     *            - the ideal start time of the new CloudLet.
      * @return a new CloudLet.
      */
     protected abstract T create(final double idealStartTime);

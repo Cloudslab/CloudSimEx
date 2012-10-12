@@ -8,6 +8,7 @@ package org.cloudbus.cloudsim.incubator.web;
  * external caller to periodically notify it of the time - see the
  * {@link IGenerator.prefetch} method.
  * 
+ * 
  * @author nikolay.grozev
  * 
  * @param <T>
@@ -38,4 +39,5 @@ public interface IGenerator<T> {
      * @param time - the current CloudSim time.
      */
     void notifyOfTime(final double time);
+    
 }

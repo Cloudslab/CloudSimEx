@@ -113,7 +113,7 @@ public class CloudSimWebExample {
 	    // submit vm list to the broker
 	    broker.submitVmList(vmlist);
 
-	    List<WebSession> sessions = generateRandomSessions(broker, appServerVM, dbServerVM, 50);
+	    List<WebSession> sessions = generateRandomSessions(broker, appServerVM, dbServerVM, 10);
 	    broker.submitSessions(sessions);
 
 	    // Sixth step: Starts the simulation

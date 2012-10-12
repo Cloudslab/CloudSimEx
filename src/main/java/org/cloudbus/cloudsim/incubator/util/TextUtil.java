@@ -139,7 +139,7 @@ public class TextUtil {
     /**
      * Converts the specified class to a single line of text. Convenient for
      * generating a header line in a log or a CSV file. For the purpose the
-     * names of all properties (the parts of the get methods after "get" or
+     * names of all properties (the parts of the get methods after "get" orString.valueOf(obj)
      * "is") are concatenated with appropriate padding. The specified delimeter
      * is placed between the entries in the line. Users, can control which
      * properties are used by using the {@link Textualize} annotation and
@@ -248,8 +248,12 @@ public class TextUtil {
 	} else if (obj instanceof Collection<?> || obj.getClass().isArray()) {
 	    result = "[...]";
 	    // If toString is not predefined
+	} else if (obj instanceof Class) {
+	    result = ((Class<?>)obj).getSimpleName();
 	} else if (String.valueOf(obj).contains(String.valueOf(obj.hashCode()))) {
 	    result = "ref<" + obj.hashCode() + ">";
+	} else {
+	    result = String.valueOf(obj);
 	}
 	return result;
     }
