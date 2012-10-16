@@ -17,16 +17,16 @@ public class TextUtilTest {
     @Test
     public void testGetTxtLine() {
 	String line = TextUtil.getTxtLine(new X(), ";", true);
-	assertEquals(clean("X=      5;Y=6;LstInts=[...];LstStr=[...];Class=X"), clean(line));
+	assertEquals(clean("LstInts=[...];LstStr=[...];X=      5;Y=6;Class=X"), clean(line));
 
 	line = TextUtil.getTxtLine(new X(), ";", false);
-	assertEquals(clean("5;6;[...];[...];X"), clean(line));
+	assertEquals(clean("  [...]; [...];      5;6;    X"), clean(line));
 
 	line = TextUtil.getTxtLine(new ExtendsXNoAnno(), "|", true);
-	assertEquals(clean("Prop=true|X=5|Y=6|LstInts=[...]|LstStr=[...]|Class=ExtendsXNoAnno"), clean(line));
+	assertEquals(clean("Prop=true|LstInts=[...]|LstStr=[...]|X=      5|Y=6|Class=ExtendsXNoAnno"), clean(line));
 
 	line = TextUtil.getTxtLine(new ExtendsXNoAnno(), ";", false);
-	assertEquals(clean("true;5;6;[...];[...];ExtendsXNoAnno"), clean(line));
+	assertEquals(clean("true;  [...]; [...];      5;6;ExtendsXNoAnno"), clean(line));
 
 	line = TextUtil.getTxtLine(new ExtendsXAnno(), "|", true);
 	assertEquals(clean("Prop=true|Y=6"), clean(line));
@@ -38,10 +38,10 @@ public class TextUtilTest {
     @Test
     public void testGetCaptionLine() {
 	String line = TextUtil.getCaptionLine(X.class, ";");
-	assertEquals(clean("X;Y;LstInts;LstStr;Class"), clean(line));
+	assertEquals(clean("LstInts;LstStr;      X;Y;Class"), clean(line));
 	
 	line = TextUtil.getCaptionLine(ExtendsXNoAnno.class, "|");
-	assertEquals(clean("Prop|X|Y|LstInts|LstStr|Class"), clean(line));
+	assertEquals(clean("Prop|LstInts|LstStr|      X|Y|Class"), clean(line));
 	
 	line = TextUtil.getCaptionLine(ExtendsXAnno.class, "|");
 	assertEquals(clean("Prop|Y"), clean(line));

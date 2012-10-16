@@ -13,9 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -41,8 +39,8 @@ import org.cloudbus.cloudsim.incubator.util.TextUtil;
 import org.cloudbus.cloudsim.incubator.web.ASStatGenerator;
 import org.cloudbus.cloudsim.incubator.web.IGenerator;
 import org.cloudbus.cloudsim.incubator.web.WebBroker;
-import org.cloudbus.cloudsim.incubator.web.WebCloudlet;
 import org.cloudbus.cloudsim.incubator.web.WebSession;
+import org.cloudbus.cloudsim.incubator.web.extensions.WebCloudlet;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
@@ -71,8 +69,6 @@ public class CloudSimWebExample {
 	CustomLog.printLine("Example of Web session modelling.");
 
 	try {
-	    
-	    CustomLog.printLine(TextUtil.getCaptionLine(WebCloudlet.class));
 	    // Step1: Initialize the CloudSim package. It should be called
 	    // before creating any entities.
 	    int numBrokers = 1; // number of brokers we'll be using
@@ -113,7 +109,7 @@ public class CloudSimWebExample {
 	    // submit vm list to the broker
 	    broker.submitVmList(vmlist);
 
-	    List<WebSession> sessions = generateRandomSessions(broker, appServerVM, dbServerVM, 10);
+	    List<WebSession> sessions = generateRandomSessions(broker, appServerVM, dbServerVM, 20);
 	    broker.submitSessions(sessions);
 
 	    // Sixth step: Starts the simulation
@@ -124,7 +120,7 @@ public class CloudSimWebExample {
 
 	    CloudSim.stopSimulation();
 
-	    // printCloudletList(newList);
+	    printCloudletList(newList);
 
 	    // Print the debt of each user to each datacenter
 	    // datacenter0.printDebts();
@@ -136,17 +132,17 @@ public class CloudSimWebExample {
 	}
     }
 
-    private static List<WebSession> generateRandomSessions(WebBroker broker, Vm appServerVM, Vm dbServerVM, int sessionNum) {
+    private static List<WebSession> generateRandomSessions(WebBroker broker, Vm appServerVM, Vm dbServerVM,
+	    int sessionNum) {
 	// Create Random Generators
 	Random rng = new MersenneTwisterRNG();
-	GaussianGenerator gen = new GaussianGenerator(100, 20, rng);
+	GaussianGenerator gen = new GaussianGenerator(1000, 20, rng);
 	Map<String, NumberGenerator<Double>> generators = new HashMap<>();
 	generators.put(ASStatGenerator.CLOUDLET_LENGTH, gen);
 	generators.put(ASStatGenerator.CLOUDLET_RAM, gen);
 	IGenerator<WebCloudlet> asGenerator = new ASStatGenerator(broker, generators);
 	IGenerator<WebCloudlet> dbGenerator = new ASStatGenerator(broker, generators);
 
-	
 	List<WebSession> sessions = new ArrayList<>();
 	for (int i = 0; i < sessionNum; i++) {
 	    WebSession session = new WebSession(asGenerator, dbGenerator);
@@ -233,32 +229,14 @@ public class CloudSimWebExample {
 	int size = list.size();
 	Cloudlet cloudlet;
 
-	String indent = "    ";
 	CustomLog.printLine("\n\n========== OUTPUT ==========");
-	CustomLog.printLine("Cloudlet ID" + indent + "STATUS" + indent
-		+ "Data center ID" + indent + "VM ID" + indent + "Time"
-		+ indent + "Start Time" + indent + "Finish Time");
+	// Printe header line
+	CustomLog.printLine(TextUtil.getCaptionLine(WebCloudlet.class));
 
-	DecimalFormat dft = new DecimalFormat("###.##");
+	// Print details for each cloudlet
 	for (int i = 0; i < size; i++) {
 	    cloudlet = list.get(i);
-	    CustomLog.print(
-		    indent + cloudlet.getCloudletId() + indent + indent, null);
-
-	    if (cloudlet.getCloudletStatus() == Cloudlet.SUCCESS) {
-		CustomLog.print("SUCCESS", null);
-
-		CustomLog.printLine(
-			indent + indent + cloudlet.getResourceId() + indent
-				+ indent + indent + cloudlet.getVmId() + indent
-				+ indent
-				+ dft.format(cloudlet.getActualCPUTime())
-				+ indent + indent
-				+ dft.format(cloudlet.getExecStartTime())
-				+ indent + indent
-				+ dft.format(cloudlet.getFinishTime()));
-	    }
+	    CustomLog.print(TextUtil.getTxtLine(cloudlet));
 	}
-
     }
 }

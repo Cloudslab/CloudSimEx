@@ -2,6 +2,7 @@ package org.cloudbus.cloudsim.incubator.web;
 
 import java.util.Map;
 
+import org.cloudbus.cloudsim.incubator.web.extensions.WebCloudlet;
 import org.uncommons.maths.number.NumberGenerator;
 
 /**

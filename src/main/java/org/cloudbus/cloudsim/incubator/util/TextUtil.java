@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,8 +32,6 @@ import com.google.common.primitives.Primitives;
  */
 public class TextUtil {
 
-    /** Format for dates. */
-    public static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
     /** Format for double prevision numbers. */
     public static final DecimalFormat DEC_FORMAT = new DecimalFormat("####0.00");
     /** Number of positions used when converting doubles to text. */
@@ -41,7 +40,7 @@ public class TextUtil {
     public static final int SIZE_OF_INT_STRINGS = 7;
     /** The new line symbol of this system. */
     public static final String NEW_LINE = System.getProperty("line.separator");
-    
+
     private static final String STANDARD_GET_REGEX = "get.+";
     private static final String BOOLGET_REGEX = "is.+";
     private static final String DEFAULT_DELIM = ";";
@@ -55,6 +54,14 @@ public class TextUtil {
      * which get methods are being called by using the {@link Textualize}
      * annotation and specifying the properties (the parts of the get methods
      * after "get" or "is") and order they need.
+     * 
+     * <br/>
+     * 
+     * Note that if the class is annotated with {@link Textualize} the order
+     * specified in the annotation is used. If not - the order of the methods is
+     * defined by the class they appear in (this classe's props first, then its
+     * superclass and so on). Properties defined within the same class are
+     * sorted alphabetically.
      * 
      * @param obj
      *            - the object to extract text from. Must not be null.
@@ -79,6 +86,14 @@ public class TextUtil {
      * The flag includeFieldNames is used to specify if the names of the
      * properties should be included in the result. If it is true, the result
      * will consist of entries like: "propA=valueA"
+     * 
+     * <br/>
+     * 
+     * Note that if the class is annotated with {@link Textualize} the order
+     * specified in the annotation is used. If not - the order of the methods is
+     * defined by the class they appear in (this classe's props first, then its
+     * superclass and so on). Properties defined within the same class are
+     * sorted alphabetically.
      * 
      * @param obj
      *            - the object to extract text from. Must not be null.
@@ -128,6 +143,15 @@ public class TextUtil {
      * can control which properties are used by using the {@link Textualize}
      * annotation and specifying the properties and the order they need.
      * 
+     * <br/>
+     * 
+     * Note that if the class is annotated with {@link Textualize} the order
+     * specified in the annotation is used. If not - the order of the methods is
+     * defined by the class they appear in (this classe's props first, then its
+     * superclass and so on). Properties defined within the same class are
+     * sorted alphabetically.
+     * 
+     * 
      * @param clazz
      *            - the class to use to create the line. Must not be null.
      * @return formated line of text, as described above.
@@ -139,11 +163,20 @@ public class TextUtil {
     /**
      * Converts the specified class to a single line of text. Convenient for
      * generating a header line in a log or a CSV file. For the purpose the
-     * names of all properties (the parts of the get methods after "get" orString.valueOf(obj)
-     * "is") are concatenated with appropriate padding. The specified delimeter
-     * is placed between the entries in the line. Users, can control which
-     * properties are used by using the {@link Textualize} annotation and
-     * specifying the properties and the order they need.
+     * names of all properties (the parts of the get methods after "get"
+     * orString.valueOf(obj) "is") are concatenated with appropriate padding.
+     * The specified delimeter is placed between the entries in the line. Users,
+     * can control which properties are used by using the {@link Textualize}
+     * annotation and specifying the properties and the order they need.
+     * 
+     * <br/>
+     * 
+     * Note that if the class is annotated with {@link Textualize} the order
+     * specified in the annotation is used. If not - the order of the methods is
+     * defined by the class they appear in (this classe's props first, then its
+     * superclass and so on). Properties defined within the same class are
+     * sorted alphabetically.
+     * 
      * 
      * @param clazz
      *            - the class to use to create the line. Must not be null.
@@ -182,7 +215,12 @@ public class TextUtil {
 	    methods = new ArrayList<>();
 	    do {
 		// Defined in the class methods (not inherited)
-		methods.addAll(Arrays.asList(clazz.getDeclaredMethods()));
+		List<Method> clazzMethods = Arrays.asList(clazz.getDeclaredMethods());
+		// Sort them by name... since getDeclaredMethods does not
+		// guarantee order
+		Collections.sort(clazzMethods, MethodsAlphaComparator.METHOD_CMP);
+
+		methods.addAll(clazzMethods);
 		clazz = clazz.getSuperclass();
 	    } while (clazz != null);
 
@@ -198,6 +236,13 @@ public class TextUtil {
 		    iter.remove();
 		}
 	    }
+
+	    // Sort by the order defined in the annotation
+	    if (classAnnotation != null) {
+		final List<String> props = Arrays.asList(classAnnotation.properties());
+		Collections.sort(methods, new MethodsLitIndexComparator(props));
+	    }
+
 	    methods = Collections.unmodifiableList(methods);
 	    GET_METHODS.put(clazz, methods);
 	}
@@ -205,7 +250,8 @@ public class TextUtil {
     }
 
     private static String getPropName(Method getter) {
-	return isBoolGetter(getter) ? getter.getName().substring(2) : getter.getName().substring(3);
+	return isBoolGetter(getter) ? getter.getName().substring(2) :
+		isGetter(getter) ? getter.getName().substring(3) : getter.getName();
     }
 
     private static boolean isAllowedGetter(final Method m, final Textualize annotation) {
@@ -244,18 +290,57 @@ public class TextUtil {
 	} else if (Number.class.isAssignableFrom(clazz)) {
 	    result = String.format("%" + SIZE_OF_INT_STRINGS + "s", obj);
 	} else if (obj instanceof Date) {
-	    result = DATE_FORMAT.format(obj);
+	    result = getDataFormat().format(obj);
 	} else if (obj instanceof Collection<?> || obj.getClass().isArray()) {
 	    result = "[...]";
 	    // If toString is not predefined
 	} else if (obj instanceof Class) {
-	    result = ((Class<?>)obj).getSimpleName();
+	    result = ((Class<?>) obj).getSimpleName();
 	} else if (String.valueOf(obj).contains(String.valueOf(obj.hashCode()))) {
 	    result = "ref<" + obj.hashCode() + ">";
 	} else {
 	    result = String.valueOf(obj);
 	}
 	return result;
+    }
+
+    /**
+     * Returns the format for dates.
+     * 
+     * @return the format for dates.
+     */
+    public static DateFormat getDataFormat() {
+	return new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+    }
+
+    private static class MethodsAlphaComparator implements Comparator<Method> {
+	static MethodsAlphaComparator METHOD_CMP = new MethodsAlphaComparator();
+
+	private MethodsAlphaComparator() {
+	};
+
+	@Override
+	public int compare(Method o1, Method o2) {
+	    String prop1 = getPropName(o1);
+	    String prop2 = getPropName(o2);
+	    return prop1.compareTo(prop2);
+	}
+    }
+
+    private static class MethodsLitIndexComparator implements Comparator<Method> {
+	private List<String> properties = null;
+
+	public MethodsLitIndexComparator(List<String> properties) {
+	    super();
+	    this.properties = properties;
+	}
+
+	@Override
+	public int compare(Method o1, Method o2) {
+	    String prop1 = getPropName(o1);
+	    String prop2 = getPropName(o2);
+	    return Integer.valueOf(properties.indexOf(prop1)).compareTo(properties.indexOf(prop2));
+	}
     }
 
 }

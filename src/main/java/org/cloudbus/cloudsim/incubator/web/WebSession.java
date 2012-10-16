@@ -1,5 +1,8 @@
 package org.cloudbus.cloudsim.incubator.web;
 
+import org.cloudbus.cloudsim.incubator.util.Id;
+import org.cloudbus.cloudsim.incubator.web.extensions.WebCloudlet;
+
 /**
  * A web session is a session established between a user, and application server
  * (deployed in a VM) and a database server (deployed in another VM). Throughout
@@ -32,8 +35,8 @@ package org.cloudbus.cloudsim.incubator.web;
  */
 public class WebSession {
 
-    private IGenerator<WebCloudlet> appServerCloudLets;
-    private IGenerator<WebCloudlet> dbServerCloudLets;
+    private IGenerator<? extends WebCloudlet> appServerCloudLets;
+    private IGenerator<? extends WebCloudlet> dbServerCloudLets;
 
     private WebCloudlet currentAppServerCloudLet = null;
     private WebCloudlet currentDBServerCloudLet = null;
@@ -41,7 +44,7 @@ public class WebSession {
     private Integer appVmId = null;
     private Integer dbVmId = null;
 
-    private int sessionId;
+    private final int sessionId;
 
     /**
      * Creates a new instance with the specified cloudlet generators.
@@ -53,10 +56,12 @@ public class WebSession {
      *            - a generator for cloudlets for the db server. Must not be
      *            null.
      */
-    public WebSession(final IGenerator<WebCloudlet> appServerCloudLets, final IGenerator<WebCloudlet> dbServerCloudLets) {
+    public WebSession(final IGenerator<? extends WebCloudlet> appServerCloudLets,
+	    final IGenerator<? extends WebCloudlet> dbServerCloudLets) {
 	super();
 	this.appServerCloudLets = appServerCloudLets;
 	this.dbServerCloudLets = dbServerCloudLets;
+	sessionId = Id.pollId(getClass());
     }
 
     /**
@@ -98,12 +103,30 @@ public class WebSession {
     }
 
     /**
+     * NOTE!!! - used only for test purposes.
+     * 
+     * @return - the current app server cloudlet
+     */
+    /* package access */WebCloudlet getCurrentAppServerCloudLet() {
+	return currentAppServerCloudLet;
+    }
+
+    /**
+     * NOTE!!! - used only for test purposes.
+     * 
+     * @return - the current db server cloudlet.
+     */
+    /* package access */WebCloudlet getCurrentDBServerCloudLet() {
+	return currentDBServerCloudLet;
+    }
+
+    /**
      * Gets notified of the current time.
      * 
      * @param time
      *            - the current CloudSim time.
      */
-    public void notifyOfTime(final Double time) {
+    public void notifyOfTime(final double time) {
 	appServerCloudLets.notifyOfTime(time);
 	dbServerCloudLets.notifyOfTime(time);
     }
@@ -157,7 +180,4 @@ public class WebSession {
 	return sessionId;
     }
 
-    public void setSessionId(int sessionId) {
-	this.sessionId = sessionId;
-    }
 }

@@ -1,24 +1,24 @@
 package org.cloudbus.cloudsim.incubator.web;
 
+import static org.cloudbus.cloudsim.incubator.util.helpers.TestUtil.createSeededGaussian;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.incubator.web.extensions.WebCloudlet;
 import org.junit.Before;
 import org.junit.Test;
 import org.uncommons.maths.number.NumberGenerator;
-import org.uncommons.maths.random.GaussianGenerator;
-import org.uncommons.maths.random.MersenneTwisterRNG;
 
 /**
  * 
@@ -27,37 +27,26 @@ import org.uncommons.maths.random.MersenneTwisterRNG;
  */
 public class ASStatGeneratorTest {
 
-    // Seed it for testing
-    private static final byte[] SEED = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-
     private static final int GEN_RAM_MEAN = 200;
     private static final int GEN_RAM_STDEV = 10;
-    private GaussianGenerator genRAM;
+    private NumberGenerator<Double> genRAM;
 
     private static final int GEN_CPU_MEAN = 25;
     private static final int GEN_CPU_STDEV = 2;
-    private GaussianGenerator genCPU;
+    private NumberGenerator<Double> genCPU;
 
-    private static IWebBroker DUMMY_BROKER = new IWebBroker() {
-
-	@Override
-	public <T extends Vm> List<T> getVmList() {
-	    return new ArrayList<T>();
-	}
-
-	@Override
-	public int getId() {
-	    return 1;
-	}
-    };
+    private static IWebBroker dummyBroker;
 
     private Map<String, NumberGenerator<Double>> testGenerators = new HashMap<>();
 
     @Before
     public void setUP() {
-	Random RNG = new MersenneTwisterRNG(SEED);
-	genRAM = new GaussianGenerator(GEN_RAM_MEAN, GEN_RAM_STDEV, RNG);
-	genCPU = new GaussianGenerator(GEN_CPU_MEAN, GEN_CPU_STDEV, RNG);
+	dummyBroker = mock(IWebBroker.class);
+	when(dummyBroker.getVmList()).thenReturn(new ArrayList<Vm>());
+	when(dummyBroker.getId()).thenReturn(1);
+	
+	genRAM = createSeededGaussian(GEN_RAM_MEAN, GEN_RAM_STDEV);
+	genCPU = createSeededGaussian(GEN_CPU_MEAN, GEN_CPU_STDEV);
 	testGenerators = new HashMap<>();
 	testGenerators.put(ASStatGenerator.CLOUDLET_LENGTH, genCPU);
 	testGenerators.put(ASStatGenerator.CLOUDLET_RAM, genRAM);
@@ -66,7 +55,7 @@ public class ASStatGeneratorTest {
     @Test
     public void testHandlingEmptyAndNonemtpyCases() {
 	// Should be empty in the start
-	ASStatGenerator generator = new ASStatGenerator(DUMMY_BROKER, testGenerators);
+	ASStatGenerator generator = new ASStatGenerator(dummyBroker, testGenerators);
 	assertTrue(generator.isEmpty());
 	assertNull(generator.peek());
 	assertNull(generator.poll());
@@ -91,7 +80,7 @@ public class ASStatGeneratorTest {
     @Test
     public void testHandlingTimeConstraints() {
 	// Should be empty in the start
-	ASStatGenerator generator = new ASStatGenerator(DUMMY_BROKER, testGenerators, 3, 12);
+	ASStatGenerator generator = new ASStatGenerator(dummyBroker, testGenerators, 3, 12);
 
 	// Notify for times we are not interested in...
 	generator.notifyOfTime(2);
@@ -139,7 +128,7 @@ public class ASStatGeneratorTest {
 
     @Test
     public void testStatisticsAreUsedOK() {
-	ASStatGenerator generator = new ASStatGenerator(DUMMY_BROKER, testGenerators);
+	ASStatGenerator generator = new ASStatGenerator(dummyBroker, testGenerators);
 
 	DescriptiveStatistics ramStat = new DescriptiveStatistics();
 	DescriptiveStatistics cpuStat = new DescriptiveStatistics();
@@ -158,7 +147,7 @@ public class ASStatGeneratorTest {
 	}
 
 	//Allow for delta, because of using doubles, and rounding some of the numbers
-	double delta = 1;
+	double delta = 10;
 	assertEquals(GEN_RAM_MEAN, ramStat.getMean(), delta);
 	assertEquals(GEN_RAM_STDEV, ramStat.getStandardDeviation(), delta);
 	assertEquals(GEN_CPU_MEAN, cpuStat.getMean(), delta);

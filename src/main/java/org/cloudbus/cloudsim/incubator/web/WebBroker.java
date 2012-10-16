@@ -8,8 +8,7 @@ import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.DatacenterBroker;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEvent;
-import org.cloudbus.cloudsim.incubator.util.CustomLog;
-import org.cloudbus.cloudsim.incubator.util.TextUtil;
+import org.cloudbus.cloudsim.incubator.web.extensions.WebCloudlet;
 
 /**
  * A broker that takes care of the submission of web sessions to the data
@@ -121,8 +120,7 @@ public class WebBroker extends DatacenterBroker implements IWebBroker {
 	    cloudletsSubmitted--;
 	}
 
-	// CustomLog.print(cloudlet.toString(), null);
-	CustomLog.printLine(TextUtil.getTxtLine(cloudlet));
+	//CustomLog.printLine(TextUtil.getTxtLine(cloudlet));
     }
 
 }

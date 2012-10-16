@@ -72,9 +72,9 @@ public class CustomLog {
     /**
      * The default log level used by this log, if not specified.
      */
-    public static Level DEFAULT_LEVEL = Level.INFO;
+    public final static Level DEFAULT_LEVEL = Level.INFO;
 
-    private static Logger logger;
+    private static final Logger LOGGER = Logger.getLogger(CustomLog.class.getPackage().getName());
     private static Level granularityLevel;
     private static Formatter formatter;
 
@@ -88,7 +88,7 @@ public class CustomLog {
      *            - the level to use. If null the default level is used.
      */
     public static void print(Object message, Level level) {
-	logger.log(
+	LOGGER.log(
 		level == null ? DEFAULT_LEVEL : level, String.valueOf(message));
     }
 
@@ -112,7 +112,7 @@ public class CustomLog {
      *            - the message. Must not be null.
      */
     public static void printLine(Level level, String msg) {
-	logger.log(level == null ? DEFAULT_LEVEL : level, msg);
+	LOGGER.log(level == null ? DEFAULT_LEVEL : level, msg);
     }
 
     /**
@@ -136,7 +136,7 @@ public class CustomLog {
      * @param args
      */
     public static void printf(Level level, String format, Object... args) {
-	logger.log(level == null ? DEFAULT_LEVEL : level, String.format(format, args));
+	LOGGER.log(level == null ? DEFAULT_LEVEL : level, String.format(format, args));
     }
 
     /**
@@ -145,7 +145,7 @@ public class CustomLog {
      * @return - if this logger is disabled.
      */
     public static boolean isDisabled() {
-	return logger.getLevel().equals(Level.OFF);
+	return LOGGER.getLevel().equals(Level.OFF);
     }
 
     /**
@@ -158,7 +158,7 @@ public class CustomLog {
      *            - the new output. Must not be null.
      */
     public static void setOutput(OutputStream output) {
-	logger.addHandler(new StreamHandler(output, formatter));
+	LOGGER.addHandler(new StreamHandler(output, formatter));
     }
 
     /**
@@ -183,41 +183,38 @@ public class CustomLog {
      */
     public static void configLogger(final Properties props)
 	    throws SecurityException, IOException {
-	if (logger == null) {
-	    final boolean logInFile = props.containsKey(FILE_PATH_PROP_KEY);
-	    final String fileName = logInFile ? props.getProperty(
-		    FILE_PATH_PROP_KEY).toString() : null;
-	    final String format = props.getProperty(LOG_FORMAT_PROP_KEY,
-		    "getLevel;getMessage").toString();
-	    final boolean prefixCloudSimClock = Boolean.parseBoolean(props
-		    .getProperty(LOG_CLOUD_SIM_CLOCK_PROP_KEY, "false")
-		    .toString());
-	    final boolean shutStandardMessages = Boolean.parseBoolean(props
-		    .getProperty(SHUT_STANDART_LOGGER_PROP_KEY, "false")
-		    .toString());
-	    granularityLevel = Level.parse(props.getProperty(
-		    LOG_LEVEL_PROP_KEY, "FINE").toString());
+	final boolean logInFile = props.containsKey(FILE_PATH_PROP_KEY);
+	final String fileName = logInFile ? props.getProperty(
+		FILE_PATH_PROP_KEY).toString() : null;
+	final String format = props.getProperty(LOG_FORMAT_PROP_KEY,
+		"getLevel;getMessage").toString();
+	final boolean prefixCloudSimClock = Boolean.parseBoolean(props
+		.getProperty(LOG_CLOUD_SIM_CLOCK_PROP_KEY, "false")
+		.toString());
+	final boolean shutStandardMessages = Boolean.parseBoolean(props
+		.getProperty(SHUT_STANDART_LOGGER_PROP_KEY, "false")
+		.toString());
+	granularityLevel = Level.parse(props.getProperty(
+		LOG_LEVEL_PROP_KEY, "FINE").toString());
 
-	    if (shutStandardMessages) {
-		Log.setOutput(new NullOutputStream());
-	    }
-
-	    logger = Logger.getLogger(CustomLog.class.getPackage().getName());
-	    logger.setUseParentHandlers(false);
-
-	    formatter = new CustomFormatter(prefixCloudSimClock, format);
-
-	    if (logInFile) {
-		System.err.println("Rediricting output to " + new File(fileName).getAbsolutePath());
-	    }
-
-	    StreamHandler handler = logInFile ? new FileHandler(fileName, false)
-		    : new ConsoleHandler();
-	    handler.setLevel(granularityLevel);
-	    handler.setFormatter(formatter);
-	    logger.addHandler(handler);
-	    logger.setLevel(granularityLevel);
+	if (shutStandardMessages) {
+	    Log.setOutput(new NullOutputStream());
 	}
+
+	LOGGER.setUseParentHandlers(false);
+
+	formatter = new CustomFormatter(prefixCloudSimClock, format);
+
+	if (logInFile) {
+	    System.err.println("Rediricting output to " + new File(fileName).getAbsolutePath());
+	}
+
+	StreamHandler handler = logInFile ? new FileHandler(fileName, false)
+		: new ConsoleHandler();
+	handler.setLevel(granularityLevel);
+	handler.setFormatter(formatter);
+	LOGGER.addHandler(handler);
+	LOGGER.setLevel(granularityLevel);
     }
 
     private static class CustomFormatter extends Formatter {

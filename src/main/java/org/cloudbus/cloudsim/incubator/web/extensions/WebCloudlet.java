@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.incubator.web;
+package org.cloudbus.cloudsim.incubator.web.extensions;
 
 import java.util.List;
 
@@ -10,6 +10,7 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.incubator.util.Id;
 import org.cloudbus.cloudsim.incubator.util.TextUtil;
 import org.cloudbus.cloudsim.incubator.util.Textualize;
+import org.cloudbus.cloudsim.incubator.web.IWebBroker;
 import org.cloudbus.cloudsim.lists.VmList;
 
 /**

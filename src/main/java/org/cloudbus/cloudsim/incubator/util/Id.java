@@ -8,6 +8,7 @@ import java.util.Set;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.DatacenterBroker;
 import org.cloudbus.cloudsim.Host;
+import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.incubator.web.WebSession;
 
@@ -31,6 +32,7 @@ public final class Id {
 	COUNTERS.put(Host.class, 1);
 	COUNTERS.put(DatacenterBroker.class, 1);
 	COUNTERS.put(WebSession.class, 1);
+	COUNTERS.put(Pe.class, 1);
     }
 
     private Id() {
