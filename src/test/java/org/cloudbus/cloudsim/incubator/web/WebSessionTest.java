@@ -11,7 +11,6 @@ import java.util.Map;
 
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.incubator.util.Id;
-import org.cloudbus.cloudsim.incubator.web.extensions.WebCloudlet;
 import org.junit.Before;
 import org.junit.Test;
 import org.uncommons.maths.number.NumberGenerator;
@@ -141,8 +140,9 @@ public class WebSessionTest {
     private static class TestWebCloudlet extends WebCloudlet {
 	private boolean finished;
 
-	public TestWebCloudlet(double idealStartTime, long cloudletLength, int ram, IWebBroker webBroker) {
-	    super(idealStartTime, cloudletLength, ram, webBroker);
+	public TestWebCloudlet(double idealStartTime, long cloudletLength, long cloudletIOLength, int ram,
+		IWebBroker webBroker) {
+	    super(idealStartTime, cloudletLength, cloudletIOLength, ram, webBroker);
 	}
 
 	@Override
@@ -167,10 +167,11 @@ public class WebSessionTest {
 
 	@Override
 	protected TestWebCloudlet create(double idealStartTime) {
-	    long cpuLen = Math.max(0, seqGenerators.get(CLOUDLET_LENGTH).nextValue().longValue());
-	    int ram = Math.max(0, seqGenerators.get(CLOUDLET_RAM).nextValue().intValue());
+	    long cpuLen = generateValue(CLOUDLET_LENGTH).longValue();
+	    int ram = generateValue(CLOUDLET_RAM).intValue();
+	    int ioLen = generateValue(CLOUDLET_LENGTH).intValue();
 
-	    return new TestWebCloudlet(idealStartTime, cpuLen, ram, webBroker);
+	    return new TestWebCloudlet(idealStartTime, cpuLen, ioLen, ram, webBroker);
 	}
     }
 

@@ -1,7 +1,6 @@
 package org.cloudbus.cloudsim.incubator.web;
 
 import org.cloudbus.cloudsim.incubator.util.Id;
-import org.cloudbus.cloudsim.incubator.web.extensions.WebCloudlet;
 
 /**
  * A web session is a session established between a user, and application server

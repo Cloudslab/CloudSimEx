@@ -22,6 +22,8 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerato
     public static final String CLOUDLET_LENGTH = "CLOUDLET_MIS";
     /** A key for the statistical generator of RAM length of the cloudlet. */
     public static final String CLOUDLET_RAM = "CLOUDLET_RAM";
+    /** A key for the statistical generator of IO length of the cloudlet. */
+    public static final String CLOUDLET_IO = "CLOUDLET_IO";
 
     protected Map<String, NumberGenerator<Double>> seqGenerators;
     private LinkedList<Double> idealStartUpTimes = new LinkedList<>();
@@ -150,4 +152,14 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerato
      */
     protected abstract T create(final double idealStartTime);
 
+    
+    /**
+     * Generates a plausible value for the key.
+     * @param key - the key. Tytpically one of the constants of the clas..
+     * @return a plausible (with the correspondent statistical properties) value for the key.
+     */
+    protected Double generateValue(final String key) {
+	return !seqGenerators.containsKey(key) ? 0 :
+		Math.max(0, seqGenerators.get(key).nextValue());
+    }
 }

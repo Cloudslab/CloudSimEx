@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.cloudbus.cloudsim.Vm;
-import org.cloudbus.cloudsim.incubator.web.extensions.WebCloudlet;
 import org.junit.Before;
 import org.junit.Test;
 import org.uncommons.maths.number.NumberGenerator;

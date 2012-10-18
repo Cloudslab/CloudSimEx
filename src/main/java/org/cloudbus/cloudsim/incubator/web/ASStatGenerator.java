@@ -2,7 +2,6 @@ package org.cloudbus.cloudsim.incubator.web;
 
 import java.util.Map;
 
-import org.cloudbus.cloudsim.incubator.web.extensions.WebCloudlet;
 import org.uncommons.maths.number.NumberGenerator;
 
 /**
@@ -56,9 +55,11 @@ public class ASStatGenerator extends BaseStatGenerator<WebCloudlet> {
      */
     @Override
     protected WebCloudlet create(final double idealStartTime) {
-	long cpuLen = Math.max(0, seqGenerators.get(CLOUDLET_LENGTH).nextValue().longValue());
-	int ram = Math.max(0, seqGenerators.get(CLOUDLET_RAM).nextValue().intValue());
+	long cpuLen = generateValue(CLOUDLET_LENGTH).longValue();
+	int ram = generateValue(CLOUDLET_RAM).intValue();
+	int ioLen = generateValue(CLOUDLET_LENGTH).intValue();
 
-	return new WebCloudlet(idealStartTime, cpuLen, ram, webBroker);
+	return new WebCloudlet(idealStartTime, cpuLen, ioLen, ram, webBroker);
     }
+
 }

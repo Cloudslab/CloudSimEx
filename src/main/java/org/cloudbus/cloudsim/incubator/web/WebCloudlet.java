@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.incubator.web.extensions;
+package org.cloudbus.cloudsim.incubator.web;
 
 import java.util.List;
 
@@ -10,7 +10,6 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.incubator.util.Id;
 import org.cloudbus.cloudsim.incubator.util.TextUtil;
 import org.cloudbus.cloudsim.incubator.util.Textualize;
-import org.cloudbus.cloudsim.incubator.web.IWebBroker;
 import org.cloudbus.cloudsim.lists.VmList;
 
 /**
@@ -38,6 +37,9 @@ public class WebCloudlet extends Cloudlet {
     private IWebBroker webBroker;
     private int sessionId;
 
+    private int numberOfHddPes = 1;
+    private long cloudletIOLength;
+
     /**
      * Constructs a new cloudlet.
      * 
@@ -54,14 +56,20 @@ public class WebCloudlet extends Cloudlet {
      * @param record
      *            - the record flag, as specified by the parent class.
      */
-    public WebCloudlet(final double idealStartTime, final long cloudletLength, final int ram,
-	    final IWebBroker webBroker, final int userId, final boolean record) {
+    public WebCloudlet(final double idealStartTime,
+	    final long cloudletLength,
+	    final long cloudletIOLength,
+	    final int ram,
+	    final IWebBroker webBroker,
+	    final boolean record) {
+
 	super(Id.pollId(Cloudlet.class), cloudletLength, 1, 0, 0,
 		new UtilizationModelFull(), null, new UtilizationModelNull(),
 		record);
 	this.idealStartTime = idealStartTime;
 	this.ram = ram;
 	this.webBroker = webBroker;
+	this.cloudletIOLength = cloudletIOLength;
 	setUserId(webBroker.getId());
 	setUtilizationModelRam(new FixedUtilizationModel());
     }
@@ -78,14 +86,12 @@ public class WebCloudlet extends Cloudlet {
      * @param webBroker
      *            - the broker used to submit this cloudlet to the data center.
      */
-    public WebCloudlet(final double idealStartTime, final long cloudletLength, final int ram, final IWebBroker webBroker) {
-	super(Id.pollId(Cloudlet.class), cloudletLength, 1, 0, 0,
-		new UtilizationModelFull(), null, new UtilizationModelNull());
-	this.idealStartTime = idealStartTime;
-	this.ram = ram;
-	this.webBroker = webBroker;
-	setUserId(webBroker.getId());
-	setUtilizationModelRam(new FixedUtilizationModel());
+    public WebCloudlet(final double idealStartTime,
+	    final long cloudletLength,
+	    final long cloudletIOLength,
+	    final int ram,
+	    final IWebBroker webBroker) {
+	this(idealStartTime, cloudletLength, cloudletIOLength, ram, webBroker, false);
     }
 
     /**
@@ -137,8 +143,7 @@ public class WebCloudlet extends Cloudlet {
      */
     public double getDelay() {
 	double delay = getExecStartTime() - getIdealStartTime();
-	delay = delay < 0 ? -1 : delay;
-	return delay;
+	return delay < 0 ? -1 : delay;
     }
 
     /**
@@ -150,6 +155,43 @@ public class WebCloudlet extends Cloudlet {
 	return ram;
     }
 
+    /**
+     * Returns the number of Harddisks this host has.
+     * @return the number of Harddisks this host has.
+     */
+    public int getNumberOfHddPes() {
+	return numberOfHddPes;
+    }
+
+    /**
+     * Sets the number of Harddisks this host has.
+     * @param numberOfHddPes - the number of Harddisks this host has. Must not be negative or 0.
+     */
+    public void setNumberOfHddPes(int numberOfHddPes) {
+	this.numberOfHddPes = numberOfHddPes;
+    }
+
+
+    /**
+     * Returns the total length of this cloudlet in terms of IO operations.
+     * @return the total length of this cloudlet in terms of IO operations.
+     */
+    public long getCloudletTotalIOLength() {
+	return getCloudletIOLength() * getNumberOfHddPes();
+    }
+
+    public long getCloudletIOLength() {
+	return cloudletIOLength;
+    }
+
+    /**
+     * Sets the total length of this cloudlet in terms of IO operations.
+     * @param cloudletIOLength - total length of this cloudlet in terms of IO operations. Must be a positive number.
+     */
+    public void setCloudletIOLength(long cloudletIOLength) {
+	this.cloudletIOLength = cloudletIOLength;
+    }
+    
     @Override
     public String toString() {
 	return TextUtil.getTxtLine(this, "\t", true);
@@ -166,4 +208,5 @@ public class WebCloudlet extends Cloudlet {
 	    return result;
 	}
     }
+
 }
