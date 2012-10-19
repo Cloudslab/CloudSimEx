@@ -31,6 +31,7 @@ import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeShared;
+import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.incubator.util.CustomLog;
 import org.cloudbus.cloudsim.incubator.util.TextUtil;
@@ -91,6 +92,7 @@ public class CloudSimWebExampleNew {
 
 	    // VM description
 	    int mips = 250;
+	    int ioMips = 200;
 	    long size = 10000; // image size (MB)
 	    int ram = 512; // vm memory (MB)
 	    long bw = 1000;
@@ -98,10 +100,10 @@ public class CloudSimWebExampleNew {
 	    String vmm = "Xen"; // VMM name
 
 	    // create two VMs
-	    HddVm appServerVM = new HddVm(broker.getId(), mips, pesNumber,
+	    HddVm appServerVM = new HddVm(broker.getId(), mips, ioMips, pesNumber,
 		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared());
 
-	    HddVm dbServerVM = new HddVm(broker.getId(), mips, pesNumber,
+	    HddVm dbServerVM = new HddVm(broker.getId(), mips, ioMips, pesNumber,
 		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared());
 
 	    // add the VMs to the vmList
@@ -186,7 +188,7 @@ public class CloudSimWebExampleNew {
 
 	hostList.add(new HddHost(new RamProvisionerSimple(ram),
 		new BwProvisionerSimple(bw), storage, peList, hddList,
-		new VmSchedulerTimeShared(peList), new VmSchedulerTimeShared(hddList))); // This is our machine
+		new VmSchedulerTimeShared(peList), new VmSchedulerTimeSharedOverSubscription(hddList))); // This is our machine
 
 	// 5. Create a DatacenterCharacteristics object that stores the
 	// properties of a data center: architecture, OS, list of

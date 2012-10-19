@@ -56,8 +56,9 @@ public class HddHost extends Host {
 	double smallerTime = Double.MAX_VALUE;
 
 	for (HddVm vm : getVmList()) {
-	    double time = vm.updateVmProcessing(currentTime, getVmScheduler().getAllocatedMipsForVm(vm),
-		    getHddIOScheduler().getAllocatedMipsForVm(vm));
+	    List<Double> mips = getVmScheduler().getAllocatedMipsForVm(vm);
+	    List<Double> iops = getHddIOScheduler().getAllocatedMipsForVm(vm);
+	    double time = vm.updateVmProcessing(currentTime, mips, iops);
 
 	    if (time > 0.0 && time < smallerTime) {
 		smallerTime = time;
@@ -77,7 +78,7 @@ public class HddHost extends Host {
 	boolean allocatednOfCPUFlag = super.vmCreate(vm);
 	boolean allocationOfHDD = false;
 
-	allocationOfHDD = allocatednOfCPUFlag && getHddIOScheduler().allocatePesForVm(vm, vm.getCurrentRequestedMips());
+	allocationOfHDD = allocatednOfCPUFlag && getHddIOScheduler().allocatePesForVm(vm, ((HddVm)vm).getCurrentRequestedIOMips());
 
 	if (allocatednOfCPUFlag && !allocationOfHDD) {
 	    getRamProvisioner().deallocateRamForVm(vm);

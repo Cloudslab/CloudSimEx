@@ -1,5 +1,6 @@
 package org.cloudbus.cloudsim.incubator.web.extensions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,6 +17,10 @@ import org.cloudbus.cloudsim.incubator.util.Id;
  */
 public class HddVm extends Vm {
 
+    /** The IO MIPS. */
+    private double ioMips;
+    private int numberOfHdds = 1;
+
     /**
      * 
      * @param userId
@@ -27,13 +32,15 @@ public class HddVm extends Vm {
      * @param vmm
      * @param cloudletScheduler
      */
-    public HddVm(int userId, double mips, int numberOfPes, int ram, long bw, long size, String vmm,
+    public HddVm(int userId, double mips, double ioMips, int numberOfPes, int ram, long bw, long size, String vmm,
 	    HddCloudletSchedulerTimeShared cloudletScheduler) {
 	super(Id.pollId(HddVm.class), userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
+	this.ioMips = ioMips;
     }
 
     /*
      * (non-Javadoc)
+     * 
      * @see org.cloudbus.cloudsim.Vm#updateVmProcessing(double, java.util.List)
      */
     @Override
@@ -44,10 +51,14 @@ public class HddVm extends Vm {
 
     /**
      * Updates the processing of the VM
-     *  
-     * @param currentTime - current simulation time.
-     * @param mipsShare - array with MIPS share of each Pe available to the scheduler.
-     * @param iopsShare - array with I/O MIPS share of each Harddisk available to the scheduler.
+     * 
+     * @param currentTime
+     *            - current simulation time.
+     * @param mipsShare
+     *            - array with MIPS share of each Pe available to the scheduler.
+     * @param iopsShare
+     *            - array with I/O MIPS share of each Harddisk available to the
+     *            scheduler.
      * @return
      */
     public double updateVmProcessing(final double currentTime, final List<Double> mipsShare,
@@ -60,6 +71,7 @@ public class HddVm extends Vm {
 
     /*
      * (non-Javadoc)
+     * 
      * @see org.cloudbus.cloudsim.Vm#getCloudletScheduler()
      */
     @Override
@@ -67,4 +79,28 @@ public class HddVm extends Vm {
 	return (HddCloudletSchedulerTimeShared) super.getCloudletScheduler();
     }
 
+    public double getIoMips() {
+	return ioMips;
+    }
+    
+    public void setIoMips(double ioMips) {
+	this.ioMips = ioMips;
+    }
+
+    public int getNumberOfHdds() {
+        return numberOfHdds;
+    }
+
+    public List<Double> getCurrentRequestedIOMips() {
+	List<Double> currentRequestedMips = getCloudletScheduler().getCurrentRequestedIOMips();
+	if (isBeingInstantiated()) {
+	    currentRequestedMips = new ArrayList<Double>();
+	    for (int i = 0; i < getNumberOfHdds(); i++) {
+		currentRequestedMips.add(getIoMips());
+	    }
+	}
+	return currentRequestedMips;
+    }
+
+    
 }

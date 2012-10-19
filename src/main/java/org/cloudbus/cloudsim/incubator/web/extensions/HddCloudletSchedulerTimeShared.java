@@ -338,7 +338,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 	// time to file transferring. It must be added to the cloudlet length
 	double extraSize = getCapacity(getCurrentMipsShare()) * fileTransferTime;
 	long cpuLength = (long) (hddCloudlet.getCloudletLength() + extraSize);
-	long ioLength = (long) (hddCloudlet.getCloudletLength() + extraSize);
+	long ioLength = (long) (hddCloudlet.getCloudletIOLength() + extraSize);
 	hddCloudlet.setCloudletLength(cpuLength);
 	hddCloudlet.setCloudletIOLength(ioLength);
 
@@ -602,6 +602,11 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 	    bw += cloudlet.getCloudlet().getUtilizationOfBw(CloudSim.clock());
 	}
 	return bw;
+    }
+
+    public List<Double> getCurrentRequestedIOMips() {
+	List<Double> ioMipsShare = new ArrayList<Double>();
+	return ioMipsShare;
     }
 
 }
