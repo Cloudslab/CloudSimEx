@@ -84,8 +84,7 @@ public class WebSession {
 	boolean dbServerNextReady = !dbServerCloudLets.isEmpty()
 		&& dbServerCloudLets.peek().getIdealStartTime() <= currTime;
 
-	if (appCloudletFinished && dbCloudletFinished && appServerNextReady
-		&& dbServerNextReady) {
+	if (appCloudletFinished && dbCloudletFinished && appServerNextReady && dbServerNextReady) {
 	    result = new WebCloudlet[] {
 		    appServerCloudLets.poll(),
 		    dbServerCloudLets.poll() };

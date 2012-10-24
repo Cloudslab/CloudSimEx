@@ -48,3 +48,14 @@ Icon?
 ehthumbs.db
 Thumbs.db
 
+# Latex generated files #
+######################
+*.aux
+*.blg
+*.bbl
+*.bak
+*.nav
+*.snm
+*.vrb
+
+

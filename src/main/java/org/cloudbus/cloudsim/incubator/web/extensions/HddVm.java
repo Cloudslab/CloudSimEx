@@ -20,6 +20,7 @@ public class HddVm extends Vm {
     /** The IO MIPS. */
     private double ioMips;
     private int numberOfHdds = 1;
+    private boolean outOfMemory = false;
 
     /**
      * 
@@ -102,5 +103,12 @@ public class HddVm extends Vm {
 	return currentRequestedMips;
     }
 
+    public boolean isOutOfMemory() {
+        return outOfMemory;
+    }
+
+    public void setOutOfMemory(boolean outOfMemory) {
+        this.outOfMemory = outOfMemory;
+    }
     
 }

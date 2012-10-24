@@ -39,6 +39,7 @@ import org.cloudbus.cloudsim.incubator.web.ASStatGenerator;
 import org.cloudbus.cloudsim.incubator.web.IGenerator;
 import org.cloudbus.cloudsim.incubator.web.WebBroker;
 import org.cloudbus.cloudsim.incubator.web.WebCloudlet;
+import org.cloudbus.cloudsim.incubator.web.WebDataCenter;
 import org.cloudbus.cloudsim.incubator.web.WebSession;
 import org.cloudbus.cloudsim.incubator.web.extensions.HDPe;
 import org.cloudbus.cloudsim.incubator.web.extensions.HddVm;
@@ -113,7 +114,7 @@ public class CloudSimWebExampleNew {
 	    // submit vm list to the broker
 	    broker.submitVmList(vmlist);
 
-	    List<WebSession> sessions = generateRandomSessions(broker, appServerVM, dbServerVM, 10);
+	    List<WebSession> sessions = generateRandomSessions(broker, appServerVM, dbServerVM, 100);
 	    broker.submitSessions(sessions);
 
 	    // Sixth step: Starts the simulation
@@ -140,11 +141,14 @@ public class CloudSimWebExampleNew {
 	    int sessionNum) {
 	// Create Random Generators
 	Random rng = new MersenneTwisterRNG();
-	GaussianGenerator gen = new GaussianGenerator(1000, 20, rng);
+	GaussianGenerator cpuGen = new GaussianGenerator(1000, 20, rng);
+	GaussianGenerator ramGen = new GaussianGenerator(5, 1, rng);
+	GaussianGenerator ioGen = new GaussianGenerator(1000, 20, rng);
+	
 	Map<String, NumberGenerator<Double>> generators = new HashMap<>();
-	generators.put(ASStatGenerator.CLOUDLET_LENGTH, gen);
-	generators.put(ASStatGenerator.CLOUDLET_RAM, gen);
-	generators.put(ASStatGenerator.CLOUDLET_IO, gen);
+	generators.put(ASStatGenerator.CLOUDLET_LENGTH, cpuGen);
+	generators.put(ASStatGenerator.CLOUDLET_RAM, ramGen);
+	generators.put(ASStatGenerator.CLOUDLET_IO, ioGen);
 	IGenerator<WebCloudlet> asGenerator = new ASStatGenerator(broker, generators);
 	IGenerator<WebCloudlet> dbGenerator = new ASStatGenerator(broker, generators);
 
@@ -218,7 +222,7 @@ public class CloudSimWebExampleNew {
 	// 6. Finally, we need to create a PowerDatacenter object.
 	Datacenter datacenter = null;
 	try {
-	    datacenter = new Datacenter(name, characteristics,
+	    datacenter = new WebDataCenter(name, characteristics,
 		    new VmAllocationPolicySimple(hostList), storageList, 0);
 	} catch (Exception e) {
 	    e.printStackTrace();
