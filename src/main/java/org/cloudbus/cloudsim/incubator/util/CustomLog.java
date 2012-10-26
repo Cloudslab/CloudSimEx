@@ -247,7 +247,7 @@ public class CustomLog {
 		    System.exit(1);
 		}
 		if (i++ < methodCalls.length - 1) {
-		    result.append("\t");
+		    result.append('\t');
 		}
 	    }
 	    result.append(TextUtil.NEW_LINE);

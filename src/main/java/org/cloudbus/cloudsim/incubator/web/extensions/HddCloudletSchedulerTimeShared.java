@@ -659,6 +659,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 	return ioMipsShare;
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void failAllCloudlets() {
 	for (ListIterator<HddResCloudlet> iter = getCloudletExecList().listIterator(); iter.hasNext();) {
 	    HddResCloudlet hddResCloudlet = iter.next();

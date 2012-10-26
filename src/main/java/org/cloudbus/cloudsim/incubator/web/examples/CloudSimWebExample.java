@@ -23,7 +23,6 @@ import java.util.Properties;
 import java.util.Random;
 
 import org.cloudbus.cloudsim.Cloudlet;
-import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.Datacenter;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
 import org.cloudbus.cloudsim.Host;
@@ -32,15 +31,20 @@ import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeShared;
+import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.incubator.util.CustomLog;
-import org.cloudbus.cloudsim.incubator.util.Id;
 import org.cloudbus.cloudsim.incubator.util.TextUtil;
 import org.cloudbus.cloudsim.incubator.web.ASStatGenerator;
 import org.cloudbus.cloudsim.incubator.web.IGenerator;
 import org.cloudbus.cloudsim.incubator.web.WebBroker;
 import org.cloudbus.cloudsim.incubator.web.WebCloudlet;
+import org.cloudbus.cloudsim.incubator.web.WebDataCenter;
 import org.cloudbus.cloudsim.incubator.web.WebSession;
+import org.cloudbus.cloudsim.incubator.web.extensions.HDPe;
+import org.cloudbus.cloudsim.incubator.web.extensions.HddVm;
+import org.cloudbus.cloudsim.incubator.web.extensions.HddCloudletSchedulerTimeShared;
+import org.cloudbus.cloudsim.incubator.web.extensions.HddHost;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
@@ -89,6 +93,7 @@ public class CloudSimWebExample {
 
 	    // VM description
 	    int mips = 250;
+	    int ioMips = 200;
 	    long size = 10000; // image size (MB)
 	    int ram = 512; // vm memory (MB)
 	    long bw = 1000;
@@ -96,11 +101,11 @@ public class CloudSimWebExample {
 	    String vmm = "Xen"; // VMM name
 
 	    // create two VMs
-	    Vm appServerVM = new Vm(Id.pollId(Vm.class), broker.getId(), mips, pesNumber,
-		    ram, bw, size, vmm, new CloudletSchedulerTimeShared());
+	    HddVm appServerVM = new HddVm(broker.getId(), mips, ioMips, pesNumber,
+		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared());
 
-	    Vm dbServerVM = new Vm(Id.pollId(Vm.class), broker.getId(), mips, pesNumber,
-		    ram, bw, size, vmm, new CloudletSchedulerTimeShared());
+	    HddVm dbServerVM = new HddVm(broker.getId(), mips, ioMips, pesNumber,
+		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared());
 
 	    // add the VMs to the vmList
 	    vmlist.add(appServerVM);
@@ -109,7 +114,7 @@ public class CloudSimWebExample {
 	    // submit vm list to the broker
 	    broker.submitVmList(vmlist);
 
-	    List<WebSession> sessions = generateRandomSessions(broker, appServerVM, dbServerVM, 20);
+	    List<WebSession> sessions = generateRandomSessions(broker, appServerVM, dbServerVM, 100);
 	    broker.submitSessions(sessions);
 
 	    // Sixth step: Starts the simulation
@@ -136,10 +141,14 @@ public class CloudSimWebExample {
 	    int sessionNum) {
 	// Create Random Generators
 	Random rng = new MersenneTwisterRNG();
-	GaussianGenerator gen = new GaussianGenerator(1000, 20, rng);
+	GaussianGenerator cpuGen = new GaussianGenerator(1000, 20, rng);
+	GaussianGenerator ramGen = new GaussianGenerator(5, 1, rng);
+	GaussianGenerator ioGen = new GaussianGenerator(1000, 20, rng);
+	
 	Map<String, NumberGenerator<Double>> generators = new HashMap<>();
-	generators.put(ASStatGenerator.CLOUDLET_LENGTH, gen);
-	generators.put(ASStatGenerator.CLOUDLET_RAM, gen);
+	generators.put(ASStatGenerator.CLOUDLET_LENGTH, cpuGen);
+	generators.put(ASStatGenerator.CLOUDLET_RAM, ramGen);
+	generators.put(ASStatGenerator.CLOUDLET_IO, ioGen);
 	IGenerator<WebCloudlet> asGenerator = new ASStatGenerator(broker, generators);
 	IGenerator<WebCloudlet> dbGenerator = new ASStatGenerator(broker, generators);
 
@@ -162,25 +171,28 @@ public class CloudSimWebExample {
 
 	// 2. A Machine contains one or more PEs or CPUs/Cores.
 	// In this example, it will have only one core.
-	List<Pe> peList = new ArrayList<Pe>();
+	List<Pe> peList = new ArrayList<>();
+	List<HDPe> hddList = new ArrayList<>();
 
 	int mips = 1000;
+	int iops = 1000;
 
 	// 3. Create PEs and add these into a list.
 	peList.add(new Pe(0, new PeProvisionerSimple(mips))); // need to store
 							      // Pe id and
 							      // MIPS Rating
 
+	hddList.add(new HDPe(new PeProvisionerSimple(iops)));
+	
 	// 4. Create Host with its id and list of PEs and add them to the list
 	// of machines
-	int hostId = 0;
 	int ram = 2048; // host memory (MB)
 	long storage = 1000000; // host storage
 	int bw = 10000;
 
-	hostList.add(new Host(hostId, new RamProvisionerSimple(ram),
-		new BwProvisionerSimple(bw), storage, peList,
-		new VmSchedulerTimeShared(peList))); // This is our machine
+	hostList.add(new HddHost(new RamProvisionerSimple(ram),
+		new BwProvisionerSimple(bw), storage, peList, hddList,
+		new VmSchedulerTimeShared(peList), new VmSchedulerTimeSharedOverSubscription(hddList))); // This is our machine
 
 	// 5. Create a DatacenterCharacteristics object that stores the
 	// properties of a data center: architecture, OS, list of
@@ -210,7 +222,7 @@ public class CloudSimWebExample {
 	// 6. Finally, we need to create a PowerDatacenter object.
 	Datacenter datacenter = null;
 	try {
-	    datacenter = new Datacenter(name, characteristics,
+	    datacenter = new WebDataCenter(name, characteristics,
 		    new VmAllocationPolicySimple(hostList), storageList, 0);
 	} catch (Exception e) {
 	    e.printStackTrace();
