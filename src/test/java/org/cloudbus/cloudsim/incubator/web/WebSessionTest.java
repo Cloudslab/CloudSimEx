@@ -55,17 +55,17 @@ public class WebSessionTest {
 	genCPU_DB = createSeededGaussian(GEN_CPU_MEAN, GEN_CPU_STDEV);
 
 	testGeneratorsAS = new HashMap<>();
-	testGeneratorsAS.put(ASStatGenerator.CLOUDLET_LENGTH, genCPU_AS);
-	testGeneratorsAS.put(ASStatGenerator.CLOUDLET_RAM, genRAM_AS);
+	testGeneratorsAS.put(StatGenerator.CLOUDLET_LENGTH, genCPU_AS);
+	testGeneratorsAS.put(StatGenerator.CLOUDLET_RAM, genRAM_AS);
 
 	testGeneratorsDB = new HashMap<>();
-	testGeneratorsDB.put(ASStatGenerator.CLOUDLET_LENGTH, genCPU_DB);
-	testGeneratorsDB.put(ASStatGenerator.CLOUDLET_RAM, genRAM_DB);
+	testGeneratorsDB.put(StatGenerator.CLOUDLET_LENGTH, genCPU_DB);
+	testGeneratorsDB.put(StatGenerator.CLOUDLET_RAM, genRAM_DB);
 
-	statGeneratorAS = new TestStatGenerator(dummyBroker, testGeneratorsAS);
-	statGeneratorDB = new TestStatGenerator(dummyBroker, testGeneratorsDB);
+	statGeneratorAS = new TestStatGenerator(dummyBroker, testGeneratorsAS, 1);
+	statGeneratorDB = new TestStatGenerator(dummyBroker, testGeneratorsDB, 1);
 
-	session = new WebSession(statGeneratorAS, statGeneratorDB);
+	session = new WebSession(statGeneratorAS, statGeneratorDB, 1);
 	session.setAppVmId(Id.pollId(Vm.class));
 	session.setDbVmId(Id.pollId(Vm.class));
     }
@@ -140,9 +140,8 @@ public class WebSessionTest {
     private static class TestWebCloudlet extends WebCloudlet {
 	private boolean finished;
 
-	public TestWebCloudlet(double idealStartTime, long cloudletLength, long cloudletIOLength, int ram,
-		IWebBroker webBroker) {
-	    super(idealStartTime, cloudletLength, cloudletIOLength, ram, webBroker);
+	public TestWebCloudlet(double idealStartTime, long cloudletLength, long cloudletIOLength, int ram, int userId) {
+	    super(idealStartTime, cloudletLength, cloudletIOLength, ram, userId);
 	}
 
 	@Override
@@ -156,13 +155,11 @@ public class WebSessionTest {
     }
 
     private static class TestStatGenerator extends BaseStatGenerator<TestWebCloudlet> {
-
-	private final IWebBroker webBroker;
-
+	int userId;
 	public TestStatGenerator(final IWebBroker webBroker,
-		Map<String, NumberGenerator<Double>> randomGenerators) {
+		Map<String, NumberGenerator<Double>> randomGenerators, int userId) {
 	    super(randomGenerators);
-	    this.webBroker = webBroker;
+	    this.userId = userId;
 	}
 
 	@Override
@@ -171,7 +168,7 @@ public class WebSessionTest {
 	    int ram = generateValue(CLOUDLET_RAM).intValue();
 	    int ioLen = generateValue(CLOUDLET_LENGTH).intValue();
 
-	    return new TestWebCloudlet(idealStartTime, cpuLen, ioLen, ram, webBroker);
+	    return new TestWebCloudlet(idealStartTime, cpuLen, ioLen, ram, userId);
 	}
     }
 

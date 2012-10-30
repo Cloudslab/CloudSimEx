@@ -43,6 +43,8 @@ public class WebSession {
     private Integer appVmId = null;
     private Integer dbVmId = null;
 
+    private int userId;
+
     private final int sessionId;
 
     /**
@@ -54,13 +56,25 @@ public class WebSession {
      * @param dbServerCloudLets
      *            - a generator for cloudlets for the db server. Must not be
      *            null.
+     * @param userId
+     *            - the use id. Not a valid user id must be sed either through a
+     *            constructor or the set method, before this instance is used.
      */
     public WebSession(final IGenerator<? extends WebCloudlet> appServerCloudLets,
-	    final IGenerator<? extends WebCloudlet> dbServerCloudLets) {
+	    final IGenerator<? extends WebCloudlet> dbServerCloudLets, int userId) {
 	super();
 	this.appServerCloudLets = appServerCloudLets;
 	this.dbServerCloudLets = dbServerCloudLets;
+	this.userId = userId;
 	sessionId = Id.pollId(getClass());
+    }
+
+    public int getUserId() {
+	return userId;
+    }
+
+    public void setUserId(int userId) {
+	this.userId = userId;
     }
 
     /**
@@ -96,6 +110,9 @@ public class WebSession {
 
 	    currentAppServerCloudLet.setSessionId(getSessionId());
 	    currentDBServerCloudLet.setSessionId(getSessionId());
+
+	    currentAppServerCloudLet.setUserId(userId);
+	    currentDBServerCloudLet.setUserId(userId);
 	}
 	return result;
     }
@@ -134,7 +151,7 @@ public class WebSession {
      * 
      * @return the id of the VM hosting the application server.
      */
-    public int getAppVmId() {
+    public Integer getAppVmId() {
 	return appVmId;
     }
 
@@ -154,7 +171,7 @@ public class WebSession {
      * 
      * @return the id of the VM hosting the db server.
      */
-    public int getDbVmId() {
+    public Integer getDbVmId() {
 	return dbVmId;
     }
 

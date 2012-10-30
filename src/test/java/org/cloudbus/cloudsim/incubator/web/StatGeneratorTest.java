@@ -6,15 +6,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.cloudbus.cloudsim.Vm;
 import org.junit.Before;
 import org.junit.Test;
 import org.uncommons.maths.number.NumberGenerator;
@@ -24,7 +20,7 @@ import org.uncommons.maths.number.NumberGenerator;
  * @author nikolay.grozev
  * 
  */
-public class ASStatGeneratorTest {
+public class StatGeneratorTest {
 
     private static final int GEN_RAM_MEAN = 200;
     private static final int GEN_RAM_STDEV = 10;
@@ -34,27 +30,22 @@ public class ASStatGeneratorTest {
     private static final int GEN_CPU_STDEV = 2;
     private NumberGenerator<Double> genCPU;
 
-    private static IWebBroker dummyBroker;
 
     private Map<String, NumberGenerator<Double>> testGenerators = new HashMap<>();
 
     @Before
     public void setUP() {
-	dummyBroker = mock(IWebBroker.class);
-	when(dummyBroker.getVmList()).thenReturn(new ArrayList<Vm>());
-	when(dummyBroker.getId()).thenReturn(1);
-	
 	genRAM = createSeededGaussian(GEN_RAM_MEAN, GEN_RAM_STDEV);
 	genCPU = createSeededGaussian(GEN_CPU_MEAN, GEN_CPU_STDEV);
 	testGenerators = new HashMap<>();
-	testGenerators.put(ASStatGenerator.CLOUDLET_LENGTH, genCPU);
-	testGenerators.put(ASStatGenerator.CLOUDLET_RAM, genRAM);
+	testGenerators.put(StatGenerator.CLOUDLET_LENGTH, genCPU);
+	testGenerators.put(StatGenerator.CLOUDLET_RAM, genRAM);
     }
 
     @Test
     public void testHandlingEmptyAndNonemtpyCases() {
 	// Should be empty in the start
-	ASStatGenerator generator = new ASStatGenerator(dummyBroker, testGenerators);
+	StatGenerator generator = new StatGenerator(testGenerators);
 	assertTrue(generator.isEmpty());
 	assertNull(generator.peek());
 	assertNull(generator.poll());
@@ -79,7 +70,7 @@ public class ASStatGeneratorTest {
     @Test
     public void testHandlingTimeConstraints() {
 	// Should be empty in the start
-	ASStatGenerator generator = new ASStatGenerator(dummyBroker, testGenerators, 3, 12);
+	StatGenerator generator = new StatGenerator(testGenerators, 3, 12);
 
 	// Notify for times we are not interested in...
 	generator.notifyOfTime(2);
@@ -127,7 +118,7 @@ public class ASStatGeneratorTest {
 
     @Test
     public void testStatisticsAreUsedOK() {
-	ASStatGenerator generator = new ASStatGenerator(dummyBroker, testGenerators);
+	StatGenerator generator = new StatGenerator(testGenerators);
 
 	DescriptiveStatistics ramStat = new DescriptiveStatistics();
 	DescriptiveStatistics cpuStat = new DescriptiveStatistics();

@@ -2,12 +2,16 @@ package org.cloudbus.cloudsim.incubator.web;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.DatacenterBroker;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.incubator.web.workload.WorkloadGenerator;
 
 /**
  * A broker that takes care of the submission of web sessions to the data
@@ -21,12 +25,17 @@ import org.cloudbus.cloudsim.core.SimEvent;
 public class WebBroker extends DatacenterBroker implements IWebBroker {
 
     private static final int TIMER_TAG = 123456;
+    private static final int SUBMIT_SESSION_TAG = TIMER_TAG + 1;
 
     private boolean isTimerRunning = false;
     private final double refreshPeriod;
     private final double lifeLength;
 
+    private Map<Long, ILoadBalancer> loadBalancers = new HashMap<>();
+    private Map<Long, List<WorkloadGenerator>> loadBalancersToGenerators = new HashMap<>();
+
     private List<WebSession> sessions = new ArrayList<>();
+    private List<PresetEvent> presetEvents = new ArrayList<>();
 
     /**
      * Creates a new web broker.
@@ -50,13 +59,22 @@ public class WebBroker extends DatacenterBroker implements IWebBroker {
 
     /*
      * (non-Javadoc)
-     * @see org.cloudbus.cloudsim.DatacenterBroker#processEvent(org.cloudbus.cloudsim.core.SimEvent)
+     * 
+     * @see
+     * org.cloudbus.cloudsim.DatacenterBroker#processEvent(org.cloudbus.cloudsim
+     * .core.SimEvent)
      */
     @Override
     public void processEvent(SimEvent ev) {
 	if (!isTimerRunning) {
 	    isTimerRunning = true;
 	    sendNow(getId(), TIMER_TAG);
+
+	    for (ListIterator<PresetEvent> iter = presetEvents.listIterator(); iter.hasNext();) {
+		PresetEvent event = iter.next();
+		send(event.getId(), event.getDelay(), event.getTag(), event.getData());
+		iter.remove();
+	    }
 	}
 
 	super.processEvent(ev);
@@ -64,16 +82,66 @@ public class WebBroker extends DatacenterBroker implements IWebBroker {
 
     /**
      * Submits new web sessions to this broker.
-     * @param webSessions - the new web sessions.
+     * 
+     * @param webSessions
+     *            - the new web sessions.
      */
-    public void submitSessions(final List<WebSession> webSessions) {
+    public void submitSessions(final List<WebSession> webSessions, final long loadBalancerId) {
+	loadBalancers.get(loadBalancerId).assignToServers(webSessions.toArray(new WebSession[webSessions.size()]));
 	sessions.addAll(webSessions);
     }
 
     /**
-     * (non-Javadoc)
-     * @see org.cloudbus.cloudsim.DatacenterBroker#processOtherEvent(org.cloudbus.cloudsim.core.SimEvent)
+     * Submits new sessions after the specified delay.
+     * 
+     * @param webSessions
+     *            - the list of sessions to submit.
+     * @param loadBalancerId
+     *            - the id of the load balancer to submit to.
+     * @param delay
+     *            - the delay to submit after.
      */
+    public void submitSessionsAtTime(final List<WebSession> webSessions, final long loadBalancerId, final double delay) {
+	Object data = new Object[] { webSessions, loadBalancerId };
+	if (isTimerRunning) {
+	    send(getId(), delay, SUBMIT_SESSION_TAG, data);
+	} else {
+	    presetEvents.add(new PresetEvent(getId(), SUBMIT_SESSION_TAG, data, delay));
+	}
+    }
+
+    /**
+     * Adds a new load balancer for handling incoming sessions.
+     * 
+     * @param balancer
+     *            - the balancer to add. Must not be null.
+     */
+    public void addLoadBalancer(final ILoadBalancer balancer) {
+	loadBalancers.put(balancer.getId(), balancer);
+	loadBalancersToGenerators.put(balancer.getId(), new ArrayList<WorkloadGenerator>());
+    }
+
+    /**
+     * Adds a new workload generator for the specified load balancer.
+     * 
+     * @param workloads
+     *            - the workload generators.
+     * @param loadBalancerId
+     *            - the id of the load balancer. There must such a load balancer
+     *            registered before this method is called.
+     */
+    public void addWorkloadGenerators(final List<WorkloadGenerator> workloads, final long loadBalancerId) {
+	loadBalancersToGenerators.get(loadBalancerId).addAll(workloads);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.cloudbus.cloudsim.DatacenterBroker#processOtherEvent(org.cloudbus
+     * .cloudsim.core.SimEvent)
+     */
+    @SuppressWarnings("unchecked")
     @Override
     protected void processOtherEvent(SimEvent ev) {
 	switch (ev.getTag()) {
@@ -83,14 +151,16 @@ public class WebBroker extends DatacenterBroker implements IWebBroker {
 		    updateSessions();
 		}
 		break;
-
+	    case SUBMIT_SESSION_TAG:
+		Object[] data = (Object[]) ev.getData();
+		submitSessions((List<WebSession>) data[0], (Long) data[1]);
+		break;
 	    default:
 		super.processOtherEvent(ev);
 	}
     }
 
     private void updateSessions() {
-	// CustomLog.print("Updating sessions", null);
 	for (WebSession sess : sessions) {
 	    double currTime = CloudSim.clock();
 
@@ -106,20 +176,59 @@ public class WebBroker extends DatacenterBroker implements IWebBroker {
 
     /*
      * (non-Javadoc)
-     * @see org.cloudbus.cloudsim.DatacenterBroker#processCloudletReturn(org.cloudbus.cloudsim.core.SimEvent)
+     * 
+     * @see
+     * org.cloudbus.cloudsim.DatacenterBroker#processCloudletReturn(org.cloudbus
+     * .cloudsim.core.SimEvent)
      */
     @Override
     protected void processCloudletReturn(SimEvent ev) {
 	Cloudlet cloudlet = (Cloudlet) ev.getData();
 	if (CloudSim.clock() >= lifeLength) {
-	    // kill the broker only if it's life is over
+	    // kill the broker only if it's life length is over/expired
 	    super.processCloudletReturn(ev);
 	} else {
 	    getCloudletReceivedList().add(cloudlet);
 	    cloudletsSubmitted--;
 	}
-
-	//CustomLog.printLine(TextUtil.getTxtLine(cloudlet));
     }
 
+    /**
+     * CloudSim does not execute events that are fired before the simulation has
+     * started. Thus we need to buffer them and then refire when the simulation
+     * starts.
+     * 
+     * @author nikolay.grozev
+     * 
+     */
+    private static class PresetEvent {
+	private int id;
+	private int tag;
+	private Object data;
+	private double delay;
+
+	public PresetEvent(int id, int tag, Object data, double delay) {
+	    super();
+	    this.id = id;
+	    this.tag = tag;
+	    this.data = data;
+	    this.delay = delay;
+	}
+
+	public int getId() {
+	    return id;
+	}
+
+	public int getTag() {
+	    return tag;
+	}
+
+	public Object getData() {
+	    return data;
+	}
+
+	public double getDelay() {
+	    return delay;
+	}
+    }
 }

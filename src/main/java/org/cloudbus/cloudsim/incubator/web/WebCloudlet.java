@@ -1,16 +1,11 @@
 package org.cloudbus.cloudsim.incubator.web;
 
-import java.util.List;
-
 import org.cloudbus.cloudsim.Cloudlet;
-import org.cloudbus.cloudsim.UtilizationModel;
 import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.UtilizationModelNull;
-import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.incubator.util.Id;
 import org.cloudbus.cloudsim.incubator.util.TextUtil;
 import org.cloudbus.cloudsim.incubator.util.Textualize;
-import org.cloudbus.cloudsim.lists.VmList;
 
 /**
  * A web cloudlet is a cloudlet, which is a part of a web session. Usually it is
@@ -34,7 +29,6 @@ public class WebCloudlet extends Cloudlet {
 
     private double idealStartTime;
     private int ram;
-    private IWebBroker webBroker;
     private int sessionId;
 
     private int numberOfHddPes = 1;
@@ -49,10 +43,8 @@ public class WebCloudlet extends Cloudlet {
      *            - number of processor instructions (MIPS) required.
      * @param ram
      *            - amount of ram in megabytes.
-     * @param webBroker
-     *            - the broker used to submit this cloudlet to the data center.
      * @param userId
-     *            - the user id, as specified by the parent class.
+     *            - the userId.
      * @param record
      *            - the record flag, as specified by the parent class.
      */
@@ -60,18 +52,16 @@ public class WebCloudlet extends Cloudlet {
 	    final long cloudletLength,
 	    final long cloudletIOLength,
 	    final int ram,
-	    final IWebBroker webBroker,
+	    final int userId,
 	    final boolean record) {
 
 	super(Id.pollId(Cloudlet.class), cloudletLength, 1, 0, 0,
-		new UtilizationModelFull(), null, new UtilizationModelNull(),
+		new UtilizationModelFull(), new UtilizationModelFull(), new UtilizationModelNull(),
 		record);
 	this.idealStartTime = idealStartTime;
 	this.ram = ram;
-	this.webBroker = webBroker;
 	this.cloudletIOLength = cloudletIOLength;
-	setUserId(webBroker.getId());
-	setUtilizationModelRam(new FixedUtilizationModel());
+	setUserId(userId);
     }
 
     /**
@@ -83,6 +73,8 @@ public class WebCloudlet extends Cloudlet {
      *            - number of processor instructions (MIPS) required
      * @param ram
      *            - amount of ram in megabytes.
+     * @param userId
+     *            - the userId.       
      * @param webBroker
      *            - the broker used to submit this cloudlet to the data center.
      */
@@ -90,22 +82,10 @@ public class WebCloudlet extends Cloudlet {
 	    final long cloudletLength,
 	    final long cloudletIOLength,
 	    final int ram,
-	    final IWebBroker webBroker) {
-	this(idealStartTime, cloudletLength, cloudletIOLength, ram, webBroker, false);
+	    final int userId) {
+	this(idealStartTime, cloudletLength, cloudletIOLength, ram, userId, false);
     }
 
-    /**
-     * Sets the userid. Does not allow user ids to be reset.
-     * 
-     * @see org.cloudbus.cloudsim.Cloudlet#setUserId(int)
-     */
-    @Override
-    public void setUserId(int id) {
-	if (id != webBroker.getId()) {
-	    throw new IllegalArgumentException("Can not reset user id.");
-	}
-	super.setUserId(id);
-    }
 
     /**
      * Returns the ideal start time of this web cloudlet.
@@ -197,16 +177,6 @@ public class WebCloudlet extends Cloudlet {
 	return TextUtil.getTxtLine(this, "\t", true);
     }
 
-    private class FixedUtilizationModel implements UtilizationModel {
-	public double getUtilization(double time) {
-	    double result = 0;
-	    if (webBroker != null) {
-		List<Vm> vms = webBroker.getVmList();
-		Vm vm = VmList.getById(vms, getVmId());
-		result = vm.getRam() / (double) ram;
-	    }
-	    return result;
-	}
-    }
+
 
 }

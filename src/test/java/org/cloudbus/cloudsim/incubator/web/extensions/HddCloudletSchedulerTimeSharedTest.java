@@ -90,21 +90,21 @@ public class HddCloudletSchedulerTimeSharedTest {
     public void testOneJobMoreIOThanCPU() {
 	double timesMips = 5;
 	double timesIOMIPS = 12;
-	runSingleCloudlet(timesMips, timesIOMIPS);
+	testSingleCloudlet(timesMips, timesIOMIPS);
     }
 
     @Test
     public void testOneJobMoreCPUThanIO() {
 	double timesMips = 13;
 	double timesIOMIPS = 12;
-	runSingleCloudlet(timesMips, timesIOMIPS);
+	testSingleCloudlet(timesMips, timesIOMIPS);
     }
 
     @Test
     public void testOneJobEqualCPUAndIO() {
 	double timesMips = 13;
 	double timesIOMIPS = timesMips;
-	runSingleCloudlet(timesMips, timesIOMIPS);
+	testSingleCloudlet(timesMips, timesIOMIPS);
     }
 
     @Test
@@ -116,9 +116,9 @@ public class HddCloudletSchedulerTimeSharedTest {
 	double job2TimesIOMIPS = 2;
 
 	WebCloudlet cloudlet1 = new WebCloudlet(0, (int) (VM_MIPS * job1TimesMips),
-		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker);
+		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId());
 	WebCloudlet cloudlet2 = new WebCloudlet(0, (int) (VM_MIPS * job2TimesMips),
-		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker);
+		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId());
 	broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2));
 
 	CloudSim.startSimulation();
@@ -145,9 +145,9 @@ public class HddCloudletSchedulerTimeSharedTest {
 	double job2TimesIOMIPS = 0;
 
 	WebCloudlet cloudlet1 = new WebCloudlet(0, (int) (VM_MIPS * job1TimesMips),
-		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker);
+		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId());
 	WebCloudlet cloudlet2 = new WebCloudlet(0, (int) (VM_MIPS * job2TimesMips),
-		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker);
+		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId());
 	broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2));
 
 	CloudSim.startSimulation();
@@ -174,9 +174,9 @@ public class HddCloudletSchedulerTimeSharedTest {
 	double job2TimesIOMIPS = 2;
 
 	WebCloudlet cloudlet1 = new WebCloudlet(0, (int) (VM_MIPS * job1TimesMips),
-		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker);
+		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId());
 	WebCloudlet cloudlet2 = new WebCloudlet(0, (int) (VM_MIPS * job2TimesMips),
-		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker);
+		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId());
 	broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2));
 
 	CloudSim.startSimulation();
@@ -208,9 +208,9 @@ public class HddCloudletSchedulerTimeSharedTest {
 	double job2TimesIOMIPS = 10;
 
 	WebCloudlet cloudlet1 = new WebCloudlet(0, (int) (VM_MIPS * job1TimesMips),
-		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker);
+		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId());
 	WebCloudlet cloudlet2 = new WebCloudlet(0, (int) (VM_MIPS * job2TimesMips),
-		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker);
+		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId());
 	broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2));
 
 	CloudSim.startSimulation();
@@ -238,9 +238,9 @@ public class HddCloudletSchedulerTimeSharedTest {
 	double job2TimesIOMIPS = 0.1;
 
 	WebCloudlet cloudlet1 = new WebCloudlet(0, (int) (VM_MIPS * job1TimesMips),
-		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker);
+		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId());
 	WebCloudlet cloudlet2 = new WebCloudlet(0, (int) (VM_MIPS * job2TimesMips),
-		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker);
+		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId());
 	broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2));
 
 	CloudSim.startSimulation();
@@ -263,9 +263,9 @@ public class HddCloudletSchedulerTimeSharedTest {
     public void testOutOfMemoryTwoCloudlets() {
 
 	WebCloudlet cloudlet1 = new WebCloudlet(0, 100,
-		100, VM_RAM / 2 + 1, broker);
+		100, VM_RAM / 2 + 1, broker.getId());
 	WebCloudlet cloudlet2 = new WebCloudlet(0, 100,
-		100, VM_RAM / 2 + 1, broker);
+		100, VM_RAM / 2 + 1, broker.getId());
 	broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2));
 
 	CloudSim.startSimulation();
@@ -300,7 +300,7 @@ public class HddCloudletSchedulerTimeSharedTest {
 	    double jobTimesMips = nextRandBetween(rand, minMipsFactor, maxMipsFactor);
 	    double jobTimesIOMIPS = nextRandBetween(rand, minMiopsFactor, maxMiopsFactor);
 	    jobs.add(new WebCloudlet(0, (int) (VM_MIPS * jobTimesMips),
-		    (int) (HOST_MIOPS * jobTimesIOMIPS), 5, broker));
+		    (int) (HOST_MIOPS * jobTimesIOMIPS), 5, broker.getId()));
 	}
 
 	broker.submitCloudletList(jobs);
@@ -326,9 +326,9 @@ public class HddCloudletSchedulerTimeSharedTest {
 	return rand.nextDouble() * (end - start) + start;
     }
 
-    private void runSingleCloudlet(double timesMips, double timesIOMIPS) {
+    private void testSingleCloudlet(double timesMips, double timesIOMIPS) {
 	WebCloudlet cloudlet = new WebCloudlet(0, (int) (VM_MIPS * timesMips), (int) (HOST_MIOPS * timesIOMIPS), 5,
-		broker);
+		broker.getId());
 	broker.submitCloudletList(Arrays.asList(cloudlet));
 
 	CloudSim.startSimulation();

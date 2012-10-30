@@ -5,35 +5,27 @@ import java.util.Map;
 import org.uncommons.maths.number.NumberGenerator;
 
 /**
- * A statistical generator for Application Server cloudlets.
+ * A statistical generator for Server cloudlets.
  * 
  * @author nikolay.grozev
  * 
  */
-public class ASStatGenerator extends BaseStatGenerator<WebCloudlet> {
-
-    private final IWebBroker webBroker;
+public class StatGenerator extends BaseStatGenerator<WebCloudlet> {
 
     /**
      * Creates a new instance.
      * 
-     * @param webBroker
-     *            - the broker that will submit this CloudLet. Must not be null.
      * @param randomGenerators
      *            - the statistical random number generators as explained in the
      *            javadoc of the super class.
      */
-    public ASStatGenerator(final IWebBroker webBroker,
-	    Map<String, NumberGenerator<Double>> randomGenerators) {
+    public StatGenerator(final Map<String, NumberGenerator<Double>> randomGenerators) {
 	super(randomGenerators);
-	this.webBroker = webBroker;
     }
 
     /**
      * Creates a new instance.
      * 
-     * @param webBroker
-     *            - the broker that will submit this CloudLet. Must not be null.
      * @param randomGenerators
      *            - the statistical random number generators as explained in the
      *            javadoc of the super class.
@@ -42,10 +34,9 @@ public class ASStatGenerator extends BaseStatGenerator<WebCloudlet> {
      * @param startTime
      *            - see the javadoc of the super class..
      */
-    public ASStatGenerator(final IWebBroker webBroker, final Map<String, NumberGenerator<Double>> seqGenerators,
+    public StatGenerator(final Map<String, NumberGenerator<Double>> seqGenerators,
 	    final double startTime, final double endTime) {
 	super(seqGenerators, startTime, endTime);
-	this.webBroker = webBroker;
     }
 
     /**
@@ -59,7 +50,7 @@ public class ASStatGenerator extends BaseStatGenerator<WebCloudlet> {
 	int ram = generateValue(CLOUDLET_RAM).intValue();
 	int ioLen = generateValue(CLOUDLET_LENGTH).intValue();
 
-	return new WebCloudlet(idealStartTime, cpuLen, ioLen, ram, webBroker);
+	return new WebCloudlet(idealStartTime, cpuLen, ioLen, ram, -1);
     }
 
 }
