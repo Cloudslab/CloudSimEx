@@ -1,5 +1,7 @@
 package org.cloudbus.cloudsim.incubator.web;
 
+import java.util.List;
+
 import org.cloudbus.cloudsim.incubator.web.extensions.HddVm;
 
 /**
@@ -35,5 +37,17 @@ public interface ILoadBalancer {
      *            - the new app server.
      */
     public void registerAppServer(final HddVm vm);
+    
+    /**
+     * Returns the list of all app servers managed by this load balancer.
+     * @return the list of all app servers managed by this load balancer.
+     */
+    public List<HddVm> getAppServers();
+    
+    /**
+     * Returns the DB server managed by this load balancer.
+     * @return the DB server managed by this load balancer.
+     */
+    public HddVm getDbServer();
 
 }

@@ -117,4 +117,14 @@ public class SimpleWebLoadBalancer implements ILoadBalancer {
 	double vmMips = vm.getMips() * vm.getNumberOfPes();
 	return sumExecCloudLets / vmMips;
     }
+
+    @Override
+    public List<HddVm> getAppServers() {
+	return appServers;
+    }
+
+    @Override
+    public HddVm getDbServer() {
+	return dbServer;
+    }
 }

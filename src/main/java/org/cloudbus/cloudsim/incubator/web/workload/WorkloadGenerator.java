@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Random;
 
 import org.cloudbus.cloudsim.incubator.web.WebSession;
+import org.cloudbus.cloudsim.incubator.web.workload.freq.FrequencyFunction;
+import org.cloudbus.cloudsim.incubator.web.workload.sessions.ISessionGenerator;
 import org.uncommons.maths.number.NumberGenerator;
 import org.uncommons.maths.random.MersenneTwisterRNG;
 import org.uncommons.maths.random.PoissonGenerator;

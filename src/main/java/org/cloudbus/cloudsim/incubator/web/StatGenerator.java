@@ -39,7 +39,7 @@ public class StatGenerator extends BaseStatGenerator<WebCloudlet> {
 	super(seqGenerators, startTime, endTime);
     }
 
-    /**
+    /*
      * (non-Javadoc)
      * 
      * @see org.cloudbus.cloudsim.incubator.web.BaseStatGenerator#create(double)

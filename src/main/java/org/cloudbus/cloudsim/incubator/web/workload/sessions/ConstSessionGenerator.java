@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.incubator.web.workload;
+package org.cloudbus.cloudsim.incubator.web.workload.sessions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,8 +24,7 @@ public class ConstSessionGenerator implements ISessionGenerator {
     private int dbRam;
     private long dbCloudletIOLength;
 
-    private double startTime;
-    private double endTime;
+    private double duration;
 
     /**
      * Constructor.
@@ -34,19 +33,17 @@ public class ConstSessionGenerator implements ISessionGenerator {
      * @param dbCloudletLength - the length of the generated db server cloudlets.
      * @param dbRam - the ram of the generated db server cloudlets.
      * @param dbCloudletIOLength - the IO ram of the generated app server cloudlets.
-     * @param startTime - the start time. No cloudlets before this moment will be generated.
-     * @param endTime - the end time. No cloudlets after this moment will be generated.
+     * @param startTime - the duration of the generated cloudlets.
      */
     public ConstSessionGenerator(long asCloudletLength, int asRam, long dbCloudletLength, int dbRam,
-	    long dbCloudletIOLength, double startTime, double endTime) {
+	    long dbCloudletIOLength, double duration) {
 	super();
 	this.asCloudletLength = asCloudletLength;
 	this.asRam = asRam;
 	this.dbCloudletLength = dbCloudletLength;
 	this.dbRam = dbRam;
 	this.dbCloudletIOLength = dbCloudletIOLength;
-	this.startTime = startTime;
-	this.endTime = endTime;
+	this.duration = duration;
     }
 
     /**
@@ -59,12 +56,14 @@ public class ConstSessionGenerator implements ISessionGenerator {
      */
     public ConstSessionGenerator(long asCloudletLength, int asRam, long dbCloudletLength, int dbRam,
 	    long dbCloudletIOLength) {
-	this(asCloudletLength, asRam, dbCloudletLength, dbRam, dbCloudletIOLength, -1, -1);
+	this(asCloudletLength, asRam, dbCloudletLength, dbRam, dbCloudletIOLength, -1);
     }
 
     @Override
     public WebSession generateSessionAt(double time) {
-
+	double startTime = duration > 0 ? time : -1;
+	double endTime = duration > 0 ? time + duration : -1;
+	
 	Map<String, NumberGenerator<Double>> asGenerators = new HashMap<>();
 	asGenerators.put(StatGenerator.CLOUDLET_LENGTH, new ConstantGenerator<Double>((double) asCloudletLength));
 	asGenerators.put(StatGenerator.CLOUDLET_RAM, new ConstantGenerator<Double>((double) asRam));

@@ -22,7 +22,7 @@ import org.cloudbus.cloudsim.incubator.web.workload.WorkloadGenerator;
  * @author nikolay.grozev
  * 
  */
-public class WebBroker extends DatacenterBroker implements IWebBroker {
+public class WebBroker extends DatacenterBroker {
 
     private static final int TIMER_TAG = 123456;
     private static final int SUBMIT_SESSION_TAG = TIMER_TAG + 1;
@@ -88,6 +88,9 @@ public class WebBroker extends DatacenterBroker implements IWebBroker {
      */
     public void submitSessions(final List<WebSession> webSessions, final long loadBalancerId) {
 	loadBalancers.get(loadBalancerId).assignToServers(webSessions.toArray(new WebSession[webSessions.size()]));
+	for(WebSession ws : webSessions) {
+	    ws.setUserId(getId());
+	}
 	sessions.addAll(webSessions);
     }
 
@@ -149,6 +152,7 @@ public class WebBroker extends DatacenterBroker implements IWebBroker {
 		if (CloudSim.clock() < lifeLength) {
 		    send(getId(), refreshPeriod, TIMER_TAG);
 		    updateSessions();
+		    generateWorkload();
 		}
 		break;
 	    case SUBMIT_SESSION_TAG:
@@ -157,6 +161,24 @@ public class WebBroker extends DatacenterBroker implements IWebBroker {
 		break;
 	    default:
 		super.processOtherEvent(ev);
+	}
+    }
+
+    private void generateWorkload() {
+	double currTime = CloudSim.clock();
+	for (Map.Entry<Long, List<WorkloadGenerator>> balancersToWorkloadGens : loadBalancersToGenerators.entrySet()) {
+	    long balancerId = balancersToWorkloadGens.getKey();
+	    for (WorkloadGenerator gen : balancersToWorkloadGens.getValue()) {
+		Map<Double, WebSession> timeToSessions = gen.generateSessions(currTime, refreshPeriod);
+		for (Map.Entry<Double, WebSession> sessEntry : timeToSessions.entrySet()) {
+		    if (currTime == sessEntry.getKey()) {
+			submitSessions(Arrays.asList(sessEntry.getValue()), balancerId);
+		    } else {
+			submitSessionsAtTime(Arrays.asList(sessEntry.getValue()), balancerId, 
+				sessEntry.getKey() - currTime);
+		    }
+		}
+	    }
 	}
     }
 

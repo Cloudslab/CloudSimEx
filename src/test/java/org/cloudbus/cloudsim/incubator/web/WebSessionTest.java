@@ -1,11 +1,10 @@
 package org.cloudbus.cloudsim.incubator.web;
 
 import static org.cloudbus.cloudsim.incubator.util.helpers.TestUtil.createSeededGaussian;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,8 +31,6 @@ public class WebSessionTest {
     private NumberGenerator<Double> genCPU_AS;
     private NumberGenerator<Double> genCPU_DB;
 
-    private static IWebBroker dummyBroker;
-
     private Map<String, NumberGenerator<Double>> testGeneratorsAS;
     private Map<String, NumberGenerator<Double>> testGeneratorsDB;
 
@@ -44,9 +41,6 @@ public class WebSessionTest {
 
     @Before
     public void setUp() {
-	dummyBroker = mock(IWebBroker.class);
-	when(dummyBroker.getVmList()).thenReturn(new ArrayList<Vm>());
-	when(dummyBroker.getId()).thenReturn(1);
 
 	genRAM_AS = createSeededGaussian(GEN_RAM_MEAN, GEN_RAM_STDEV);
 	genRAM_DB = createSeededGaussian(GEN_RAM_MEAN, GEN_RAM_STDEV);
@@ -62,8 +56,8 @@ public class WebSessionTest {
 	testGeneratorsDB.put(StatGenerator.CLOUDLET_LENGTH, genCPU_DB);
 	testGeneratorsDB.put(StatGenerator.CLOUDLET_RAM, genRAM_DB);
 
-	statGeneratorAS = new TestStatGenerator(dummyBroker, testGeneratorsAS, 1);
-	statGeneratorDB = new TestStatGenerator(dummyBroker, testGeneratorsDB, 1);
+	statGeneratorAS = new TestStatGenerator(testGeneratorsAS, 1);
+	statGeneratorDB = new TestStatGenerator(testGeneratorsDB, 1);
 
 	session = new WebSession(statGeneratorAS, statGeneratorDB, 1);
 	session.setAppVmId(Id.pollId(Vm.class));
@@ -156,8 +150,7 @@ public class WebSessionTest {
 
     private static class TestStatGenerator extends BaseStatGenerator<TestWebCloudlet> {
 	int userId;
-	public TestStatGenerator(final IWebBroker webBroker,
-		Map<String, NumberGenerator<Double>> randomGenerators, int userId) {
+	public TestStatGenerator(Map<String, NumberGenerator<Double>> randomGenerators, int userId) {
 	    super(randomGenerators);
 	    this.userId = userId;
 	}

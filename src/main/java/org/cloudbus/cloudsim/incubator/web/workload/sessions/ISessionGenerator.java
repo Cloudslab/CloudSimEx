@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.incubator.web.workload;
+package org.cloudbus.cloudsim.incubator.web.workload.sessions;
 
 import org.cloudbus.cloudsim.incubator.web.WebSession;
 

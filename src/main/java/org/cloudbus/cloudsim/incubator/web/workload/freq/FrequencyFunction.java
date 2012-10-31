@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.incubator.web.workload;
+package org.cloudbus.cloudsim.incubator.web.workload.freq;
 
 /**
  * We are representing the generated workload as a Poisson distribution over a
