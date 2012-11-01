@@ -9,7 +9,10 @@ import java.util.Map;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.DatacenterBroker;
+import org.cloudbus.cloudsim.DatacenterCharacteristics;
+import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.incubator.web.workload.WorkloadGenerator;
 
@@ -38,6 +41,12 @@ public class WebBroker extends DatacenterBroker {
     private List<PresetEvent> presetEvents = new ArrayList<>();
 
     /**
+     * By default CloudSim's brokers use all available datacenters. So we need
+     * to enforce only the data centers we want.
+     */
+    private List<Integer> dataCenterIds;
+
+    /**
      * Creates a new web broker.
      * 
      * @param name
@@ -52,9 +61,32 @@ public class WebBroker extends DatacenterBroker {
      */
     public WebBroker(final String name, final double refreshPeriod,
 	    final double lifeLength) throws Exception {
+	this(name, refreshPeriod, lifeLength, null);
+    }
+
+    /**
+     * Creates a new web broker.
+     * 
+     * @param name
+     *            - the name of the broker.
+     * @param refreshPeriod
+     *            - the period of polling web sessions for new cloudlets.
+     * @param lifeLength
+     *            - the length of the simulation.
+     * @param dataCenterIds
+     *            - the ids of the datacenters this broker operates with. If
+     *            null all present data centers are used.
+     * 
+     * @throws Exception
+     *             - if something goes wrong. See the documentation of the super
+     *             class.
+     */
+    public WebBroker(final String name, final double refreshPeriod,
+	    final double lifeLength, List<Integer> dataCenterIds) throws Exception {
 	super(name);
 	this.refreshPeriod = refreshPeriod;
 	this.lifeLength = lifeLength;
+	this.dataCenterIds = dataCenterIds;
     }
 
     /*
@@ -88,7 +120,7 @@ public class WebBroker extends DatacenterBroker {
      */
     public void submitSessions(final List<WebSession> webSessions, final long loadBalancerId) {
 	loadBalancers.get(loadBalancerId).assignToServers(webSessions.toArray(new WebSession[webSessions.size()]));
-	for(WebSession ws : webSessions) {
+	for (WebSession ws : webSessions) {
 	    ws.setUserId(getId());
 	}
 	sessions.addAll(webSessions);
@@ -174,7 +206,7 @@ public class WebBroker extends DatacenterBroker {
 		    if (currTime == sessEntry.getKey()) {
 			submitSessions(Arrays.asList(sessEntry.getValue()), balancerId);
 		    } else {
-			submitSessionsAtTime(Arrays.asList(sessEntry.getValue()), balancerId, 
+			submitSessionsAtTime(Arrays.asList(sessEntry.getValue()), balancerId,
 				sessEntry.getKey() - currTime);
 		    }
 		}
@@ -212,6 +244,28 @@ public class WebBroker extends DatacenterBroker {
 	} else {
 	    getCloudletReceivedList().add(cloudlet);
 	    cloudletsSubmitted--;
+	}
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see cloudsim.core.SimEntity#startEntity()
+     */
+    @Override
+    public void startEntity() {
+	Log.printLine(getName() + " is starting...");
+	schedule(getId(), 0, CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST, dataCenterIds);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected void processResourceCharacteristicsRequest(SimEvent ev) {
+	setDatacenterIdsList(ev.getData() == null ? CloudSim.getCloudResourceList() : (List<Integer>) ev.getData());
+	setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
+
+	for (Integer datacenterId : getDatacenterIdsList()) {
+	    sendNow(datacenterId, CloudSimTags.RESOURCE_CHARACTERISTICS, getId());
 	}
     }
 
