@@ -59,9 +59,28 @@ public class WebSessionTest {
 	statGeneratorAS = new TestStatGenerator(testGeneratorsAS, 1);
 	statGeneratorDB = new TestStatGenerator(testGeneratorsDB, 1);
 
-	session = new WebSession(statGeneratorAS, statGeneratorDB, 1);
+	session = new WebSession(statGeneratorAS, statGeneratorDB, 1, -1, 100);
 	session.setAppVmId(Id.pollId(Vm.class));
 	session.setDbVmId(Id.pollId(Vm.class));
+    }
+
+    @Test
+    public void testBeyoundCapacity() {
+	int time = 0;
+	int numCloudlets = 10;
+	WebSession newSession = new WebSession(statGeneratorAS, statGeneratorDB, 1, numCloudlets, 100);
+	newSession.setAppVmId(Id.pollId(Vm.class));
+	newSession.setDbVmId(Id.pollId(Vm.class));
+
+	for (int i = 0; i < numCloudlets; i++) {
+	    newSession.notifyOfTime(time++);
+	    WebCloudlet[] currCloudLets = newSession.pollCloudlets(time++);
+	    assertNotNull(currCloudLets);
+	    ((TestWebCloudlet) currCloudLets[0]).setFinished(true);
+	    ((TestWebCloudlet) currCloudLets[1]).setFinished(true);
+	}
+	newSession.notifyOfTime(time++);
+	assertNull(newSession.pollCloudlets(time++));
     }
 
     @Test
@@ -150,6 +169,7 @@ public class WebSessionTest {
 
     private static class TestStatGenerator extends BaseStatGenerator<TestWebCloudlet> {
 	int userId;
+
 	public TestStatGenerator(Map<String, NumberGenerator<Double>> randomGenerators, int userId) {
 	    super(randomGenerators);
 	    this.userId = userId;

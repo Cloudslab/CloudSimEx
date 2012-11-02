@@ -68,7 +68,7 @@ public class SimpleWebLoadBalancer implements ILoadBalancer {
      */
     @Override
     public void assignToServers(final WebSession... sessions) {
-	//Filter all sessions without an assigned application server
+	// Filter all sessions without an assigned application server
 	List<WebSession> appServSessions = new ArrayList<>();
 	appServSessions.addAll(Arrays.asList(sessions));
 	for (ListIterator<WebSession> iter = appServSessions.listIterator(); iter.hasNext();) {
@@ -96,14 +96,16 @@ public class SimpleWebLoadBalancer implements ILoadBalancer {
 
 	// Distribute the sessions among the best VMs
 	int i = 0;
-	for (WebSession session : appServSessions) {
-	    int index = i++ % bestVms.size(); 
-	    session.setAppVmId(bestVms.get(index).getId());
+	if (!bestVms.isEmpty()) {
+	    for (WebSession session : appServSessions) {
+		int index = i++ % bestVms.size();
+		session.setAppVmId(bestVms.get(index).getId());
+	    }
 	}
 
 	// Set the DB VM
 	for (WebSession session : sessions) {
-	    if (session.getDbVmId() == null) {
+	    if (session.getDbVmId() == null && !dbServer.isOutOfMemory()) {
 		session.setDbVmId(dbServer.getId());
 	    }
 	}

@@ -38,6 +38,7 @@ import org.cloudbus.cloudsim.incubator.web.SimpleWebLoadBalancer;
 import org.cloudbus.cloudsim.incubator.web.WebBroker;
 import org.cloudbus.cloudsim.incubator.web.WebCloudlet;
 import org.cloudbus.cloudsim.incubator.web.WebDataCenter;
+import org.cloudbus.cloudsim.incubator.web.WebSession;
 import org.cloudbus.cloudsim.incubator.web.extensions.HDPe;
 import org.cloudbus.cloudsim.incubator.web.extensions.HddCloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.incubator.web.extensions.HddHost;
@@ -52,7 +53,26 @@ import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 
+/**
+ * 
+ * @author nikolay.grozev
+ * 
+ */
 public class Experiment {
+
+    private static final int MINUTE = 60;
+    private static final int HOUR = 60 * MINUTE;
+    private static final int DAY = 24 * HOUR;
+    private static final int SIMULATION_LENGTH = 2 * DAY;
+    private static final Integer[] HOURS = new Integer[25];
+
+    private static int REFRESH_TIME = 5;
+
+    static {
+	for (int i = 0; i <= 24; i++) {
+	    HOURS[i] = i * HOUR;
+	}
+    }
 
     /**
      * Creates main() to run this example
@@ -61,8 +81,8 @@ public class Experiment {
      * @throws SecurityException
      */
     public static void main(String[] args) throws SecurityException, IOException {
-	long start = System.currentTimeMillis();
-	
+	long simulationStart = System.currentTimeMillis();
+
 	// Step 0: Set up the logger
 	Properties props = new Properties();
 	try (InputStream is = Files.newInputStream(Paths.get("custom_log.properties"))) {
@@ -73,150 +93,178 @@ public class Experiment {
 	try {
 	    // Step1: Initialize the CloudSim package. It should be called
 	    // before creating any entities.
-	    int numBrokers = 1; // number of brokers we'll be using
+	    int numBrokers = 2; // number of brokers we'll be using
 	    boolean trace_flag = false; // mean trace events
-
-	    // Initialize CloudSim
 	    CloudSim.init(numBrokers, Calendar.getInstance(), trace_flag);
 
-	    // Step 2: Create Datacenters - the resource providers in CloudSim
-	    // Datacenter datacenter0 =
-	    Datacenter dc1 = createDatacenter("WebDataCenter");
-	    Datacenter dc2 = createDatacenter("WebDataCenter1");
+	    // Step 2: Create Datacenters
+	    Datacenter dc1 = createDatacenter("WebDataCenter1");
+	    Datacenter dc2 = createDatacenter("WebDataCenter2");
 
-	    // Step 3: Create Broker
-	    int refreshTime = 5;
-	    WebBroker broker = new WebBroker("Broker", refreshTime, 24 * 3600);
+	    // Step 3: Create Brokers
+	    WebBroker brokerDC1 = new WebBroker("BrokerDC1", REFRESH_TIME, SIMULATION_LENGTH,
+		    Arrays.asList(dc1.getId()));
+	    WebBroker brokerDC2 = new WebBroker("BrokerDC2", REFRESH_TIME, SIMULATION_LENGTH,
+		    Arrays.asList(dc2.getId()));
 
 	    // Step 4: Create virtual machines
-	    List<Vm> vmlist = new ArrayList<Vm>();
+	    HddVm appServerVM1DC1 = createVM(brokerDC1.getId());
+	    HddVm appServerVM2DC1 = createVM(brokerDC1.getId());
+	    HddVm dbServerVMDC1 = createVM(brokerDC1.getId());
 
-	    // VM description
-	    int mips = 250;
-	    int ioMips = 200;
-	    long size = 10000; // image size (MB)
-	    int ram = 512; // vm memory (MB)
-	    long bw = 1000;
-	    int pesNumber = 1; // number of cpus
-	    String vmm = "Xen"; // VMM name
+	    HddVm appServerVM1DC2 = createVM(brokerDC2.getId());
+	    HddVm appServerVM2DC2 = createVM(brokerDC2.getId());
+	    HddVm dbServerVMDC2 = createVM(brokerDC2.getId());
 
-	    // create two VMs
-	    HddVm appServerVM = new HddVm(broker.getId(), mips, ioMips, pesNumber,
-		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared());
-	    HddVm appServerVM2 = new HddVm(broker.getId(), mips, ioMips, pesNumber,
-		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared());
+	    // Step 5: Create load balancers for the virtual machines in the 2
+	    // datacenters
+	    ILoadBalancer balancerDC1 = new SimpleWebLoadBalancer(
+		    Arrays.asList(appServerVM1DC1, appServerVM2DC1), dbServerVMDC1);
+	    brokerDC1.addLoadBalancer(balancerDC1);
 
-	    HddVm dbServerVM = new HddVm(broker.getId(), mips, ioMips, pesNumber,
-		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared());
+	    ILoadBalancer balancerDC2 = new SimpleWebLoadBalancer(
+		    Arrays.asList(appServerVM1DC2, appServerVM2DC2), dbServerVMDC2);
+	    brokerDC2.addLoadBalancer(balancerDC2);
 
-	    ILoadBalancer balancer = new SimpleWebLoadBalancer(Arrays.asList(appServerVM, appServerVM2), dbServerVM);  
-	    broker.addLoadBalancer(balancer);
+	    // Step 6: Add the virtual machines fo the data centers
+	    List<Vm> vmlistDC1 = new ArrayList<Vm>();
+	    vmlistDC1.addAll(balancerDC1.getAppServers());
+	    vmlistDC1.add(balancerDC1.getDbServer());
+	    brokerDC1.submitVmList(vmlistDC1);
 
-	    // add the VMs to the vmList
-	    vmlist.addAll(balancer.getAppServers());
-	    vmlist.add(balancer.getDbServer());
+	    List<Vm> vmlistDC2 = new ArrayList<Vm>();
+	    vmlistDC2.addAll(balancerDC2.getAppServers());
+	    vmlistDC2.add(balancerDC2.getDbServer());
+	    brokerDC2.submitVmList(vmlistDC2);
 
-	    // submit vm list to the broker
-	    broker.submitVmList(vmlist);
+	    // Step 7: Define the workload and associate it with load balancers
+	    List<WorkloadGenerator> workloadDC1 = generateWorkloadsDC1();
+	    brokerDC1.addWorkloadGenerators(workloadDC1, balancerDC1.getId());
 
-	    List<WorkloadGenerator> workloads = generateWorkloads();
-	    broker.addWorkloadGenerators(workloads, balancer.getId());
+	    List<WorkloadGenerator> workloadDC2 = generateWorkloadsDC2();
+	    brokerDC2.addWorkloadGenerators(workloadDC2, balancerDC2.getId());
 
-	    // Sixth step: Starts the simulation
+	    // Step 8: Starts the simulation
 	    CloudSim.startSimulation();
 
-	    // Final step: Print results when simulation is over
-	    List<Cloudlet> newList = broker.getCloudletReceivedList();
+	    // Step 9: get the results
+	    List<Cloudlet> resultDC1 = brokerDC1.getCloudletReceivedList();
+	    List<Cloudlet> resultDC2 = brokerDC2.getCloudletReceivedList();
+	    List<WebSession> resultDC1Sessions = brokerDC1.getServedSessions();
+	    List<WebSession> resultDC2Sessions = brokerDC2.getServedSessions();
 
+	    // Step 10 : stop the simulation and print the results
 	    CloudSim.stopSimulation();
+	    printDetails(resultDC1Sessions, resultDC2Sessions);
 
-	    printCloudletList(newList);
-
-	    // Print the debt of each user to each datacenter
-	    // datacenter0.printDebts();
-
-	    System.err.println("\nSimulation is finished!");
+	    System.err.println();
+	    System.err.println("Simulation is finished!");
 	} catch (Exception e) {
 	    e.printStackTrace();
 	    System.err.println("The simulation has been terminated due to an unexpected error");
 	}
-	
-	long end = System.currentTimeMillis();
-	System.out.println("Finished in " + (end - start) /1000 + "seconds");
+	System.err.println("Finished in " + (System.currentTimeMillis() - simulationStart) / 1000 + " seconds");
     }
 
-    private static List<WorkloadGenerator> generateWorkloads() {
-	List<WorkloadGenerator> workloads = new ArrayList<>();
-	
-	int asCloudletLength = 200;
+    private static HddVm createVM(int brokerId) {
+	// VM description
+	int mips = 250;
+	int ioMips = 200;
+	long size = 10000; // image size (MB)
+	int ram = 1024; // vm memory (MB)
+	long bw = 1000;
+	int pesNumber = 1; // number of cpus
+	String vmm = "Xen"; // VMM name
+
+	// create two VMs
+	HddVm appServerVM = new HddVm(brokerId, mips, ioMips, pesNumber,
+		ram, bw, size, vmm, new HddCloudletSchedulerTimeShared());
+	return appServerVM;
+    }
+
+    private static List<WorkloadGenerator> generateWorkloadsDC1() {
+	double nullPoint = 0;
+
+	String[] periods = new String[] {
+		String.format("[%d,%d] m=5 std=1", HOURS[0], HOURS[5]),
+		String.format("(%d,%d] m=20 std=2", HOURS[5], HOURS[6]),
+		String.format("(%d,%d] m=40 std=2", HOURS[6], HOURS[7]),
+		String.format("(%d,%d] m=50 std=4", HOURS[7], HOURS[8]),
+		String.format("(%d,%d] m=80 std=4", HOURS[8], HOURS[9]),
+		String.format("(%d,%d] m=100 std=5", HOURS[9], HOURS[12]),
+		String.format("(%d,%d] m=50 std=2", HOURS[12], HOURS[13]),
+		String.format("(%d,%d] m=90 std=5", HOURS[13], HOURS[14]),
+		String.format("(%d,%d] m=100 std=5", HOURS[14], HOURS[17]),
+		String.format("(%d,%d] m=80 std=2", HOURS[17], HOURS[18]),
+		String.format("(%d,%d] m=50 std=2", HOURS[18], HOURS[19]),
+		String.format("(%d,%d] m=40 std=2", HOURS[19], HOURS[20]),
+		String.format("(%d,%d] m=20 std=2", HOURS[20], HOURS[21]),
+		String.format("(%d,%d] m=5 std=1", HOURS[21], HOURS[24]) };
+	return generateWorkload(nullPoint, periods);
+    }
+
+    private static List<WorkloadGenerator> generateWorkloadsDC2() {
+	double nullPoint = 12 * HOUR;
+
+	String[] periods = new String[] {
+		String.format("[%d,%d] m=10 std=1", HOURS[0], HOURS[5]),
+		String.format("(%d,%d] m=40 std=2", HOURS[5], HOURS[6]),
+		String.format("(%d,%d] m=80 std=2", HOURS[6], HOURS[7]),
+		String.format("(%d,%d] m=100 std=4", HOURS[7], HOURS[8]),
+		String.format("(%d,%d] m=160 std=4", HOURS[8], HOURS[9]),
+		String.format("(%d,%d] m=200 std=5", HOURS[9], HOURS[12]),
+		String.format("(%d,%d] m=100 std=2", HOURS[12], HOURS[13]),
+		String.format("(%d,%d] m=180 std=5", HOURS[13], HOURS[14]),
+		String.format("(%d,%d] m=200 std=5", HOURS[14], HOURS[17]),
+		String.format("(%d,%d] m=160 std=2", HOURS[17], HOURS[18]),
+		String.format("(%d,%d] m=100 std=2", HOURS[18], HOURS[19]),
+		String.format("(%d,%d] m=80 std=2", HOURS[19], HOURS[20]),
+		String.format("(%d,%d] m=40 std=2", HOURS[20], HOURS[21]),
+		String.format("(%d,%d] m=10 std=1", HOURS[21], HOURS[24]) };
+	return generateWorkload(nullPoint, periods);
+    }
+
+    private static List<WorkloadGenerator> generateWorkload(double nullPoint, String[] periods) {
+	int asCloudletLength = 100;
 	int asRam = 1;
 	int dbCloudletLength = 10;
 	int dbRam = 1;
 	int dbCloudletIOLength = 5;
 	int duration = 200;
-	
-	ISessionGenerator sessGen = new ConstSessionGenerator(asCloudletLength, asRam, dbCloudletLength, dbRam, dbCloudletIOLength, duration);
-	
-	double unit = 3600;
-	double periodLength = 3600*24;
-	double nullPoint = 0;
-	
-	double h0 = 0*3600;
-	double h10 = 10*3600;
-	double h13 = 13*3600;
-	double h14 = 14*3600;
-	double h17 = 17*3600;
-	double h21 = 21*3600;
-	double h24 = 24*3600;
-	
-	String[] periods = new String[]{String.format("[%f,%f] m=10 std=1", h0, h10),
-		String.format("(%f,%f] m=100 std=5", h10, h13),
-		String.format("(%f,%f] m=50 std=1", h13, h14),
-		String.format("(%f,%f] m=200 std=5", h14, h17),
-		String.format("(%f,%f] m=100 std=2", h17, h21),
-		String.format("(%f,%f] m=10 std=1", h21, h24)};
-	
+
+	int numberOfCloudlets = duration / REFRESH_TIME;
+	numberOfCloudlets = numberOfCloudlets == 0 ? 1 : numberOfCloudlets;
+
+	ISessionGenerator sessGen = new ConstSessionGenerator(asCloudletLength, asRam, dbCloudletLength,
+		dbRam, dbCloudletIOLength, duration, numberOfCloudlets);
+
+	double unit = HOUR;
+	double periodLength = DAY;
+
 	FrequencyFunction freqFun = new PeriodicStochasticFrequencyFunction(unit, periodLength, nullPoint,
-	    	CompositeValuedSet.createCompositeValuedSet(periods));
-	workloads.add(new WorkloadGenerator(freqFun, sessGen));
-	return workloads;
+		CompositeValuedSet.createCompositeValuedSet(periods));
+	return Arrays.asList(new WorkloadGenerator(freqFun, sessGen));
     }
 
-
     private static Datacenter createDatacenter(String name) {
-
-	// Here are the steps needed to create a PowerDatacenter:
-	// 1. We need to create a list to store
-	// our machine
 	List<Host> hostList = new ArrayList<Host>();
 
-	// 2. A Machine contains one or more PEs or CPUs/Cores.
-	// In this example, it will have only one core.
 	List<Pe> peList = new ArrayList<>();
 	List<HDPe> hddList = new ArrayList<>();
 
 	int mips = 1000;
 	int iops = 1000;
 
-	// 3. Create PEs and add these into a list.
-	peList.add(new Pe(0, new PeProvisionerSimple(mips))); // need to store
-							      // Pe id and
-							      // MIPS Rating
-
+	peList.add(new Pe(0, new PeProvisionerSimple(mips)));
 	hddList.add(new HDPe(new PeProvisionerSimple(iops)));
 
-	// 4. Create Host with its id and list of PEs and add them to the list
-	// of machines
-	int ram = 2048; // host memory (MB)
+	int ram = 2048 * 2; // host memory (MB)
 	long storage = 1000000; // host storage
 	int bw = 10000;
 
 	hostList.add(new HddHost(new RamProvisionerSimple(ram),
 		new BwProvisionerSimple(bw), storage, peList, hddList,
-		new VmSchedulerTimeShared(peList), new VmSchedulerTimeSharedOverSubscription(hddList))); // This
-													 // is
-													 // our
-													 // machine
+		new VmSchedulerTimeShared(peList), new VmSchedulerTimeSharedOverSubscription(hddList)));
 
 	// 5. Create a DatacenterCharacteristics object that stores the
 	// properties of a data center: architecture, OS, list of
@@ -250,22 +298,20 @@ public class Experiment {
     }
 
     /**
-     * Prints the Cloudlet objects
+     * Prints the results with a header.
      * 
      * @param list
      *            list of Cloudlets
      */
-    private static void printCloudletList(List<Cloudlet> list) {
-	int size = list.size();
-	Cloudlet cloudlet;
-
+    private static void printDetails(List<?>... lists) {
 	// Print header line
-	CustomLog.printLine(TextUtil.getCaptionLine(WebCloudlet.class));
+	CustomLog.printLine(TextUtil.getCaptionLine(lists[0].get(0).getClass()));
 
 	// Print details for each cloudlet
-	for (int i = 0; i < size; i++) {
-	    cloudlet = list.get(i);
-	    CustomLog.print(TextUtil.getTxtLine(cloudlet));
+	for (List<?> list : lists) {
+	    for (Object o : list) {
+		CustomLog.print(TextUtil.getTxtLine(o));
+	    }
 	}
     }
 }

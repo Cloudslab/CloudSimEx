@@ -140,6 +140,18 @@ public class CustomLog {
     }
 
     /**
+     * Prints the formatted string with the default level, resulting from
+     * applying the format string to the arguements.
+     * 
+     * @param format
+     *            - the format (as in String.format).
+     * @param args
+     */
+    public static void printf(String format, Object... args) {
+	LOGGER.log(DEFAULT_LEVEL, String.format(format, args));
+    }
+
+    /**
      * Returns if this logger is disabled.
      * 
      * @return - if this logger is disabled.

@@ -1,24 +1,27 @@
 package org.cloudbus.cloudsim.incubator.web;
 
 import org.cloudbus.cloudsim.incubator.util.Id;
+import org.cloudbus.cloudsim.incubator.util.Textualize;
 
 /**
- * A web session is a session established between a user, and application server
- * (deployed in a VM) and a database server (deployed in another VM). Throughout
- * it's lifetime a session continuously generates workload on the servers
- * deployed in these virtual machines. The workload is represented as cloudlets,
- * which are sent to the assigned servers.
+ * A web session is a session established between a user, and an application
+ * server (deployed in a VM) and a database server (deployed in another VM).
+ * Throughout it's lifetime a session continuously generates workload on the
+ * servers deployed in these virtual machines. The workload is represented as
+ * cloudlets, which are sent to the assigned servers.
  * 
+ * <br/>
  * <br/>
  * 
  * To achieve this a web session generates two consequent "steams" of cloudlets
- * and directs to the servers. These streams are based on two instances of
+ * and directs them to the servers. These streams are based on two instances of
  * {@link IGenerator} passed when constructing the session. The session takes
  * care to synchronize the two generators, so that consequent cloudlets from the
  * two generators are executed at the same pace. Thus if one of the servers is
  * performing better than the other, this will not be reflected in a quicker
  * exhaustion of its respective generator.
  * 
+ * <br/>
  * <br/>
  * 
  * Since the session utilizes {@link IGenerator} instances, which are unaware of
@@ -32,6 +35,7 @@ import org.cloudbus.cloudsim.incubator.util.Id;
  * @author nikolay.grozev
  * 
  */
+@Textualize(properties = { "SessionId", "AppVmId", "DbVmId", "Delay" })
 public class WebSession {
 
     private IGenerator<? extends WebCloudlet> appServerCloudLets;
@@ -44,6 +48,9 @@ public class WebSession {
     private Integer dbVmId = null;
 
     private int userId;
+    private int cloudletsLeft;
+
+    private double idealEnd;
 
     private final int sessionId;
 
@@ -61,12 +68,17 @@ public class WebSession {
      *            constructor or the set method, before this instance is used.
      */
     public WebSession(final IGenerator<? extends WebCloudlet> appServerCloudLets,
-	    final IGenerator<? extends WebCloudlet> dbServerCloudLets, int userId) {
+	    final IGenerator<? extends WebCloudlet> dbServerCloudLets, int userId, int numberOfCloudlets,
+	    double idealEnd) {
 	super();
+	sessionId = Id.pollId(getClass());
+
 	this.appServerCloudLets = appServerCloudLets;
 	this.dbServerCloudLets = dbServerCloudLets;
 	this.userId = userId;
-	sessionId = Id.pollId(getClass());
+
+	this.cloudletsLeft = numberOfCloudlets;
+	this.idealEnd = idealEnd;
     }
 
     public int getUserId() {
@@ -98,7 +110,7 @@ public class WebSession {
 	boolean dbServerNextReady = !dbServerCloudLets.isEmpty()
 		&& dbServerCloudLets.peek().getIdealStartTime() <= currTime;
 
-	if (appCloudletFinished && dbCloudletFinished && appServerNextReady && dbServerNextReady) {
+	if (cloudletsLeft != 0 && appCloudletFinished && dbCloudletFinished && appServerNextReady && dbServerNextReady) {
 	    result = new WebCloudlet[] {
 		    appServerCloudLets.poll(),
 		    dbServerCloudLets.poll() };
@@ -113,6 +125,7 @@ public class WebSession {
 
 	    currentAppServerCloudLet.setUserId(userId);
 	    currentDBServerCloudLet.setUserId(userId);
+	    cloudletsLeft--;
 	}
 	return result;
     }
@@ -193,6 +206,21 @@ public class WebSession {
      */
     public int getSessionId() {
 	return sessionId;
+    }
+
+    /**
+     * Returns the accumulated delay of this session. If the session has a
+     * cloudlet running -1 is returned.
+     * 
+     * @return the accumulated delay of this session. If the session has a
+     *         cloudlet running -1 is returned.
+     */
+    public double getDelay() {
+	double delayAS = currentAppServerCloudLet == null || currentAppServerCloudLet.isFinished() ? -1
+		: currentAppServerCloudLet.getFinishTime() - idealEnd;
+	double delayDB = currentDBServerCloudLet == null || currentDBServerCloudLet.isFinished() ? -1
+		: currentDBServerCloudLet.getFinishTime() - idealEnd;
+	return Math.max(delayAS, delayDB);
     }
 
 }

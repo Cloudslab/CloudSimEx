@@ -69,8 +69,10 @@ public class WebDataCenter extends Datacenter {
 		    scheduler.failAllCloudlets();
 		    cl.setCloudletStatus(Cloudlet.FAILED);
 		    vm.setOutOfMemory(true);
-		    
-		    CustomLog.printLine("VM " + vm.getId() + " is out of memory!!!.");
+
+		    CustomLog.printf(
+			    "VM/Server %d on host %d in data center %s(%d) is out of memory. It will not be further available",
+			    vm.getId(), host.getId(), getName(), getId() );
 		} else {
 		    super.processCloudletSubmit(ev, ack);
 		}

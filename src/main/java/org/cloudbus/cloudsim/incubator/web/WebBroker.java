@@ -14,6 +14,7 @@ import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.incubator.util.CustomLog;
 import org.cloudbus.cloudsim.incubator.web.workload.WorkloadGenerator;
 
 /**
@@ -37,7 +38,8 @@ public class WebBroker extends DatacenterBroker {
     private Map<Long, ILoadBalancer> loadBalancers = new HashMap<>();
     private Map<Long, List<WorkloadGenerator>> loadBalancersToGenerators = new HashMap<>();
 
-    private List<WebSession> sessions = new ArrayList<>();
+    private List<WebSession> servedSessions = new ArrayList<>();
+    private List<WebSession> canceledSessions = new ArrayList<>();
     private List<PresetEvent> presetEvents = new ArrayList<>();
 
     /**
@@ -89,6 +91,25 @@ public class WebBroker extends DatacenterBroker {
 	this.dataCenterIds = dataCenterIds;
     }
 
+    /**
+     * Returns the session that were canceled due to lack of resources to serve
+     * them.
+     * 
+     * @return the session that were canceled due to lack of resources to serve
+     *         them.
+     */
+    public List<WebSession> getCanceledSessions() {
+	return canceledSessions;
+    }
+
+    /**
+     * Returns the sessions that were sucessfully served.
+     * @return  the sessions that were sucessfully served.
+     */
+    public List<WebSession> getServedSessions() {
+        return servedSessions;
+    }
+    
     /*
      * (non-Javadoc)
      * 
@@ -119,11 +140,23 @@ public class WebBroker extends DatacenterBroker {
      *            - the new web sessions.
      */
     public void submitSessions(final List<WebSession> webSessions, final long loadBalancerId) {
-	loadBalancers.get(loadBalancerId).assignToServers(webSessions.toArray(new WebSession[webSessions.size()]));
-	for (WebSession ws : webSessions) {
-	    ws.setUserId(getId());
+	List<WebSession> copyWebSessions = new ArrayList<>(webSessions);
+	loadBalancers.get(loadBalancerId).assignToServers(
+		copyWebSessions.toArray(new WebSession[copyWebSessions.size()]));
+
+	for (ListIterator<WebSession> iter = copyWebSessions.listIterator(); iter.hasNext();) {
+	    WebSession session = iter.next();
+	    // If the load balancer could not assign it...
+	    if (session.getAppVmId() == null || session.getDbVmId() == null) {
+		iter.remove();
+		canceledSessions.add(session);
+		CustomLog.printf(
+			"Session could not be served and is canceled. Session id:%d", session.getSessionId());
+	    }
+	    session.setUserId(getId());
 	}
-	sessions.addAll(webSessions);
+
+	servedSessions.addAll(copyWebSessions);
     }
 
     /**
@@ -215,7 +248,7 @@ public class WebBroker extends DatacenterBroker {
     }
 
     private void updateSessions() {
-	for (WebSession sess : sessions) {
+	for (WebSession sess : servedSessions) {
 	    double currTime = CloudSim.clock();
 
 	    sess.notifyOfTime(currTime);

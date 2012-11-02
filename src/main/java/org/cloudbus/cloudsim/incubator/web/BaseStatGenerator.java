@@ -155,7 +155,7 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerato
     
     /**
      * Generates a plausible value for the key.
-     * @param key - the key. Tytpically one of the constants of the clas..
+     * @param key - the key. Tytpically one of the constants of the class..
      * @return a plausible (with the correspondent statistical properties) value for the key.
      */
     protected Double generateValue(final String key) {

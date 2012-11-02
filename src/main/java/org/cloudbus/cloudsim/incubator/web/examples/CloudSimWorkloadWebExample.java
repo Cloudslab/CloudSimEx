@@ -153,8 +153,9 @@ public class CloudSimWorkloadWebExample {
 	int dbRam = 1;
 	int dbCloudletIOLength = 5;
 	int duration = 200;
+	int numberOfCloudlets = duration/5;
 	
-	ISessionGenerator sessGen = new ConstSessionGenerator(asCloudletLength, asRam, dbCloudletLength, dbRam, dbCloudletIOLength, duration);
+	ISessionGenerator sessGen = new ConstSessionGenerator(asCloudletLength, asRam, dbCloudletLength, dbRam, dbCloudletIOLength, duration, numberOfCloudlets);
 	
 	double unit = 3600;
 	double periodLength = 3600*24;

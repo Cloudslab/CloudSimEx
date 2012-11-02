@@ -25,6 +25,7 @@ public class ConstSessionGenerator implements ISessionGenerator {
     private long dbCloudletIOLength;
 
     private double duration;
+    private int numberOfCloudlets = 0;
 
     /**
      * Constructor.
@@ -33,10 +34,11 @@ public class ConstSessionGenerator implements ISessionGenerator {
      * @param dbCloudletLength - the length of the generated db server cloudlets.
      * @param dbRam - the ram of the generated db server cloudlets.
      * @param dbCloudletIOLength - the IO ram of the generated app server cloudlets.
-     * @param startTime - the duration of the generated cloudlets.
+     * @param duration - the duration of the generated sessions.
+     * @param numberOfCloudlets - number of cloudlets in each sessions. Negative means infinity. 
      */
     public ConstSessionGenerator(long asCloudletLength, int asRam, long dbCloudletLength, int dbRam,
-	    long dbCloudletIOLength, double duration) {
+	    long dbCloudletIOLength, double duration, int numberOfCloudlets) {
 	super();
 	this.asCloudletLength = asCloudletLength;
 	this.asRam = asRam;
@@ -44,6 +46,7 @@ public class ConstSessionGenerator implements ISessionGenerator {
 	this.dbRam = dbRam;
 	this.dbCloudletIOLength = dbCloudletIOLength;
 	this.duration = duration;
+	this.numberOfCloudlets = numberOfCloudlets;
     }
 
     /**
@@ -56,7 +59,7 @@ public class ConstSessionGenerator implements ISessionGenerator {
      */
     public ConstSessionGenerator(long asCloudletLength, int asRam, long dbCloudletLength, int dbRam,
 	    long dbCloudletIOLength) {
-	this(asCloudletLength, asRam, dbCloudletLength, dbRam, dbCloudletIOLength, -1);
+	this(asCloudletLength, asRam, dbCloudletLength, dbRam, dbCloudletIOLength, -1, -1);
     }
 
     @Override
@@ -75,7 +78,7 @@ public class ConstSessionGenerator implements ISessionGenerator {
 	dbGenerators.put(StatGenerator.CLOUDLET_IO, new ConstantGenerator<Double>((double) dbCloudletIOLength));
 	IGenerator<WebCloudlet> dbServerCloudLets = new StatGenerator(dbGenerators, startTime, endTime);
 
-	return new WebSession(appServerCloudLets, dbServerCloudLets, -1);
+	return new WebSession(appServerCloudLets, dbServerCloudLets, -1, numberOfCloudlets, time + duration);
     }
 
 }

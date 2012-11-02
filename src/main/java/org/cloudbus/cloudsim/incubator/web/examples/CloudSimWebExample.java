@@ -159,7 +159,7 @@ public class CloudSimWebExample {
 
 	List<WebSession> sessions = new ArrayList<>();
 	for (int i = 0; i < sessionNum; i++) {
-	    WebSession session = new WebSession(asGenerator, dbGenerator, broker.getId());
+	    WebSession session = new WebSession(asGenerator, dbGenerator, broker.getId(), -1, 100);
 	    sessions.add(session);
 	}
 	return sessions;
