@@ -63,7 +63,7 @@ public class Experiment {
     private static final int MINUTE = 60;
     private static final int HOUR = 60 * MINUTE;
     private static final int DAY = 24 * HOUR;
-    private static final int SIMULATION_LENGTH = 2 * DAY;
+    private static final int SIMULATION_LENGTH = DAY/100;
     private static final Integer[] HOURS = new Integer[25];
 
     private static int REFRESH_TIME = 5;

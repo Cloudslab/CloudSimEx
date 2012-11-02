@@ -216,9 +216,9 @@ public class WebSession {
      *         cloudlet running -1 is returned.
      */
     public double getDelay() {
-	double delayAS = currentAppServerCloudLet == null || currentAppServerCloudLet.isFinished() ? -1
+	double delayAS = currentAppServerCloudLet == null || !currentAppServerCloudLet.isFinished() ? -1
 		: currentAppServerCloudLet.getFinishTime() - idealEnd;
-	double delayDB = currentDBServerCloudLet == null || currentDBServerCloudLet.isFinished() ? -1
+	double delayDB = currentDBServerCloudLet == null || !currentDBServerCloudLet.isFinished() ? -1
 		: currentDBServerCloudLet.getFinishTime() - idealEnd;
 	return Math.max(delayAS, delayDB);
     }
