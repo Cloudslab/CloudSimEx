@@ -35,7 +35,7 @@ import org.cloudbus.cloudsim.incubator.util.Textualize;
  * @author nikolay.grozev
  * 
  */
-@Textualize(properties = { "SessionId", "AppVmId", "DbVmId", "Delay" })
+@Textualize(properties = { "ReadableStartTime", "StartTime", "SessionId", "AppVmId", "DbVmId", "Delay", "Complete"})
 public class WebSession {
 
     private IGenerator<? extends WebCloudlet> appServerCloudLets;
@@ -51,6 +51,7 @@ public class WebSession {
     private int cloudletsLeft;
 
     private double idealEnd;
+    private Double startTime;
 
     private final int sessionId;
 
@@ -126,6 +127,11 @@ public class WebSession {
 	    currentAppServerCloudLet.setUserId(userId);
 	    currentDBServerCloudLet.setUserId(userId);
 	    cloudletsLeft--;
+
+	    if (startTime == null) {
+		startTime = Math.min(currentAppServerCloudLet.getIdealStartTime(),
+			currentDBServerCloudLet.getIdealStartTime());
+	    }
 	}
 	return result;
     }
@@ -220,7 +226,30 @@ public class WebSession {
 		: currentAppServerCloudLet.getFinishTime() - idealEnd;
 	double delayDB = currentDBServerCloudLet == null || !currentDBServerCloudLet.isFinished() ? -1
 		: currentDBServerCloudLet.getFinishTime() - idealEnd;
-	return Math.max(delayAS, delayDB);
+	return Math.max(0, Math.max(delayAS, delayDB));
     }
 
+    public double getStartTime() {
+	return startTime;
+    }
+
+    public String getReadableStartTime() {
+	int days = (startTime.intValue() / (24 * 3600));
+	int hours = (startTime.intValue() / 3600);
+	int minutes = (startTime.intValue()) / 60;
+	int rest = (startTime.intValue()) % 60;
+
+	// Now normalize the values
+	hours = hours % 24;
+	minutes = minutes % 60;
+	return String.format("%2d: %2d: %2d: %2d", days, hours, minutes, rest);
+    }
+
+    public boolean isComplete() {
+	return cloudletsLeft == 0 &&
+		currentAppServerCloudLet != null &&
+		currentAppServerCloudLet.isFinished() &&
+		currentDBServerCloudLet != null &&
+		currentDBServerCloudLet.isFinished();
+    }
 }

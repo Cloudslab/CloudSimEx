@@ -21,6 +21,7 @@ public class SimpleWebLoadBalancer implements ILoadBalancer {
     private List<HddVm> appServers;
     private HddVm dbServer;
     private long id;
+    private long startPositionWhenEqual = 0;
 
     /**
      * Constructor.
@@ -69,9 +70,9 @@ public class SimpleWebLoadBalancer implements ILoadBalancer {
     @Override
     public void assignToServers(final WebSession... sessions) {
 	// Filter all sessions without an assigned application server
-	List<WebSession> appServSessions = new ArrayList<>();
-	appServSessions.addAll(Arrays.asList(sessions));
-	for (ListIterator<WebSession> iter = appServSessions.listIterator(); iter.hasNext();) {
+	List<WebSession> noAppServSessions = new ArrayList<>();
+	noAppServSessions.addAll(Arrays.asList(sessions));
+	for (ListIterator<WebSession> iter = noAppServSessions.listIterator(); iter.hasNext();) {
 	    WebSession sess = iter.next();
 	    if (sess.getAppVmId() != null) {
 		iter.remove();
@@ -95,11 +96,11 @@ public class SimpleWebLoadBalancer implements ILoadBalancer {
 	}
 
 	// Distribute the sessions among the best VMs
-	int i = 0;
+	long i = startPositionWhenEqual++;
 	if (!bestVms.isEmpty()) {
-	    for (WebSession session : appServSessions) {
-		int index = i++ % bestVms.size();
-		session.setAppVmId(bestVms.get(index).getId());
+	    for (WebSession session : noAppServSessions) {
+		long index = i++ % bestVms.size();
+		session.setAppVmId(bestVms.get((int)index).getId());
 	    }
 	}
 

@@ -59,26 +59,30 @@ public class WorkloadGenerator {
 
     /**
      * Generates sessions for the period [startTime, startTime + periodLen].
-     * @param startTime - the start time of the generated sessions.
-     * @param periodLen - the length of the period.
+     * 
+     * @param startTime
+     *            - the start time of the generated sessions.
+     * @param periodLen
+     *            - the length of the period.
      * @return a map between session start times and sessions.
      */
     public Map<Double, WebSession> generateSessions(final double startTime, final double periodLen) {
 	double unit = freqFun.getUnit();
 	double freq = freqFun.getFrequency(startTime);
 
-	// The frequency within this period
-	double freqInLen = freq * (periodLen / unit);
-	NumberGenerator<Integer> poiss = new PoissonGenerator(freqInLen, rng);
-	int numberOfSessions = poiss.nextValue();
-
 	Map<Double, WebSession> timesToSessions = new LinkedHashMap<>();
+	if (freq > 0) {
+	    // The frequency within this period
+	    double freqInLen = freq * (periodLen / unit);
+	    NumberGenerator<Integer> poiss = new PoissonGenerator(freqInLen, rng);
+	    int numberOfSessions = poiss.nextValue();
 
-	// Distribute uniformly the created sessions
-	double timeStep = periodLen / numberOfSessions;
-	for (int i = 0; i < numberOfSessions; i++) {
-	    double sessionTime = startTime + i * timeStep;
-	    timesToSessions.put(sessionTime, sessGen.generateSessionAt(sessionTime));
+	    // Distribute uniformly the created sessions
+	    double timeStep = periodLen / numberOfSessions;
+	    for (int i = 0; i < numberOfSessions; i++) {
+		double sessionTime = startTime + i * timeStep;
+		timesToSessions.put(sessionTime, sessGen.generateSessionAt(sessionTime));
+	    }
 	}
 
 	return timesToSessions;

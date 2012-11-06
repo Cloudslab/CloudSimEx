@@ -48,7 +48,7 @@ public class StatGenerator extends BaseStatGenerator<WebCloudlet> {
     protected WebCloudlet create(final double idealStartTime) {
 	long cpuLen = generateValue(CLOUDLET_LENGTH).longValue();
 	int ram = generateValue(CLOUDLET_RAM).intValue();
-	int ioLen = generateValue(CLOUDLET_LENGTH).intValue();
+	int ioLen = generateValue(CLOUDLET_IO).intValue();
 
 	return new WebCloudlet(idealStartTime, cpuLen, ioLen, ram, -1);
     }

@@ -1,12 +1,3 @@
-/*
- * Title:        CloudSim Toolkit
- * Description:  CloudSim (Cloud Simulation) Toolkit for Modeling and Simulation
- *               of Clouds
- * Licence:      GPL - http://www.gnu.org/copyleft/gpl.html
- *
- * Copyright (c) 2009, The University of Melbourne, Australia
- */
-
 package org.cloudbus.cloudsim.incubator.web.experiments;
 
 import java.io.IOException;
@@ -16,11 +7,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.Datacenter;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
 import org.cloudbus.cloudsim.Host;
@@ -54,19 +46,23 @@ import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 
 /**
+ * Baseline experiment. It's protected methods and properties should be overriden
+ * to customize different lifecycle events - creation of data centers, workload
+ * etc.
  * 
  * @author nikolay.grozev
  * 
  */
-public class Experiment {
+public class BaselineExperiment {
 
-    private static final int MINUTE = 60;
-    private static final int HOUR = 60 * MINUTE;
-    private static final int DAY = 24 * HOUR;
-    private static final int SIMULATION_LENGTH = DAY/100;
-    private static final Integer[] HOURS = new Integer[25];
+    protected static final int MINUTE = 60;
+    protected static final int HOUR = 60 * MINUTE;
+    protected static final int DAY = 24 * HOUR;
+    protected static final Integer[] HOURS = new Integer[25];
 
-    private static int REFRESH_TIME = 5;
+    protected int simulationLength;
+    protected int refreshTime;
+    protected String experimentName;
 
     static {
 	for (int i = 0; i <= 24; i++) {
@@ -74,21 +70,28 @@ public class Experiment {
 	}
     }
 
-    /**
-     * Creates main() to run this example
-     * 
-     * @throws IOException
-     * @throws SecurityException
-     */
-    public static void main(String[] args) throws SecurityException, IOException {
-	long simulationStart = System.currentTimeMillis();
-
+    public static void main(String[] args) throws IOException {
 	// Step 0: Set up the logger
-	Properties props = new Properties();
-	try (InputStream is = Files.newInputStream(Paths.get("custom_log.properties"))) {
-	    props.load(is);
-	}
-	CustomLog.configLogger(props);
+	parseExperimentParameters(args);
+	
+	new BaselineExperiment(2 * DAY, 4, "[Base Experimnet]").runExperimemt();
+    }
+    
+    public BaselineExperiment(int simulationLength, int refreshTime, String experimentName) {
+	super();
+	this.simulationLength = simulationLength;
+	this.refreshTime = refreshTime;
+	this.experimentName = experimentName;
+    }
+
+    /**
+     * Sets up the experiment and runs it.
+     * 
+     * @throws SecurityException
+     * @throws IOException
+     */
+    public final void runExperimemt() throws SecurityException, IOException {
+	long simulationStart = System.currentTimeMillis();
 
 	try {
 	    // Step1: Initialize the CloudSim package. It should be called
@@ -102,9 +105,9 @@ public class Experiment {
 	    Datacenter dc2 = createDatacenter("WebDataCenter2");
 
 	    // Step 3: Create Brokers
-	    WebBroker brokerDC1 = new WebBroker("BrokerDC1", REFRESH_TIME, SIMULATION_LENGTH,
+	    WebBroker brokerDC1 = new WebBroker("BrokerDC1", refreshTime, simulationLength,
 		    Arrays.asList(dc1.getId()));
-	    WebBroker brokerDC2 = new WebBroker("BrokerDC2", REFRESH_TIME, SIMULATION_LENGTH,
+	    WebBroker brokerDC2 = new WebBroker("BrokerDC2", refreshTime, simulationLength,
 		    Arrays.asList(dc2.getId()));
 
 	    // Step 4: Create virtual machines
@@ -148,25 +151,35 @@ public class Experiment {
 	    CloudSim.startSimulation();
 
 	    // Step 9: get the results
-	    List<Cloudlet> resultDC1 = brokerDC1.getCloudletReceivedList();
-	    List<Cloudlet> resultDC2 = brokerDC2.getCloudletReceivedList();
+	    List<WebCloudlet> resultDC1 = brokerDC1.getCloudletReceivedList();
+	    List<WebCloudlet> resultDC2 = brokerDC2.getCloudletReceivedList();
 	    List<WebSession> resultDC1Sessions = brokerDC1.getServedSessions();
 	    List<WebSession> resultDC2Sessions = brokerDC2.getServedSessions();
 
 	    // Step 10 : stop the simulation and print the results
 	    CloudSim.stopSimulation();
-	    printDetails(resultDC1Sessions, resultDC2Sessions);
+	    printDetails(WebSession.class, resultDC1Sessions, resultDC2Sessions);
+
+//	    Comparator<WebCloudlet> comparator = new Comparator<WebCloudlet>() {
+//		@Override
+//		public int compare(WebCloudlet o1, WebCloudlet o2) {
+//		    return Double.valueOf(o1.getIdealStartTime()).compareTo(o2.getIdealStartTime());
+//		}
+//	    };
+//	    Collections.sort(resultDC1, comparator);
+//	    Collections.sort(resultDC2, comparator);
+//	    printDetails(WebCloudlet.class, resultDC1, resultDC2);
 
 	    System.err.println();
-	    System.err.println("Simulation is finished!");
+	    System.err.println(experimentName + ": Simulation is finished!");
 	} catch (Exception e) {
 	    e.printStackTrace();
-	    System.err.println("The simulation has been terminated due to an unexpected error");
+	    System.err.println(experimentName + ": The simulation has been terminated due to an unexpected error");
 	}
-	System.err.println("Finished in " + (System.currentTimeMillis() - simulationStart) / 1000 + " seconds");
+	System.err.println(experimentName + ": Finished in " + (System.currentTimeMillis() - simulationStart) / 1000 + " seconds");
     }
 
-    private static HddVm createVM(int brokerId) {
+    protected HddVm createVM(int brokerId) {
 	// VM description
 	int mips = 250;
 	int ioMips = 200;
@@ -182,9 +195,8 @@ public class Experiment {
 	return appServerVM;
     }
 
-    private static List<WorkloadGenerator> generateWorkloadsDC1() {
+    protected List<WorkloadGenerator> generateWorkloadsDC1() {
 	double nullPoint = 0;
-
 	String[] periods = new String[] {
 		String.format("[%d,%d] m=5 std=1", HOURS[0], HOURS[5]),
 		String.format("(%d,%d] m=20 std=2", HOURS[5], HOURS[6]),
@@ -203,9 +215,8 @@ public class Experiment {
 	return generateWorkload(nullPoint, periods);
     }
 
-    private static List<WorkloadGenerator> generateWorkloadsDC2() {
+    protected List<WorkloadGenerator> generateWorkloadsDC2() {
 	double nullPoint = 12 * HOUR;
-
 	String[] periods = new String[] {
 		String.format("[%d,%d] m=10 std=1", HOURS[0], HOURS[5]),
 		String.format("(%d,%d] m=40 std=2", HOURS[5], HOURS[6]),
@@ -224,15 +235,15 @@ public class Experiment {
 	return generateWorkload(nullPoint, periods);
     }
 
-    private static List<WorkloadGenerator> generateWorkload(double nullPoint, String[] periods) {
-	int asCloudletLength = 100;
+    protected List<WorkloadGenerator> generateWorkload(double nullPoint, String[] periods) {
+	int asCloudletLength = 200;
 	int asRam = 1;
-	int dbCloudletLength = 10;
+	int dbCloudletLength = 50;
 	int dbRam = 1;
-	int dbCloudletIOLength = 5;
+	int dbCloudletIOLength = 50;
 	int duration = 200;
 
-	int numberOfCloudlets = duration / REFRESH_TIME;
+	int numberOfCloudlets = duration / refreshTime;
 	numberOfCloudlets = numberOfCloudlets == 0 ? 1 : numberOfCloudlets;
 
 	ISessionGenerator sessGen = new ConstSessionGenerator(asCloudletLength, asRam, dbCloudletLength,
@@ -246,7 +257,7 @@ public class Experiment {
 	return Arrays.asList(new WorkloadGenerator(freqFun, sessGen));
     }
 
-    private static Datacenter createDatacenter(String name) {
+    protected Datacenter createDatacenter(String name) {
 	List<Host> hostList = new ArrayList<Host>();
 
 	List<Pe> peList = new ArrayList<>();
@@ -298,14 +309,14 @@ public class Experiment {
     }
 
     /**
-     * Prints the results with a header.
+     * Prints the objects' details with a header.
      * 
      * @param list
      *            list of Cloudlets
      */
-    private static void printDetails(List<?>... lists) {
+    protected static void printDetails(Class<?> caption, List<?>... lists) {
 	// Print header line
-	CustomLog.printLine(TextUtil.getCaptionLine(lists[0].get(0).getClass()));
+	CustomLog.printLine(TextUtil.getCaptionLine(caption));
 
 	// Print details for each cloudlet
 	for (List<?> list : lists) {
@@ -313,5 +324,19 @@ public class Experiment {
 		CustomLog.print(TextUtil.getTxtLine(o));
 	    }
 	}
+    }
+
+    /**
+     * Parses the experiments parameters and sets up the logger.
+     * @param args
+     * @throws IOException
+     */
+    protected static void parseExperimentParameters(String[] args) throws IOException {
+	Properties props = new Properties();
+	try (InputStream is = Files.newInputStream(Paths.get(args[1]))) {
+	    props.load(is);
+	}
+	props.put(CustomLog.FILE_PATH_PROP_KEY, args[0]);
+	CustomLog.configLogger(props);
     }
 }

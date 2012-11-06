@@ -23,7 +23,7 @@ import org.cloudbus.cloudsim.incubator.util.Textualize;
  * 
  */
 @Textualize(properties = { "CloudletId", "SessionId", "Ram", "VmId", "Delay", "IdealStartTime", "ExecStartTime",
-	"CloudletLength",
+	"CloudletLength", "CloudletIOLength",
 	"ActualCPUTime", "FinishTime", "CloudletStatusString", "Finished" })
 public class WebCloudlet extends Cloudlet {
 

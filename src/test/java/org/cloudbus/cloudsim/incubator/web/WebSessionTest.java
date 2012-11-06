@@ -144,6 +144,7 @@ public class WebSessionTest {
 	assertNull(session.pollCloudlets(currTime++));
     }
 
+    
     /**
      * A cloudlet that we can explicitly set as finished for testing purposes.
      * 
