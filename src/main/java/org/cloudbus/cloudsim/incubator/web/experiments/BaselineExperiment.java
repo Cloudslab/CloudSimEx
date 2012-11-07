@@ -7,8 +7,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -28,7 +26,6 @@ import org.cloudbus.cloudsim.incubator.util.TextUtil;
 import org.cloudbus.cloudsim.incubator.web.ILoadBalancer;
 import org.cloudbus.cloudsim.incubator.web.SimpleWebLoadBalancer;
 import org.cloudbus.cloudsim.incubator.web.WebBroker;
-import org.cloudbus.cloudsim.incubator.web.WebCloudlet;
 import org.cloudbus.cloudsim.incubator.web.WebDataCenter;
 import org.cloudbus.cloudsim.incubator.web.WebSession;
 import org.cloudbus.cloudsim.incubator.web.extensions.HDPe;
@@ -111,22 +108,20 @@ public class BaselineExperiment {
 		    Arrays.asList(dc2.getId()));
 
 	    // Step 4: Create virtual machines
-	    HddVm appServerVM1DC1 = createVM(brokerDC1.getId());
-	    HddVm appServerVM2DC1 = createVM(brokerDC1.getId());
 	    HddVm dbServerVMDC1 = createVM(brokerDC1.getId());
-
-	    HddVm appServerVM1DC2 = createVM(brokerDC2.getId());
-	    HddVm appServerVM2DC2 = createVM(brokerDC2.getId());
 	    HddVm dbServerVMDC2 = createVM(brokerDC2.getId());
+	    
+	    List<HddVm> appServersVMDC1 = createApplicationServerVMS(brokerDC1);
+	    List<HddVm> appServersVMDC2 = createApplicationServerVMS(brokerDC2);
 
 	    // Step 5: Create load balancers for the virtual machines in the 2
 	    // datacenters
 	    ILoadBalancer balancerDC1 = new SimpleWebLoadBalancer(
-		    Arrays.asList(appServerVM1DC1, appServerVM2DC1), dbServerVMDC1);
+		    appServersVMDC1, dbServerVMDC1);
 	    brokerDC1.addLoadBalancer(balancerDC1);
 
 	    ILoadBalancer balancerDC2 = new SimpleWebLoadBalancer(
-		    Arrays.asList(appServerVM1DC2, appServerVM2DC2), dbServerVMDC2);
+		    appServersVMDC2, dbServerVMDC2);
 	    brokerDC2.addLoadBalancer(balancerDC2);
 
 	    // Step 6: Add the virtual machines fo the data centers
@@ -151,8 +146,8 @@ public class BaselineExperiment {
 	    CloudSim.startSimulation();
 
 	    // Step 9: get the results
-	    List<WebCloudlet> resultDC1 = brokerDC1.getCloudletReceivedList();
-	    List<WebCloudlet> resultDC2 = brokerDC2.getCloudletReceivedList();
+//	    List<WebCloudlet> resultDC1 = brokerDC1.getCloudletReceivedList();
+//	    List<WebCloudlet> resultDC2 = brokerDC2.getCloudletReceivedList();
 	    List<WebSession> resultDC1Sessions = brokerDC1.getServedSessions();
 	    List<WebSession> resultDC2Sessions = brokerDC2.getServedSessions();
 
@@ -179,6 +174,10 @@ public class BaselineExperiment {
 	System.err.println(experimentName + ": Finished in " + (System.currentTimeMillis() - simulationStart) / 1000 + " seconds");
     }
 
+    protected List<HddVm> createApplicationServerVMS(WebBroker brokerDC1) {
+	return Arrays.asList(createVM(brokerDC1.getId()), createVM(brokerDC1.getId()));
+    }
+
     protected HddVm createVM(int brokerId) {
 	// VM description
 	int mips = 250;
@@ -198,7 +197,7 @@ public class BaselineExperiment {
     protected List<WorkloadGenerator> generateWorkloadsDC1() {
 	double nullPoint = 0;
 	String[] periods = new String[] {
-		String.format("[%d,%d] m=5 std=1", HOURS[0], HOURS[5]),
+		String.format("[%d,%d] m=6 std=1", HOURS[0], HOURS[5]),
 		String.format("(%d,%d] m=20 std=2", HOURS[5], HOURS[6]),
 		String.format("(%d,%d] m=40 std=2", HOURS[6], HOURS[7]),
 		String.format("(%d,%d] m=50 std=4", HOURS[7], HOURS[8]),
@@ -211,27 +210,27 @@ public class BaselineExperiment {
 		String.format("(%d,%d] m=50 std=2", HOURS[18], HOURS[19]),
 		String.format("(%d,%d] m=40 std=2", HOURS[19], HOURS[20]),
 		String.format("(%d,%d] m=20 std=2", HOURS[20], HOURS[21]),
-		String.format("(%d,%d] m=5 std=1", HOURS[21], HOURS[24]) };
+		String.format("(%d,%d] m=6 std=1", HOURS[21], HOURS[24]) };
 	return generateWorkload(nullPoint, periods);
     }
 
     protected List<WorkloadGenerator> generateWorkloadsDC2() {
 	double nullPoint = 12 * HOUR;
 	String[] periods = new String[] {
-		String.format("[%d,%d] m=10 std=1", HOURS[0], HOURS[5]),
-		String.format("(%d,%d] m=40 std=2", HOURS[5], HOURS[6]),
-		String.format("(%d,%d] m=80 std=2", HOURS[6], HOURS[7]),
-		String.format("(%d,%d] m=100 std=4", HOURS[7], HOURS[8]),
-		String.format("(%d,%d] m=160 std=4", HOURS[8], HOURS[9]),
-		String.format("(%d,%d] m=200 std=5", HOURS[9], HOURS[12]),
-		String.format("(%d,%d] m=100 std=2", HOURS[12], HOURS[13]),
-		String.format("(%d,%d] m=180 std=5", HOURS[13], HOURS[14]),
-		String.format("(%d,%d] m=200 std=5", HOURS[14], HOURS[17]),
-		String.format("(%d,%d] m=160 std=2", HOURS[17], HOURS[18]),
-		String.format("(%d,%d] m=100 std=2", HOURS[18], HOURS[19]),
-		String.format("(%d,%d] m=80 std=2", HOURS[19], HOURS[20]),
-		String.format("(%d,%d] m=40 std=2", HOURS[20], HOURS[21]),
-		String.format("(%d,%d] m=10 std=1", HOURS[21], HOURS[24]) };
+		String.format("[%d,%d] m=9 std=1", HOURS[0], HOURS[5]),
+		String.format("(%d,%d] m=30 std=2", HOURS[5], HOURS[6]),
+		String.format("(%d,%d] m=60 std=2", HOURS[6], HOURS[7]),
+		String.format("(%d,%d] m=75 std=4", HOURS[7], HOURS[8]),
+		String.format("(%d,%d] m=120 std=4", HOURS[8], HOURS[9]),
+		String.format("(%d,%d] m=150 std=5", HOURS[9], HOURS[12]),
+		String.format("(%d,%d] m=75 std=2", HOURS[12], HOURS[13]),
+		String.format("(%d,%d] m=135 std=5", HOURS[13], HOURS[14]),
+		String.format("(%d,%d] m=150 std=5", HOURS[14], HOURS[17]),
+		String.format("(%d,%d] m=120 std=2", HOURS[17], HOURS[18]),
+		String.format("(%d,%d] m=75 std=2", HOURS[18], HOURS[19]),
+		String.format("(%d,%d] m=60 std=2", HOURS[19], HOURS[20]),
+		String.format("(%d,%d] m=30 std=2", HOURS[20], HOURS[21]),
+		String.format("(%d,%d] m=9 std=1", HOURS[21], HOURS[24]) };
 	return generateWorkload(nullPoint, periods);
     }
 
@@ -243,6 +242,12 @@ public class BaselineExperiment {
 	int dbCloudletIOLength = 50;
 	int duration = 200;
 
+	return generateWorkload(nullPoint, periods, asCloudletLength, asRam, dbCloudletLength, dbRam,
+		dbCloudletIOLength, duration);
+    }
+
+    public List<WorkloadGenerator> generateWorkload(double nullPoint, String[] periods, int asCloudletLength,
+	    int asRam, int dbCloudletLength, int dbRam, int dbCloudletIOLength, int duration) {
 	int numberOfCloudlets = duration / refreshTime;
 	numberOfCloudlets = numberOfCloudlets == 0 ? 1 : numberOfCloudlets;
 
@@ -269,7 +274,7 @@ public class BaselineExperiment {
 	peList.add(new Pe(0, new PeProvisionerSimple(mips)));
 	hddList.add(new HDPe(new PeProvisionerSimple(iops)));
 
-	int ram = 2048 * 2; // host memory (MB)
+	int ram = 2048 * 4; // host memory (MB)
 	long storage = 1000000; // host storage
 	int bw = 10000;
 

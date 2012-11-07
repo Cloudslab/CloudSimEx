@@ -15,7 +15,7 @@ import java.util.concurrent.Future;
 
 /**
  * 
- * a utility that runs a set experiments in different JVM processes. Each
+ * A utility that runs a set experiments in different JVM processes. Each
  * experiment is specified by a class with a main method and an output file,
  * where the output from the CustomLog is stored.
  * 
@@ -38,7 +38,8 @@ public class ExperimentsRunner {
      * provided - it is run in the current process.
      * 
      * @param experimentsToOutputs
-     *            - the experiments mapped to the output files they'll be using.
+     *            - the experiments's main classes mapped to the output files
+     *            they'll be using.
      * @param logPropertiesFile
      *            - the properties for the loggers of the experiments.
      * @throws IOException
@@ -171,7 +172,7 @@ public class ExperimentsRunner {
 	String[] cmd = { "bash", "-c", "echo $PPID" };
 	Process p = Runtime.getRuntime().exec(cmd);
 	p.getInputStream().read(bo);
-	
+
 	String pid = new String(bo).trim();
 	System.err.println("Main process Id (PID) is: " + pid + ". Use: ");
 	System.err.println("\tkill -SIGINT " + pid);

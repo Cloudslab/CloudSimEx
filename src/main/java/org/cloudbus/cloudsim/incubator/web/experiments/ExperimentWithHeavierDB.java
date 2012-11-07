@@ -1,15 +1,9 @@
 package org.cloudbus.cloudsim.incubator.web.experiments;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import org.cloudbus.cloudsim.incubator.web.workload.WorkloadGenerator;
-import org.cloudbus.cloudsim.incubator.web.workload.freq.CompositeValuedSet;
-import org.cloudbus.cloudsim.incubator.web.workload.freq.FrequencyFunction;
-import org.cloudbus.cloudsim.incubator.web.workload.freq.PeriodicStochasticFrequencyFunction;
-import org.cloudbus.cloudsim.incubator.web.workload.sessions.ConstSessionGenerator;
-import org.cloudbus.cloudsim.incubator.web.workload.sessions.ISessionGenerator;
 
 /**
  * 
@@ -33,26 +27,17 @@ public class ExperimentWithHeavierDB extends BaselineExperiment {
 	super(simulationLength, refreshTime, experimentName);
     }
 
+    @Override
     protected List<WorkloadGenerator> generateWorkload(double nullPoint, String[] periods) {
-	int asCloudletLength = 200;
+	int asCloudletLength = 30;
 	int asRam = 1;
-	int dbCloudletLength = 50;
+	int dbCloudletLength = 30;
 	int dbRam = 1;
-	int dbCloudletIOLength = 300;
+	int dbCloudletIOLength = 65;
 	int duration = 200;
 
-	int numberOfCloudlets = duration / refreshTime;
-	numberOfCloudlets = numberOfCloudlets == 0 ? 1 : numberOfCloudlets;
-
-	ISessionGenerator sessGen = new ConstSessionGenerator(asCloudletLength, asRam, dbCloudletLength,
-		dbRam, dbCloudletIOLength, duration, numberOfCloudlets);
-
-	double unit = HOUR;
-	double periodLength = DAY;
-
-	FrequencyFunction freqFun = new PeriodicStochasticFrequencyFunction(unit, periodLength, nullPoint,
-		CompositeValuedSet.createCompositeValuedSet(periods));
-	return Arrays.asList(new WorkloadGenerator(freqFun, sessGen));
+	return generateWorkload(nullPoint, periods, asCloudletLength, asRam, dbCloudletLength, dbRam,
+		dbCloudletIOLength, duration);
     }
 
 }
