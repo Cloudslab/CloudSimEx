@@ -33,7 +33,7 @@ public class ExperimentWithHeavierDB extends BaselineExperiment {
 	int asRam = 1;
 	int dbCloudletLength = 30;
 	int dbRam = 1;
-	int dbCloudletIOLength = 65;
+	int dbCloudletIOLength = 70;
 	int duration = 200;
 
 	return generateWorkload(nullPoint, periods, asCloudletLength, asRam, dbCloudletLength, dbRam,
