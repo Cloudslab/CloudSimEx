@@ -268,10 +268,11 @@ public class BaselineExperiment {
 	List<Pe> peList = new ArrayList<>();
 	List<HDPe> hddList = new ArrayList<>();
 
-	int mips = 1000;
+	int mips = 500;
 	int iops = 1000;
 
 	peList.add(new Pe(0, new PeProvisionerSimple(mips)));
+	peList.add(new Pe(1, new PeProvisionerSimple(mips)));
 	hddList.add(new HDPe(new PeProvisionerSimple(iops)));
 
 	int ram = 2048 * 4; // host memory (MB)
@@ -280,7 +281,7 @@ public class BaselineExperiment {
 
 	hostList.add(new HddHost(new RamProvisionerSimple(ram),
 		new BwProvisionerSimple(bw), storage, peList, hddList,
-		new VmSchedulerTimeShared(peList), new VmSchedulerTimeSharedOverSubscription(hddList)));
+		new VmSchedulerTimeSharedOverSubscription(peList), new VmSchedulerTimeSharedOverSubscription(hddList)));
 
 	// 5. Create a DatacenterCharacteristics object that stores the
 	// properties of a data center: architecture, OS, list of

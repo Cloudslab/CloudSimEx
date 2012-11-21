@@ -1,7 +1,7 @@
 package org.cloudbus.cloudsim.incubator.web.workload.freq;
 
 /**
- * A frequency function that defines periodic behaviour - foe example the
+ * A frequency function that defines periodic behaviour - for example the
  * workload change over everyday/week etc. During each period, the frequency
  * values are defined as values of a statistical/stochastic distribution.
  * 
