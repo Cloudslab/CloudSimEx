@@ -50,18 +50,22 @@ public class ConstSessionGenerator implements ISessionGenerator {
     }
 
     /**
-     * 
-     * @param asCloudletLength
-     * @param asRam
-     * @param dbCloudletLength
-     * @param dbRam
-     * @param dbCloudletIOLength
+     * Constructor.
+     * @param asCloudletLength - the length of the generated app server cloudlets.
+     * @param asRam - the ram of the generated app server cloudlets.
+     * @param dbCloudletLength - the length of the generated db server cloudlets.
+     * @param dbRam - the ram of the generated db server cloudlets.
+     * @param dbCloudletIOLength - the IO ram of the generated app server cloudlets.
      */
     public ConstSessionGenerator(long asCloudletLength, int asRam, long dbCloudletLength, int dbRam,
 	    long dbCloudletIOLength) {
 	this(asCloudletLength, asRam, dbCloudletLength, dbRam, dbCloudletIOLength, -1, -1);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.cloudbus.cloudsim.incubator.web.workload.sessions.ISessionGenerator#generateSessionAt(double)
+     */
     @Override
     public WebSession generateSessionAt(double time) {
 	double startTime = duration > 0 ? time : -1;

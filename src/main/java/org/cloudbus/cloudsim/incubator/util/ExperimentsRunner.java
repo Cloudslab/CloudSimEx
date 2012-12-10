@@ -2,28 +2,30 @@ package org.cloudbus.cloudsim.incubator.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
  * 
- * A utility that runs a set experiments in different JVM processes. Each
- * experiment is specified by a class with a main method and an output file,
- * where the output from the CustomLog is stored.
+ * A utility that runs a set of experiments in different JVM processes. Since
+ * CloudSim makes heavy use of static data, experiments can not be run in
+ * multiple threads within the same JVM. With this utility class one can spawn
+ * multiple independent JVM process, redirect their standard outputs to a single
+ * place and synchronize with their ends.
  * 
  * <br>
  * <br>
- * Each class's main method should take two parameters - the output file and the
- * config file for the logger. It is responsibility of the implementers of the
- * classes to parse and use these.
+ * Each experiment is specified by a class with a main method and an output
+ * file, where the output from the CustomLog is stored. Each class's main method
+ * should take two parameters - the output file and the config file for the
+ * logger. It is responsibility of the implementers of these classes to parse
+ * and use these parameters.
  * 
  * @author nikolay.grozev
  * 
@@ -34,27 +36,26 @@ public class ExperimentsRunner {
     private static Thread shutdownHook = null;
 
     /**
-     * Runs a set of experiments in separated processes. If only experiment is
-     * provided - it is run in the current process.
+     * Runs a set of experiments in separated processes. If only one experiment
+     * is provided - it is run in the current process. Allows users to specify
+     * how many processors to remain idle, even if they are needed for the
+     * faster execution of the experiment.
      * 
      * @param experimentsToOutputs
      *            - the experiments's main classes mapped to the output files
      *            they'll be using.
      * @param logPropertiesFile
      *            - the properties for the loggers of the experiments.
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws ExecutionException
-     * @throws SecurityException
-     * @throws NoSuchMethodException
-     * @throws InvocationTargetException
-     * @throws IllegalArgumentException
-     * @throws IllegalAccessException
+     * @param numFreeCPUs
+     *            - number of processors to leave unused. Must be non-negative
+     *            and less than the number processors - 1. For example if 0 -
+     *            all processors/cores can be used if required. If 1 - then 1
+     *            CPU will be free at all times.
+     * 
+     * @throws Exception
      */
-    public static synchronized void runExperiments(Map<Class<?>, String> experimentsToOutputs,
-	    final String logPropertiesFile)
-	    throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, SecurityException,
-	    IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public static synchronized void runExperiments(final Map<Class<?>, String> experimentsToOutputs,
+	    final String logPropertiesFile, final int numFreeCPUs) throws Exception {
 
 	// If only one experiment - run it in this process
 	// If more than on experiment - spawn a new process for each
@@ -75,7 +76,7 @@ public class ExperimentsRunner {
 
 	    int cores = Runtime.getRuntime().availableProcessors();
 	    // If possible leave one core free
-	    int coresToUse = cores == 1 ? cores : cores - 1;
+	    int coresToUse = cores == 1 ? 1 : cores - numFreeCPUs;
 
 	    ExecutorService pool = Executors.newFixedThreadPool(coresToUse);
 	    Collection<Future<?>> futures = new ArrayList<Future<?>>();

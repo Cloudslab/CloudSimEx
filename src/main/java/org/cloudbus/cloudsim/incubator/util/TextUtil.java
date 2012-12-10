@@ -21,9 +21,9 @@ import com.google.common.primitives.Primitives;
 
 /**
  * 
- * This a utility class for transforming beans and other classes into consistent
- * and well aligned text. Can be used to easily generate readable log or CSV
- * files.
+ * This is a utility class for transforming beans and other classes into
+ * consistent and well aligned text. Can be used to easily generate readable log
+ * or CSV files.
  * 
  * @author nikolay.grozev
  * 
@@ -48,12 +48,12 @@ public class TextUtil {
 
     /**
      * Converts the specified object to a single line of text. Convenient to
-     * converting and object to a line in log or a line in a CSV file. For the
+     * converting and object to a line in a log or a line in a CSV file. For the
      * purpose all get methods of the object are consequently called and the
      * results are appended with appropriate formatting. Users, can control
      * which get methods are being called by using the {@link Textualize}
      * annotation and specifying the properties (the parts of the get methods
-     * after "get" or "is") and order they need.
+     * after "get" or "is") and the order they need.
      * 
      * <br/>
      * 
@@ -73,13 +73,12 @@ public class TextUtil {
 
     /**
      * Converts the specified object to a single line of text. Convenient to
-     * converting and object to a line in log or a line in a CSV file. For the
+     * converting and object to a line in a log or a line in a CSV file. For the
      * purpose all get methods of the object are consequently called and the
-     * results are appended with appropriate formatting. The specified delimeter
-     * is placed between the entries in the line. Users, can control which get
-     * methods are being called by using the {@link Textualize} annotation and
-     * specifying the properties (the parts of the get methods after "get" or
-     * "is") and order they need.
+     * results are appended with appropriate formatting. Users, can control
+     * which get methods are being called by using the {@link Textualize}
+     * annotation and specifying the properties (the parts of the get methods
+     * after "get" or "is") and the order they need.
      * 
      * <br/>
      * 
@@ -293,9 +292,9 @@ public class TextUtil {
 	    result = getDataFormat().format(obj);
 	} else if (obj instanceof Collection<?> || obj.getClass().isArray()) {
 	    result = "[...]";
-	    // If toString is not predefined
 	} else if (obj instanceof Class) {
 	    result = ((Class<?>) obj).getSimpleName();
+	    // If toString is not predefined ...
 	} else if (String.valueOf(obj).contains(String.valueOf(obj.hashCode()))) {
 	    result = "ref<" + obj.hashCode() + ">";
 	} else {

@@ -8,9 +8,9 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.incubator.util.Id;
 
 /**
- * A virtual machine with a harddisk. Unlike the other CloudSim implementaions
+ * A virtual machine with a harddisk. Unlike the other CloudSim implementations
  * of virtual machines, this one models the contention caused by the I/O
- * opearations of the cloudlets.
+ * operations of the cloudlets.
  * 
  * @author nikolay.grozev
  * 

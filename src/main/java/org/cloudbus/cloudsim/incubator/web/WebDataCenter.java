@@ -16,7 +16,9 @@ import org.cloudbus.cloudsim.incubator.web.extensions.HddVm;
 
 /**
  * 
- * 
+ * A data center capable of executing web applications. The main difference
+ * between it and a {@link Datacenter} is that it marks VMs as disabled if their
+ * RAM consumption is exceeded.
  * 
  * @author nikolay.grozev
  * 
@@ -24,7 +26,7 @@ import org.cloudbus.cloudsim.incubator.web.extensions.HddVm;
 public class WebDataCenter extends Datacenter {
 
     /**
-     * 
+     * Constr.
      * @param name
      * @param characteristics
      * @param vmAllocationPolicy
@@ -70,9 +72,10 @@ public class WebDataCenter extends Datacenter {
 		    cl.setCloudletStatus(Cloudlet.FAILED);
 		    vm.setOutOfMemory(true);
 
-		    CustomLog.printf(
-			    "VM/Server %d on host %d in data center %s(%d) is out of memory. It will not be further available",
-			    vm.getId(), host.getId(), getName(), getId() );
+		    CustomLog
+			    .printf(
+				    "VM/Server %d on host %d in data center %s(%d) is out of memory. It will not be further available",
+				    vm.getId(), host.getId(), getName(), getId());
 		} else {
 		    super.processCloudletSubmit(ev, ack);
 		}

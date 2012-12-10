@@ -6,7 +6,7 @@ import org.cloudbus.cloudsim.incubator.web.WebCloudlet;
 
 /**
  * 
- * Extension of {@link ResCloudlet} that allows modelling the used I/O
+ * Extension of {@link ResCloudlet} that allows modeling the used I/O
  * operations.
  * 
  * @author nikolay.grozev

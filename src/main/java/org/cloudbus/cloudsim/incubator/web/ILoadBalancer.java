@@ -5,9 +5,7 @@ import java.util.List;
 import org.cloudbus.cloudsim.incubator.web.extensions.HddVm;
 
 /**
- * The load balancer of an application.
- * 
- * Assigns sessions to servers.
+ * The load balancer of an application. Assigns sessions to servers.
  * 
  * @author nikolay.grozev
  * 

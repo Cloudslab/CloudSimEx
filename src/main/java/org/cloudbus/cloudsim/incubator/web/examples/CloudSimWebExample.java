@@ -58,7 +58,7 @@ import org.uncommons.maths.random.MersenneTwisterRNG;
 public class CloudSimWebExample {
 
     /**
-     * Creates main() to run this example
+     * Creates main method to run this example.
      * 
      * @throws IOException
      * @throws SecurityException

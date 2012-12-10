@@ -5,9 +5,10 @@ import org.cloudbus.cloudsim.incubator.util.Id;
 import org.cloudbus.cloudsim.provisioners.PeProvisioner;
 
 /**
+ * A Harddisk processing element.
  * 
  * @author nikolay.grozev
- *
+ * 
  */
 public class HDPe extends Pe {
 

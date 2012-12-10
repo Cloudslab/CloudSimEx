@@ -27,9 +27,7 @@ public class Experiments {
      * @throws SecurityException
      * @throws NoSuchMethodException
      */
-    public static void main(String[] args) throws IOException, InterruptedException, ExecutionException,
-	    NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
-	    InvocationTargetException {
+    public static void main(String[] args) throws Exception {
 	Map<Class<?>, String> experiments = new LinkedHashMap<>();
 
 	Class<?>[] experimens = new Class<?>[] {
@@ -45,7 +43,7 @@ public class Experiments {
 	}
 
 	//cp -f * "/home/nikolay/Important Data/papers/Formal_Model/RStat/"
-	ExperimentsRunner.runExperiments(experiments, "custom_log.properties");
+	ExperimentsRunner.runExperiments(experiments, "custom_log.properties", 1);
     }
 
 }

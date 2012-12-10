@@ -2,7 +2,7 @@ package org.cloudbus.cloudsim.incubator.web.workload.freq;
 
 /**
  * A frequency function that defines periodic behaviour - for example the
- * workload change over everyday/week etc. During each period, the frequency
+ * workload changes over everyday/week etc. During each period, the frequency
  * values are defined as values of a statistical/stochastic distribution.
  * 
  * <br>
@@ -34,6 +34,10 @@ public class PeriodicStochasticFrequencyFunction extends FrequencyFunction {
 	this.valuedSet = valuedSet;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.cloudbus.cloudsim.incubator.web.workload.freq.FrequencyFunction#getFrequency(double)
+     */
     @Override
     public int getFrequency(double time) {
 	double periodOffset = 0;
@@ -49,5 +53,4 @@ public class PeriodicStochasticFrequencyFunction extends FrequencyFunction {
 	}
 	return Math.max(0, (int) valuedSet.getValue(periodOffset));
     }
-
 }

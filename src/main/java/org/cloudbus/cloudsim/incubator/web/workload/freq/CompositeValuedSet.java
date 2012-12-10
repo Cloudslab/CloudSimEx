@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An set consisting of smaller finite continous intervals.
+ * A set consisting of smaller finite continuous intervals, associated with
+ * normal distributions.
  * 
  * @author nikolay.grozev
  * 
@@ -17,7 +18,7 @@ public class CompositeValuedSet {
      * Constr.
      * 
      * @param subintervals
-     *            - the intervals tha make up the set.
+     *            - the intervals that make up the set.
      */
     public CompositeValuedSet(List<FiniteValuedInterval> subintervals) {
 	this.subIntervals = subintervals;

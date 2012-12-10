@@ -4,16 +4,16 @@ import org.cloudbus.cloudsim.incubator.util.Id;
 import org.cloudbus.cloudsim.incubator.util.Textualize;
 
 /**
- * A web session is a session established between a user, and an application
- * server (deployed in a VM) and a database server (deployed in another VM).
- * Throughout it's lifetime a session continuously generates workload on the
- * servers deployed in these virtual machines. The workload is represented as
- * cloudlets, which are sent to the assigned servers.
+ * A web session is a session established between a user an application server
+ * (deployed in a VM) and a database server (deployed in another VM). Throughout
+ * it's lifetime a session continuously generates workload on the servers
+ * deployed in these virtual machines. The workload is represented as cloudlets,
+ * which are sent to the assigned servers.
  * 
  * <br/>
  * <br/>
  * 
- * To achieve this a web session generates two consequent "steams" of cloudlets
+ * To achieve this a web session generates two consequent "streams" of cloudlets
  * and directs them to the servers. These streams are based on two instances of
  * {@link IGenerator} passed when constructing the session. The session takes
  * care to synchronize the two generators, so that consequent cloudlets from the
@@ -35,7 +35,7 @@ import org.cloudbus.cloudsim.incubator.util.Textualize;
  * @author nikolay.grozev
  * 
  */
-@Textualize(properties = { "ReadableStartTime", "StartTime", "SessionId", "AppVmId", "DbVmId", "Delay", "Complete"})
+@Textualize(properties = { "ReadableStartTime", "StartTime", "SessionId", "AppVmId", "DbVmId", "Delay", "Complete" })
 public class WebSession {
 
     private IGenerator<? extends WebCloudlet> appServerCloudLets;
@@ -229,10 +229,20 @@ public class WebSession {
 	return Math.max(0, Math.max(delayAS, delayDB));
     }
 
+    /**
+     * Returns the starting time of the session.
+     * 
+     * @return the starting time of the session.
+     */
     public double getStartTime() {
 	return startTime;
     }
 
+    /**
+     * Returns a readable representation of the start time.
+     * 
+     * @return a readable representation of the start time.
+     */
     public String getReadableStartTime() {
 	int days = (startTime.intValue() / (24 * 3600));
 	int hours = (startTime.intValue() / 3600);
@@ -245,6 +255,11 @@ public class WebSession {
 	return String.format("%2d: %2d: %2d: %2d", days, hours, minutes, rest);
     }
 
+    /**
+     * Returns if the session has completed.
+     * 
+     * @return if the session has completed.
+     */
     public boolean isComplete() {
 	return cloudletsLeft == 0 &&
 		currentAppServerCloudLet != null &&

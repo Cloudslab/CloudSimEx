@@ -28,6 +28,7 @@ import org.cloudbus.cloudsim.incubator.web.workload.WorkloadGenerator;
  */
 public class WebBroker extends DatacenterBroker {
 
+    // FIXME find a better way to get an unused tag instead of hardcoding 123456
     private static final int TIMER_TAG = 123456;
     private static final int SUBMIT_SESSION_TAG = TIMER_TAG + 1;
 
@@ -104,12 +105,13 @@ public class WebBroker extends DatacenterBroker {
 
     /**
      * Returns the sessions that were sucessfully served.
-     * @return  the sessions that were sucessfully served.
+     * 
+     * @return the sessions that were sucessfully served.
      */
     public List<WebSession> getServedSessions() {
-        return servedSessions;
+	return servedSessions;
     }
-    
+
     /*
      * (non-Javadoc)
      * 

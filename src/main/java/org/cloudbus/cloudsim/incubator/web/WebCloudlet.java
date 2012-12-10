@@ -15,7 +15,7 @@ import org.cloudbus.cloudsim.incubator.util.Textualize;
  * <br/>
  * 
  * A distinct property of a web cloudlet is that it has ideal start time. This
- * ideal start time can be met... but can also be postponed if the previous web
+ * ideal start time can be met, but can also be postponed if the previous web
  * cloudlets in the web session are delayed. Thus there is a difference between
  * the ideal start time and the actual start time.
  * 
@@ -176,7 +176,5 @@ public class WebCloudlet extends Cloudlet {
     public String toString() {
 	return TextUtil.getTxtLine(this, "\t", true);
     }
-
-
 
 }

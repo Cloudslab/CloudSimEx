@@ -7,9 +7,10 @@ import org.cloudbus.cloudsim.Cloudlet;
 import org.uncommons.maths.number.NumberGenerator;
 
 /**
- * A base class containing the main functionality of a statistical generators of
- * CloutLets. That is this class generates CloudLets based on the provided
- * statistical distributions for their properties.
+ * A base class containing the main functionality of a statistical generator of
+ * CloutLets. This class generates CloudLets based on the provided statistical
+ * distributions for their properties. Random generators are provided in a map,
+ * whose keys usually are the constants of the class, as documented below.
  * 
  * @author nikolay.grozev
  * 
@@ -19,7 +20,7 @@ import org.uncommons.maths.number.NumberGenerator;
 public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerator<T> {
 
     /** A key for the statistical generator of CPU length of the cloudlet. */
-    public static final String CLOUDLET_LENGTH = "CLOUDLET_MIS";
+    public static final String CLOUDLET_LENGTH = "CLOUDLET_MIPS";
     /** A key for the statistical generator of RAM length of the cloudlet. */
     public static final String CLOUDLET_RAM = "CLOUDLET_RAM";
     /** A key for the statistical generator of IO length of the cloudlet. */
@@ -152,11 +153,13 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerato
      */
     protected abstract T create(final double idealStartTime);
 
-    
     /**
      * Generates a plausible value for the key.
-     * @param key - the key. Tytpically one of the constants of the class..
-     * @return a plausible (with the correspondent statistical properties) value for the key.
+     * 
+     * @param key
+     *            - the key. Tytpically one of the constants of the class..
+     * @return a plausible (with the correspondent statistical properties) value
+     *         for the key.
      */
     protected Double generateValue(final String key) {
 	return !seqGenerators.containsKey(key) ? 0 :
