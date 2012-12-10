@@ -53,7 +53,6 @@ public class IterableGeneratorTest {
 	    assertTrue(peeked == peekedAgain);
 	    assertTrue(peeked == polled);
 	}
-
     }
 
 }

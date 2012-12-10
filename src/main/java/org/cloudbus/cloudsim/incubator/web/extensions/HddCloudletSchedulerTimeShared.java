@@ -377,7 +377,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 	// time to file transferring. It must be added to the cloudlet length
 	double extraSize = getCapacity(getCurrentMipsShare(), true) * fileTransferTime;
 	long cpuLength = (long) (hddCloudlet.getCloudletLength() + extraSize);
-	long ioLength = (long) (hddCloudlet.getCloudletIOLength());
+	long ioLength = hddCloudlet.getCloudletIOLength();
 	hddCloudlet.setCloudletLength(cpuLength);
 	hddCloudlet.setCloudletIOLength(ioLength);
 

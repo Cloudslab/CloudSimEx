@@ -34,7 +34,7 @@ public class StatGeneratorTest {
     private Map<String, NumberGenerator<Double>> testGenerators = new HashMap<>();
 
     @Before
-    public void setUP() {
+    public void setUp() {
 	genRAM = createSeededGaussian(GEN_RAM_MEAN, GEN_RAM_STDEV);
 	genCPU = createSeededGaussian(GEN_CPU_MEAN, GEN_CPU_STDEV);
 	testGenerators = new HashMap<>();
@@ -72,7 +72,7 @@ public class StatGeneratorTest {
 	// Should be empty in the start
 	StatGenerator generator = new StatGenerator(testGenerators, 3, 12);
 
-	// Notify for times we are not interested in...
+	// Notify for times we are not interested in (they are outside [3;12])
 	generator.notifyOfTime(2);
 	generator.notifyOfTime(15);
 	generator.notifyOfTime(17);
@@ -83,7 +83,7 @@ public class StatGeneratorTest {
 	assertNull(generator.poll());
 
 	// Notify for times again.
-	generator.notifyOfTime(2); // Not Interested
+	generator.notifyOfTime(2); // Not Interested - outside [3;12]
 	generator.notifyOfTime(5); // Interested
 	generator.notifyOfTime(5); // Not Interested - it is repeated
 	generator.notifyOfTime(7); // Interested

@@ -11,6 +11,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.lang3.SystemUtils;
+
 /**
  * 
  * A utility that runs a set of experiments in different JVM processes. Since
@@ -169,15 +171,19 @@ public class ExperimentsRunner {
     }
 
     private static void printPIDInformation() throws IOException {
-	byte[] bo = new byte[100];
-	String[] cmd = { "bash", "-c", "echo $PPID" };
-	Process p = Runtime.getRuntime().exec(cmd);
-	p.getInputStream().read(bo);
+	if (SystemUtils.IS_OS_LINUX) {
+	    byte[] bo = new byte[100];
+	    String[] cmd = { "bash", "-c", "echo $PPID" };
+	    Process p = Runtime.getRuntime().exec(cmd);
+	    p.getInputStream().read(bo);
 
-	String pid = new String(bo).trim();
-	System.err.println("Main process Id (PID) is: " + pid + ". Use: ");
-	System.err.println("\tkill -SIGINT " + pid);
-	System.err.println("to kill all experiments");
-	System.err.println();
+	    String pid = new String(bo).trim();
+	    System.err.println("Main process Id (PID) is: " + pid + ". Use: ");
+	    System.err.println("\tkill -SIGINT " + pid);
+	    System.err.println("to kill all experiments");
+	    System.err.println();
+	} else {
+	    System.err.println("Could not detect the PID");
+	}
     }
 }

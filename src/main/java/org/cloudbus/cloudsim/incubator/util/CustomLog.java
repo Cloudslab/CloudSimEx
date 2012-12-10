@@ -92,7 +92,7 @@ public class CustomLog {
      * @param message
      *            - the message.
      */
-    public static void print(Level level, Object message) {
+    public static void print(final Level level, final Object message) {
 	LOGGER.log(
 		level == null ? DEFAULT_LEVEL : level, String.valueOf(message));
     }
@@ -104,7 +104,7 @@ public class CustomLog {
      * @param message
      *            - the message.
      */
-    public static void print(Object message) {
+    public static void print(final Object message) {
 	print(DEFAULT_LEVEL, message);
     }
 
@@ -116,7 +116,7 @@ public class CustomLog {
      * @param msg
      *            - the message. Must not be null.
      */
-    public static void printLine(Level level, String msg) {
+    public static void printLine(final Level level, final String msg) {
 	LOGGER.log(level == null ? DEFAULT_LEVEL : level, msg);
     }
 
@@ -226,7 +226,7 @@ public class CustomLog {
 	    System.err.println("Rediricting output to " + new File(fileName).getAbsolutePath());
 	}
 
-	StreamHandler handler = logInFile ? new FileHandler(fileName, false)
+	final StreamHandler handler = logInFile ? new FileHandler(fileName, false)
 		: new ConsoleHandler();
 	handler.setLevel(granularityLevel);
 	handler.setFormatter(formatter);
@@ -236,8 +236,8 @@ public class CustomLog {
 
     private static class CustomFormatter extends Formatter {
 
-	private boolean prefixCloudSimClock;
-	private String format;
+	private final boolean prefixCloudSimClock;
+	private final String format;
 
 	public CustomFormatter(boolean prefixCloudSimClock, String format) {
 	    super();
@@ -247,8 +247,8 @@ public class CustomLog {
 
 	@Override
 	public String format(LogRecord record) {
-	    String[] methodCalls = format.split(";");
-	    StringBuffer result = new StringBuffer();
+	    final String[] methodCalls = format.split(";");
+	    final StringBuffer result = new StringBuffer();
 	    if (prefixCloudSimClock) {
 		result.append(formatClockTime() + "\t");
 	    }

@@ -7,7 +7,7 @@ import org.uncommons.maths.random.GaussianGenerator;
 import org.uncommons.maths.random.MersenneTwisterRNG;
 
 /**
- * Defines a set of common test functions and constants.
+ * Defines a set of common test functions and constants for test purposes.
  * 
  * @author nikolay.grozev
  * 
