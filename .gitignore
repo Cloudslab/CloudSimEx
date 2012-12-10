@@ -3,6 +3,7 @@
 .settings/
 .classpath
 .project
+*cpd-report.txt
 
 # MVN target #
 ##############
