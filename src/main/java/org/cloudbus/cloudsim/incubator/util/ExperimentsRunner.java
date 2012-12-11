@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -34,14 +35,16 @@ import org.apache.commons.lang3.SystemUtils;
  */
 public class ExperimentsRunner {
 
-    private static final List<Process> PROCESSES = new ArrayList<>();
+    private static final List<Process> PROCESSES = Collections.synchronizedList(new ArrayList<Process>());
     private static Thread shutdownHook = null;
 
     /**
      * Runs a set of experiments in separated processes. If only one experiment
      * is provided - it is run in the current process. Allows users to specify
      * how many processors to remain idle, even if they are needed for the
-     * faster execution of the experiment.
+     * faster execution of the experiment. It is wise to leave at least 1 CPU
+     * idle if you're running experiments on your PC or laptop, so that it does
+     * not freeze.
      * 
      * @param experimentsToOutputs
      *            - the experiments's main classes mapped to the output files
@@ -51,10 +54,12 @@ public class ExperimentsRunner {
      * @param numFreeCPUs
      *            - number of processors to leave unused. Must be non-negative
      *            and less than the number processors - 1. For example if 0 -
-     *            all processors/cores can be used if required. If 1 - then 1
-     *            CPU will be free at all times.
+     *            all processors/cores can be used if required. If 1 and the
+     *            system has multiple CPUs - then 1 CPU will be free at all
+     *            times.
      * 
      * @throws Exception
+     *             - if something goes wrong.
      */
     public static synchronized void runExperiments(final Map<Class<?>, String> experimentsToOutputs,
 	    final String logPropertiesFile, final int numFreeCPUs) throws Exception {
@@ -76,9 +81,9 @@ public class ExperimentsRunner {
 	    // If this process dies - kill the spawn subprocesses.
 	    addHookToKillProcesses();
 
+	    // If possible leave the requested processors free
 	    int cores = Runtime.getRuntime().availableProcessors();
-	    // If possible leave one core free
-	    int coresToUse = cores == 1 ? 1 : cores - numFreeCPUs;
+	    int coresToUse = cores <= numFreeCPUs ? 1 : cores - numFreeCPUs;
 
 	    ExecutorService pool = Executors.newFixedThreadPool(coresToUse);
 	    Collection<Future<?>> futures = new ArrayList<Future<?>>();
@@ -131,9 +136,9 @@ public class ExperimentsRunner {
     }
 
     /**
-     * Inspired by
-     * http://stackoverflow.com/questions/636367/executing-a-java-application
-     * -in-a-separate-process
+     * Inspired by <a href=
+     * "http://stackoverflow.com/questions/636367/executing-a-java-application-in-a-separate-process"
+     * >StackOverflow: Executing java in a separate process</a>
      * 
      * @param klass
      * @param logPropertiesFile
@@ -183,7 +188,8 @@ public class ExperimentsRunner {
 	    System.err.println("to kill all experiments");
 	    System.err.println();
 	} else {
-	    System.err.println("Could not detect the PID");
+	    // TODO implement for other OS-es or in a platform independent way
+	    System.err.println("Could not detect the PID of the current processess ...");
 	}
     }
 }

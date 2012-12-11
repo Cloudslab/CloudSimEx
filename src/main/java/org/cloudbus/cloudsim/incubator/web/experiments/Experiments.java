@@ -9,7 +9,9 @@ import java.util.concurrent.ExecutionException;
 import org.cloudbus.cloudsim.incubator.util.ExperimentsRunner;
 
 /**
- * Runs a bunch of experiments.
+ * Runs the experiments for the
+ * "Modelling and Simulation of Three-Tier Applications in a Multi-Cloud Environment"
+ * paper.
  * 
  * @author nikolay.grozev
  * 
@@ -42,7 +44,7 @@ public class Experiments {
 	    experiments.put(klass, String.format("results/%s.log", klass.getSimpleName()));
 	}
 
-	//cp -f * "/home/nikolay/Important Data/papers/Formal_Model/RStat/"
+	// cp -f * "/home/nikolay/Important Data/papers/Formal_Model/RStat/"
 	ExperimentsRunner.runExperiments(experiments, "custom_log.properties", 1);
     }
 
