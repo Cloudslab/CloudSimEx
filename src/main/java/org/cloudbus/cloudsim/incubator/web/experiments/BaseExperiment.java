@@ -42,14 +42,14 @@ import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 
 /**
- * Baseline experiment. It's protected methods and properties should be overridden
+ * Base experiment. It's protected methods and properties should be overridden
  * to customize different lifecycle events - creation of data centers, workload
  * etc.
  * 
  * @author nikolay.grozev
  * 
  */
-public class BaselineExperiment {
+public class BaseExperiment {
 
     protected static final int MINUTE = 60;
     protected static final int HOUR = 60 * MINUTE;
@@ -70,10 +70,10 @@ public class BaselineExperiment {
 	// Step 0: Set up the logger
 	parseExperimentParameters(args);
 	
-	new BaselineExperiment(2 * DAY, 4, "[Base Experimnet]").runExperimemt();
+	new BaseExperiment(2 * DAY, 4, "[Base Experimnet]").runExperimemt();
     }
     
-    public BaselineExperiment(int simulationLength, int refreshTime, String experimentName) {
+    public BaseExperiment(int simulationLength, int refreshTime, String experimentName) {
 	super();
 	this.simulationLength = simulationLength;
 	this.refreshTime = refreshTime;
@@ -152,7 +152,7 @@ public class BaselineExperiment {
 
 	    // Step 10 : stop the simulation and print the results
 	    CloudSim.stopSimulation();
-	    printDetails(WebSession.class, resultDC1Sessions, resultDC2Sessions);
+	    printResults(WebSession.class, resultDC1Sessions, resultDC2Sessions);
 
 //	    Comparator<WebCloudlet> comparator = new Comparator<WebCloudlet>() {
 //		@Override
@@ -245,7 +245,7 @@ public class BaselineExperiment {
 		dbCloudletIOLength, duration);
     }
 
-    public List<WorkloadGenerator> generateWorkload(double nullPoint, String[] periods, int asCloudletLength,
+    protected List<WorkloadGenerator> generateWorkload(double nullPoint, String[] periods, int asCloudletLength,
 	    int asRam, int dbCloudletLength, int dbRam, int dbCloudletIOLength, int duration) {
 	int numberOfCloudlets = duration / refreshTime;
 	numberOfCloudlets = numberOfCloudlets == 0 ? 1 : numberOfCloudlets;
@@ -319,12 +319,12 @@ public class BaselineExperiment {
      * @param list
      *            list of Cloudlets
      */
-    protected static void printDetails(Class<?> caption, List<?>... lists) {
+    protected static void printResults(Class<?> caption, List<?>... lines) {
 	// Print header line
 	CustomLog.printLine(TextUtil.getCaptionLine(caption));
 
 	// Print details for each cloudlet
-	for (List<?> list : lists) {
+	for (List<?> list : lines) {
 	    for (Object o : list) {
 		CustomLog.print(TextUtil.getTxtLine(o));
 	    }

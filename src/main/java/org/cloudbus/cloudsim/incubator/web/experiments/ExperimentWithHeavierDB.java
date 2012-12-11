@@ -10,7 +10,7 @@ import org.cloudbus.cloudsim.incubator.web.workload.WorkloadGenerator;
  * @author nikolay.grozev
  * 
  */
-public class ExperimentWithHeavierDB extends BaselineExperiment {
+public class ExperimentWithHeavierDB extends BaseExperiment {
 
     /**
      * @param args

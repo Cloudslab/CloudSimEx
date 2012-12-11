@@ -1,10 +1,7 @@
 package org.cloudbus.cloudsim.incubator.web.experiments;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import org.cloudbus.cloudsim.incubator.util.ExperimentsRunner;
 
@@ -19,32 +16,29 @@ import org.cloudbus.cloudsim.incubator.util.ExperimentsRunner;
 public class Experiments {
 
     /**
+     * Run all experiments we need asynchronously.
+     * 
      * @param args
-     * @throws ExecutionException
-     * @throws InterruptedException
-     * @throws IOException
-     * @throws InvocationTargetException
-     * @throws IllegalArgumentException
-     * @throws IllegalAccessException
-     * @throws SecurityException
-     * @throws NoSuchMethodException
+     * @throws Execution
      */
     public static void main(String[] args) throws Exception {
-	Map<Class<?>, String> experiments = new LinkedHashMap<>();
-
+	// The main classes of the experiments
 	Class<?>[] experimens = new Class<?>[] {
-		BaselineExperiment.class,
+		// BaseExperiment.class,
 		ExperimentWithHeavierAS.class,
 		ExperimentWithHeavierDB.class,
 		ExperimentWithHeavierASAndMoreAS.class,
 		ExperimentWithHeavierDBAndMoreDB.class,
 	};
 
-	for (Class<?> klass : experimens) {
-	    experiments.put(klass, String.format("results/%s.log", klass.getSimpleName()));
+	// Map the main experiment classes to the output files
+	Map<Class<?>, String> experiments = new LinkedHashMap<>();
+	for (Class<?> clazz : experimens) {
+	    experiments.put(clazz, String.format("results/%s.log", clazz.getSimpleName()));
 	}
 
-	// cp -f * "/home/nikolay/Important Data/papers/Formal_Model/RStat/"
+	// Run the experiments with custom_log.properties config of the loggers
+	// and leave 1 CPU free at all times.
 	ExperimentsRunner.runExperiments(experiments, "custom_log.properties", 1);
     }
 
