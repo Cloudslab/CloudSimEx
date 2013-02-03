@@ -95,16 +95,16 @@ public class SimpleWebLoadBalancerTest {
 	broker.addLoadBalancer(balancer);
 
 	//Should take > 10s
-	WebCloudlet session1AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId());
+	WebCloudlet session1AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	//Should take > 10s
-	WebCloudlet session1DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId()); 
+	WebCloudlet session1DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	WebSession session1 = new WebSession(new IterableGenerator<WebCloudlet>(session1AppCloudlet),
 		new IterableGenerator<WebCloudlet>(session1DbCloudlet), broker.getId(), -1, 100);
 
 	//Should take > 10s
-	WebCloudlet session2AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId());
+	WebCloudlet session2AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	//Should take > 10s
-	WebCloudlet session2DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId());
+	WebCloudlet session2DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	WebSession session2 = new WebSession(new IterableGenerator<WebCloudlet>(session2AppCloudlet),
 		new IterableGenerator<WebCloudlet>(session2DbCloudlet), broker.getId(), -1, 100);
 
@@ -149,23 +149,23 @@ public class SimpleWebLoadBalancerTest {
 	broker.addLoadBalancer(balancer);
 
 	//Should take > 10s
-	WebCloudlet session1AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId());
+	WebCloudlet session1AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	//Should take > 10s
-	WebCloudlet session1DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId()); 
+	WebCloudlet session1DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	WebSession session1 = new WebSession(new IterableGenerator<WebCloudlet>(session1AppCloudlet),
 		new IterableGenerator<WebCloudlet>(session1DbCloudlet), broker.getId(), -1, 100);
 
 	//Should take > 10s
-	WebCloudlet session2AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId());
+	WebCloudlet session2AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	//Should take > 10s
-	WebCloudlet session2DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId());
+	WebCloudlet session2DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	WebSession session2 = new WebSession(new IterableGenerator<WebCloudlet>(session2AppCloudlet),
 		new IterableGenerator<WebCloudlet>(session2DbCloudlet), broker.getId(), -1, 100);
 	
 	//Should take > 10s
-	WebCloudlet session3AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId());
+	WebCloudlet session3AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	//Should take > 10s
-	WebCloudlet session3DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId());
+	WebCloudlet session3DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	WebSession session3 = new WebSession(new IterableGenerator<WebCloudlet>(session3AppCloudlet),
 		new IterableGenerator<WebCloudlet>(session3DbCloudlet), broker.getId(), -1, 100);
 	
@@ -217,23 +217,23 @@ public class SimpleWebLoadBalancerTest {
 	broker.addLoadBalancer(balancer);
 
 	//Should take > 10s
-	WebCloudlet session1AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, VM_RAM * 2, broker.getId());
+	WebCloudlet session1AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, VM_RAM * 2, broker.getId(), null);
 	//Should take > 10s
-	WebCloudlet session1DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId()); 
+	WebCloudlet session1DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	WebSession session1 = new WebSession(new IterableGenerator<WebCloudlet>(session1AppCloudlet),
 		new IterableGenerator<WebCloudlet>(session1DbCloudlet), broker.getId(), -1, 100);
 
 	//Should take > 10s
-	WebCloudlet session2AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId());
+	WebCloudlet session2AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	//Should take > 10s
-	WebCloudlet session2DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId());
+	WebCloudlet session2DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	WebSession session2 = new WebSession(new IterableGenerator<WebCloudlet>(session2AppCloudlet),
 		new IterableGenerator<WebCloudlet>(session2DbCloudlet), broker.getId(), -1, 100);
 	
 	//Should take > 10s
-	WebCloudlet session3AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId());
+	WebCloudlet session3AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	//Should take > 10s
-	WebCloudlet session3DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId());
+	WebCloudlet session3DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	WebSession session3 = new WebSession(new IterableGenerator<WebCloudlet>(session3AppCloudlet),
 		new IterableGenerator<WebCloudlet>(session3DbCloudlet), broker.getId(), -1, 100);
 	
@@ -284,16 +284,16 @@ public class SimpleWebLoadBalancerTest {
 	broker.addLoadBalancer(balancer);
 	
 	//Should take > 10s
-	WebCloudlet session1AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId());
+	WebCloudlet session1AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	//Should take > 10s
-	WebCloudlet session1DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId()); 
+	WebCloudlet session1DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	WebSession session1 = new WebSession(new IterableGenerator<WebCloudlet>(session1AppCloudlet),
 		new IterableGenerator<WebCloudlet>(session1DbCloudlet), broker.getId(), -1, 100);
 	
 	//Should take > 10s
-	WebCloudlet session2AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId());
+	WebCloudlet session2AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	//Should take > 10s
-	WebCloudlet session2DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId());
+	WebCloudlet session2DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), null);
 	WebSession session2 = new WebSession(new IterableGenerator<WebCloudlet>(session2AppCloudlet),
 		new IterableGenerator<WebCloudlet>(session2DbCloudlet), broker.getId(), -1, 100);
 	

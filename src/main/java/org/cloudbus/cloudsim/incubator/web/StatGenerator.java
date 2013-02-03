@@ -50,7 +50,7 @@ public class StatGenerator extends BaseStatGenerator<WebCloudlet> {
 	int ram = generateValue(CLOUDLET_RAM).intValue();
 	int ioLen = generateValue(CLOUDLET_IO).intValue();
 
-	return new WebCloudlet(idealStartTime, cpuLen, ioLen, ram, -1);
+	return new WebCloudlet(idealStartTime, cpuLen, ioLen, ram, -1, null);
     }
 
 }

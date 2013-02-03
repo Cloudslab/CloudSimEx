@@ -155,7 +155,7 @@ public class WebSessionTest {
 	private boolean finished;
 
 	public TestWebCloudlet(double idealStartTime, long cloudletLength, long cloudletIOLength, int ram, int userId) {
-	    super(idealStartTime, cloudletLength, cloudletIOLength, ram, userId);
+	    super(idealStartTime, cloudletLength, cloudletIOLength, ram, userId, null);
 	}
 
 	@Override

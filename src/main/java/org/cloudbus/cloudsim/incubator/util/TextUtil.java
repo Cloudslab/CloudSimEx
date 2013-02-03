@@ -32,7 +32,7 @@ import com.google.common.primitives.Primitives;
  */
 public class TextUtil {
 
-    /** Format for double prevision numbers. */
+    /** Format for double precision numbers. */
     public static final DecimalFormat DEC_FORMAT = new DecimalFormat("####0.00");
     /** Number of positions used when converting doubles to text. */
     public static final int SIZE_OF_DBL_STRINGS = 10;
@@ -48,7 +48,7 @@ public class TextUtil {
 
     /**
      * Converts the specified object to a single line of text. Convenient to
-     * converting and object to a line in a log or a line in a CSV file. For the
+     * converting an object to a line in a log or a line in a CSV file. For the
      * purpose all get methods of the object are consequently called and the
      * results are appended with appropriate formatting. Users, can control
      * which get methods are being called by using the {@link Textualize}
@@ -73,7 +73,7 @@ public class TextUtil {
 
     /**
      * Converts the specified object to a single line of text. Convenient to
-     * converting and object to a line in a log or a line in a CSV file. For the
+     * converting an object to a line in a log or a line in a CSV file. For the
      * purpose all get methods of the object are consequently called and the
      * results are appended with appropriate formatting. Users, can control
      * which get methods are being called by using the {@link Textualize}

@@ -10,7 +10,6 @@ import org.cloudbus.cloudsim.DatacenterBroker;
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.Vm;
-import org.cloudbus.cloudsim.incubator.web.WebSession;
 
 /**
  * A factory for CloudSim entities' ids. CloudSim requires a lot of ids, that
@@ -31,7 +30,6 @@ public final class Id {
 	COUNTERS.put(Vm.class, 1);
 	COUNTERS.put(Host.class, 1);
 	COUNTERS.put(DatacenterBroker.class, 1);
-	COUNTERS.put(WebSession.class, 1);
 	COUNTERS.put(Pe.class, 1);
     }
 

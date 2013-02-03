@@ -25,7 +25,7 @@ import org.cloudbus.cloudsim.core.CloudSim;
  * Before using this class remember to call the {@link CustomLog.configLogger}
  * with the desired {@link Properties}, or with an empty {@link Properties} if
  * you want to use the defaults. The documentation of the public String
- * constants of the clas describes what keys and values can be specified.
+ * constants of the class describes what keys and values can be specified.
  * 
  * 
  * @author Nikolay Grozev

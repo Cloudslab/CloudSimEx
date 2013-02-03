@@ -6,6 +6,7 @@ import org.cloudbus.cloudsim.UtilizationModelNull;
 import org.cloudbus.cloudsim.incubator.util.Id;
 import org.cloudbus.cloudsim.incubator.util.TextUtil;
 import org.cloudbus.cloudsim.incubator.util.Textualize;
+import org.cloudbus.cloudsim.incubator.web.extensions.DataItem;
 
 /**
  * A web cloudlet is a cloudlet, which is a part of a web session. Usually it is
@@ -27,12 +28,14 @@ import org.cloudbus.cloudsim.incubator.util.Textualize;
 	"ActualCPUTime", "FinishTime", "CloudletStatusString", "Finished" })
 public class WebCloudlet extends Cloudlet {
 
-    private double idealStartTime;
-    private int ram;
+    private final double idealStartTime;
+    private final int ram;
     private int sessionId;
 
     private int numberOfHddPes = 1;
     private long cloudletIOLength;
+
+    private final DataItem data;
 
     /**
      * Constructs a new cloudlet.
@@ -45,6 +48,8 @@ public class WebCloudlet extends Cloudlet {
      *            - amount of ram in megabytes.
      * @param userId
      *            - the userId.
+     * @param data
+     *            - the data used by this cloudlet.
      * @param record
      *            - the record flag, as specified by the parent class.
      */
@@ -53,6 +58,7 @@ public class WebCloudlet extends Cloudlet {
 	    final long cloudletIOLength,
 	    final int ram,
 	    final int userId,
+	    final DataItem data,
 	    final boolean record) {
 
 	super(Id.pollId(Cloudlet.class), cloudletLength, 1, 0, 0,
@@ -61,6 +67,7 @@ public class WebCloudlet extends Cloudlet {
 	this.idealStartTime = idealStartTime;
 	this.ram = ram;
 	this.cloudletIOLength = cloudletIOLength;
+	this.data = data;
 	setUserId(userId);
     }
 
@@ -74,7 +81,9 @@ public class WebCloudlet extends Cloudlet {
      * @param ram
      *            - amount of ram in megabytes.
      * @param userId
-     *            - the userId.       
+     *            - the userId.
+     * @param data
+     *            - the data used by this cloudlet.
      * @param webBroker
      *            - the broker used to submit this cloudlet to the data center.
      */
@@ -82,14 +91,14 @@ public class WebCloudlet extends Cloudlet {
 	    final long cloudletLength,
 	    final long cloudletIOLength,
 	    final int ram,
-	    final int userId) {
-	this(idealStartTime, cloudletLength, cloudletIOLength, ram, userId, false);
+	    final int userId,
+	    final DataItem data) {
+	this(idealStartTime, cloudletLength, cloudletIOLength, ram, userId, data, false);
     }
 
 
     /**
      * Returns the ideal start time of this web cloudlet.
-     * 
      * @return the ideal start time of this web cloudlet.
      */
     public double getIdealStartTime() {
@@ -98,7 +107,6 @@ public class WebCloudlet extends Cloudlet {
 
     /**
      * Returns the id of the session this cloudlet belongs to.
-     * 
      * @return the id of the session this cloudlet belongs to.
      */
     public int getSessionId() {
@@ -107,7 +115,6 @@ public class WebCloudlet extends Cloudlet {
 
     /**
      * Sets the session id of the session this cloudlet belongs to.
-     * 
      * @param sessionId
      *            - the new session id.
      */
@@ -128,7 +135,6 @@ public class WebCloudlet extends Cloudlet {
 
     /**
      * Returns the amount of ram memory used in megabytes.
-     * 
      * @return the amount of ram memory used in megabytes.
      */
     public int getRam() {
@@ -172,6 +178,14 @@ public class WebCloudlet extends Cloudlet {
 	this.cloudletIOLength = cloudletIOLength;
     }
     
+    /**
+     * Returns the data used by this cloudlet.
+     * @return - the data used by this cloudlet.
+     */
+    public DataItem getData() {
+	return data;
+    }
+
     @Override
     public String toString() {
 	return TextUtil.getTxtLine(this, "\t", true);
