@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.incubator.web.extensions;
+package org.cloudbus.cloudsim.incubator.disk;
 
 import java.util.List;
 
@@ -6,6 +6,7 @@ import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmScheduler;
+import org.cloudbus.cloudsim.incubator.scheduling.VmSchedulerWithIndependentPes;
 import org.cloudbus.cloudsim.incubator.util.Id;
 import org.cloudbus.cloudsim.lists.PeList;
 import org.cloudbus.cloudsim.provisioners.BwProvisioner;
@@ -20,9 +21,9 @@ import org.cloudbus.cloudsim.provisioners.RamProvisioner;
 public class HddHost extends Host {
 
     /** The list of harddisks. */
-    private final List<? extends HDPe> hddList;
+    private final List<? extends HddPe> hddList;
     /** A scheduler for the harddisk operations. */
-    private final VmScheduler hddIOScheduler;
+    private final VmSchedulerWithIndependentPes<HddPe, HddVm> hddIOScheduler;
 
     /**
      * Constructor.
@@ -38,8 +39,8 @@ public class HddHost extends Host {
      *            - the IO scheduler.
      */
     public HddHost(final RamProvisioner ramProvisioner, final BwProvisioner bwProvisioner, final long storage,
-	    final List<? extends Pe> peList, final List<? extends HDPe> hddList, final VmScheduler vmCPUScheduler,
-	    final VmScheduler vmHDDScheduler) {
+	    final List<? extends Pe> peList, final List<? extends HddPe> hddList, final VmScheduler vmCPUScheduler,
+	    final VmSchedulerWithIndependentPes<HddPe, HddVm> vmHDDScheduler) {
 	super(Id.pollId(HddHost.class), ramProvisioner, bwProvisioner, storage, peList, vmCPUScheduler);
 	this.hddIOScheduler = vmHDDScheduler;
 	this.hddList = hddList;
@@ -74,16 +75,19 @@ public class HddHost extends Host {
      * @see org.cloudbus.cloudsim.Host#vmCreate(org.cloudbus.cloudsim.Vm)
      */
     @Override
-    public boolean vmCreate(Vm vm) {
+    public boolean vmCreate(final Vm vm) {
 	boolean allocatednOfCPUFlag = super.vmCreate(vm);
 	boolean allocationOfHDD = false;
+	Host prevHost = vm.getHost();
 
-	allocationOfHDD = allocatednOfCPUFlag && getHddIOScheduler().allocatePesForVm(vm, ((HddVm)vm).getCurrentRequestedIOMips());
+	allocationOfHDD = allocatednOfCPUFlag
+		&& getHddIOScheduler().allocatePesForVm((HddVm) vm, ((HddVm) vm).getCurrentRequestedIOMips());
 
 	if (allocatednOfCPUFlag && !allocationOfHDD) {
 	    getRamProvisioner().deallocateRamForVm(vm);
 	    getBwProvisioner().deallocateBwForVm(vm);
 	    deallocatePesForVm(vm);
+	    vm.setHost(prevHost);
 	}
 
 	return allocationOfHDD;
@@ -124,7 +128,7 @@ public class HddHost extends Host {
      * @see org.cloudbus.cloudsim.Host#setFailed(boolean)
      */
     @Override
-    public boolean setFailed(boolean failed) {
+    public boolean setFailed(final boolean failed) {
 	if (getHddList() != null) {
 	    PeList.setStatusFailed(getHddList(), failed);
 	}
@@ -160,8 +164,17 @@ public class HddHost extends Host {
      * 
      * @return the list of all hard disks of this host.
      */
-    public List<? extends HDPe> getHddList() {
+    public List<? extends HddPe> getHddList() {
 	return hddList;
+    }
+
+    /**
+     * Gets the hdds number.
+     * 
+     * @return the hdds number
+     */
+    public int getNumberOfHdds() {
+	return getHddList().size();
     }
 
     /**
@@ -171,7 +184,7 @@ public class HddHost extends Host {
      * @return the scheduler, that manages the distribution of the I/O
      *         operations among VMs.
      */
-    public VmScheduler getHddIOScheduler() {
+    public VmSchedulerWithIndependentPes<HddPe, HddVm> getHddIOScheduler() {
 	return hddIOScheduler;
     }
 

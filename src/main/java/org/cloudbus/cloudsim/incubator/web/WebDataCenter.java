@@ -8,11 +8,11 @@ import org.cloudbus.cloudsim.DatacenterCharacteristics;
 import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.VmAllocationPolicy;
 import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.incubator.disk.HddCloudletSchedulerTimeShared;
+import org.cloudbus.cloudsim.incubator.disk.HddHost;
+import org.cloudbus.cloudsim.incubator.disk.HddResCloudlet;
+import org.cloudbus.cloudsim.incubator.disk.HddVm;
 import org.cloudbus.cloudsim.incubator.util.CustomLog;
-import org.cloudbus.cloudsim.incubator.web.extensions.HddCloudletSchedulerTimeShared;
-import org.cloudbus.cloudsim.incubator.web.extensions.HddHost;
-import org.cloudbus.cloudsim.incubator.web.extensions.HddResCloudlet;
-import org.cloudbus.cloudsim.incubator.web.extensions.HddVm;
 
 /**
  * 

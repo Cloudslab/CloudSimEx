@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.incubator.web.extensions;
+package org.cloudbus.cloudsim.incubator.disk;
 
 import org.cloudbus.cloudsim.incubator.util.Id;
 

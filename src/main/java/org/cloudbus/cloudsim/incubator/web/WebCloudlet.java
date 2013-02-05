@@ -3,10 +3,10 @@ package org.cloudbus.cloudsim.incubator.web;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.UtilizationModelNull;
+import org.cloudbus.cloudsim.incubator.disk.DataItem;
 import org.cloudbus.cloudsim.incubator.util.Id;
 import org.cloudbus.cloudsim.incubator.util.TextUtil;
 import org.cloudbus.cloudsim.incubator.util.Textualize;
-import org.cloudbus.cloudsim.incubator.web.extensions.DataItem;
 
 /**
  * A web cloudlet is a cloudlet, which is a part of a web session. Usually it is

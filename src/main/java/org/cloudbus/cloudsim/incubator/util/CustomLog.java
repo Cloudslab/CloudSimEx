@@ -212,7 +212,7 @@ public class CustomLog {
 		.getProperty(SHUT_STANDART_LOGGER_PROP_KEY, "false")
 		.toString());
 	granularityLevel = Level.parse(props.getProperty(
-		LOG_LEVEL_PROP_KEY, "FINE").toString());
+		LOG_LEVEL_PROP_KEY, DEFAULT_LEVEL.getName()).toString());
 
 	if (shutStandardMessages) {
 	    Log.setOutput(new NullOutputStream());

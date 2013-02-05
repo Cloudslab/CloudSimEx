@@ -2,7 +2,7 @@ package org.cloudbus.cloudsim.incubator.web;
 
 import java.util.List;
 
-import org.cloudbus.cloudsim.incubator.web.extensions.HddVm;
+import org.cloudbus.cloudsim.incubator.disk.HddVm;
 
 /**
  * The load balancer of an application. Assigns sessions to servers.

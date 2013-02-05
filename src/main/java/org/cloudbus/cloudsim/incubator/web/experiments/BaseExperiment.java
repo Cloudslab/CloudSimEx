@@ -20,6 +20,11 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.incubator.disk.HddCloudletSchedulerTimeShared;
+import org.cloudbus.cloudsim.incubator.disk.HddHost;
+import org.cloudbus.cloudsim.incubator.disk.HddPe;
+import org.cloudbus.cloudsim.incubator.disk.HddVm;
+import org.cloudbus.cloudsim.incubator.disk.VmDiskScheduler;
 import org.cloudbus.cloudsim.incubator.util.CustomLog;
 import org.cloudbus.cloudsim.incubator.util.TextUtil;
 import org.cloudbus.cloudsim.incubator.web.ILoadBalancer;
@@ -27,10 +32,6 @@ import org.cloudbus.cloudsim.incubator.web.SimpleWebLoadBalancer;
 import org.cloudbus.cloudsim.incubator.web.WebBroker;
 import org.cloudbus.cloudsim.incubator.web.WebDataCenter;
 import org.cloudbus.cloudsim.incubator.web.WebSession;
-import org.cloudbus.cloudsim.incubator.web.extensions.HDPe;
-import org.cloudbus.cloudsim.incubator.web.extensions.HddCloudletSchedulerTimeShared;
-import org.cloudbus.cloudsim.incubator.web.extensions.HddHost;
-import org.cloudbus.cloudsim.incubator.web.extensions.HddVm;
 import org.cloudbus.cloudsim.incubator.web.workload.WorkloadGenerator;
 import org.cloudbus.cloudsim.incubator.web.workload.freq.CompositeValuedSet;
 import org.cloudbus.cloudsim.incubator.web.workload.freq.FrequencyFunction;
@@ -66,14 +67,14 @@ public class BaseExperiment {
 	}
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(final String[] args) throws IOException {
 	// Step 0: Set up the logger
 	parseExperimentParameters(args);
-	
+
 	new BaseExperiment(2 * DAY, 4, "[Base Experimnet]").runExperimemt();
     }
-    
-    public BaseExperiment(int simulationLength, int refreshTime, String experimentName) {
+
+    public BaseExperiment(final int simulationLength, final int refreshTime, final String experimentName) {
 	super();
 	this.simulationLength = simulationLength;
 	this.refreshTime = refreshTime;
@@ -109,7 +110,7 @@ public class BaseExperiment {
 	    // Step 4: Create virtual machines
 	    HddVm dbServerVMDC1 = createVM(brokerDC1.getId());
 	    HddVm dbServerVMDC2 = createVM(brokerDC2.getId());
-	    
+
 	    List<HddVm> appServersVMDC1 = createApplicationServerVMS(brokerDC1);
 	    List<HddVm> appServersVMDC2 = createApplicationServerVMS(brokerDC2);
 
@@ -145,8 +146,10 @@ public class BaseExperiment {
 	    CloudSim.startSimulation();
 
 	    // Step 9: get the results
-//	    List<WebCloudlet> resultDC1 = brokerDC1.getCloudletReceivedList();
-//	    List<WebCloudlet> resultDC2 = brokerDC2.getCloudletReceivedList();
+	    // List<WebCloudlet> resultDC1 =
+	    // brokerDC1.getCloudletReceivedList();
+	    // List<WebCloudlet> resultDC2 =
+	    // brokerDC2.getCloudletReceivedList();
 	    List<WebSession> resultDC1Sessions = brokerDC1.getServedSessions();
 	    List<WebSession> resultDC2Sessions = brokerDC2.getServedSessions();
 
@@ -154,15 +157,17 @@ public class BaseExperiment {
 	    CloudSim.stopSimulation();
 	    printResults(WebSession.class, resultDC1Sessions, resultDC2Sessions);
 
-//	    Comparator<WebCloudlet> comparator = new Comparator<WebCloudlet>() {
-//		@Override
-//		public int compare(WebCloudlet o1, WebCloudlet o2) {
-//		    return Double.valueOf(o1.getIdealStartTime()).compareTo(o2.getIdealStartTime());
-//		}
-//	    };
-//	    Collections.sort(resultDC1, comparator);
-//	    Collections.sort(resultDC2, comparator);
-//	    printDetails(WebCloudlet.class, resultDC1, resultDC2);
+	    // Comparator<WebCloudlet> comparator = new
+	    // Comparator<WebCloudlet>() {
+	    // @Override
+	    // public int compare(WebCloudlet o1, WebCloudlet o2) {
+	    // return
+	    // Double.valueOf(o1.getIdealStartTime()).compareTo(o2.getIdealStartTime());
+	    // }
+	    // };
+	    // Collections.sort(resultDC1, comparator);
+	    // Collections.sort(resultDC2, comparator);
+	    // printDetails(WebCloudlet.class, resultDC1, resultDC2);
 
 	    System.err.println();
 	    System.err.println(experimentName + ": Simulation is finished!");
@@ -170,14 +175,15 @@ public class BaseExperiment {
 	    e.printStackTrace();
 	    System.err.println(experimentName + ": The simulation has been terminated due to an unexpected error");
 	}
-	System.err.println(experimentName + ": Finished in " + (System.currentTimeMillis() - simulationStart) / 1000 + " seconds");
+	System.err.println(experimentName + ": Finished in " + (System.currentTimeMillis() - simulationStart) / 1000
+		+ " seconds");
     }
 
-    protected List<HddVm> createApplicationServerVMS(WebBroker brokerDC1) {
+    protected List<HddVm> createApplicationServerVMS(final WebBroker brokerDC1) {
 	return Arrays.asList(createVM(brokerDC1.getId()), createVM(brokerDC1.getId()));
     }
 
-    protected HddVm createVM(int brokerId) {
+    protected HddVm createVM(final int brokerId) {
 	// VM description
 	int mips = 250;
 	int ioMips = 200;
@@ -233,7 +239,7 @@ public class BaseExperiment {
 	return generateWorkload(nullPoint, periods);
     }
 
-    protected List<WorkloadGenerator> generateWorkload(double nullPoint, String[] periods) {
+    protected List<WorkloadGenerator> generateWorkload(final double nullPoint, final String[] periods) {
 	int asCloudletLength = 200;
 	int asRam = 1;
 	int dbCloudletLength = 50;
@@ -245,8 +251,10 @@ public class BaseExperiment {
 		dbCloudletIOLength, duration);
     }
 
-    protected List<WorkloadGenerator> generateWorkload(double nullPoint, String[] periods, int asCloudletLength,
-	    int asRam, int dbCloudletLength, int dbRam, int dbCloudletIOLength, int duration) {
+    protected List<WorkloadGenerator> generateWorkload(final double nullPoint, final String[] periods,
+	    final int asCloudletLength,
+	    final int asRam, final int dbCloudletLength, final int dbRam, final int dbCloudletIOLength,
+	    final int duration) {
 	int numberOfCloudlets = duration / refreshTime;
 	numberOfCloudlets = numberOfCloudlets == 0 ? 1 : numberOfCloudlets;
 
@@ -261,18 +269,18 @@ public class BaseExperiment {
 	return Arrays.asList(new WorkloadGenerator(freqFun, sessGen));
     }
 
-    protected Datacenter createDatacenter(String name) {
+    protected Datacenter createDatacenter(final String name) {
 	List<Host> hostList = new ArrayList<Host>();
 
 	List<Pe> peList = new ArrayList<>();
-	List<HDPe> hddList = new ArrayList<>();
+	List<HddPe> hddList = new ArrayList<>();
 
 	int mips = 500;
 	int iops = 1000;
 
 	peList.add(new Pe(0, new PeProvisionerSimple(mips)));
 	peList.add(new Pe(1, new PeProvisionerSimple(mips)));
-	hddList.add(new HDPe(new PeProvisionerSimple(iops)));
+	hddList.add(new HddPe(new PeProvisionerSimple(iops)));
 
 	int ram = 2048 * 4; // host memory (MB)
 	long storage = 1000000; // host storage
@@ -280,7 +288,8 @@ public class BaseExperiment {
 
 	hostList.add(new HddHost(new RamProvisionerSimple(ram),
 		new BwProvisionerSimple(bw), storage, peList, hddList,
-		new VmSchedulerTimeSharedOverSubscription(peList), new VmSchedulerTimeSharedOverSubscription(hddList)));
+		new VmSchedulerTimeSharedOverSubscription(peList),
+		new VmDiskScheduler(hddList)));
 
 	// 5. Create a DatacenterCharacteristics object that stores the
 	// properties of a data center: architecture, OS, list of
@@ -319,7 +328,7 @@ public class BaseExperiment {
      * @param list
      *            list of Cloudlets
      */
-    protected static void printResults(Class<?> caption, List<?>... lines) {
+    protected static void printResults(final Class<?> caption, final List<?>... lines) {
 	// Print header line
 	CustomLog.printLine(TextUtil.getCaptionLine(caption));
 
@@ -333,10 +342,11 @@ public class BaseExperiment {
 
     /**
      * Parses the experiments parameters and sets up the logger.
+     * 
      * @param args
      * @throws IOException
      */
-    protected static void parseExperimentParameters(String[] args) throws IOException {
+    protected static void parseExperimentParameters(final String[] args) throws IOException {
 	Properties props = new Properties();
 	try (InputStream is = Files.newInputStream(Paths.get(args[1]))) {
 	    props.load(is);

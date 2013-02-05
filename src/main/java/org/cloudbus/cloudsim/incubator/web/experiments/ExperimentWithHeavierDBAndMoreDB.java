@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.cloudbus.cloudsim.incubator.disk.HddVm;
 import org.cloudbus.cloudsim.incubator.web.WebBroker;
-import org.cloudbus.cloudsim.incubator.web.extensions.HddVm;
 
 /**
  * 

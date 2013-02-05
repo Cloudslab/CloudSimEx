@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.incubator.web.extensions;
+package org.cloudbus.cloudsim.incubator.disk;
 
 import org.cloudbus.cloudsim.Consts;
 import org.cloudbus.cloudsim.ResCloudlet;
@@ -54,9 +54,29 @@ public class HddResCloudlet extends ResCloudlet {
      * @param ioFinishedSoFar
      *            - the number of served IO instructions.
      */
-    public void updateCloudletFinishedSoFar(long cpuFinishedSoFar, long ioFinishedSoFar) {
-	super.updateCloudletFinishedSoFar(cpuFinishedSoFar);
-	cloudletIOFinishedSoFar += ioFinishedSoFar;
+    public void updateCloudletFinishedSoFar(final long cpuFinishedSoFar, final long ioFinishedSoFar) {
+	updateCloudletFinishedSoFar(cpuFinishedSoFar);
+	// Do not allow addition of mips to the IOFinishedSoFar variable, if the
+	// IO part of the cloudlet is finished. This is needed to avoid
+	// overflow of the variable.
+	if (getRemainingCloudletIOLength() > 0) {
+	    cloudletIOFinishedSoFar += ioFinishedSoFar;
+	}
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.cloudbus.cloudsim.ResCloudlet#updateCloudletFinishedSoFar(long)
+     */
+    @Override
+    public void updateCloudletFinishedSoFar(final long miLength) {
+	// Do not allow addition of mips to the finishedSoFar variable, if the
+	// CPU part of the cloudlet is finished. This is needed to avoid
+	// overflow of the variable
+	if (getRemainingCloudletLength() > 0) {
+	    super.updateCloudletFinishedSoFar(miLength);
+	}
     }
 
     /**

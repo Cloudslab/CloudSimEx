@@ -29,8 +29,12 @@ import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeShared;
-import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.incubator.disk.HddCloudletSchedulerTimeShared;
+import org.cloudbus.cloudsim.incubator.disk.HddHost;
+import org.cloudbus.cloudsim.incubator.disk.HddPe;
+import org.cloudbus.cloudsim.incubator.disk.HddVm;
+import org.cloudbus.cloudsim.incubator.disk.VmDiskScheduler;
 import org.cloudbus.cloudsim.incubator.util.CustomLog;
 import org.cloudbus.cloudsim.incubator.util.TextUtil;
 import org.cloudbus.cloudsim.incubator.web.ILoadBalancer;
@@ -38,10 +42,6 @@ import org.cloudbus.cloudsim.incubator.web.SimpleWebLoadBalancer;
 import org.cloudbus.cloudsim.incubator.web.WebBroker;
 import org.cloudbus.cloudsim.incubator.web.WebCloudlet;
 import org.cloudbus.cloudsim.incubator.web.WebDataCenter;
-import org.cloudbus.cloudsim.incubator.web.extensions.HDPe;
-import org.cloudbus.cloudsim.incubator.web.extensions.HddCloudletSchedulerTimeShared;
-import org.cloudbus.cloudsim.incubator.web.extensions.HddHost;
-import org.cloudbus.cloudsim.incubator.web.extensions.HddVm;
 import org.cloudbus.cloudsim.incubator.web.workload.WorkloadGenerator;
 import org.cloudbus.cloudsim.incubator.web.workload.freq.CompositeValuedSet;
 import org.cloudbus.cloudsim.incubator.web.workload.freq.FrequencyFunction;
@@ -60,9 +60,9 @@ public class CloudSimWorkloadWebExample {
      * @throws IOException
      * @throws SecurityException
      */
-    public static void main(String[] args) throws SecurityException, IOException {
+    public static void main(final String[] args) throws SecurityException, IOException {
 	long start = System.currentTimeMillis();
-	
+
 	// Step 0: Set up the logger
 	Properties props = new Properties();
 	try (InputStream is = Files.newInputStream(Paths.get("custom_log.properties"))) {
@@ -108,7 +108,7 @@ public class CloudSimWorkloadWebExample {
 	    HddVm dbServerVM = new HddVm(broker.getId(), mips, ioMips, pesNumber,
 		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared());
 
-	    ILoadBalancer balancer = new SimpleWebLoadBalancer(Arrays.asList(appServerVM, appServerVM2), dbServerVM);  
+	    ILoadBalancer balancer = new SimpleWebLoadBalancer(Arrays.asList(appServerVM, appServerVM2), dbServerVM);
 	    broker.addLoadBalancer(balancer);
 
 	    // add the VMs to the vmList
@@ -139,51 +139,51 @@ public class CloudSimWorkloadWebExample {
 	    e.printStackTrace();
 	    System.err.println("The simulation has been terminated due to an unexpected error");
 	}
-	
+
 	long end = System.currentTimeMillis();
-	System.out.println("Finished in " + (end - start) /1000 + "seconds");
+	System.out.println("Finished in " + (end - start) / 1000 + "seconds");
     }
 
     private static List<WorkloadGenerator> generateWorkloads() {
 	List<WorkloadGenerator> workloads = new ArrayList<>();
-	
+
 	int asCloudletLength = 200;
 	int asRam = 1;
 	int dbCloudletLength = 10;
 	int dbRam = 1;
 	int dbCloudletIOLength = 5;
 	int duration = 200;
-	int numberOfCloudlets = duration/5;
-	
-	ISessionGenerator sessGen = new ConstSessionGenerator(asCloudletLength, asRam, dbCloudletLength, dbRam, dbCloudletIOLength, duration, numberOfCloudlets);
-	
+	int numberOfCloudlets = duration / 5;
+
+	ISessionGenerator sessGen = new ConstSessionGenerator(asCloudletLength, asRam, dbCloudletLength, dbRam,
+		dbCloudletIOLength, duration, numberOfCloudlets);
+
 	double unit = 3600;
-	double periodLength = 3600*24;
+	double periodLength = 3600 * 24;
 	double nullPoint = 0;
-	
-	double h0 = 0*3600;
-	double h10 = 10*3600;
-	double h13 = 13*3600;
-	double h14 = 14*3600;
-	double h17 = 17*3600;
-	double h21 = 21*3600;
-	double h24 = 24*3600;
-	
-	String[] periods = new String[]{String.format("[%f,%f] m=10 std=1", h0, h10),
+
+	double h0 = 0 * 3600;
+	double h10 = 10 * 3600;
+	double h13 = 13 * 3600;
+	double h14 = 14 * 3600;
+	double h17 = 17 * 3600;
+	double h21 = 21 * 3600;
+	double h24 = 24 * 3600;
+
+	String[] periods = new String[] { String.format("[%f,%f] m=10 std=1", h0, h10),
 		String.format("(%f,%f] m=100 std=5", h10, h13),
 		String.format("(%f,%f] m=50 std=1", h13, h14),
 		String.format("(%f,%f] m=200 std=5", h14, h17),
 		String.format("(%f,%f] m=100 std=2", h17, h21),
-		String.format("(%f,%f] m=10 std=1", h21, h24)};
-	
+		String.format("(%f,%f] m=10 std=1", h21, h24) };
+
 	FrequencyFunction freqFun = new PeriodicStochasticFrequencyFunction(unit, periodLength, nullPoint,
-	    	CompositeValuedSet.createCompositeValuedSet(periods));
+		CompositeValuedSet.createCompositeValuedSet(periods));
 	workloads.add(new WorkloadGenerator(freqFun, sessGen));
 	return workloads;
     }
 
-
-    private static Datacenter createDatacenter(String name) {
+    private static Datacenter createDatacenter(final String name) {
 
 	// Here are the steps needed to create a PowerDatacenter:
 	// 1. We need to create a list to store
@@ -193,7 +193,7 @@ public class CloudSimWorkloadWebExample {
 	// 2. A Machine contains one or more PEs or CPUs/Cores.
 	// In this example, it will have only one core.
 	List<Pe> peList = new ArrayList<>();
-	List<HDPe> hddList = new ArrayList<>();
+	List<HddPe> hddList = new ArrayList<>();
 
 	int mips = 1000;
 	int iops = 1000;
@@ -203,7 +203,7 @@ public class CloudSimWorkloadWebExample {
 							      // Pe id and
 							      // MIPS Rating
 
-	hddList.add(new HDPe(new PeProvisionerSimple(iops)));
+	hddList.add(new HddPe(new PeProvisionerSimple(iops)));
 
 	// 4. Create Host with its id and list of PEs and add them to the list
 	// of machines
@@ -211,12 +211,11 @@ public class CloudSimWorkloadWebExample {
 	long storage = 1000000; // host storage
 	int bw = 10000;
 
+	// This is ourmachine
 	hostList.add(new HddHost(new RamProvisionerSimple(ram),
 		new BwProvisionerSimple(bw), storage, peList, hddList,
-		new VmSchedulerTimeShared(peList), new VmSchedulerTimeSharedOverSubscription(hddList))); // This
-													 // is
-													 // our
-													 // machine
+		new VmSchedulerTimeShared(peList),
+		new VmDiskScheduler(hddList)));
 
 	// 5. Create a DatacenterCharacteristics object that stores the
 	// properties of a data center: architecture, OS, list of
@@ -255,7 +254,7 @@ public class CloudSimWorkloadWebExample {
      * @param list
      *            list of Cloudlets
      */
-    private static void printCloudletList(List<Cloudlet> list) {
+    private static void printCloudletList(final List<Cloudlet> list) {
 	int size = list.size();
 	Cloudlet cloudlet;
 

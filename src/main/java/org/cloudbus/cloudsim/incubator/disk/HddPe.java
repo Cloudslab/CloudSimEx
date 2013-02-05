@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.incubator.web.extensions;
+package org.cloudbus.cloudsim.incubator.disk;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,7 +15,7 @@ import org.cloudbus.cloudsim.provisioners.PeProvisioner;
  * @author nikolay.grozev
  * 
  */
-public class HDPe extends Pe {
+public class HddPe extends Pe {
 
     private final Map<Integer, DataItem> data = new LinkedHashMap<>();
 
@@ -27,8 +27,8 @@ public class HDPe extends Pe {
      * @param dataItems
      *            - the data items in this harddisk. Must not be null.
      */
-    public HDPe(final PeProvisioner peProvisioner, final Collection<DataItem> dataItems) {
-	super(Id.pollId(HDPe.class), peProvisioner);
+    public HddPe(final PeProvisioner peProvisioner, final Collection<DataItem> dataItems) {
+	super(Id.pollId(HddPe.class), peProvisioner);
 	for (DataItem item : dataItems) {
 	    data.put(item.getId(), item);
 	}
@@ -42,7 +42,7 @@ public class HDPe extends Pe {
      * @param dataItems
      *            - the data items in this harddisk. Must not be null.
      */
-    public HDPe(final PeProvisioner peProvisioner, final DataItem... dataItems) {
+    public HddPe(final PeProvisioner peProvisioner, final DataItem... dataItems) {
 	this(peProvisioner, Arrays.asList(dataItems));
     }
 

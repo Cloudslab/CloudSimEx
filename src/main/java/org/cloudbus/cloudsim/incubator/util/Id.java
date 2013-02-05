@@ -23,7 +23,7 @@ public final class Id {
 
     private static final Map<Class<?>, Integer> COUNTERS = new LinkedHashMap<>();
     private static final Set<Class<?>> NO_COUNTERS = new HashSet<>();
-    private static int globalCounter = 0;
+    private static int globalCounter = 1;
 
     static {
 	COUNTERS.put(Cloudlet.class, 1);
@@ -43,7 +43,7 @@ public final class Id {
      *            - the class of the object to get an id for. Must not be null.
      * @return a valid id for the specified class.
      */
-    public static synchronized int pollId(Class<?> clazz) {
+    public static synchronized int pollId(final Class<?> clazz) {
 	Class<?> matchClass = null;
 	if (COUNTERS.containsKey(clazz)) {
 	    matchClass = clazz;

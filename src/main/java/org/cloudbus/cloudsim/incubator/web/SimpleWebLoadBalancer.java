@@ -5,9 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.cloudbus.cloudsim.incubator.disk.HddResCloudlet;
+import org.cloudbus.cloudsim.incubator.disk.HddVm;
 import org.cloudbus.cloudsim.incubator.util.Id;
-import org.cloudbus.cloudsim.incubator.web.extensions.HddResCloudlet;
-import org.cloudbus.cloudsim.incubator.web.extensions.HddVm;
 
 /**
  * Implements simple load balancing - sessions are assigned to the least busy
