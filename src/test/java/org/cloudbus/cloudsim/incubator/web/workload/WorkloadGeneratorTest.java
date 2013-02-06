@@ -1,6 +1,7 @@
 package org.cloudbus.cloudsim.incubator.web.workload;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Map;
 
@@ -42,7 +43,7 @@ public class WorkloadGeneratorTest {
 	sessionGenerator = new ConstSessionGenerator(AS_CLOUDLET_LENGTH, AS_RAM, DB_CLOUDLET_LENGTH, DB_RAM,
 		DB_CLOUDLET_IO_LENGTH);
 
-	workloadGenerator = new WorkloadGenerator(TestUtil.SEED, freqFunction, sessionGenerator);
+	workloadGenerator = new WorkloadGenerator(TestUtil.SEED_ARRAY, freqFunction, sessionGenerator);
 
 	// Test with different ratios of the lengths
 	testWebSessionGeneration(0.11);
@@ -57,7 +58,7 @@ public class WorkloadGeneratorTest {
      *            - how big is the length compared to the unit of the frequency
      *            function
      */
-    private void testWebSessionGeneration(double timesLen) {
+    private void testWebSessionGeneration(final double timesLen) {
 	double startTime = 15;
 	double periodLen = FREQ_UNIT * timesLen;
 	double expectedFreq = FREQ_VALUE * timesLen;

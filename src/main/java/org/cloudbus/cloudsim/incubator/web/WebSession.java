@@ -38,8 +38,8 @@ import org.cloudbus.cloudsim.incubator.util.Textualize;
 @Textualize(properties = { "ReadableStartTime", "StartTime", "SessionId", "AppVmId", "DbVmId", "Delay", "Complete" })
 public class WebSession {
 
-    private IGenerator<? extends WebCloudlet> appServerCloudLets;
-    private IGenerator<? extends WebCloudlet> dbServerCloudLets;
+    private final IGenerator<? extends WebCloudlet> appServerCloudLets;
+    private final IGenerator<? extends WebCloudlet> dbServerCloudLets;
 
     private WebCloudlet currentAppServerCloudLet = null;
     private WebCloudlet currentDBServerCloudLet = null;
@@ -50,7 +50,7 @@ public class WebSession {
     private int userId;
     private int cloudletsLeft;
 
-    private double idealEnd;
+    private final double idealEnd;
     private Double startTime;
 
     private final int sessionId;
@@ -69,8 +69,10 @@ public class WebSession {
      *            constructor or the set method, before this instance is used.
      */
     public WebSession(final IGenerator<? extends WebCloudlet> appServerCloudLets,
-	    final IGenerator<? extends WebCloudlet> dbServerCloudLets, int userId, int numberOfCloudlets,
-	    double idealEnd) {
+	    final IGenerator<? extends WebCloudlet> dbServerCloudLets,
+	    final int userId,
+	    final int numberOfCloudlets,
+	    final double idealEnd) {
 	super();
 	sessionId = Id.pollId(getClass());
 
@@ -86,7 +88,7 @@ public class WebSession {
 	return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(final int userId) {
 	this.userId = userId;
     }
 
@@ -181,7 +183,7 @@ public class WebSession {
      * @param appVmId
      *            - the id of the VM hosting the app server.
      */
-    public void setAppVmId(int appVmId) {
+    public void setAppVmId(final int appVmId) {
 	this.appVmId = appVmId;
     }
 
@@ -201,7 +203,7 @@ public class WebSession {
      * @param dbVmId
      *            - the id of the VM hosting the db server.
      */
-    public void setDbVmId(int dbVmId) {
+    public void setDbVmId(final int dbVmId) {
 	this.dbVmId = dbVmId;
     }
 

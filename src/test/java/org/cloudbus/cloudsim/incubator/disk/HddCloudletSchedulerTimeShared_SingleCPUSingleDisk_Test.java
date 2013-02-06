@@ -22,6 +22,7 @@ import org.cloudbus.cloudsim.VmSchedulerTimeShared;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.incubator.util.CustomLog;
 import org.cloudbus.cloudsim.incubator.util.Id;
+import org.cloudbus.cloudsim.incubator.util.helpers.TestUtil;
 import org.cloudbus.cloudsim.incubator.web.IGenerator;
 import org.cloudbus.cloudsim.incubator.web.ILoadBalancer;
 import org.cloudbus.cloudsim.incubator.web.IterableGenerator;
@@ -41,7 +42,7 @@ import org.junit.Test;
  * @author nikolay.grozev
  * 
  */
-public class HddCloudletSchedulerTimeShared_SingleDisk_Test {
+public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 
     private static final int ITEM_SIZE = 5;
     private static final double DELTA = 0.01;
@@ -65,11 +66,10 @@ public class HddCloudletSchedulerTimeShared_SingleDisk_Test {
 
     @Before
     public void setUp() throws Exception {
-
-	Properties props = new Properties();
-	// props.put(CustomLog.LOG_LEVEL_PROP_KEY, Level.FINEST.getName());
-	props.put("ShutStandardLogger", "true");
-	CustomLog.configLogger(props);
+	Properties logProps = new Properties();
+	// logProps.put(CustomLog.LOG_LEVEL_PROP_KEY, Level.FINEST.getName());
+	// logProps.put("ShutStandardLogger", "true");
+	CustomLog.configLogger(logProps);
 
 	int numBrokers = 1;
 	boolean trace_flag = false;
@@ -275,7 +275,6 @@ public class HddCloudletSchedulerTimeShared_SingleDisk_Test {
 
     @Test
     public void testOutOfMemoryTwoCloudlets() {
-
 	WebCloudlet cloudlet1 = new WebCloudlet(0, 100,
 		100, VM_RAM / 2 + 1, broker.getId(), null);
 	WebCloudlet cloudlet2 = new WebCloudlet(0, 100,
@@ -286,7 +285,7 @@ public class HddCloudletSchedulerTimeShared_SingleDisk_Test {
 	List<Cloudlet> resultList = broker.getCloudletReceivedList();
 	CloudSim.stopSimulation();
 
-	assertEquals(0, resultList.size());
+	assertEquals(2, resultList.size());
 
 	double cloudletExecTime1 = cloudlet1.getFinishTime() - cloudlet1.getExecStartTime();
 	double cloudletExecTime2 = cloudlet2.getFinishTime() - cloudlet2.getExecStartTime();
@@ -300,8 +299,7 @@ public class HddCloudletSchedulerTimeShared_SingleDisk_Test {
 
     @Test
     public void testMultipleJobs() {
-	long seed = 1;
-	Random rand = new Random(seed);
+	Random rand = new Random(TestUtil.SEED);
 	int jobCount = 100;
 	List<WebCloudlet> jobs = new ArrayList<>();
 

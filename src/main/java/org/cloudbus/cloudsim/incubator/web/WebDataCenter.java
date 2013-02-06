@@ -5,8 +5,10 @@ import java.util.List;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.Datacenter;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
+import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.VmAllocationPolicy;
+import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.incubator.disk.HddCloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.incubator.disk.HddHost;
@@ -27,6 +29,7 @@ public class WebDataCenter extends Datacenter {
 
     /**
      * Constr.
+     * 
      * @param name
      * @param characteristics
      * @param vmAllocationPolicy
@@ -34,8 +37,9 @@ public class WebDataCenter extends Datacenter {
      * @param schedulingInterval
      * @throws Exception
      */
-    public WebDataCenter(String name, DatacenterCharacteristics characteristics, VmAllocationPolicy vmAllocationPolicy,
-	    List<Storage> storageList, double schedulingInterval) throws Exception {
+    public WebDataCenter(final String name, final DatacenterCharacteristics characteristics,
+	    final VmAllocationPolicy vmAllocationPolicy,
+	    final List<Storage> storageList, final double schedulingInterval) throws Exception {
 	super(name, characteristics, vmAllocationPolicy, storageList, schedulingInterval);
     }
 
@@ -47,7 +51,7 @@ public class WebDataCenter extends Datacenter {
      * .core.SimEvent, boolean)
      */
     @Override
-    protected void processCloudletSubmit(SimEvent ev, boolean ack) {
+    protected void processCloudletSubmit(final SimEvent ev, final boolean ack) {
 	try {
 	    WebCloudlet cl = (WebCloudlet) ev.getData();
 
@@ -69,21 +73,38 @@ public class WebDataCenter extends Datacenter {
 		// If we have used all of the resources of this VM
 		if (vmUsedRam + cl.getRam() > vm.getRam()) {
 		    scheduler.failAllCloudlets();
-		    cl.setCloudletStatus(Cloudlet.FAILED);
+		    scheduler.addFailedCloudlet(cl);
 		    vm.setOutOfMemory(true);
 
 		    CustomLog
-			    .printf(
-				    "VM/Server %d on host %d in data center %s(%d) is out of memory. It will not be further available",
+			    .printf("VM/Server %d on host %d in data center %s(%d) is out of memory. It will not be further available",
 				    vm.getId(), host.getId(), getName(), getId());
 		} else {
 		    super.processCloudletSubmit(ev, ack);
 		}
 	    } else {
-		cl.setCloudletStatus(Cloudlet.FAILED);
+		scheduler.addFailedCloudlet(cl);
 	    }
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
     }
+
+    @Override
+    protected void checkCloudletCompletion() {
+	super.checkCloudletCompletion();
+
+	for (Host host : getVmAllocationPolicy().getHostList()) {
+	    for (HddVm vm : ((HddHost) host).getVmList()) {
+		while (vm.getCloudletScheduler().isFailedCloudlets()) {
+		    Cloudlet cl = vm.getCloudletScheduler().getNextFailedCloudlet();
+		    if (cl != null) {
+			sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN, cl);
+		    }
+		}
+	    }
+	}
+
+    }
+
 }

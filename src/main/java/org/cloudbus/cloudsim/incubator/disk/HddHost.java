@@ -80,14 +80,16 @@ public class HddHost extends Host {
 	boolean allocationOfHDD = false;
 	Host prevHost = vm.getHost();
 
+	HddVm hddVm = (HddVm) vm;
 	allocationOfHDD = allocatednOfCPUFlag
-		&& getHddIOScheduler().allocatePesForVm((HddVm) vm, ((HddVm) vm).getCurrentRequestedIOMips());
+		&& getHddIOScheduler().allocatePesForVm(hddVm, hddVm.getCurrentRequestedIOMips());
 
 	if (allocatednOfCPUFlag && !allocationOfHDD) {
-	    getRamProvisioner().deallocateRamForVm(vm);
-	    getBwProvisioner().deallocateBwForVm(vm);
-	    deallocatePesForVm(vm);
-	    vm.setHost(prevHost);
+	    getRamProvisioner().deallocateRamForVm(hddVm);
+	    getBwProvisioner().deallocateBwForVm(hddVm);
+	    deallocatePesForVm(hddVm);
+	    getHddIOScheduler().deallocatePesForVm(hddVm);
+	    hddVm.setHost(prevHost);
 	}
 
 	return allocationOfHDD;
