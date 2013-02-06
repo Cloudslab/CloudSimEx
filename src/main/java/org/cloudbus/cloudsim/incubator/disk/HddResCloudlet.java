@@ -2,7 +2,6 @@ package org.cloudbus.cloudsim.incubator.disk;
 
 import org.cloudbus.cloudsim.Consts;
 import org.cloudbus.cloudsim.ResCloudlet;
-import org.cloudbus.cloudsim.incubator.web.WebCloudlet;
 
 /**
  * 
@@ -23,7 +22,7 @@ public class HddResCloudlet extends ResCloudlet {
      * @param cloudlet
      *            - the new cloudlet.
      */
-    public HddResCloudlet(final WebCloudlet cloudlet) {
+    public HddResCloudlet(final HddCloudlet cloudlet) {
 	super(cloudlet);
     }
 
@@ -33,8 +32,8 @@ public class HddResCloudlet extends ResCloudlet {
      * @see org.cloudbus.cloudsim.ResCloudlet#getCloudlet()
      */
     @Override
-    public WebCloudlet getCloudlet() {
-	return (WebCloudlet) super.getCloudlet();
+    public HddCloudlet getCloudlet() {
+	return (HddCloudlet) super.getCloudlet();
     }
 
     /**

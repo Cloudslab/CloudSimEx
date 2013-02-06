@@ -6,7 +6,7 @@ import java.util.List;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.VmScheduler;
 import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
-import org.cloudbus.cloudsim.incubator.scheduling.VmSchedulerWithIndependentPes;
+import org.cloudbus.cloudsim.incubator.VmSchedulerWithIndependentPes;
 
 /**
  * 

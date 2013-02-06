@@ -34,6 +34,7 @@ import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeShared;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.incubator.disk.HddCloudletSchedulerTimeShared;
+import org.cloudbus.cloudsim.incubator.disk.HddDataCenter;
 import org.cloudbus.cloudsim.incubator.disk.HddHost;
 import org.cloudbus.cloudsim.incubator.disk.HddPe;
 import org.cloudbus.cloudsim.incubator.disk.HddVm;
@@ -46,7 +47,6 @@ import org.cloudbus.cloudsim.incubator.web.SimpleWebLoadBalancer;
 import org.cloudbus.cloudsim.incubator.web.StatGenerator;
 import org.cloudbus.cloudsim.incubator.web.WebBroker;
 import org.cloudbus.cloudsim.incubator.web.WebCloudlet;
-import org.cloudbus.cloudsim.incubator.web.WebDataCenter;
 import org.cloudbus.cloudsim.incubator.web.WebSession;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
@@ -221,7 +221,7 @@ public class CloudSimWebExample {
 	// 6. Finally, we need to create a PowerDatacenter object.
 	Datacenter datacenter = null;
 	try {
-	    datacenter = new WebDataCenter(name, characteristics,
+	    datacenter = new HddDataCenter(name, characteristics,
 		    new VmAllocationPolicySimple(hostList), storageList, 0);
 	} catch (Exception e) {
 	    e.printStackTrace();

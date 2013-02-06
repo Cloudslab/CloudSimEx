@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.incubator.scheduling;
+package org.cloudbus.cloudsim.incubator;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

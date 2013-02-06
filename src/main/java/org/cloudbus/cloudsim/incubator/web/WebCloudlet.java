@@ -1,11 +1,7 @@
 package org.cloudbus.cloudsim.incubator.web;
 
-import org.cloudbus.cloudsim.Cloudlet;
-import org.cloudbus.cloudsim.UtilizationModelFull;
-import org.cloudbus.cloudsim.UtilizationModelNull;
 import org.cloudbus.cloudsim.incubator.disk.DataItem;
-import org.cloudbus.cloudsim.incubator.util.Id;
-import org.cloudbus.cloudsim.incubator.util.TextUtil;
+import org.cloudbus.cloudsim.incubator.disk.HddCloudlet;
 import org.cloudbus.cloudsim.incubator.util.Textualize;
 
 /**
@@ -26,16 +22,10 @@ import org.cloudbus.cloudsim.incubator.util.Textualize;
 @Textualize(properties = { "CloudletId", "SessionId", "Ram", "VmId", "Delay", "IdealStartTime", "ExecStartTime",
 	"CloudletLength", "CloudletIOLength",
 	"ActualCPUTime", "FinishTime", "CloudletStatusString", "Finished" })
-public class WebCloudlet extends Cloudlet {
+public class WebCloudlet extends HddCloudlet {
 
     private final double idealStartTime;
-    private final int ram;
     private int sessionId;
-
-    private int numberOfHddPes = 1;
-    private long cloudletIOLength;
-
-    private final DataItem data;
 
     /**
      * Constructs a new cloudlet.
@@ -60,15 +50,8 @@ public class WebCloudlet extends Cloudlet {
 	    final int userId,
 	    final DataItem data,
 	    final boolean record) {
-
-	super(Id.pollId(Cloudlet.class), cloudletLength, 1, 0, 0,
-		new UtilizationModelFull(), new UtilizationModelFull(), new UtilizationModelNull(),
-		record);
+	super(cloudletLength, cloudletIOLength, 1, 1, ram, userId, data, record);
 	this.idealStartTime = idealStartTime;
-	this.ram = ram;
-	this.cloudletIOLength = cloudletIOLength;
-	this.data = data;
-	setUserId(userId);
     }
 
     /**
@@ -131,64 +114,6 @@ public class WebCloudlet extends Cloudlet {
     public double getDelay() {
 	double delay = getExecStartTime() - getIdealStartTime();
 	return delay < 0 ? -1 : delay;
-    }
-
-    /**
-     * Returns the amount of ram memory used in megabytes.
-     * @return the amount of ram memory used in megabytes.
-     */
-    public int getRam() {
-	return ram;
-    }
-
-    /**
-     * Returns the number of Harddisks this host has.
-     * @return the number of Harddisks this host has.
-     */
-    public int getNumberOfHddPes() {
-	return numberOfHddPes;
-    }
-
-    /**
-     * Sets the number of Harddisks this host has.
-     * @param numberOfHddPes - the number of Harddisks this host has. Must not be negative or 0.
-     */
-    public void setNumberOfHddPes(int numberOfHddPes) {
-	this.numberOfHddPes = numberOfHddPes;
-    }
-
-
-    /**
-     * Returns the total length of this cloudlet in terms of IO operations.
-     * @return the total length of this cloudlet in terms of IO operations.
-     */
-    public long getCloudletTotalIOLength() {
-	return getCloudletIOLength() * getNumberOfHddPes();
-    }
-
-    public long getCloudletIOLength() {
-	return cloudletIOLength;
-    }
-
-    /**
-     * Sets the total length of this cloudlet in terms of IO operations.
-     * @param cloudletIOLength - total length of this cloudlet in terms of IO operations. Must be a positive number.
-     */
-    public void setCloudletIOLength(long cloudletIOLength) {
-	this.cloudletIOLength = cloudletIOLength;
-    }
-    
-    /**
-     * Returns the data used by this cloudlet.
-     * @return - the data used by this cloudlet.
-     */
-    public DataItem getData() {
-	return data;
-    }
-
-    @Override
-    public String toString() {
-	return TextUtil.getTxtLine(this, "\t", true);
     }
 
 }

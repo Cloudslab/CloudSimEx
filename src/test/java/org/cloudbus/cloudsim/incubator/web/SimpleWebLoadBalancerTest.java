@@ -19,6 +19,7 @@ import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeShared;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.incubator.disk.HddCloudletSchedulerTimeShared;
+import org.cloudbus.cloudsim.incubator.disk.HddDataCenter;
 import org.cloudbus.cloudsim.incubator.disk.HddHost;
 import org.cloudbus.cloudsim.incubator.disk.HddPe;
 import org.cloudbus.cloudsim.incubator.disk.HddVm;
@@ -38,7 +39,7 @@ import org.junit.Test;
  */
 public class SimpleWebLoadBalancerTest {
 
-    protected WebDataCenter datacenter;
+    protected HddDataCenter datacenter;
     protected WebBroker broker;
     protected ILoadBalancer balancer;
 
@@ -310,7 +311,7 @@ public class SimpleWebLoadBalancerTest {
 	assertEquals(session1.getDbVmId(), session2.getDbVmId());
     }
 
-    private static WebDataCenter createDatacenter() {
+    private static HddDataCenter createDatacenter() {
 	List<Host> hostList = new ArrayList<Host>();
 
 	List<Pe> peList = new ArrayList<>();
@@ -337,9 +338,9 @@ public class SimpleWebLoadBalancerTest {
 		arch, os, vmm, hostList, time_zone, cost, costPerMem,
 		costPerStorage, costPerBw);
 
-	WebDataCenter datacenter = null;
+	HddDataCenter datacenter = null;
 	try {
-	    datacenter = new WebDataCenter("TestDatacenter", characteristics,
+	    datacenter = new HddDataCenter("TestDatacenter", characteristics,
 		    new VmAllocationPolicySimple(hostList), storageList, 0);
 	} catch (Exception e) {
 	    e.printStackTrace();

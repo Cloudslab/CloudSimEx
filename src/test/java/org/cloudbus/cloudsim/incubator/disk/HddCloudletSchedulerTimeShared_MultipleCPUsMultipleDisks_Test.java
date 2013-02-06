@@ -21,8 +21,6 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.incubator.util.CustomLog;
 import org.cloudbus.cloudsim.incubator.util.Id;
 import org.cloudbus.cloudsim.incubator.web.WebBroker;
-import org.cloudbus.cloudsim.incubator.web.WebCloudlet;
-import org.cloudbus.cloudsim.incubator.web.WebDataCenter;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
@@ -38,7 +36,7 @@ public class HddCloudletSchedulerTimeShared_MultipleCPUsMultipleDisks_Test {
 
     private static final double DELTA = 0.01;
 
-    protected WebDataCenter datacenter;
+    protected HddDataCenter datacenter;
     protected WebBroker broker;
     protected HddVm vm1;
     protected HddVm vm2;
@@ -123,13 +121,13 @@ public class HddCloudletSchedulerTimeShared_MultipleCPUsMultipleDisks_Test {
 	double job4TimesMips = 1;
 	double job4TimesIOMIPS = 2;
 
-	WebCloudlet cloudlet1 = new WebCloudlet(0, (int) (VM_MIPS * job1TimesMips),
+	HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips),
 		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId(), dataItem_1_1);
-	WebCloudlet cloudlet2 = new WebCloudlet(0, (int) (VM_MIPS * job2TimesMips),
+	HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips),
 		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId(), dataItem_1_2);
-	WebCloudlet cloudlet3 = new WebCloudlet(0, (int) (VM_MIPS * job3TimesMips),
+	HddCloudlet cloudlet3 = new HddCloudlet((int) (VM_MIPS * job3TimesMips),
 		(int) (HOST_MIOPS * job3TimesIOMIPS), 5, broker.getId(), dataItem_2_2);
-	WebCloudlet cloudlet4 = new WebCloudlet(0, (int) (VM_MIPS * job4TimesMips),
+	HddCloudlet cloudlet4 = new HddCloudlet((int) (VM_MIPS * job4TimesMips),
 		(int) (HOST_MIOPS * job4TimesIOMIPS), 5, broker.getId(), dataItem_2_2);
 
 	cloudlet1.setVmId(vm1.getId());
@@ -158,7 +156,7 @@ public class HddCloudletSchedulerTimeShared_MultipleCPUsMultipleDisks_Test {
 	assertEquals(4, cloudletExecTime4, DELTA);
     }
 
-    private static WebDataCenter createDatacenterWithSingleHostAndTwoDisks(final String name) {
+    private static HddDataCenter createDatacenterWithSingleHostAndTwoDisks(final String name) {
 	List<Host> hostList = new ArrayList<Host>();
 
 	List<Pe> peList = new ArrayList<>();
@@ -187,9 +185,9 @@ public class HddCloudletSchedulerTimeShared_MultipleCPUsMultipleDisks_Test {
 		arch, os, vmm, hostList, time_zone, cost, costPerMem,
 		costPerStorage, costPerBw);
 
-	WebDataCenter datacenter = null;
+	HddDataCenter datacenter = null;
 	try {
-	    datacenter = new WebDataCenter(name, characteristics,
+	    datacenter = new HddDataCenter(name, characteristics,
 		    new VmAllocationPolicySimple(hostList), storageList, 0);
 	} catch (Exception e) {
 	    e.printStackTrace();

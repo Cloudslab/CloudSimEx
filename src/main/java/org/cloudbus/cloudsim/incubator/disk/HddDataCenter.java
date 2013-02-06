@@ -1,6 +1,7 @@
-package org.cloudbus.cloudsim.incubator.web;
+package org.cloudbus.cloudsim.incubator.disk;
 
 import java.util.List;
+import java.util.logging.Level;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.Datacenter;
@@ -10,22 +11,18 @@ import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.VmAllocationPolicy;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
-import org.cloudbus.cloudsim.incubator.disk.HddCloudletSchedulerTimeShared;
-import org.cloudbus.cloudsim.incubator.disk.HddHost;
-import org.cloudbus.cloudsim.incubator.disk.HddResCloudlet;
-import org.cloudbus.cloudsim.incubator.disk.HddVm;
 import org.cloudbus.cloudsim.incubator.util.CustomLog;
 
 /**
  * 
- * A data center capable of executing web applications. The main difference
+ * A data center capable of executing harddisk cloudlets. The main difference
  * between it and a {@link Datacenter} is that it marks VMs as disabled if their
  * RAM consumption is exceeded.
  * 
  * @author nikolay.grozev
  * 
  */
-public class WebDataCenter extends Datacenter {
+public class HddDataCenter extends Datacenter {
 
     /**
      * Constr.
@@ -37,7 +34,7 @@ public class WebDataCenter extends Datacenter {
      * @param schedulingInterval
      * @throws Exception
      */
-    public WebDataCenter(final String name, final DatacenterCharacteristics characteristics,
+    public HddDataCenter(final String name, final DatacenterCharacteristics characteristics,
 	    final VmAllocationPolicy vmAllocationPolicy,
 	    final List<Storage> storageList, final double schedulingInterval) throws Exception {
 	super(name, characteristics, vmAllocationPolicy, storageList, schedulingInterval);
@@ -53,7 +50,7 @@ public class WebDataCenter extends Datacenter {
     @Override
     protected void processCloudletSubmit(final SimEvent ev, final boolean ack) {
 	try {
-	    WebCloudlet cl = (WebCloudlet) ev.getData();
+	    HddCloudlet cl = (HddCloudlet) ev.getData();
 
 	    int userId = cl.getUserId();
 	    int vmId = cl.getVmId();
@@ -76,24 +73,34 @@ public class WebDataCenter extends Datacenter {
 		    scheduler.addFailedCloudlet(cl);
 		    vm.setOutOfMemory(true);
 
-		    CustomLog
-			    .printf("VM/Server %d on host %d in data center %s(%d) is out of memory. It will not be further available",
-				    vm.getId(), host.getId(), getName(), getId());
+		    CustomLog.printf("VM/Server %d on host %d in data center %s(%d) is out of memory. " +
+			    "It will not be further available",
+			    vm.getId(), host.getId(), getName(), getId());
 		} else {
 		    super.processCloudletSubmit(ev, ack);
 		}
 	    } else {
 		scheduler.addFailedCloudlet(cl);
+		CustomLog.printf("Cloudlet %d could not be submited because " +
+				"VM/Server %d on host %d in data center %s(%d) is out of memory. ",
+			cl.getCloudletId(), vm.getId(), host.getId(), getName(), getId());
 	    }
 	} catch (Exception e) {
-	    e.printStackTrace();
+	    CustomLog.printf(Level.SEVERE,
+		    "An error occurred when processing cloudlet sbmission: %s", e.getMessage());
 	}
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.cloudbus.cloudsim.Datacenter#checkCloudletCompletion()
+     */
     @Override
     protected void checkCloudletCompletion() {
 	super.checkCloudletCompletion();
 
+	// Return the failed cloudlets as well.
 	for (Host host : getVmAllocationPolicy().getHostList()) {
 	    for (HddVm vm : ((HddHost) host).getVmList()) {
 		while (vm.getCloudletScheduler().isFailedCloudlets()) {
@@ -104,7 +111,6 @@ public class WebDataCenter extends Datacenter {
 		}
 	    }
 	}
-
     }
 
 }

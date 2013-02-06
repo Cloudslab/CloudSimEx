@@ -6,7 +6,7 @@ import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmScheduler;
-import org.cloudbus.cloudsim.incubator.scheduling.VmSchedulerWithIndependentPes;
+import org.cloudbus.cloudsim.incubator.VmSchedulerWithIndependentPes;
 import org.cloudbus.cloudsim.incubator.util.Id;
 import org.cloudbus.cloudsim.lists.PeList;
 import org.cloudbus.cloudsim.provisioners.BwProvisioner;

@@ -29,7 +29,6 @@ import org.cloudbus.cloudsim.incubator.web.IterableGenerator;
 import org.cloudbus.cloudsim.incubator.web.SimpleWebLoadBalancer;
 import org.cloudbus.cloudsim.incubator.web.WebBroker;
 import org.cloudbus.cloudsim.incubator.web.WebCloudlet;
-import org.cloudbus.cloudsim.incubator.web.WebDataCenter;
 import org.cloudbus.cloudsim.incubator.web.WebSession;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
@@ -47,7 +46,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
     private static final int ITEM_SIZE = 5;
     private static final double DELTA = 0.01;
 
-    protected WebDataCenter datacenter;
+    protected HddDataCenter datacenter;
     protected WebBroker broker;
     protected HddVm vm1;
     protected HddVm vm2;
@@ -129,9 +128,9 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 	double job2TimesMips = 1;
 	double job2TimesIOMIPS = 2;
 
-	WebCloudlet cloudlet1 = new WebCloudlet(0, (int) (VM_MIPS * job1TimesMips),
+	HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips),
 		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId(), dataItem1);
-	WebCloudlet cloudlet2 = new WebCloudlet(0, (int) (VM_MIPS * job2TimesMips),
+	HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips),
 		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId(), dataItem1);
 	broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2));
 
@@ -158,9 +157,9 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 	double job2TimesMips = 1;
 	double job2TimesIOMIPS = 0;
 
-	WebCloudlet cloudlet1 = new WebCloudlet(0, (int) (VM_MIPS * job1TimesMips),
+	HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips),
 		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId(), null);
-	WebCloudlet cloudlet2 = new WebCloudlet(0, (int) (VM_MIPS * job2TimesMips),
+	HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips),
 		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId(), null);
 	broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2));
 
@@ -187,9 +186,9 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 	double job2TimesMips = 0;
 	double job2TimesIOMIPS = 2;
 
-	WebCloudlet cloudlet1 = new WebCloudlet(0, (int) (VM_MIPS * job1TimesMips),
+	HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips),
 		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId(), dataItem1);
-	WebCloudlet cloudlet2 = new WebCloudlet(0, (int) (VM_MIPS * job2TimesMips),
+	HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips),
 		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId(), dataItem1);
 	broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2));
 
@@ -221,9 +220,9 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 	double job2TimesMips = 0.1;
 	double job2TimesIOMIPS = 10;
 
-	WebCloudlet cloudlet1 = new WebCloudlet(0, (int) (VM_MIPS * job1TimesMips),
+	HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips),
 		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId(), dataItem1);
-	WebCloudlet cloudlet2 = new WebCloudlet(0, (int) (VM_MIPS * job2TimesMips),
+	HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips),
 		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId(), dataItem1);
 	broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2));
 
@@ -251,9 +250,9 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 	double job2TimesMips = 5;
 	double job2TimesIOMIPS = 0.1;
 
-	WebCloudlet cloudlet1 = new WebCloudlet(0, (int) (VM_MIPS * job1TimesMips),
+	HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips),
 		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId(), dataItem1);
-	WebCloudlet cloudlet2 = new WebCloudlet(0, (int) (VM_MIPS * job2TimesMips),
+	HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips),
 		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId(), dataItem1);
 	broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2));
 
@@ -275,9 +274,9 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 
     @Test
     public void testOutOfMemoryTwoCloudlets() {
-	WebCloudlet cloudlet1 = new WebCloudlet(0, 100,
+	HddCloudlet cloudlet1 = new HddCloudlet(100,
 		100, VM_RAM / 2 + 1, broker.getId(), null);
-	WebCloudlet cloudlet2 = new WebCloudlet(0, 100,
+	HddCloudlet cloudlet2 = new HddCloudlet(100,
 		100, VM_RAM / 2 + 1, broker.getId(), null);
 	broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2));
 
@@ -301,7 +300,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
     public void testMultipleJobs() {
 	Random rand = new Random(TestUtil.SEED);
 	int jobCount = 100;
-	List<WebCloudlet> jobs = new ArrayList<>();
+	List<HddCloudlet> jobs = new ArrayList<>();
 
 	int minMipsFactor = 5;
 	int maxMipsFactor = 10;
@@ -311,7 +310,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 	for (int i = 0; i < jobCount; i++) {
 	    double jobTimesMips = nextRandBetween(rand, minMipsFactor, maxMipsFactor);
 	    double jobTimesIOMIPS = nextRandBetween(rand, minMiopsFactor, maxMiopsFactor);
-	    jobs.add(new WebCloudlet(0, (int) (VM_MIPS * jobTimesMips),
+	    jobs.add(new HddCloudlet((int) (VM_MIPS * jobTimesMips),
 		    (int) (HOST_MIOPS * jobTimesIOMIPS), 5, broker.getId(), dataItem1));
 	}
 
@@ -323,7 +322,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 
 	assertEquals(jobs.size(), resultList.size());
 
-	for (WebCloudlet job : jobs) {
+	for (HddCloudlet job : jobs) {
 	    assertEquals(job.getCloudletStatus(), Cloudlet.SUCCESS);
 
 	    double cloudletExecTime = job.getFinishTime() - job.getExecStartTime();
@@ -363,7 +362,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 	broker.submitSessions(Arrays.asList(session), balancer.getId());
 
 	CloudSim.startSimulation();
-	// List<WebCloudlet> resultList = broker.getCloudletReceivedList();
+	// List<HddCloudlet> resultList = broker.getCloudletReceivedList();
 	CloudSim.stopSimulation();
 
 	assertEquals(asCl1.getExecStartTime(), dbCl1.getExecStartTime(), DELTA);
@@ -388,7 +387,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
     }
 
     private void testSingleCloudlet(final double timesMips, final double timesIOMIPS) {
-	WebCloudlet cloudlet = new WebCloudlet(0, (int) (VM_MIPS * timesMips), (int) (HOST_MIOPS * timesIOMIPS), 5,
+	HddCloudlet cloudlet = new HddCloudlet((int) (VM_MIPS * timesMips), (int) (HOST_MIOPS * timesIOMIPS), 5,
 		broker.getId(), dataItem1);
 	broker.submitCloudletList(Arrays.asList(cloudlet));
 
@@ -405,7 +404,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 	assertEquals(Math.max(timesMips, timesIOMIPS), cloudletExecTime, DELTA);
     }
 
-    private static WebDataCenter createDatacenterWithSingleHostAndSingleDisk(final String name) {
+    private static HddDataCenter createDatacenterWithSingleHostAndSingleDisk(final String name) {
 	List<Host> hostList = new ArrayList<Host>();
 
 	List<Pe> peList = new ArrayList<>();
@@ -432,9 +431,9 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 		arch, os, vmm, hostList, time_zone, cost, costPerMem,
 		costPerStorage, costPerBw);
 
-	WebDataCenter datacenter = null;
+	HddDataCenter datacenter = null;
 	try {
-	    datacenter = new WebDataCenter(name, characteristics,
+	    datacenter = new HddDataCenter(name, characteristics,
 		    new VmAllocationPolicySimple(hostList), storageList, 0);
 	} catch (Exception e) {
 	    e.printStackTrace();

@@ -19,7 +19,6 @@ import org.cloudbus.cloudsim.Consts;
 import org.cloudbus.cloudsim.ResCloudlet;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.incubator.util.CustomLog;
-import org.cloudbus.cloudsim.incubator.web.WebCloudlet;
 import org.cloudbus.cloudsim.lists.ResCloudletList;
 
 /**
@@ -306,7 +305,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      * @post $none
      */
     @Override
-    public WebCloudlet cloudletCancel(final int cloudletId) {
+    public HddCloudlet cloudletCancel(final int cloudletId) {
 	// First, looks in the finished queue
 	int position = ResCloudletList.getPositionById(getCloudletFinishedList(), cloudletId);
 
@@ -322,7 +321,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 	    if (rcl.isDone()) {
 		cloudletFinish(rcl);
 	    } else {
-		rcl.setCloudletStatus(WebCloudlet.CANCELED);
+		rcl.setCloudletStatus(HddCloudlet.CANCELED);
 	    }
 	    return rcl.getCloudlet();
 	}
@@ -355,7 +354,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 	    if (rcl.isDone()) {
 		cloudletFinish(rcl);
 	    } else {
-		rcl.setCloudletStatus(WebCloudlet.PAUSED);
+		rcl.setCloudletStatus(HddCloudlet.PAUSED);
 		getCloudletPausedList().add(rcl);
 	    }
 	    return true;
@@ -374,7 +373,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void cloudletFinish(final ResCloudlet rcl) {
-	rcl.setCloudletStatus(WebCloudlet.SUCCESS);
+	rcl.setCloudletStatus(HddCloudlet.SUCCESS);
 	rcl.finalizeCloudlet();
 	((List) getCloudletFinishedList()).add(rcl);
     }
@@ -395,7 +394,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 
 	if (position >= 0) {
 	    HddResCloudlet rgl = getCloudletPausedList().remove(position);
-	    rgl.setCloudletStatus(WebCloudlet.INEXEC);
+	    rgl.setCloudletStatus(HddCloudlet.INEXEC);
 	    getCloudletExecList().add(rgl);
 
 	    // calculate the expected time for cloudlet completion
@@ -432,10 +431,10 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
     // Changed
     @Override
     public double cloudletSubmit(final Cloudlet cloudlet, final double fileTransferTime) {
-	WebCloudlet hddCloudlet = (WebCloudlet) cloudlet;
+	HddCloudlet hddCloudlet = (HddCloudlet) cloudlet;
 
 	HddResCloudlet rcl = new HddResCloudlet(hddCloudlet);
-	rcl.setCloudletStatus(WebCloudlet.INEXEC);
+	rcl.setCloudletStatus(HddCloudlet.INEXEC);
 	for (int i = 0; i < hddCloudlet.getNumberOfPes(); i++) {
 	    rcl.setMachineAndPeId(0, i);
 	}
@@ -547,7 +546,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      * @post $none
      */
     @Override
-    public WebCloudlet getNextFinishedCloudlet() {
+    public HddCloudlet getNextFinishedCloudlet() {
 	if (!getCloudletFinishedList().isEmpty()) {
 	    return getCloudletFinishedList().remove(0).getCloudlet();
 	}
@@ -800,7 +799,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void addFailedCloudlet(final WebCloudlet cl) throws Exception {
+    public void addFailedCloudlet(final HddCloudlet cl) throws Exception {
 	cl.setCloudletStatus(Cloudlet.FAILED);
 	((List) getCloudletFailedList()).add(new HddResCloudlet(cl));
     }

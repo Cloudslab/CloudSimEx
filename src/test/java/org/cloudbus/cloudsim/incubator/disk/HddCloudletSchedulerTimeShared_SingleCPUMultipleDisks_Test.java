@@ -21,8 +21,6 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.incubator.util.CustomLog;
 import org.cloudbus.cloudsim.incubator.util.Id;
 import org.cloudbus.cloudsim.incubator.web.WebBroker;
-import org.cloudbus.cloudsim.incubator.web.WebCloudlet;
-import org.cloudbus.cloudsim.incubator.web.WebDataCenter;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
@@ -40,7 +38,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUMultipleDisks_Test {
 
     private static final double DELTA = 0.01;
 
-    protected WebDataCenter datacenter;
+    protected HddDataCenter datacenter;
     protected WebBroker broker;
     protected HddVm vm1;
     protected HddVm vm2;
@@ -69,10 +67,10 @@ public class HddCloudletSchedulerTimeShared_SingleCPUMultipleDisks_Test {
     private static HddPe disk1 = new HddPe(new PeProvisionerSimple(HOST_MIOPS), dataItem_1_1, dataItem_1_2);
     private static HddPe disk2 = new HddPe(new PeProvisionerSimple(HOST_MIOPS), dataItem_2_1, dataItem_2_2);
 
-    private WebCloudlet cloudlet1;
-    private WebCloudlet cloudlet2;
-    private WebCloudlet cloudlet3;
-    private WebCloudlet cloudlet4;
+    private HddCloudlet cloudlet1;
+    private HddCloudlet cloudlet2;
+    private HddCloudlet cloudlet3;
+    private HddCloudlet cloudlet4;
 
     @Before
     public void setUp() throws Exception {
@@ -295,25 +293,25 @@ public class HddCloudletSchedulerTimeShared_SingleCPUMultipleDisks_Test {
 	broker.submitVmList(vmlist);
 
 	Integer[] lengths = cloudletsLength.get("cloudlet1");
-	cloudlet1 = new WebCloudlet(0, lengths[0], lengths[1], 5, broker.getId(), cloudLetIdsToDiskIds.get("cloudlet1"));
+	cloudlet1 = new HddCloudlet(lengths[0], lengths[1], 5, broker.getId(), cloudLetIdsToDiskIds.get("cloudlet1"));
 	cloudlet1.setVmId(vm1.getId());
 
 	lengths = cloudletsLength.get("cloudlet2");
-	cloudlet2 = new WebCloudlet(0, lengths[0], lengths[1], 5, broker.getId(), cloudLetIdsToDiskIds.get("cloudlet2"));
+	cloudlet2 = new HddCloudlet(lengths[0], lengths[1], 5, broker.getId(), cloudLetIdsToDiskIds.get("cloudlet2"));
 	cloudlet2.setVmId(vm1.getId());
 
 	lengths = cloudletsLength.get("cloudlet3");
-	cloudlet3 = new WebCloudlet(0, lengths[0], lengths[1], 5, broker.getId(), cloudLetIdsToDiskIds.get("cloudlet3"));
+	cloudlet3 = new HddCloudlet(lengths[0], lengths[1], 5, broker.getId(), cloudLetIdsToDiskIds.get("cloudlet3"));
 	cloudlet3.setVmId(vm2.getId());
 
 	lengths = cloudletsLength.get("cloudlet4");
-	cloudlet4 = new WebCloudlet(0, lengths[0], lengths[1], 5, broker.getId(), cloudLetIdsToDiskIds.get("cloudlet4"));
+	cloudlet4 = new HddCloudlet(lengths[0], lengths[1], 5, broker.getId(), cloudLetIdsToDiskIds.get("cloudlet4"));
 	cloudlet4.setVmId(vm2.getId());
 
 	broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2, cloudlet3, cloudlet4));
     }
 
-    private static WebDataCenter createDatacenterWithSingleHostAndTwoDisks(final String name) {
+    private static HddDataCenter createDatacenterWithSingleHostAndTwoDisks(final String name) {
 	List<Host> hostList = new ArrayList<Host>();
 
 	List<Pe> peList = new ArrayList<>();
@@ -341,9 +339,9 @@ public class HddCloudletSchedulerTimeShared_SingleCPUMultipleDisks_Test {
 		arch, os, vmm, hostList, time_zone, cost, costPerMem,
 		costPerStorage, costPerBw);
 
-	WebDataCenter datacenter = null;
+	HddDataCenter datacenter = null;
 	try {
-	    datacenter = new WebDataCenter(name, characteristics,
+	    datacenter = new HddDataCenter(name, characteristics,
 		    new VmAllocationPolicySimple(hostList), storageList, 0);
 	} catch (Exception e) {
 	    e.printStackTrace();
