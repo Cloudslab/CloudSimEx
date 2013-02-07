@@ -86,7 +86,7 @@ public abstract class VmSchedulerWithIndependentPes<P extends Pe, V extends Vm> 
     protected abstract VmScheduler createSchedulerFroPe(final P pe);
 
     /**
-     * A predicate method, returning f a VM uses a Pe.
+     * A predicate method, returning if a VM uses a Pe.
      * 
      * @param vm
      *            - the vm to check for,

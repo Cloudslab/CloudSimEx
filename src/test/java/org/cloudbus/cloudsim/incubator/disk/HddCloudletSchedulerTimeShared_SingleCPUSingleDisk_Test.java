@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.Random;
 
 import org.cloudbus.cloudsim.Cloudlet;
@@ -23,6 +22,7 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.incubator.util.CustomLog;
 import org.cloudbus.cloudsim.incubator.util.Id;
 import org.cloudbus.cloudsim.incubator.util.helpers.TestUtil;
+import org.cloudbus.cloudsim.incubator.web.CompositeGenerator;
 import org.cloudbus.cloudsim.incubator.web.IGenerator;
 import org.cloudbus.cloudsim.incubator.web.ILoadBalancer;
 import org.cloudbus.cloudsim.incubator.web.IterableGenerator;
@@ -50,7 +50,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
     protected WebBroker broker;
     protected HddVm vm1;
     protected HddVm vm2;
-    protected static DataItem dataItem1 = new DataItem(ITEM_SIZE);
+    protected DataItem dataItem1;
 
     private static final int HOST_MIPS = 1000;
     private static final int HOST_MIOPS = 100;
@@ -65,10 +65,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 
     @Before
     public void setUp() throws Exception {
-	Properties logProps = new Properties();
-	// logProps.put(CustomLog.LOG_LEVEL_PROP_KEY, Level.FINEST.getName());
-	// logProps.put("ShutStandardLogger", "true");
-	CustomLog.configLogger(logProps);
+	CustomLog.configLogger(TestUtil.LOG_PROPS);
 
 	int numBrokers = 1;
 	boolean trace_flag = false;
@@ -78,7 +75,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 	datacenter = createDatacenterWithSingleHostAndSingleDisk("TestDatacenter");
 
 	// Create Broker
-	broker = new WebBroker("Broker", 5, 10000);
+	broker = new WebBroker("Broker", 5, 10000, Arrays.asList(datacenter.getId()));
 
 	// Create virtual machines
 	List<Vm> vmlist = new ArrayList<Vm>();
@@ -350,7 +347,8 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 		(int) (HOST_MIOPS * factor1), 10, broker.getId(), dataItem1);
 
 	IGenerator<WebCloudlet> generatorAS = new IterableGenerator<>(Arrays.asList(asCl1, asCl2));
-	IGenerator<WebCloudlet> generatorDB = new IterableGenerator<>(Arrays.asList(dbCl1, dbCl2));
+	CompositeGenerator<WebCloudlet> generatorDB =
+		new CompositeGenerator<>(new IterableGenerator<>(Arrays.asList(dbCl1, dbCl2)));
 
 	ILoadBalancer balancer = new SimpleWebLoadBalancer(Arrays.asList(vm1), vm2);
 	broker.addLoadBalancer(balancer);
@@ -362,8 +360,10 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 	broker.submitSessions(Arrays.asList(session), balancer.getId());
 
 	CloudSim.startSimulation();
-	// List<HddCloudlet> resultList = broker.getCloudletReceivedList();
+	List<HddCloudlet> resultList = broker.getCloudletReceivedList();
 	CloudSim.stopSimulation();
+
+	assertEquals(4, resultList.size());
 
 	assertEquals(asCl1.getExecStartTime(), dbCl1.getExecStartTime(), DELTA);
 	assertEquals(asCl2.getExecStartTime(), dbCl2.getExecStartTime(), DELTA);
@@ -404,13 +404,14 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 	assertEquals(Math.max(timesMips, timesIOMIPS), cloudletExecTime, DELTA);
     }
 
-    private static HddDataCenter createDatacenterWithSingleHostAndSingleDisk(final String name) {
+    private HddDataCenter createDatacenterWithSingleHostAndSingleDisk(final String name) {
 	List<Host> hostList = new ArrayList<Host>();
 
 	List<Pe> peList = new ArrayList<>();
 	List<HddPe> hddList = new ArrayList<>();
 
 	peList.add(new Pe(Id.pollId(Pe.class), new PeProvisionerSimple(HOST_MIPS)));
+	dataItem1 = new DataItem(ITEM_SIZE);
 	hddList.add(new HddPe(new PeProvisionerSimple(HOST_MIOPS), dataItem1));
 
 	hostList.add(new HddHost(new RamProvisionerSimple(HOST_RAM),

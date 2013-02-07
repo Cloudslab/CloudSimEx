@@ -30,6 +30,7 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeShared;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.incubator.disk.DataItem;
 import org.cloudbus.cloudsim.incubator.disk.HddCloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.incubator.disk.HddDataCenter;
 import org.cloudbus.cloudsim.incubator.disk.HddHost;
@@ -53,6 +54,8 @@ import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 
 public class CloudSimWorkloadWebExample {
+
+    private static DataItem data = new DataItem(5);
 
     /**
      * Creates main() to run this example
@@ -156,7 +159,7 @@ public class CloudSimWorkloadWebExample {
 	int numberOfCloudlets = duration / 5;
 
 	ISessionGenerator sessGen = new ConstSessionGenerator(asCloudletLength, asRam, dbCloudletLength, dbRam,
-		dbCloudletIOLength, duration, numberOfCloudlets);
+		dbCloudletIOLength, duration, numberOfCloudlets, data);
 
 	double unit = 3600;
 	double periodLength = 3600 * 24;
@@ -203,7 +206,7 @@ public class CloudSimWorkloadWebExample {
 							      // Pe id and
 							      // MIPS Rating
 
-	hddList.add(new HddPe(new PeProvisionerSimple(iops)));
+	hddList.add(new HddPe(new PeProvisionerSimple(iops), data));
 
 	// 4. Create Host with its id and list of PEs and add them to the list
 	// of machines

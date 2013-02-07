@@ -20,6 +20,7 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.incubator.disk.DataItem;
 import org.cloudbus.cloudsim.incubator.disk.HddCloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.incubator.disk.HddDataCenter;
 import org.cloudbus.cloudsim.incubator.disk.HddHost;
@@ -56,6 +57,8 @@ public class BaseExperiment {
     protected static final int HOUR = 60 * MINUTE;
     protected static final int DAY = 24 * HOUR;
     protected static final Integer[] HOURS = new Integer[25];
+
+    private static DataItem data = new DataItem(5);
 
     protected int simulationLength;
     protected int refreshTime;
@@ -259,7 +262,7 @@ public class BaseExperiment {
 	numberOfCloudlets = numberOfCloudlets == 0 ? 1 : numberOfCloudlets;
 
 	ISessionGenerator sessGen = new ConstSessionGenerator(asCloudletLength, asRam, dbCloudletLength,
-		dbRam, dbCloudletIOLength, duration, numberOfCloudlets);
+		dbRam, dbCloudletIOLength, duration, numberOfCloudlets, data);
 
 	double unit = HOUR;
 	double periodLength = DAY;
@@ -280,7 +283,7 @@ public class BaseExperiment {
 
 	peList.add(new Pe(0, new PeProvisionerSimple(mips)));
 	peList.add(new Pe(1, new PeProvisionerSimple(mips)));
-	hddList.add(new HddPe(new PeProvisionerSimple(iops)));
+	hddList.add(new HddPe(new PeProvisionerSimple(iops), data));
 
 	int ram = 2048 * 4; // host memory (MB)
 	long storage = 1000000; // host storage

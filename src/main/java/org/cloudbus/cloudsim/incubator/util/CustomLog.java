@@ -10,6 +10,7 @@ import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 
 import org.apache.commons.io.output.NullOutputStream;
@@ -126,7 +127,7 @@ public class CustomLog {
      * @param msg
      *            - the message. Must not be null.
      */
-    public static void printLine(String msg) {
+    public static void printLine(final String msg) {
 	printLine(DEFAULT_LEVEL, msg);
     }
 
@@ -140,7 +141,7 @@ public class CustomLog {
      *            - the level. If null the default level is used
      * @param args
      */
-    public static void printf(Level level, String format, Object... args) {
+    public static void printf(final Level level, final String format, final Object... args) {
 	LOGGER.log(level == null ? DEFAULT_LEVEL : level, String.format(format, args));
     }
 
@@ -152,8 +153,34 @@ public class CustomLog {
      *            - the format (as in String.format).
      * @param args
      */
-    public static void printf(String format, Object... args) {
+    public static void printf(final String format, final Object... args) {
 	LOGGER.log(DEFAULT_LEVEL, String.format(format, args));
+    }
+
+    /**
+     * Logs the stacktrace of the exception.
+     * 
+     * @param level
+     *            - the level to use.
+     * @param message
+     *            - the messag to append before that.
+     * @param exc
+     *            - the exception to log.
+     */
+    public static void logError(final Level level, final String message, final Throwable exc) {
+	LOGGER.log(level, "", exc);
+    }
+
+    /**
+     * Logs the stacktrace of the exception.
+     * 
+     * @param message
+     *            - the messag to append before that.
+     * @param exc
+     *            - the exception to log.
+     */
+    public static void logError(final String message, final Throwable exc) {
+	logError(DEFAULT_LEVEL, message, exc);
     }
 
     /**
@@ -174,7 +201,7 @@ public class CustomLog {
      * @param output
      *            - the new output. Must not be null.
      */
-    public static void setOutput(OutputStream output) {
+    public static void setOutput(final OutputStream output) {
 	LOGGER.addHandler(new StreamHandler(output, formatter));
     }
 
@@ -238,35 +265,42 @@ public class CustomLog {
 
 	private final boolean prefixCloudSimClock;
 	private final String format;
+	SimpleFormatter defaultFormatter = new SimpleFormatter();
 
-	public CustomFormatter(boolean prefixCloudSimClock, String format) {
+	public CustomFormatter(final boolean prefixCloudSimClock, final String format) {
 	    super();
 	    this.prefixCloudSimClock = prefixCloudSimClock;
 	    this.format = format;
 	}
 
 	@Override
-	public String format(LogRecord record) {
+	public String format(final LogRecord record) {
 	    final String[] methodCalls = format.split(";");
 	    final StringBuffer result = new StringBuffer();
 	    if (prefixCloudSimClock) {
 		result.append(formatClockTime() + "\t");
 	    }
 
-	    int i = 0;
-	    for (String method : methodCalls) {
-		try {
-		    result.append(record.getClass().getMethod(method)
-			    .invoke(record));
-		} catch (Exception e) {
-		    System.err.println("Error in logging:");
-		    e.printStackTrace(System.err);
-		    System.exit(1);
-		}
-		if (i++ < methodCalls.length - 1) {
-		    result.append('\t');
+	    // If there is an exception - use the standard formatter
+	    if (record.getThrown() != null) {
+		result.append(defaultFormatter.format(record));
+	    } else {
+		int i = 0;
+		for (String method : methodCalls) {
+		    try {
+			result.append(record.getClass().getMethod(method)
+				.invoke(record));
+		    } catch (Exception e) {
+			System.err.println("Error in logging:");
+			e.printStackTrace(System.err);
+			System.exit(1);
+		    }
+		    if (i++ < methodCalls.length - 1) {
+			result.append('\t');
+		    }
 		}
 	    }
+
 	    result.append(TextUtil.NEW_LINE);
 
 	    return result.toString();

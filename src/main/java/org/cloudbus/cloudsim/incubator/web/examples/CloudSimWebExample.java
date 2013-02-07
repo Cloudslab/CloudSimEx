@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,6 +34,7 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeShared;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.incubator.disk.DataItem;
 import org.cloudbus.cloudsim.incubator.disk.HddCloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.incubator.disk.HddDataCenter;
 import org.cloudbus.cloudsim.incubator.disk.HddHost;
@@ -41,6 +43,7 @@ import org.cloudbus.cloudsim.incubator.disk.HddVm;
 import org.cloudbus.cloudsim.incubator.disk.VmDiskScheduler;
 import org.cloudbus.cloudsim.incubator.util.CustomLog;
 import org.cloudbus.cloudsim.incubator.util.TextUtil;
+import org.cloudbus.cloudsim.incubator.web.CompositeGenerator;
 import org.cloudbus.cloudsim.incubator.web.IGenerator;
 import org.cloudbus.cloudsim.incubator.web.ILoadBalancer;
 import org.cloudbus.cloudsim.incubator.web.SimpleWebLoadBalancer;
@@ -56,6 +59,8 @@ import org.uncommons.maths.random.GaussianGenerator;
 import org.uncommons.maths.random.MersenneTwisterRNG;
 
 public class CloudSimWebExample {
+
+    private static DataItem data = new DataItem(5);
 
     /**
      * Creates main method to run this example.
@@ -154,8 +159,9 @@ public class CloudSimWebExample {
 	generators.put(StatGenerator.CLOUDLET_LENGTH, cpuGen);
 	generators.put(StatGenerator.CLOUDLET_RAM, ramGen);
 	generators.put(StatGenerator.CLOUDLET_IO, ioGen);
-	IGenerator<WebCloudlet> asGenerator = new StatGenerator(generators);
-	IGenerator<WebCloudlet> dbGenerator = new StatGenerator(generators);
+	IGenerator<WebCloudlet> asGenerator = new StatGenerator(generators, data);
+	IGenerator<Collection<WebCloudlet>> dbGenerator =
+		new CompositeGenerator<WebCloudlet>(new StatGenerator(generators, data));
 
 	List<WebSession> sessions = new ArrayList<>();
 	for (int i = 0; i < sessionNum; i++) {
@@ -185,7 +191,7 @@ public class CloudSimWebExample {
 							      // Pe id and
 							      // MIPS Rating
 
-	hddList.add(new HddPe(new PeProvisionerSimple(iops)));
+	hddList.add(new HddPe(new PeProvisionerSimple(iops), data));
 
 	// 4. Create Host with its id and list of PEs and add them to the list
 	// of machines

@@ -1,5 +1,9 @@
 package org.cloudbus.cloudsim.incubator.web;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.cloudbus.cloudsim.incubator.util.Id;
 import org.cloudbus.cloudsim.incubator.util.Textualize;
 
@@ -39,10 +43,10 @@ import org.cloudbus.cloudsim.incubator.util.Textualize;
 public class WebSession {
 
     private final IGenerator<? extends WebCloudlet> appServerCloudLets;
-    private final IGenerator<? extends WebCloudlet> dbServerCloudLets;
+    private final IGenerator<? extends Collection<? extends WebCloudlet>> dbServerCloudLets;
 
     private WebCloudlet currentAppServerCloudLet = null;
-    private WebCloudlet currentDBServerCloudLet = null;
+    private List<? extends WebCloudlet> currentDBServerCloudLets = null;
 
     private Integer appVmId = null;
     private Integer dbVmId = null;
@@ -69,7 +73,7 @@ public class WebSession {
      *            constructor or the set method, before this instance is used.
      */
     public WebSession(final IGenerator<? extends WebCloudlet> appServerCloudLets,
-	    final IGenerator<? extends WebCloudlet> dbServerCloudLets,
+	    final IGenerator<? extends Collection<? extends WebCloudlet>> dbServerCloudLets,
 	    final int userId,
 	    final int numberOfCloudlets,
 	    final double idealEnd) {
@@ -101,38 +105,37 @@ public class WebSession {
      *            - the current time of the simulation.
      * @return the result as described above.
      */
-    public WebCloudlet[] pollCloudlets(final double currTime) {
+    public StepCloudlets pollCloudlets(final double currTime) {
 
-	WebCloudlet[] result = null;
+	StepCloudlets result = null;
 	boolean appCloudletFinished = currentAppServerCloudLet == null
 		|| currentAppServerCloudLet.isFinished();
-	boolean dbCloudletFinished = currentDBServerCloudLet == null
-		|| currentDBServerCloudLet.isFinished();
+	boolean dbCloudletFinished = currentDBServerCloudLets == null
+		|| areAllCloudletsFinished(currentDBServerCloudLets);
 	boolean appServerNextReady = !appServerCloudLets.isEmpty()
 		&& appServerCloudLets.peek().getIdealStartTime() <= currTime;
 	boolean dbServerNextReady = !dbServerCloudLets.isEmpty()
-		&& dbServerCloudLets.peek().getIdealStartTime() <= currTime;
+		&& getEarliestIdealStartTime(dbServerCloudLets.peek()) <= currTime;
 
 	if (cloudletsLeft != 0 && appCloudletFinished && dbCloudletFinished && appServerNextReady && dbServerNextReady) {
-	    result = new WebCloudlet[] {
+	    result = new StepCloudlets(
 		    appServerCloudLets.poll(),
-		    dbServerCloudLets.poll() };
-	    currentAppServerCloudLet = result[0];
-	    currentDBServerCloudLet = result[1];
+		    new ArrayList<>(dbServerCloudLets.poll()));
+	    currentAppServerCloudLet = result.asCloudlet;
+	    currentDBServerCloudLets = result.dbCloudlets;
 
 	    currentAppServerCloudLet.setVmId(appVmId);
-	    currentDBServerCloudLet.setVmId(dbVmId);
+	    setVMId(dbVmId, currentDBServerCloudLets);
 
 	    currentAppServerCloudLet.setSessionId(getSessionId());
-	    currentDBServerCloudLet.setSessionId(getSessionId());
-
 	    currentAppServerCloudLet.setUserId(userId);
-	    currentDBServerCloudLet.setUserId(userId);
+	    setSessionAndUserIds(getSessionId(), userId, currentDBServerCloudLets);
+
 	    cloudletsLeft--;
 
 	    if (startTime == null) {
 		startTime = Math.min(currentAppServerCloudLet.getIdealStartTime(),
-			currentDBServerCloudLet.getIdealStartTime());
+			getEarliestIdealStartTime(currentDBServerCloudLets));
 	    }
 	}
 	return result;
@@ -152,8 +155,8 @@ public class WebSession {
      * 
      * @return - the current db server cloudlet.
      */
-    /* package access */WebCloudlet getCurrentDBServerCloudLet() {
-	return currentDBServerCloudLet;
+    /* package access */List<? extends WebCloudlet> getCurrentDBServerCloudLet() {
+	return currentDBServerCloudLets;
     }
 
     /**
@@ -226,8 +229,8 @@ public class WebSession {
     public double getDelay() {
 	double delayAS = currentAppServerCloudLet == null || !currentAppServerCloudLet.isFinished() ? -1
 		: currentAppServerCloudLet.getFinishTime() - idealEnd;
-	double delayDB = currentDBServerCloudLet == null || !currentDBServerCloudLet.isFinished() ? -1
-		: currentDBServerCloudLet.getFinishTime() - idealEnd;
+	double delayDB = currentDBServerCloudLets == null || !areAllCloudletsFinished(currentDBServerCloudLets) ? -1
+		: getLatestFinishTime(currentDBServerCloudLets) - idealEnd;
 	return Math.max(0, Math.max(delayAS, delayDB));
     }
 
@@ -266,7 +269,64 @@ public class WebSession {
 	return cloudletsLeft == 0 &&
 		currentAppServerCloudLet != null &&
 		currentAppServerCloudLet.isFinished() &&
-		currentDBServerCloudLet != null &&
-		currentDBServerCloudLet.isFinished();
+		currentDBServerCloudLets != null &&
+		areAllCloudletsFinished(currentDBServerCloudLets);
     }
+
+    private static boolean areAllCloudletsFinished(final List<? extends WebCloudlet> cloudlets) {
+	boolean result = true;
+	for (WebCloudlet cl : cloudlets) {
+	    if (!cl.isFinished()) {
+		result = false;
+		break;
+	    }
+	}
+	return result;
+    }
+
+    private static double getLatestFinishTime(final Collection<? extends WebCloudlet> cloudlets) {
+	double result = -1;
+	for (WebCloudlet cl : cloudlets) {
+	    if (cl.getFinishTime() > result) {
+		result = cl.getFinishTime();
+	    }
+	}
+	return result;
+    }
+
+    private static double getEarliestIdealStartTime(final Collection<? extends WebCloudlet> cloudlets) {
+	double result = -1;
+	for (WebCloudlet cl : cloudlets) {
+	    if (result == -1 || cl.getIdealStartTime() < result) {
+		result = cl.getIdealStartTime();
+	    }
+	}
+	return result;
+    }
+
+    private static void setVMId(final int vmId, final Collection<? extends WebCloudlet> cloudlets) {
+	for (WebCloudlet cl : cloudlets) {
+	    cl.setVmId(vmId);
+	}
+    }
+
+    private static void setSessionAndUserIds(final int sessId, final int userId,
+	    final Collection<? extends WebCloudlet> cloudlets) {
+	for (WebCloudlet cl : cloudlets) {
+	    cl.setSessionId(sessId);
+	    cl.setUserId(userId);
+	}
+    }
+
+    public static class StepCloudlets {
+	public WebCloudlet asCloudlet;
+	public List<? extends WebCloudlet> dbCloudlets;
+
+	public StepCloudlets(final WebCloudlet asCloudlet, final List<? extends WebCloudlet> dbCloudlets) {
+	    super();
+	    this.asCloudlet = asCloudlet;
+	    this.dbCloudlets = dbCloudlets;
+	}
+    }
+
 }

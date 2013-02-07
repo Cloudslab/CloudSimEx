@@ -1,14 +1,17 @@
 package org.cloudbus.cloudsim.incubator.web;
 
 import static org.cloudbus.cloudsim.incubator.util.helpers.TestUtil.createSeededGaussian;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.incubator.disk.DataItem;
 import org.cloudbus.cloudsim.incubator.util.Id;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,16 +35,34 @@ public class WebSessionTest {
     private NumberGenerator<Double> genCPU_DB;
 
     private Map<String, NumberGenerator<Double>> testGeneratorsAS;
-    private Map<String, NumberGenerator<Double>> testGeneratorsDB;
+    private Map<String, NumberGenerator<Double>> testGeneratorsDB1;
+    private Map<String, NumberGenerator<Double>> testGeneratorsDB2;
 
-    private BaseStatGenerator<TestWebCloudlet> statGeneratorAS;
-    private BaseStatGenerator<TestWebCloudlet> statGeneratorDB;
+    // Generate cloudlets statistically on every notification
+    private IGenerator<TestWebCloudlet> statGeneratorAS;
+    private IGenerator<TestWebCloudlet> statGeneratorDB1;
+    private IGenerator<TestWebCloudlet> statGeneratorDB2;
 
-    private WebSession session;
+    /** Generate cloudlets once every three notifications. */
+    private IGenerator<TestWebCloudlet> onceInThreeGeneratorDB3;
+
+    /** Creates 1 AS and 1 DB cloudlet for every notification. */
+    private WebSession singleDataItemStatSession;
+    /** Creates 1 AS and 2 DB cloudlet for every notification. */
+    private WebSession twoDataItemsStatSession;
+    /**
+     * Creates 1 AS on every notification. Creates 2 DB cloudlets every third
+     * notification, and 1 DB cloudlet otherwise.
+     */
+    private WebSession twoDataItemsCasuallySession;
+
+    private final int numCloudletsInSession2 = 10;
+
+    private static final DataItem data1 = new DataItem(65);
+    private static final DataItem data2 = new DataItem(65);
 
     @Before
     public void setUp() {
-
 	genRAM_AS = createSeededGaussian(GEN_RAM_MEAN, GEN_RAM_STDEV);
 	genRAM_DB = createSeededGaussian(GEN_RAM_MEAN, GEN_RAM_STDEV);
 
@@ -52,99 +73,253 @@ public class WebSessionTest {
 	testGeneratorsAS.put(StatGenerator.CLOUDLET_LENGTH, genCPU_AS);
 	testGeneratorsAS.put(StatGenerator.CLOUDLET_RAM, genRAM_AS);
 
-	testGeneratorsDB = new HashMap<>();
-	testGeneratorsDB.put(StatGenerator.CLOUDLET_LENGTH, genCPU_DB);
-	testGeneratorsDB.put(StatGenerator.CLOUDLET_RAM, genRAM_DB);
+	testGeneratorsDB1 = new HashMap<>();
+	testGeneratorsDB1.put(StatGenerator.CLOUDLET_LENGTH, genCPU_DB);
+	testGeneratorsDB1.put(StatGenerator.CLOUDLET_RAM, genRAM_DB);
 
-	statGeneratorAS = new TestStatGenerator(testGeneratorsAS, 1);
-	statGeneratorDB = new TestStatGenerator(testGeneratorsDB, 1);
+	testGeneratorsDB2 = new HashMap<>();
+	testGeneratorsDB2.putAll(testGeneratorsDB1);
 
-	session = new WebSession(statGeneratorAS, statGeneratorDB, 1, -1, 100);
-	session.setAppVmId(Id.pollId(Vm.class));
-	session.setDbVmId(Id.pollId(Vm.class));
+	statGeneratorAS = new TestStatGenerator(testGeneratorsAS, 1, null);
+	statGeneratorDB1 = new TestStatGenerator(testGeneratorsDB1, 1, data1);
+	statGeneratorDB2 = new TestStatGenerator(testGeneratorsDB1, 1, data2);
+	onceInThreeGeneratorDB3 = new OnceInThreeGenerator(data1);
+
+	singleDataItemStatSession = new WebSession(statGeneratorAS, new CompositeGenerator<>(statGeneratorDB1), 1, -1,
+		100);
+	singleDataItemStatSession.setAppVmId(Id.pollId(Vm.class));
+	singleDataItemStatSession.setDbVmId(Id.pollId(Vm.class));
+
+	twoDataItemsStatSession = new WebSession(statGeneratorAS,
+		new CompositeGenerator<>(statGeneratorDB1, statGeneratorDB2),
+		1, numCloudletsInSession2, 100);
+	twoDataItemsStatSession.setAppVmId(Id.pollId(Vm.class));
+	twoDataItemsStatSession.setDbVmId(Id.pollId(Vm.class));
+
+	twoDataItemsCasuallySession = new WebSession(statGeneratorAS,
+		new CompositeGenerator<>(onceInThreeGeneratorDB3, statGeneratorDB2),
+		1, numCloudletsInSession2, 100);
+	twoDataItemsCasuallySession.setAppVmId(Id.pollId(Vm.class));
+	twoDataItemsCasuallySession.setDbVmId(Id.pollId(Vm.class));
+
     }
 
     @Test
-    public void testBeyoundCapacity() {
+    public void testBeyoundCapacitySingleDataItemAccessed() {
 	int time = 0;
 	int numCloudlets = 10;
-	WebSession newSession = new WebSession(statGeneratorAS, statGeneratorDB, 1, numCloudlets, 100);
-	newSession.setAppVmId(Id.pollId(Vm.class));
-	newSession.setDbVmId(Id.pollId(Vm.class));
+	WebSession twoDataItemsSession = new WebSession(statGeneratorAS, new CompositeGenerator<>(statGeneratorDB1),
+		1, numCloudlets, 100);
+	twoDataItemsSession.setAppVmId(Id.pollId(Vm.class));
+	twoDataItemsSession.setDbVmId(Id.pollId(Vm.class));
 
 	for (int i = 0; i < numCloudlets; i++) {
-	    newSession.notifyOfTime(time++);
-	    WebCloudlet[] currCloudLets = newSession.pollCloudlets(time++);
+	    twoDataItemsSession.notifyOfTime(time++);
+	    WebSession.StepCloudlets currCloudLets = twoDataItemsSession.pollCloudlets(time++);
 	    assertNotNull(currCloudLets);
-	    ((TestWebCloudlet) currCloudLets[0]).setFinished(true);
-	    ((TestWebCloudlet) currCloudLets[1]).setFinished(true);
+	    ((TestWebCloudlet) currCloudLets.asCloudlet).setFinished(true);
+	    assertEquals(currCloudLets.dbCloudlets.size(), 1);
+	    ((TestWebCloudlet) currCloudLets.dbCloudlets.get(0)).setFinished(true);
 	}
-	newSession.notifyOfTime(time++);
-	assertNull(newSession.pollCloudlets(time++));
+	twoDataItemsSession.notifyOfTime(time++);
+	assertNull(twoDataItemsSession.pollCloudlets(time++));
+    }
+
+    @Test
+    public void testBeyoundCapacityTwoDataItemsAccessed() {
+	int time = 0;
+
+	for (int i = 0; i < numCloudletsInSession2; i++) {
+	    twoDataItemsStatSession.notifyOfTime(time++);
+	    WebSession.StepCloudlets currCloudLets = twoDataItemsStatSession.pollCloudlets(time++);
+	    assertNotNull(currCloudLets);
+	    ((TestWebCloudlet) currCloudLets.asCloudlet).setFinished(true);
+	    assertEquals(currCloudLets.dbCloudlets.size(), 2);
+	    ((TestWebCloudlet) currCloudLets.dbCloudlets.get(0)).setFinished(true);
+	    ((TestWebCloudlet) currCloudLets.dbCloudlets.get(1)).setFinished(true);
+	}
+	twoDataItemsStatSession.notifyOfTime(time++);
+	assertNull(twoDataItemsStatSession.pollCloudlets(time++));
     }
 
     @Test
     public void testPollingEmptySession() {
 	int currTime = 0;
-	assertNull(session.pollCloudlets(currTime));
+	assertNull(singleDataItemStatSession.pollCloudlets(currTime));
     }
 
     @Test
-    public void testSynchPolling() {
+    public void testSynchPollingSingleDataItemAccessed() {
 	int currTime = 0;
 
-	session.notifyOfTime(currTime++);
-	WebCloudlet[] currCloudLets = session.pollCloudlets(currTime++);
+	singleDataItemStatSession.notifyOfTime(currTime++);
+	WebSession.StepCloudlets currCloudLets = singleDataItemStatSession.pollCloudlets(currTime++);
 	assertNotNull(currCloudLets);
-	assertNotNull(currCloudLets[0]);
-	assertNotNull(currCloudLets[1]);
+	assertNotNull(currCloudLets.asCloudlet);
+	assertEquals(currCloudLets.dbCloudlets.size(), 1);
+	assertNotNull(currCloudLets.dbCloudlets.get(0));
 
-	session.notifyOfTime(currTime++);
+	singleDataItemStatSession.notifyOfTime(currTime++);
 
 	// These cloudlets are not finished - no new ones should be available
-	assertNull(session.pollCloudlets(currTime++));
+	assertNull(singleDataItemStatSession.pollCloudlets(currTime++));
 
 	// Finish one of the cloudlets
-	((TestWebCloudlet) currCloudLets[0]).setFinished(true);
+	((TestWebCloudlet) currCloudLets.asCloudlet).setFinished(true);
 
 	// One of the cloudlets is not finished - no new ones should be
 	// available
-	assertNull(session.pollCloudlets(currTime++));
+	assertNull(singleDataItemStatSession.pollCloudlets(currTime++));
 
 	// Finish the other of the cloudlets
-	((TestWebCloudlet) currCloudLets[1]).setFinished(true);
+	((TestWebCloudlet) currCloudLets.dbCloudlets.get(0)).setFinished(true);
 
 	// Now we can poll again
-	currCloudLets = session.pollCloudlets(currTime++);
+	currCloudLets = singleDataItemStatSession.pollCloudlets(currTime++);
 	assertNotNull(currCloudLets);
-	assertNotNull(currCloudLets[0]);
-	assertNotNull(currCloudLets[1]);
+	assertNotNull(currCloudLets.asCloudlet);
+	assertEquals(currCloudLets.dbCloudlets.size(), 1);
+	assertNotNull(currCloudLets.dbCloudlets.get(0));
     }
 
     @Test
-    public void testExhaustivePolling() {
+    public void testSynchPollingTwoDataItemAccessed() {
+	int currTime = 0;
+
+	twoDataItemsStatSession.notifyOfTime(currTime++);
+	WebSession.StepCloudlets currCloudLets = twoDataItemsStatSession.pollCloudlets(currTime++);
+	assertNotNull(currCloudLets);
+	assertNotNull(currCloudLets.asCloudlet);
+	assertEquals(currCloudLets.dbCloudlets.size(), 2);
+	assertNotNull(currCloudLets.dbCloudlets.get(0));
+	assertNotNull(currCloudLets.dbCloudlets.get(1));
+
+	twoDataItemsStatSession.notifyOfTime(currTime++);
+
+	// These cloudlets are not finished - no new ones should be available
+	assertNull(twoDataItemsStatSession.pollCloudlets(currTime++));
+
+	// Finish one of the DB cloudlets
+	((TestWebCloudlet) currCloudLets.dbCloudlets.get(1)).setFinished(true);
+
+	// One of the DB cloudlets and the AS cloudlet are not finished - no new
+	// ones should be available
+	assertNull(twoDataItemsStatSession.pollCloudlets(currTime++));
+
+	// Finish the AS cloudlets
+	((TestWebCloudlet) currCloudLets.asCloudlet).setFinished(true);
+
+	// One of the DB cloudlets is not finished - no new
+	// ones should be available
+	assertNull(twoDataItemsStatSession.pollCloudlets(currTime++));
+
+	// Finish the last cloudlets
+	((TestWebCloudlet) currCloudLets.dbCloudlets.get(0)).setFinished(true);
+
+	// Now we can poll again
+	currCloudLets = twoDataItemsStatSession.pollCloudlets(currTime++);
+	assertNotNull(currCloudLets);
+	assertNotNull(currCloudLets.asCloudlet);
+	assertEquals(currCloudLets.dbCloudlets.size(), 2);
+	assertNotNull(currCloudLets.dbCloudlets.get(0));
+	assertNotNull(currCloudLets.dbCloudlets.get(1));
+    }
+
+    @Test
+    public void testExhaustivePollingSingleDataItem() {
 	int currTime = 0;
 
 	for (int i = 0; i < 10; i++) {
-	    session.notifyOfTime(currTime++);
-	    WebCloudlet[] currCloudLets = session.pollCloudlets(currTime++);
+	    singleDataItemStatSession.notifyOfTime(currTime++);
+	    WebSession.StepCloudlets currCloudLets = singleDataItemStatSession.pollCloudlets(currTime++);
 	    assertNotNull(currCloudLets);
-	    assertNotNull(currCloudLets[0]);
-	    assertNotNull(currCloudLets[1]);
+	    assertNotNull(currCloudLets.asCloudlet);
+	    assertEquals(currCloudLets.dbCloudlets.size(), 1);
+	    assertNotNull(currCloudLets.dbCloudlets.get(0));
 
 	    // Assert we have runnable cloudlets
-	    assertFalse(currCloudLets[0].isFinished());
-	    assertFalse(currCloudLets[1].isFinished());
+	    assertFalse(currCloudLets.asCloudlet.isFinished());
+	    assertFalse(currCloudLets.dbCloudlets.get(0).isFinished());
 
 	    // Finish the cloudlets
-	    ((TestWebCloudlet) currCloudLets[0]).setFinished(true);
-	    ((TestWebCloudlet) currCloudLets[1]).setFinished(true);
+	    ((TestWebCloudlet) currCloudLets.asCloudlet).setFinished(true);
+	    ((TestWebCloudlet) currCloudLets.dbCloudlets.get(0)).setFinished(true);
 	}
 
-	assertNull(session.pollCloudlets(currTime++));
+	assertNull(singleDataItemStatSession.pollCloudlets(currTime++));
     }
 
-    
+    @Test
+    public void testExhaustivePollingTwoDataItems() {
+	int currTime = 0;
+
+	for (int i = 0; i < 10; i++) {
+	    twoDataItemsStatSession.notifyOfTime(currTime++);
+	    WebSession.StepCloudlets currCloudLets = twoDataItemsStatSession.pollCloudlets(currTime++);
+	    assertNotNull(currCloudLets);
+	    assertNotNull(currCloudLets.asCloudlet);
+	    assertEquals(currCloudLets.dbCloudlets.size(), 2);
+	    assertNotNull(currCloudLets.dbCloudlets.get(0));
+	    assertNotNull(currCloudLets.dbCloudlets.get(1));
+
+	    // Assert we have runnable cloudlets
+	    assertFalse(currCloudLets.asCloudlet.isFinished());
+	    assertFalse(currCloudLets.dbCloudlets.get(0).isFinished());
+	    assertFalse(currCloudLets.dbCloudlets.get(1).isFinished());
+
+	    // Finish the cloudlets
+	    ((TestWebCloudlet) currCloudLets.asCloudlet).setFinished(true);
+	    ((TestWebCloudlet) currCloudLets.dbCloudlets.get(0)).setFinished(true);
+	    ((TestWebCloudlet) currCloudLets.dbCloudlets.get(1)).setFinished(true);
+	}
+
+	assertNull(twoDataItemsStatSession.pollCloudlets(currTime++));
+    }
+
+    @Test
+    public void testNonSynchDBCloudlets() {
+	int currTime = 0;
+
+	for (int i = 0; i < 10; i++) {
+	    twoDataItemsCasuallySession.notifyOfTime(currTime++);
+	    WebSession.StepCloudlets currCloudLets = twoDataItemsCasuallySession.pollCloudlets(currTime++);
+	    assertNotNull(currCloudLets);
+	    assertNotNull(currCloudLets.asCloudlet);
+
+	    // Assert we have runnable cloudlets
+	    assertFalse(currCloudLets.asCloudlet.isFinished());
+
+	    if (i % 3 == 0) {
+		assertEquals(currCloudLets.dbCloudlets.size(), 2);
+		assertNotNull(currCloudLets.dbCloudlets.get(0));
+		assertNotNull(currCloudLets.dbCloudlets.get(1));
+
+		// Assert we have runnable cloudlets
+		assertFalse(currCloudLets.dbCloudlets.get(0).isFinished());
+		assertFalse(currCloudLets.dbCloudlets.get(1).isFinished());
+
+		// Finish the first db cloudlets
+		((TestWebCloudlet) currCloudLets.dbCloudlets.get(0)).setFinished(true);
+		((TestWebCloudlet) currCloudLets.dbCloudlets.get(1)).setFinished(true);
+	    } else {
+		assertEquals(currCloudLets.dbCloudlets.size(), 1);
+		assertNotNull(currCloudLets.dbCloudlets.get(0));
+
+		// Assert we have runnable cloudlets
+		assertFalse(currCloudLets.dbCloudlets.get(0).isFinished());
+
+		// Finish the cloudlets
+		((TestWebCloudlet) currCloudLets.dbCloudlets.get(0)).setFinished(true);
+	    }
+
+	    // Finish the cloudlets
+	    ((TestWebCloudlet) currCloudLets.asCloudlet).setFinished(true);
+	}
+
+	assertNull(twoDataItemsCasuallySession.pollCloudlets(currTime++));
+
+    }
+
     /**
      * A cloudlet that we can explicitly set as finished for testing purposes.
      * 
@@ -154,8 +329,9 @@ public class WebSessionTest {
     private static class TestWebCloudlet extends WebCloudlet {
 	private boolean finished;
 
-	public TestWebCloudlet(double idealStartTime, long cloudletLength, long cloudletIOLength, int ram, int userId) {
-	    super(idealStartTime, cloudletLength, cloudletIOLength, ram, userId, null);
+	public TestWebCloudlet(final double idealStartTime, final long cloudletLength, final long cloudletIOLength,
+		final int ram, final int userId, final DataItem data) {
+	    super(idealStartTime, cloudletLength, cloudletIOLength, ram, userId, data);
 	}
 
 	@Override
@@ -163,7 +339,7 @@ public class WebSessionTest {
 	    return finished;
 	}
 
-	public void setFinished(boolean finished) {
+	public void setFinished(final boolean finished) {
 	    this.finished = finished;
 	}
     }
@@ -171,19 +347,75 @@ public class WebSessionTest {
     private static class TestStatGenerator extends BaseStatGenerator<TestWebCloudlet> {
 	int userId;
 
-	public TestStatGenerator(Map<String, NumberGenerator<Double>> randomGenerators, int userId) {
-	    super(randomGenerators);
+	public TestStatGenerator(final Map<String, NumberGenerator<Double>> randomGenerators,
+		final int userId,
+		final DataItem data) {
+	    super(randomGenerators, data);
 	    this.userId = userId;
 	}
 
 	@Override
-	protected TestWebCloudlet create(double idealStartTime) {
+	protected TestWebCloudlet create(final double idealStartTime) {
 	    long cpuLen = generateValue(CLOUDLET_LENGTH).longValue();
 	    int ram = generateValue(CLOUDLET_RAM).intValue();
 	    int ioLen = generateValue(CLOUDLET_LENGTH).intValue();
 
-	    return new TestWebCloudlet(idealStartTime, cpuLen, ioLen, ram, userId);
+	    return new TestWebCloudlet(idealStartTime, cpuLen, ioLen, ram, userId, super.getData());
 	}
+    }
+
+    /**
+     * A generator that creates new entities once every 3 calls
+     * 
+     * @author nikolay.grozev
+     * 
+     */
+    private static class OnceInThreeGenerator implements IGenerator<TestWebCloudlet> {
+
+	private final LinkedList<Double> idealStartUpTimes = new LinkedList<>();
+	private TestWebCloudlet peeked;
+	private int i = 0;
+	private final DataItem data;
+
+	public OnceInThreeGenerator(final DataItem data) {
+	    this.data = data;
+	}
+
+	private TestWebCloudlet create(final Double time) {
+	    return new TestWebCloudlet(time, 1, 1, 1, 1, data);
+	}
+
+	@Override
+	public TestWebCloudlet peek() {
+	    if (peeked == null && !idealStartUpTimes.isEmpty()) {
+		peeked = create(idealStartUpTimes.poll());
+	    }
+	    return peeked;
+	}
+
+	@Override
+	public TestWebCloudlet poll() {
+	    TestWebCloudlet result = peeked;
+	    if (peeked != null) {
+		peeked = null;
+	    } else if (!idealStartUpTimes.isEmpty()) {
+		result = create(idealStartUpTimes.poll());
+	    }
+	    return result;
+	}
+
+	@Override
+	public boolean isEmpty() {
+	    return peek() == null;
+	}
+
+	@Override
+	public void notifyOfTime(final double time) {
+	    if (i++ % 3 == 0) {
+		idealStartUpTimes.offer(time);
+	    }
+	}
+
     }
 
 }

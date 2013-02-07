@@ -2,8 +2,11 @@ package org.cloudbus.cloudsim.incubator.web;
 
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.cloudbus.cloudsim.Cloudlet;
+import org.cloudbus.cloudsim.incubator.disk.DataItem;
+import org.cloudbus.cloudsim.incubator.util.CustomLog;
 import org.uncommons.maths.number.NumberGenerator;
 
 /**
@@ -27,7 +30,8 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerato
     public static final String CLOUDLET_IO = "CLOUDLET_IO";
 
     protected Map<String, NumberGenerator<Double>> seqGenerators;
-    private LinkedList<Double> idealStartUpTimes = new LinkedList<>();
+    private final LinkedList<Double> idealStartUpTimes = new LinkedList<>();
+    private DataItem data;
     private double startTime = -1;
     private double endTime = -1;
     private T peeked;
@@ -35,15 +39,17 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerato
     /**
      * Creates a new generator with the specified statistical distributions.
      * 
-     * @param randomGenerators
+     * @param seqGenerators
      *            - the statistical distributions to be used for the generation
      *            of CloudLets. See the standard keys provided above to see what
      *            is usually expected from this map. Inheriting classes may
      *            define their own key and values to be used in the factory
      *            method. Must not be null.
+     * @param data
+     *            - the data used by the generator, or null if no data is used.
      */
-    public BaseStatGenerator(final Map<String, NumberGenerator<Double>> randomGenerators) {
-	this(randomGenerators, -1, -1);
+    public BaseStatGenerator(final Map<String, NumberGenerator<Double>> seqGenerators, final DataItem data) {
+	this(seqGenerators, -1, -1, data);
     }
 
     /**
@@ -61,12 +67,21 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerato
      * @param startTime
      *            - the end time of the generation. If positive, no web
      *            cloudlets with ideal start time after this will be generated.
+     * @param data
+     *            - the data used by the generator, or null if no data is used.
      */
     public BaseStatGenerator(final Map<String, NumberGenerator<Double>> seqGenerators, final double startTime,
-	    final double endTime) {
+	    final double endTime, final DataItem data) {
 	this.seqGenerators = seqGenerators;
 	this.startTime = startTime;
 	this.endTime = endTime;
+	this.data = data;
+
+	if (data == null && seqGenerators.containsKey(CLOUDLET_IO)) {
+	    String errMsg = "IO opeartions should not be provided without data is missing";
+	    CustomLog.print(Level.SEVERE, errMsg);
+	    throw new IllegalArgumentException(errMsg);
+	}
     }
 
     /**
@@ -140,6 +155,17 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerato
      */
     public double getEndTime() {
 	return endTime;
+    }
+
+    /**
+     * Returns the data used by the generated cloudlets, or null if the use no
+     * data.
+     * 
+     * @return the data used by the generated cloudlets, or null if the use no
+     *         data.
+     */
+    public DataItem getData() {
+	return data;
     }
 
     /**

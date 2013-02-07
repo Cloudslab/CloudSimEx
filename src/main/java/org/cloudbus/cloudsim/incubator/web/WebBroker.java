@@ -36,18 +36,18 @@ public class WebBroker extends DatacenterBroker {
     private final double refreshPeriod;
     private final double lifeLength;
 
-    private Map<Long, ILoadBalancer> loadBalancers = new HashMap<>();
-    private Map<Long, List<WorkloadGenerator>> loadBalancersToGenerators = new HashMap<>();
+    private final Map<Long, ILoadBalancer> loadBalancers = new HashMap<>();
+    private final Map<Long, List<WorkloadGenerator>> loadBalancersToGenerators = new HashMap<>();
 
-    private List<WebSession> servedSessions = new ArrayList<>();
-    private List<WebSession> canceledSessions = new ArrayList<>();
-    private List<PresetEvent> presetEvents = new ArrayList<>();
+    private final List<WebSession> servedSessions = new ArrayList<>();
+    private final List<WebSession> canceledSessions = new ArrayList<>();
+    private final List<PresetEvent> presetEvents = new ArrayList<>();
 
     /**
      * By default CloudSim's brokers use all available datacenters. So we need
      * to enforce only the data centers we want.
      */
-    private List<Integer> dataCenterIds;
+    private final List<Integer> dataCenterIds;
 
     /**
      * Creates a new web broker.
@@ -85,7 +85,7 @@ public class WebBroker extends DatacenterBroker {
      *             class.
      */
     public WebBroker(final String name, final double refreshPeriod,
-	    final double lifeLength, List<Integer> dataCenterIds) throws Exception {
+	    final double lifeLength, final List<Integer> dataCenterIds) throws Exception {
 	super(name);
 	this.refreshPeriod = refreshPeriod;
 	this.lifeLength = lifeLength;
@@ -120,7 +120,7 @@ public class WebBroker extends DatacenterBroker {
      * .core.SimEvent)
      */
     @Override
-    public void processEvent(SimEvent ev) {
+    public void processEvent(final SimEvent ev) {
 	if (!isTimerRunning) {
 	    isTimerRunning = true;
 	    sendNow(getId(), TIMER_TAG);
@@ -213,7 +213,7 @@ public class WebBroker extends DatacenterBroker {
      */
     @SuppressWarnings("unchecked")
     @Override
-    protected void processOtherEvent(SimEvent ev) {
+    protected void processOtherEvent(final SimEvent ev) {
 	switch (ev.getTag()) {
 	    case TIMER_TAG:
 		if (CloudSim.clock() < lifeLength) {
@@ -254,10 +254,11 @@ public class WebBroker extends DatacenterBroker {
 	    double currTime = CloudSim.clock();
 
 	    sess.notifyOfTime(currTime);
-	    WebCloudlet[] webCloudlets = sess.pollCloudlets(currTime);
+	    WebSession.StepCloudlets webCloudlets = sess.pollCloudlets(currTime);
 
 	    if (webCloudlets != null) {
-		getCloudletList().addAll(Arrays.asList(webCloudlets));
+		getCloudletList().add(webCloudlets.asCloudlet);
+		getCloudletList().addAll(webCloudlets.dbCloudlets);
 		submitCloudlets();
 	    }
 	}
@@ -271,7 +272,7 @@ public class WebBroker extends DatacenterBroker {
      * .cloudsim.core.SimEvent)
      */
     @Override
-    protected void processCloudletReturn(SimEvent ev) {
+    protected void processCloudletReturn(final SimEvent ev) {
 	Cloudlet cloudlet = (Cloudlet) ev.getData();
 	if (CloudSim.clock() >= lifeLength) {
 	    // kill the broker only if it's life length is over/expired
@@ -295,7 +296,7 @@ public class WebBroker extends DatacenterBroker {
 
     @SuppressWarnings("unchecked")
     @Override
-    protected void processResourceCharacteristicsRequest(SimEvent ev) {
+    protected void processResourceCharacteristicsRequest(final SimEvent ev) {
 	setDatacenterIdsList(ev.getData() == null ? CloudSim.getCloudResourceList() : (List<Integer>) ev.getData());
 	setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
 
@@ -313,12 +314,12 @@ public class WebBroker extends DatacenterBroker {
      * 
      */
     private static class PresetEvent {
-	private int id;
-	private int tag;
-	private Object data;
-	private double delay;
+	private final int id;
+	private final int tag;
+	private final Object data;
+	private final double delay;
 
-	public PresetEvent(int id, int tag, Object data, double delay) {
+	public PresetEvent(final int id, final int tag, final Object data, final double delay) {
 	    super();
 	    this.id = id;
 	    this.tag = tag;

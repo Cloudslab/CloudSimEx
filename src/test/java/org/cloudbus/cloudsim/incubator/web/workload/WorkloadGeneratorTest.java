@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Map;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.cloudbus.cloudsim.incubator.disk.DataItem;
 import org.cloudbus.cloudsim.incubator.util.helpers.TestUtil;
 import org.cloudbus.cloudsim.incubator.web.WebSession;
 import org.cloudbus.cloudsim.incubator.web.workload.freq.ConstFreqFunction;
@@ -37,11 +38,13 @@ public class WorkloadGeneratorTest {
     private FrequencyFunction freqFunction;
     private ISessionGenerator sessionGenerator;
 
+    private final DataItem data = new DataItem(65);
+
     @Test
     public void testConstantFreqFunScenario() {
 	freqFunction = new ConstFreqFunction(FREQ_UNIT, FREQ_VALUE);
 	sessionGenerator = new ConstSessionGenerator(AS_CLOUDLET_LENGTH, AS_RAM, DB_CLOUDLET_LENGTH, DB_RAM,
-		DB_CLOUDLET_IO_LENGTH);
+		DB_CLOUDLET_IO_LENGTH, data);
 
 	workloadGenerator = new WorkloadGenerator(TestUtil.SEED_ARRAY, freqFunction, sessionGenerator);
 

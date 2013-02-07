@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
@@ -20,6 +19,7 @@ import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.incubator.util.CustomLog;
 import org.cloudbus.cloudsim.incubator.util.Id;
+import org.cloudbus.cloudsim.incubator.util.helpers.TestUtil;
 import org.cloudbus.cloudsim.incubator.web.WebBroker;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
@@ -74,10 +74,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUMultipleDisks_Test {
 
     @Before
     public void setUp() throws Exception {
-	Properties logProps = new Properties();
-	// logProps.put(CustomLog.LOG_LEVEL_PROP_KEY, Level.FINEST.getName());
-	// logProps.put("ShutStandardLogger", "true");
-	CustomLog.configLogger(logProps);
+	CustomLog.configLogger(TestUtil.LOG_PROPS);
 
 	int numBrokers = 1;
 	boolean trace_flag = false;

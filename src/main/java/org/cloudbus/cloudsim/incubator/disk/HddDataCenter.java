@@ -82,12 +82,11 @@ public class HddDataCenter extends Datacenter {
 	    } else {
 		scheduler.addFailedCloudlet(cl);
 		CustomLog.printf("Cloudlet %d could not be submited because " +
-				"VM/Server %d on host %d in data center %s(%d) is out of memory. ",
+			"VM/Server %d on host %d in data center %s(%d) is out of memory. ",
 			cl.getCloudletId(), vm.getId(), host.getId(), getName(), getId());
 	    }
 	} catch (Exception e) {
-	    CustomLog.printf(Level.SEVERE,
-		    "An error occurred when processing cloudlet sbmission: %s", e.getMessage());
+	    CustomLog.logError(Level.SEVERE, "An error occurred when processing cloudlet sbmission", e);
 	}
     }
 
