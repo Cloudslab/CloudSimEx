@@ -97,9 +97,8 @@ public class WebSession {
     }
 
     /**
-     * Creates two cloudlets to submit to the virtual machines. The first
-     * cloudlet is for the application server, the second - for the database. If
-     * at this time no cloudlets should be sent to the servers null is returned.
+     * Creates cloudlets to submit to the virtual machines. If at this time no
+     * cloudlets should be sent to the servers null is returned.
      * 
      * @param currTime
      *            - the current time of the simulation.
@@ -153,9 +152,9 @@ public class WebSession {
     /**
      * NOTE!!! - used only for test purposes.
      * 
-     * @return - the current db server cloudlet.
+     * @return - the current db server cloudlets.
      */
-    /* package access */List<? extends WebCloudlet> getCurrentDBServerCloudLet() {
+    /* package access */List<? extends WebCloudlet> getCurrentDBServerCloudLets() {
 	return currentDBServerCloudLets;
     }
 
@@ -318,6 +317,11 @@ public class WebSession {
 	}
     }
 
+    /**
+     * 
+     * @author nikolay.grozev
+     * 
+     */
     public static class StepCloudlets {
 	public WebCloudlet asCloudlet;
 	public List<? extends WebCloudlet> dbCloudlets;

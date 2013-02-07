@@ -25,13 +25,15 @@ public class PeriodicStochasticFrequencyFunctionTest {
 
     @Test
     public void testMainScenarios() {
-	long parameterSeed = 4;
-
 	PeriodicStochasticFrequencyFunction fun = new PeriodicStochasticFrequencyFunction(UNIT, PERIOD_LENGTH,
-		NULL_POINT, CompositeValuedSet.createCompositeValuedSet(TestUtil.SEED_ARRAY, "[0,20] m=10 std=1",
-			"(20,40]m=15.1 std=1.6", "(40,60] m=16 std=0.1", "(60,80] m=300 std=1", "(80,100] m=10 std=0"));
+		NULL_POINT, CompositeValuedSet.createCompositeValuedSet(TestUtil.SEED_ARRAY,
+			"[0,20] m=10 std=1",
+			"(20,40]m=15.1 std=1.6",
+			"(40,60] m=16 std=0.1",
+			"(60,80] m=300 std=1",
+			"(80,100] m=10 std=0"));
 
-	Random r = new Random(parameterSeed);
+	Random r = new Random(TestUtil.SEED);
 	DescriptiveStatistics stat = new DescriptiveStatistics();
 
 	// Test the first interval
