@@ -5,7 +5,7 @@
 	<groupId>org.cloudbus</groupId>
 	<artifactId>cloudsimex</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
 
 	<name>cloudsimex</name>
 	<url>http://maven.apache.org</url>
@@ -99,4 +99,10 @@
 			<version>1.9.0</version>
 		</dependency>
 	</dependencies>
+	<modules>
+		<module>cloudsimex-examples</module>
+		<module>cloudsimex-web</module>
+		<module>cloudsimex-core</module>
+		<module>cloudsimex-experiments</module>
+	</modules>
 </project>
