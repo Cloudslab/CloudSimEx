@@ -20,7 +20,8 @@ import org.uncommons.maths.number.NumberGenerator;
  * @param <T>
  *            - the actual type of the generated CloudLets.
  */
-public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerator<T> {
+public abstract class BaseStatGenerator<T extends Cloudlet> implements
+IGenerator<T> {
 
     /** A key for the statistical generator of CPU length of the cloudlet. */
     public static final String CLOUDLET_LENGTH = "CLOUDLET_MIPS";
@@ -28,8 +29,13 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerato
     public static final String CLOUDLET_RAM = "CLOUDLET_RAM";
     /** A key for the statistical generator of IO length of the cloudlet. */
     public static final String CLOUDLET_IO = "CLOUDLET_IO";
+    /** A key for the statistical generator of boolean values, specifying if a
+     * cloudlets modfies its data. Boolean values are represented as integers -
+     * 0 is considered False, and other values are considered as True.
+     * */
+    public static final String CLOUDLET_MODIFIES_DATA = "CLOUDLET_MODIFIES_DATA";
 
-    protected Map<String, NumberGenerator<Double>> seqGenerators;
+    protected Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators;
     private final LinkedList<Double> idealStartUpTimes = new LinkedList<>();
     private DataItem data;
     private double startTime = -1;
@@ -48,7 +54,9 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerato
      * @param data
      *            - the data used by the generator, or null if no data is used.
      */
-    public BaseStatGenerator(final Map<String, NumberGenerator<Double>> seqGenerators, final DataItem data) {
+    public BaseStatGenerator(
+	    final Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators,
+		    final DataItem data) {
 	this(seqGenerators, -1, -1, data);
     }
 
@@ -70,8 +78,9 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerato
      * @param data
      *            - the data used by the generator, or null if no data is used.
      */
-    public BaseStatGenerator(final Map<String, NumberGenerator<Double>> seqGenerators, final double startTime,
-	    final double endTime, final DataItem data) {
+    public BaseStatGenerator(
+	    final Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators,
+		    final double startTime, final double endTime, final DataItem data) {
 	this.seqGenerators = seqGenerators;
 	this.startTime = startTime;
 	this.endTime = endTime;
@@ -130,9 +139,9 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerato
      */
     @Override
     public void notifyOfTime(final double time) {
-	if ((startTime < 0 || startTime <= time) &&
-		(endTime < 0 || endTime >= time) &&
-		(idealStartUpTimes.isEmpty() || idealStartUpTimes.getLast() < time)) {
+	if ((startTime < 0 || startTime <= time)
+		&& (endTime < 0 || endTime >= time)
+		&& (idealStartUpTimes.isEmpty() || idealStartUpTimes.getLast() < time)) {
 	    idealStartUpTimes.offer(time);
 	}
     }
@@ -183,12 +192,27 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerato
      * Generates a plausible value for the key.
      * 
      * @param key
-     *            - the key. Tytpically one of the constants of the class..
+     *            - the key. Tytpically one of the constants of the class.
      * @return a plausible (with the correspondent statistical properties) value
      *         for the key.
      */
-    protected Double generateValue(final String key) {
-	return !seqGenerators.containsKey(key) ? 0 :
-		Math.max(0, seqGenerators.get(key).nextValue());
+    protected Double generateNumericValue(final String key) {
+	return !seqGenerators.containsKey(key) ? 0 : Math.max(0, seqGenerators
+		.get(key).nextValue().doubleValue());
+    }
+
+    /**
+     * Generates a boolean value for the key.
+     * 
+     * @param key
+     *            - the key. Tytpically one of the constants of the class.
+     * @return a plausible (with the correspondent statistical properties) value
+     *         for the key. 0 values are considered as False and other values are
+     *         considered as True. If no value is present for the key - False is returned.
+     */
+    protected Boolean generateBooleanValue(final String key) {
+	int result = !seqGenerators.containsKey(key) ? 0 : Math.max(0, seqGenerators
+		.get(key).nextValue().intValue());
+	return result != 1;
     }
 }

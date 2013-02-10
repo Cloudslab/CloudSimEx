@@ -22,7 +22,9 @@ public class StatGenerator extends BaseStatGenerator<WebCloudlet> {
      * @param data
      *            - the data used by the generator, or null if no data is used.
      */
-    public StatGenerator(final Map<String, NumberGenerator<Double>> randomGenerators, final DataItem data) {
+    public StatGenerator(
+	    final Map<String, ? extends NumberGenerator<? extends Number>> randomGenerators,
+		    final DataItem data) {
 	super(randomGenerators, data);
     }
 
@@ -39,8 +41,9 @@ public class StatGenerator extends BaseStatGenerator<WebCloudlet> {
      * @param data
      *            - the data used by the generator, or null if no data is used.
      */
-    public StatGenerator(final Map<String, NumberGenerator<Double>> seqGenerators,
-	    final double startTime, final double endTime, final DataItem data) {
+    public StatGenerator(
+	    final Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators,
+		    final double startTime, final double endTime, final DataItem data) {
 	super(seqGenerators, startTime, endTime, data);
     }
 
@@ -51,11 +54,13 @@ public class StatGenerator extends BaseStatGenerator<WebCloudlet> {
      */
     @Override
     protected WebCloudlet create(final double idealStartTime) {
-	long cpuLen = generateValue(CLOUDLET_LENGTH).longValue();
-	int ram = generateValue(CLOUDLET_RAM).intValue();
-	int ioLen = generateValue(CLOUDLET_IO).intValue();
+	long cpuLen = generateNumericValue(CLOUDLET_LENGTH).longValue();
+	int ram = generateNumericValue(CLOUDLET_RAM).intValue();
+	int ioLen = generateNumericValue(CLOUDLET_IO).intValue();
+	boolean modifiesData = generateBooleanValue(CLOUDLET_MODIFIES_DATA);
 
-	return new WebCloudlet(idealStartTime, cpuLen, ioLen, ram, -1, getData());
+	return new WebCloudlet(idealStartTime, cpuLen, ioLen, ram, -1,
+		modifiesData, getData());
     }
 
 }

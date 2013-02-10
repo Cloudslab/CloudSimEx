@@ -161,7 +161,7 @@ public class CloudSimWorkloadWebExample {
 	int numberOfCloudlets = duration / 5;
 
 	ISessionGenerator sessGen = new ConstSessionGenerator(asCloudletLength, asRam, dbCloudletLength, dbRam,
-		dbCloudletIOLength, duration, numberOfCloudlets, data);
+		dbCloudletIOLength, duration, numberOfCloudlets, false, data);
 
 	double unit = 3600;
 	double periodLength = 3600 * 24;
@@ -205,8 +205,8 @@ public class CloudSimWorkloadWebExample {
 
 	// 3. Create PEs and add these into a list.
 	peList.add(new Pe(0, new PeProvisionerSimple(mips))); // need to store
-							      // Pe id and
-							      // MIPS Rating
+	// Pe id and
+	// MIPS Rating
 
 	hddList.add(new HddPe(new PeProvisionerSimple(iops), data));
 
@@ -233,7 +233,7 @@ public class CloudSimWorkloadWebExample {
 	double cost = 3.0; // the cost of using processing in this resource
 	double costPerMem = 0.05; // the cost of using memory in this resource
 	double costPerStorage = 0.001; // the cost of using storage in this
-				       // resource
+	// resource
 	double costPerBw = 0.0; // the cost of using bw in this resource
 	LinkedList<Storage> storageList = new LinkedList<Storage>();
 

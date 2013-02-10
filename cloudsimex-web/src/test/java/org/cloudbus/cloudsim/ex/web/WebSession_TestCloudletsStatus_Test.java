@@ -28,15 +28,6 @@ import org.cloudbus.cloudsim.ex.disk.VmDiskScheduler;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.helpers.TestUtil;
-import org.cloudbus.cloudsim.ex.web.CompositeGenerator;
-import org.cloudbus.cloudsim.ex.web.IGenerator;
-import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
-import org.cloudbus.cloudsim.ex.web.IterableGenerator;
-import org.cloudbus.cloudsim.ex.web.SimpleDBBalancer;
-import org.cloudbus.cloudsim.ex.web.SimpleWebLoadBalancer;
-import org.cloudbus.cloudsim.ex.web.WebBroker;
-import org.cloudbus.cloudsim.ex.web.WebCloudlet;
-import org.cloudbus.cloudsim.ex.web.WebSession;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
@@ -110,53 +101,53 @@ public class WebSession_TestCloudletsStatus_Test {
 	double factor1 = 0.5;
 	double factor2 = 0.25;
 	WebCloudlet asCl1 = new WebCloudlet(0, (int) (VM_MIPS * factor1),
-		0, 10, broker.getId(), null);
+		0, 10, broker.getId(), false, null);
 	WebCloudlet asCl2 = new WebCloudlet(0, (int) (VM_MIPS * factor2),
-		0, 10, broker.getId(), null);
+		0, 10, broker.getId(), false, null);
 
 	WebCloudlet dbCl1 = new WebCloudlet(0, (int) (VM_MIPS * factor2),
-		(int) (HOST_MIOPS * factor2), 10, broker.getId(), dataItem1);
+		(int) (HOST_MIOPS * factor2), 10, broker.getId(), false, dataItem1);
 	WebCloudlet dbCl2 = new WebCloudlet(0, (int) (VM_MIPS * factor1),
-		(int) (HOST_MIOPS * factor1), 10, broker.getId(), dataItem1);
+		(int) (HOST_MIOPS * factor1), 10, broker.getId(), false, dataItem1);
 
 	IGenerator<WebCloudlet> generatorAS = new
 		IterableGenerator<>(Arrays.asList(asCl1, asCl2));
-	CompositeGenerator<WebCloudlet> generatorDB =
-		new CompositeGenerator<>(new IterableGenerator<>(Arrays.asList(dbCl1,
-			dbCl2)));
+		CompositeGenerator<WebCloudlet> generatorDB =
+			new CompositeGenerator<>(new IterableGenerator<>(Arrays.asList(dbCl1,
+				dbCl2)));
 
-	ILoadBalancer balancer = new SimpleWebLoadBalancer(Arrays.asList(vm1),
-		new SimpleDBBalancer(vm2));
-	broker.addLoadBalancer(balancer);
+			ILoadBalancer balancer = new SimpleWebLoadBalancer(Arrays.asList(vm1),
+				new SimpleDBBalancer(vm2));
+			broker.addLoadBalancer(balancer);
 
-	WebSession session = new WebSession(generatorAS, generatorDB,
-		broker.getId(), 2, -1);
-	// session.setAppVmId(vm1.getId());
-	// session.setDbBalancer(vm2.getId());
+			WebSession session = new WebSession(generatorAS, generatorDB,
+				broker.getId(), 2, -1);
+			// session.setAppVmId(vm1.getId());
+			// session.setDbBalancer(vm2.getId());
 
-	broker.submitSessions(Arrays.asList(session), balancer.getId());
+			broker.submitSessions(Arrays.asList(session), balancer.getId());
 
-	CloudSim.startSimulation();
-	List<HddCloudlet> resultList = broker.getCloudletReceivedList();
-	CloudSim.stopSimulation();
+			CloudSim.startSimulation();
+			List<HddCloudlet> resultList = broker.getCloudletReceivedList();
+			CloudSim.stopSimulation();
 
-	assertEquals(4, resultList.size());
+			assertEquals(4, resultList.size());
 
-	assertEquals(asCl1.getExecStartTime(), dbCl1.getExecStartTime(), DELTA);
-	assertEquals(asCl2.getExecStartTime(), dbCl2.getExecStartTime(), DELTA);
+			assertEquals(asCl1.getExecStartTime(), dbCl1.getExecStartTime(), DELTA);
+			assertEquals(asCl2.getExecStartTime(), dbCl2.getExecStartTime(), DELTA);
 
-	assertTrue(asCl1.isFinished());
-	assertTrue(asCl2.isFinished());
-	assertTrue(dbCl1.isFinished());
-	assertTrue(dbCl2.isFinished());
+			assertTrue(asCl1.isFinished());
+			assertTrue(asCl2.isFinished());
+			assertTrue(dbCl1.isFinished());
+			assertTrue(dbCl2.isFinished());
 
-	double asCl1Len = asCl1.getFinishTime() - asCl1.getExecStartTime();
-	double asCl2Len = asCl2.getFinishTime() - asCl2.getExecStartTime();
-	double dbCl1Len = dbCl1.getFinishTime() - dbCl1.getExecStartTime();
-	double dbCl2Len = dbCl2.getFinishTime() - dbCl2.getExecStartTime();
+			double asCl1Len = asCl1.getFinishTime() - asCl1.getExecStartTime();
+			double asCl2Len = asCl2.getFinishTime() - asCl2.getExecStartTime();
+			double dbCl1Len = dbCl1.getFinishTime() - dbCl1.getExecStartTime();
+			double dbCl2Len = dbCl2.getFinishTime() - dbCl2.getExecStartTime();
 
-	assertTrue(asCl1Len > dbCl1Len);
-	assertTrue(asCl2Len < dbCl2Len);
+			assertTrue(asCl1Len > dbCl1Len);
+			assertTrue(asCl2Len < dbCl2Len);
     }
 
     private HddDataCenter createDatacenterWithSingleHostAndSingleDisk(final String name) {

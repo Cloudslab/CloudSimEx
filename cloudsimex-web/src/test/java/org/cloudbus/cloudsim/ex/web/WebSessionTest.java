@@ -16,13 +16,6 @@ import org.cloudbus.cloudsim.ex.disk.DataItem;
 import org.cloudbus.cloudsim.ex.disk.HddCloudlet;
 import org.cloudbus.cloudsim.ex.disk.HddVm;
 import org.cloudbus.cloudsim.ex.util.Id;
-import org.cloudbus.cloudsim.ex.web.BaseStatGenerator;
-import org.cloudbus.cloudsim.ex.web.CompositeGenerator;
-import org.cloudbus.cloudsim.ex.web.IDBBalancer;
-import org.cloudbus.cloudsim.ex.web.IGenerator;
-import org.cloudbus.cloudsim.ex.web.StatGenerator;
-import org.cloudbus.cloudsim.ex.web.WebCloudlet;
-import org.cloudbus.cloudsim.ex.web.WebSession;
 import org.junit.Before;
 import org.junit.Test;
 import org.uncommons.maths.number.NumberGenerator;
@@ -355,7 +348,7 @@ public class WebSessionTest {
 
 	public TestWebCloudlet(final double idealStartTime, final long cloudletLength, final long cloudletIOLength,
 		final int ram, final int userId, final DataItem data) {
-	    super(idealStartTime, cloudletLength, cloudletIOLength, ram, userId, data);
+	    super(idealStartTime, cloudletLength, cloudletIOLength, ram, userId, false, data);
 	}
 
 	@Override
@@ -380,9 +373,9 @@ public class WebSessionTest {
 
 	@Override
 	protected TestWebCloudlet create(final double idealStartTime) {
-	    long cpuLen = generateValue(CLOUDLET_LENGTH).longValue();
-	    int ram = generateValue(CLOUDLET_RAM).intValue();
-	    int ioLen = generateValue(CLOUDLET_LENGTH).intValue();
+	    long cpuLen = generateNumericValue(CLOUDLET_LENGTH).longValue();
+	    int ram = generateNumericValue(CLOUDLET_RAM).intValue();
+	    int ioLen = generateNumericValue(CLOUDLET_LENGTH).intValue();
 
 	    return new TestWebCloudlet(idealStartTime, cpuLen, ioLen, ram, userId, super.getData());
 	}

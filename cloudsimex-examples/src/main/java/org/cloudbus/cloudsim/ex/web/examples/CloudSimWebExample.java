@@ -55,6 +55,7 @@ import org.cloudbus.cloudsim.ex.web.WebSession;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
+import org.uncommons.maths.number.ConstantGenerator;
 import org.uncommons.maths.number.NumberGenerator;
 import org.uncommons.maths.random.GaussianGenerator;
 import org.uncommons.maths.random.MersenneTwisterRNG;
@@ -156,11 +157,13 @@ public class CloudSimWebExample {
 	GaussianGenerator cpuGen = new GaussianGenerator(1000, 20, rng);
 	GaussianGenerator ramGen = new GaussianGenerator(5, 1, rng);
 	GaussianGenerator ioGen = new GaussianGenerator(1000, 20, rng);
+	NumberGenerator<Integer> modifiesDataGen = new ConstantGenerator<>(0);
 
-	Map<String, NumberGenerator<Double>> generators = new HashMap<>();
+	Map<String, NumberGenerator<? extends Number>> generators = new HashMap<>();
 	generators.put(StatGenerator.CLOUDLET_LENGTH, cpuGen);
 	generators.put(StatGenerator.CLOUDLET_RAM, ramGen);
 	generators.put(StatGenerator.CLOUDLET_IO, ioGen);
+	generators.put(StatGenerator.CLOUDLET_MODIFIES_DATA, modifiesDataGen);
 	IGenerator<WebCloudlet> asGenerator = new StatGenerator(generators, data);
 	IGenerator<Collection<WebCloudlet>> dbGenerator =
 		new CompositeGenerator<WebCloudlet>(new StatGenerator(generators, data));
@@ -190,8 +193,8 @@ public class CloudSimWebExample {
 
 	// 3. Create PEs and add these into a list.
 	peList.add(new Pe(0, new PeProvisionerSimple(mips))); // need to store
-							      // Pe id and
-							      // MIPS Rating
+	// Pe id and
+	// MIPS Rating
 
 	hddList.add(new HddPe(new PeProvisionerSimple(iops), data));
 
@@ -218,7 +221,7 @@ public class CloudSimWebExample {
 	double cost = 3.0; // the cost of using processing in this resource
 	double costPerMem = 0.05; // the cost of using memory in this resource
 	double costPerStorage = 0.001; // the cost of using storage in this
-				       // resource
+	// resource
 	double costPerBw = 0.0; // the cost of using bw in this resource
 	LinkedList<Storage> storageList = new LinkedList<Storage>();
 

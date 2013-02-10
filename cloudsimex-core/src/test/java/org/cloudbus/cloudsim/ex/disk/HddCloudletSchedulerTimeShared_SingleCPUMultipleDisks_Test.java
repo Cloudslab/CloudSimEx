@@ -18,14 +18,6 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.ex.disk.DataItem;
-import org.cloudbus.cloudsim.ex.disk.HddCloudlet;
-import org.cloudbus.cloudsim.ex.disk.HddCloudletSchedulerTimeShared;
-import org.cloudbus.cloudsim.ex.disk.HddDataCenter;
-import org.cloudbus.cloudsim.ex.disk.HddHost;
-import org.cloudbus.cloudsim.ex.disk.HddPe;
-import org.cloudbus.cloudsim.ex.disk.HddVm;
-import org.cloudbus.cloudsim.ex.disk.VmDiskScheduler;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.helpers.TestUtil;
@@ -263,16 +255,16 @@ public class HddCloudletSchedulerTimeShared_SingleCPUMultipleDisks_Test {
 
 	double cloudletExecTime1 = cloudlet1.getCloudletStatus() == Cloudlet.SUCCESS ?
 		cloudlet1.getFinishTime() - cloudlet1.getExecStartTime() : -1;
-	double cloudletExecTime2 = cloudlet2.getCloudletStatus() == Cloudlet.SUCCESS ?
-		cloudlet2.getFinishTime() - cloudlet2.getExecStartTime() : -1;
-	double cloudletExecTime3 = cloudlet3.getCloudletStatus() == Cloudlet.SUCCESS ?
-		cloudlet3.getFinishTime() - cloudlet3.getExecStartTime() : -1;
-	double cloudletExecTime4 = cloudlet4.getCloudletStatus() == Cloudlet.SUCCESS ?
-		cloudlet4.getFinishTime() - cloudlet4.getExecStartTime() : -1;
-	assertEquals(cloudletExpectedExecTimes.get("cloudlet1"), cloudletExecTime1, DELTA);
-	assertEquals(cloudletExpectedExecTimes.get("cloudlet2"), cloudletExecTime2, DELTA);
-	assertEquals(cloudletExpectedExecTimes.get("cloudlet3"), cloudletExecTime3, DELTA);
-	assertEquals(cloudletExpectedExecTimes.get("cloudlet4"), cloudletExecTime4, DELTA);
+		double cloudletExecTime2 = cloudlet2.getCloudletStatus() == Cloudlet.SUCCESS ?
+			cloudlet2.getFinishTime() - cloudlet2.getExecStartTime() : -1;
+			double cloudletExecTime3 = cloudlet3.getCloudletStatus() == Cloudlet.SUCCESS ?
+				cloudlet3.getFinishTime() - cloudlet3.getExecStartTime() : -1;
+				double cloudletExecTime4 = cloudlet4.getCloudletStatus() == Cloudlet.SUCCESS ?
+					cloudlet4.getFinishTime() - cloudlet4.getExecStartTime() : -1;
+					assertEquals(cloudletExpectedExecTimes.get("cloudlet1"), cloudletExecTime1, DELTA);
+					assertEquals(cloudletExpectedExecTimes.get("cloudlet2"), cloudletExecTime2, DELTA);
+					assertEquals(cloudletExpectedExecTimes.get("cloudlet3"), cloudletExecTime3, DELTA);
+					assertEquals(cloudletExpectedExecTimes.get("cloudlet4"), cloudletExecTime4, DELTA);
     }
 
     private void provisionVMsAndScheduleCloudlets(final ImmutableMap<String, Integer[]> vmIdsToDiskIds,
@@ -298,19 +290,19 @@ public class HddCloudletSchedulerTimeShared_SingleCPUMultipleDisks_Test {
 	broker.submitVmList(vmlist);
 
 	Integer[] lengths = cloudletsLength.get("cloudlet1");
-	cloudlet1 = new HddCloudlet(lengths[0], lengths[1], 5, broker.getId(), cloudLetIdsToDiskIds.get("cloudlet1"));
+	cloudlet1 = new HddCloudlet(lengths[0], lengths[1], 5, broker.getId(), false, cloudLetIdsToDiskIds.get("cloudlet1"));
 	cloudlet1.setVmId(vm1.getId());
 
 	lengths = cloudletsLength.get("cloudlet2");
-	cloudlet2 = new HddCloudlet(lengths[0], lengths[1], 5, broker.getId(), cloudLetIdsToDiskIds.get("cloudlet2"));
+	cloudlet2 = new HddCloudlet(lengths[0], lengths[1], 5, broker.getId(), false, cloudLetIdsToDiskIds.get("cloudlet2"));
 	cloudlet2.setVmId(vm1.getId());
 
 	lengths = cloudletsLength.get("cloudlet3");
-	cloudlet3 = new HddCloudlet(lengths[0], lengths[1], 5, broker.getId(), cloudLetIdsToDiskIds.get("cloudlet3"));
+	cloudlet3 = new HddCloudlet(lengths[0], lengths[1], 5, broker.getId(), false, cloudLetIdsToDiskIds.get("cloudlet3"));
 	cloudlet3.setVmId(vm2.getId());
 
 	lengths = cloudletsLength.get("cloudlet4");
-	cloudlet4 = new HddCloudlet(lengths[0], lengths[1], 5, broker.getId(), cloudLetIdsToDiskIds.get("cloudlet4"));
+	cloudlet4 = new HddCloudlet(lengths[0], lengths[1], 5, broker.getId(), false, cloudLetIdsToDiskIds.get("cloudlet4"));
 	cloudlet4.setVmId(vm2.getId());
 
 	broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2, cloudlet3, cloudlet4));

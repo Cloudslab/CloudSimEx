@@ -9,7 +9,6 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.cloudbus.cloudsim.ex.disk.DataItem;
 import org.cloudbus.cloudsim.ex.util.helpers.TestUtil;
 import org.cloudbus.cloudsim.ex.web.WebSession;
-import org.cloudbus.cloudsim.ex.web.workload.WorkloadGenerator;
 import org.cloudbus.cloudsim.ex.web.workload.freq.ConstFreqFunction;
 import org.cloudbus.cloudsim.ex.web.workload.freq.FrequencyFunction;
 import org.cloudbus.cloudsim.ex.web.workload.sessions.ConstSessionGenerator;
@@ -45,7 +44,7 @@ public class WorkloadGeneratorTest {
     public void testConstantFreqFunScenario() {
 	freqFunction = new ConstFreqFunction(FREQ_UNIT, FREQ_VALUE);
 	sessionGenerator = new ConstSessionGenerator(AS_CLOUDLET_LENGTH, AS_RAM, DB_CLOUDLET_LENGTH, DB_RAM,
-		DB_CLOUDLET_IO_LENGTH, data);
+		DB_CLOUDLET_IO_LENGTH, false, data);
 
 	workloadGenerator = new WorkloadGenerator(TestUtil.SEED_ARRAY, freqFunction, sessionGenerator);
 

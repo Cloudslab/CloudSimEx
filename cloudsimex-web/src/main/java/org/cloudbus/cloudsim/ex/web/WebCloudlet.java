@@ -40,6 +40,8 @@ public class WebCloudlet extends HddCloudlet {
      *            - the userId.
      * @param data
      *            - the data used by this cloudlet.
+     * @param dataModifying
+     * 		  - whether this cloudlets modifies the data it accesses.
      * @param record
      *            - the record flag, as specified by the parent class.
      */
@@ -48,9 +50,10 @@ public class WebCloudlet extends HddCloudlet {
 	    final long cloudletIOLength,
 	    final int ram,
 	    final int userId,
+	    final boolean dataModifying,
 	    final DataItem data,
 	    final boolean record) {
-	super(cloudletLength, cloudletIOLength, 1, 1, ram, userId, data, record);
+	super(cloudletLength, cloudletIOLength, 1, 1, ram, userId, dataModifying, data, record);
 	this.idealStartTime = idealStartTime;
     }
 
@@ -67,16 +70,17 @@ public class WebCloudlet extends HddCloudlet {
      *            - the userId.
      * @param data
      *            - the data used by this cloudlet.
-     * @param webBroker
-     *            - the broker used to submit this cloudlet to the data center.
+     * @param dataModifying
+     * 		  - whether this cloudlets modifies the data it accesses.
      */
     public WebCloudlet(final double idealStartTime,
 	    final long cloudletLength,
 	    final long cloudletIOLength,
 	    final int ram,
 	    final int userId,
+	    final boolean dataModifying,
 	    final DataItem data) {
-	this(idealStartTime, cloudletLength, cloudletIOLength, ram, userId, data, false);
+	this(idealStartTime, cloudletLength, cloudletIOLength, ram, userId, dataModifying, data, false);
     }
 
 

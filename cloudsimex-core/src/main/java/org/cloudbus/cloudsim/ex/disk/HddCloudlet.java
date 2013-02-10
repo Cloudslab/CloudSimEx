@@ -19,6 +19,7 @@ public class HddCloudlet extends Cloudlet {
     protected long cloudletIOLength;
     protected final int ram;
     protected final DataItem data;
+    protected boolean dataModifying;
 
     /**
      * Constr.
@@ -30,14 +31,17 @@ public class HddCloudlet extends Cloudlet {
      * @param ram
      * @param userId
      * @param data
+     * @param dataModifying
+     * 		  - whether this cloudlets modifies the data it accesses.
      * @param record
      */
-    public HddCloudlet(long cloudletLength,
+    public HddCloudlet(final long cloudletLength,
 	    final long cloudletIOLength,
-	    int pesNumber,
-	    int numberOfHddPes,
+	    final int pesNumber,
+	    final int numberOfHddPes,
 	    final int ram,
 	    final int userId,
+	    final boolean dataModifying,
 	    final DataItem data,
 	    final boolean record) {
 
@@ -47,6 +51,7 @@ public class HddCloudlet extends Cloudlet {
 	this.cloudletIOLength = cloudletIOLength;
 	this.data = data;
 	this.numberOfHddPes = numberOfHddPes;
+	this.dataModifying = dataModifying;
 	setUserId(userId);
     }
 
@@ -57,6 +62,8 @@ public class HddCloudlet extends Cloudlet {
      * @param cloudletIOLength
      * @param ram
      * @param userId
+     * @param dataModifying
+     * 		  - whether this cloudlets modifies the data it accesses.
      * @param data
      * @param record
      */
@@ -64,9 +71,10 @@ public class HddCloudlet extends Cloudlet {
 	    final long cloudletIOLength,
 	    final int ram,
 	    final int userId,
+	    final boolean dataModifying,
 	    final DataItem data,
 	    final boolean record) {
-	this(cloudletLength, cloudletIOLength, 1, 1, ram, userId, data, record);
+	this(cloudletLength, cloudletIOLength, 1, 1, ram, userId, dataModifying, data, record);
     }
 
     /**
@@ -76,14 +84,17 @@ public class HddCloudlet extends Cloudlet {
      * @param cloudletIOLength
      * @param ram
      * @param userId
+     * @param dataModifying
+     * 		  - whether this cloudlets modifies the data it accesses.
      * @param data
      */
     public HddCloudlet(final long cloudletLength,
 	    final long cloudletIOLength,
 	    final int ram,
 	    final int userId,
+	    final boolean dataModifying,
 	    final DataItem data) {
-	this(cloudletLength, cloudletIOLength, 1, 1, ram, userId, data, false);
+	this(cloudletLength, cloudletIOLength, 1, 1, ram, userId, dataModifying, data, false);
     }
 
     /**
@@ -111,7 +122,7 @@ public class HddCloudlet extends Cloudlet {
      *            - the number of Harddisks this host has. Must not be negative
      *            or 0.
      */
-    public void setNumberOfHddPes(int numberOfHddPes) {
+    public void setNumberOfHddPes(final int numberOfHddPes) {
 	this.numberOfHddPes = numberOfHddPes;
     }
 
@@ -135,7 +146,7 @@ public class HddCloudlet extends Cloudlet {
      *            - total length of this cloudlet in terms of IO operations.
      *            Must be a positive number.
      */
-    public void setCloudletIOLength(long cloudletIOLength) {
+    public void setCloudletIOLength(final long cloudletIOLength) {
 	this.cloudletIOLength = cloudletIOLength;
     }
 
@@ -146,6 +157,22 @@ public class HddCloudlet extends Cloudlet {
      */
     public DataItem getData() {
 	return data;
+    }
+
+    /**
+     * Returns if this cloudlet modifies the data it accesses.
+     * @return if this cloudlet modifies the data it accesses.
+     */
+    public boolean isDataModifying() {
+	return dataModifying;
+    }
+
+    /**
+     * Sets if this cloudlet modifies the data it accesses.
+     * @param dataModifying - if this cloudlet modifies the data it accesses.
+     */
+    public void setDataModifying(final boolean dataModifying) {
+	this.dataModifying = dataModifying;
     }
 
     @Override

@@ -18,14 +18,6 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.ex.disk.DataItem;
-import org.cloudbus.cloudsim.ex.disk.HddCloudlet;
-import org.cloudbus.cloudsim.ex.disk.HddCloudletSchedulerTimeShared;
-import org.cloudbus.cloudsim.ex.disk.HddDataCenter;
-import org.cloudbus.cloudsim.ex.disk.HddHost;
-import org.cloudbus.cloudsim.ex.disk.HddPe;
-import org.cloudbus.cloudsim.ex.disk.HddVm;
-import org.cloudbus.cloudsim.ex.disk.VmDiskScheduler;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.helpers.TestUtil;
@@ -127,13 +119,13 @@ public class HddCloudletSchedulerTimeShared_MultipleCPUsMultipleDisks_Test {
 	double job4TimesIOMIPS = 2;
 
 	HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips),
-		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId(), dataItem_1_1);
+		(int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId(), false, dataItem_1_1);
 	HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips),
-		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId(), dataItem_1_2);
+		(int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId(), false, dataItem_1_2);
 	HddCloudlet cloudlet3 = new HddCloudlet((int) (VM_MIPS * job3TimesMips),
-		(int) (HOST_MIOPS * job3TimesIOMIPS), 5, broker.getId(), dataItem_2_2);
+		(int) (HOST_MIOPS * job3TimesIOMIPS), 5, broker.getId(), false, dataItem_2_2);
 	HddCloudlet cloudlet4 = new HddCloudlet((int) (VM_MIPS * job4TimesMips),
-		(int) (HOST_MIOPS * job4TimesIOMIPS), 5, broker.getId(), dataItem_2_2);
+		(int) (HOST_MIOPS * job4TimesIOMIPS), 5, broker.getId(), false, dataItem_2_2);
 
 	cloudlet1.setVmId(vm1.getId());
 	cloudlet2.setVmId(vm2.getId());
