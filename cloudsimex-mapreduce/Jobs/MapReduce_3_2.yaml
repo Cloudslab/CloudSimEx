@@ -1,0 +1,44 @@
+# This job is to calculate the average temperature of one of the Great Barrier Reef (GBR) temperature sensor on 2011 and 2012
+
+maps:
+	- id: map00001
+	  dsize: 64
+	  idsize: 0.5
+	  mipb: 100
+	  ds:
+	  	- id: gbr-sensors
+	  	  file: temperature_gbr_1_20m.txt
+	  	  block: 1
+	  	- id: EEE-sensors
+	  	  file: temperature_gbr_1_20m.txt
+	  	  block: 1
+	  
+	- id: map00002
+	  dsize: 64
+	  idsize: 0.5
+	  mipb: 100
+	  ds:
+	  	- id: gbr-sensors
+	  	  file: temperature_gbr_1_20m.txt
+	  	  block: 2
+	  	- id: S3-sensors
+	  	  file: temperature_gbr_1_20m.txt
+	  	  block: 2
+	  
+	- id: map00003
+	  dsize: 10
+	  idsize: 0.5
+	  mipb: 100
+	  ds:
+	  	- id: S3-sensors
+	  	  file: temperature_gbr_1_20m.txt
+	  	  block: 2
+	  	  
+reduces:
+	- id: reduce00001
+	  idsize: .5
+	  mipb: 100
+	  
+	- id: reduce00002
+	  idsize: .5
+	  mipb: 100
