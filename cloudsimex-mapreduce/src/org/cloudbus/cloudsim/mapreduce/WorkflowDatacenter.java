@@ -1,8 +1,9 @@
-package org.cloudbus.cloudsim.workflow;
+package org.cloudbus.cloudsim.mapreduce;
 
 import java.text.DecimalFormat;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.Map.Entry;
 
 import org.cloudbus.cloudsim.Cloudlet;
@@ -23,7 +24,7 @@ import org.cloudbus.cloudsim.core.SimEvent;
  * transfer delays if data has to be moved for task
  * running in other VM.
  */
-public class OptimalWorkflowDatacenter extends Datacenter {
+public class WorkflowDatacenter extends Datacenter {
 	
 	public static final int UPDATE_NETWORK = 455671;
 	public static final int TRANSFER_DATA_ITEM = 455672;
@@ -42,6 +43,8 @@ public class OptimalWorkflowDatacenter extends Datacenter {
 	Hashtable<Vm,Long> vmCreationTime;
 	Hashtable<Vm,Long> vmPrice;
 	
+	Random random;
+	Random seedGenerator;
 	long basicCpuUnit;
 	double bandwidth;
 	double latency;
@@ -50,8 +53,8 @@ public class OptimalWorkflowDatacenter extends Datacenter {
 	long budget; //output parameter: time of vms used during the simulation
 	VMOffers vmOffers;
 	
-	public OptimalWorkflowDatacenter(String name, DatacenterCharacteristics characteristics, VmAllocationPolicy vmAllocationPolicy,
-			double bandwidth, double latency, int basicCpuUnit, long averageCreationDelay, VMOffers vmOffers) throws Exception {
+	public WorkflowDatacenter(String name, DatacenterCharacteristics characteristics, VmAllocationPolicy vmAllocationPolicy,
+			double bandwidth, double latency, int basicCpuUnit, long averageCreationDelay, VMOffers vmOffers, long seed) throws Exception {
 		super(name,characteristics,vmAllocationPolicy,null,0);
 		
 		this.vmTable = new Hashtable<Integer,Vm>();
@@ -60,6 +63,8 @@ public class OptimalWorkflowDatacenter extends Datacenter {
 		this.vmCreationTime = new Hashtable<Vm,Long>();
 		this.vmPrice = new Hashtable<Vm,Long>();
 				
+		this.random = new Random(seed);
+		this.seedGenerator = new Random(seed);
 		this.bandwidth = bandwidth;
 		this.latency = latency;
 		this.averageCreationDelay = averageCreationDelay;
@@ -106,12 +111,13 @@ public class OptimalWorkflowDatacenter extends Datacenter {
 		 * moment we request the Vm, but it takes a while for it
 		 * to be usable)
 		 */
+		double randomDelay = Math.ceil(averageCreationDelay*(1.0+random.nextGaussian()/10.0));
 		int[] data = new int[3];
 		data[0] = getId();
 		data[1] = vm.getId();
 		data[2] = CloudSimTags.TRUE;
 
-		send(vm.getUserId(),averageCreationDelay,CloudSimTags.VM_CREATE_ACK, data);
+		send(vm.getUserId(),randomDelay,CloudSimTags.VM_CREATE_ACK, data);
 	}
 	
 	@Override
@@ -258,7 +264,7 @@ public class OptimalWorkflowDatacenter extends Datacenter {
 		long key = sourceId*MAX_VMS+destinationId;
 		
 		if(!vmChannelTable.containsKey(key)){
-			Channel channel = new Channel(bandwidth);
+			Channel channel = new Channel(bandwidth,seedGenerator.nextLong());
 			vmChannelTable.put(key, channel);
 		}
 	}

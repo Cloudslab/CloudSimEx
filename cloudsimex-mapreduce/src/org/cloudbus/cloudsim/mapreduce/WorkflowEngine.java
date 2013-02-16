@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.workflow;
+package org.cloudbus.cloudsim.mapreduce;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;

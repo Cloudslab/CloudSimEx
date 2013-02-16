@@ -1,7 +1,8 @@
-# This job is to calculate the average temperature of one of the Great Barrier Reef (GBR) temperature sensor on 2011 and 2012
+# This job is to calculate the average temperature of one of the Great Barrier Reef (GBR) temperature sensor in 2011 and 2012
 
 maps:
 	- id: map00001
+	  description: Forward 2011 and 2012 values to the right reducer
 	  dsize: 64
 	  idsize: 0.5
 	  mipb: 100
@@ -14,6 +15,7 @@ maps:
 	  	  block: 1
 	  
 	- id: map00002
+	  description: Forward 2011 and 2012 values to the right reducer
 	  dsize: 64
 	  idsize: 0.5
 	  mipb: 100
@@ -26,6 +28,7 @@ maps:
 	  	  block: 2
 	  
 	- id: map00003
+	  description: Forward 2011 and 2012 values to the right reducer
 	  dsize: 10
 	  idsize: 0.5
 	  mipb: 100
@@ -36,9 +39,11 @@ maps:
 	  	  
 reduces:
 	- id: reduce00001
+	  description: Average 2011 key values
 	  idsize: .5
 	  mipb: 100
 	  
 	- id: reduce00002
+	  description: Average 2012 key values
 	  idsize: .5
 	  mipb: 100

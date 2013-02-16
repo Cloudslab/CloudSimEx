@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.workflow;
+package org.cloudbus.cloudsim.mapreduce;
 
 /**
  * This class represents transmission of a DataItem. It controls

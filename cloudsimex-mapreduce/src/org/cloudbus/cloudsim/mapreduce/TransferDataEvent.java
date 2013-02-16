@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.workflow;
+package org.cloudbus.cloudsim.mapreduce;
 
 /**
  * This class contains information necessary to enable data

@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.workflow;
+package org.cloudbus.cloudsim.mapreduce;
 
 /**
  * This class supplies seeds for random numbers generators. This guarantees that all the

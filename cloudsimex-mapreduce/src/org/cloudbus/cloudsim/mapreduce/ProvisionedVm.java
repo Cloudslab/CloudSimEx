@@ -1,33 +1,37 @@
-package org.cloudbus.cloudsim.workflow;
+package org.cloudbus.cloudsim.mapreduce;
 
 import org.cloudbus.cloudsim.Vm;
 
-public class TimeSlot {
+/**
+ * This class encapsulates a VM that has been provisioned. It contains
+ * the actual VM, its start and end time, and the cost.
+ */
+public class ProvisionedVm {
 	
 	Vm vm;
 	long startTime;
 	long endTime;
-	boolean alreadyPaid;
+	int cost;
 	
-	public TimeSlot(Vm vm, long startTime, long endTime, boolean alreadyPaid) {
+	public ProvisionedVm(Vm vm, long startTime, long endTime, int cost) {
 		this.vm = vm;
 		this.startTime = startTime;
 		this.endTime = endTime;
-		this.alreadyPaid = alreadyPaid;
+		this.cost = cost;
 	}
 	
-	public Vm getVm(){
+	public Vm getVm() {
 		return vm;
 	}
-	
+
 	public long getStartTime() {
 		return startTime;
 	}
-	
+
 	public void setStartTime(long startTime) {
 		this.startTime = startTime;
 	}
-	
+
 	public long getEndTime() {
 		return endTime;
 	}
@@ -36,11 +40,7 @@ public class TimeSlot {
 		this.endTime = endTime;
 	}
 	
-	public void setAlreadyPaid(boolean alreadyPaid){
-		this.alreadyPaid = alreadyPaid;
-	}
-	
-	public boolean isAlreadyPaid() {
-		return alreadyPaid;
+	public int getCost(){
+		return cost;
 	}
 }

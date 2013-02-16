@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.workflow;
+package org.cloudbus.cloudsim.mapreduce;
 
 import java.util.Comparator;
 import java.util.Map.Entry;

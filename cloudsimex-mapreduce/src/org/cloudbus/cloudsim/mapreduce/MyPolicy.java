@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.workflow;
+package org.cloudbus.cloudsim.mapreduce;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,20 +10,22 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
+import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.Vm;
 
 /**
- * This class implements the "IaaS Cloud Partial Critical Paths (IC-PCP)"
- * policy proposed by Abrishami et al:
- * 
- * Abrishami, S.; Naghibzadeh, M. & Epema, D. "Deadline-constrained workflow
- * scheduling algorithms for IaaS Clouds". In: Future Generation Computer
- * Systems 29(1):158-169, Elsevier, Jan. 2013.
+ * Implements the Enhanced IC-PCP with Replication policy. It accounts for VM boot time and data transfer
+ * time while doing provisioning and scheduling decisions. It also applied the excess of available budget
+ * to launch extra VMs and replicate critical workflow tasks. Replication is performed via a modified
+ * Resubmission Impact [1] algorithm combined with backfilling.
  *
  */
-public class ICPCPPolicy extends Policy {
-
+public class MyPolicy extends Policy {
+	
+	private static final int MAX_REPLICAS = 5;
+	
 	Hashtable<Task,Long> estTable;
 	Hashtable<Task,Long> metTable;
 	Hashtable<Task,Long> eftTable;
@@ -31,14 +33,31 @@ public class ICPCPPolicy extends Policy {
 	Hashtable<Task,Long> astTable;
 	Hashtable<Long,Long> ttTable;
 	
-	Hashtable<Task,Vm> taskScheduleTable;
+	Hashtable<Vm,Long> vmStartTable;
+	Hashtable<Vm,Long> vmEndTable;
 		
 	List<Vm> vmOffersList;
 	
+	long availableExecTime;
+	boolean replicate = false;
+	
 	int vmId=0;
-		
+
+	public long getLft(Task task) {
+		return lftTable.get(task);		
+	}
+	
+	public long getAst(Task task) {
+		return astTable.get(task);		
+	}
+	
+	public long getMet(Task task) {
+		return metTable.get(task);	
+	}
+	
 	@Override
 	public void doScheduling(long availableExecTime, VMOffers vmOffers) {
+		this.availableExecTime = availableExecTime;
 		
 		estTable = new Hashtable<Task,Long>();
 		metTable = new Hashtable<Task,Long>();
@@ -47,7 +66,10 @@ public class ICPCPPolicy extends Policy {
 		astTable = new Hashtable<Task,Long>();
 		ttTable = new Hashtable<Long,Long>();
 		
-		taskScheduleTable = new Hashtable<Task,Vm>();
+		vmStartTable = new Hashtable<Vm,Long>();
+		vmEndTable = new Hashtable<Vm,Long>();
+				
+		replicate = Boolean.parseBoolean(Properties.REPLICATION_ENABLED.getProperty());
 		
 		Enumeration<DataItem> dataIter = dataItems.elements();
 		
@@ -61,7 +83,6 @@ public class ICPCPPolicy extends Policy {
 		//what's the best VM available?
 		vmOffersList = getVmOfferList();
 		long mips = (long) Math.floor(vmOffersList.get(vmOffersList.size()-1).getMips());
-
 		//determine MET(ti)
 		for(Task ti:tasks){
 			long met = ti.getCloudlet().getCloudletLength()/mips;
@@ -77,7 +98,7 @@ public class ICPCPPolicy extends Policy {
 			entry.addChild(t);
 			t.addParent(entry);
 		}
-
+		
 		Task exit = new Task(null,0);
 		metTable.put(exit, 0L);
 		for(Task t:exitTasks){
@@ -87,13 +108,15 @@ public class ICPCPPolicy extends Policy {
 				
 		//===== 3. compute EST(ti), EFT(ti), and LFT(ti) for each task in G =====
 		//-----> EST & EFT
-		estTable.put(entry,0L);
-		eftTable.put(entry,0L);
+		estTable.put(entry,vmOffers.getBootTime()); //<==== EST of tentry is set to VM boot time
+		eftTable.put(entry,vmOffers.getBootTime()); //<==== EFT of tentry is set to VM boot time
+
 		LinkedList<Task> estList = new LinkedList<Task>();
 		estList.addAll(entryTasks);
 		
 		while(!estList.isEmpty()){
-			Task ti = estList.remove(0);		
+			Task ti = estList.remove(0);
+			
 			if(estTable.containsKey(ti)) continue; //this task was already calculated
 			
 			//now, check if this task is ready to be calculated
@@ -106,7 +129,7 @@ public class ICPCPPolicy extends Policy {
 				}
 			}
 			if (!ready) continue;
-					
+			
 			//determine EST(ti) 
 			long est=-1;
 			for(Task tp:ti.getParents()){
@@ -120,6 +143,7 @@ public class ICPCPPolicy extends Policy {
 		
 			//determine EFT(ti) = EST(ti)+MET(ti)
 			long eft = est+metTable.get(ti);
+					
 			//update tables for this task
 			estTable.put(ti, est);
 			eftTable.put(ti, eft);
@@ -127,7 +151,7 @@ public class ICPCPPolicy extends Policy {
 			//add children to continue BFS
 			estList.addAll(ti.getChildren());
 		}
-			
+		
 		//-----> LFT
 		lftTable.put(exit,availableExecTime);
 		LinkedList<Task> lftList = new LinkedList<Task>();
@@ -165,9 +189,9 @@ public class ICPCPPolicy extends Policy {
 			//add parents to continue reverse BFS
 			lftList.addAll(ti.getParents());
 		}
-				
-		//===== 4. AST(tentry)<-0, AST(texit)<-D =====
-		astTable.put(entry, 0L);
+		
+		//===== 4. AST(tentry)<-BootTime, AST(texit)<-D =====
+		astTable.put(entry, vmOffers.getBootTime());
 		astTable.put(exit, availableExecTime);
 		
 		//===== 5. mark tentry and texit as assigned =====
@@ -179,50 +203,14 @@ public class ICPCPPolicy extends Policy {
 		assignParents(exit,unassigned);
 		
 		//===== ALGORITHM IS DONE. fill provisioning information =====
-		for (ProvisionedVm vm: provisioningInfo){
-			vmId = vm.getVm().getId();
-			List<Task> scheduledTasks = schedulingTable.get(vmId);
-			
-			//vm starts with first task's AST
-			long startTime = astTable.get(scheduledTasks.get(0));
-			vm.setStartTime(startTime);
-			
-			//vm ends with the end of last task
-			Task lastTask = scheduledTasks.get(scheduledTasks.size()-1); 
-			long endTime = astTable.get(lastTask)+metTable.get(lastTask);
-			vm.setEndTime(endTime);
+		for (ProvisionedVm pvm: provisioningInfo){
+			pvm.setStartTime(vmStartTable.get(pvm.getVm()));
+			pvm.setEndTime(vmEndTable.get(pvm.getVm()));
 		}
-		
-		//FIXS ON THE ORIGINAL ALGORITHM: EXPAND CREATION OR DESTRUCTION TIME IF NECESSARY FOR DATA TRANSFER
-		for (ProvisionedVm vm: provisioningInfo){
-			List<Task> scheduledTasks = schedulingTable.get(vm.getVm().getId());
-			long biggestCommCost=0;
-			
-			//who is the first task?
-			Task firstTask = scheduledTasks.get(0);
 
-			for(Task parent:firstTask.getParents()){
-				//what is the communication cost between the two tasks?
-				long commcost = getTT(parent, firstTask);
-				if(commcost>biggestCommCost){
-					biggestCommCost = commcost;
-				}
-			}
-			//vm has to start before tt(parent,firstTask)
-			if(biggestCommCost>0) vm.setStartTime(vm.getStartTime()-biggestCommCost);
-			
-			biggestCommCost=0;
-			
-			//repeat the process for the last task and its children
-			Task lastTask = scheduledTasks.get(scheduledTasks.size()-1);
-			for(Task child:lastTask.getChildren()){
-				long commcost = getTT(lastTask,child);
-				if(commcost>biggestCommCost){
-					biggestCommCost=commcost;
-				}
-			}
-			//vm has to finish after tt(lastTask,child) 
-			if(biggestCommCost>0) vm.setEndTime(vm.getEndTime()+biggestCommCost);
+		//==== If replication is enabled, do it
+		if (replicate){
+			processReplication();
 		}
 	}
 	
@@ -347,8 +335,7 @@ public class ICPCPPolicy extends Policy {
 				if (estTable.get(p.getFirst())>previousFinishTime) previousFinishTime = estTable.get(p.getFirst());
 				
 				//check existing gap between tasks
-				long gap =  astTable.get(children)-previousFinishTime;
-				
+				long gap =  astTable.get(children)-previousFinishTime;	
 				pcpOverhead = pathExecTime-gap;
 				
 				//can the children be delayed?
@@ -382,8 +369,11 @@ public class ICPCPPolicy extends Policy {
 			} else {//no. Put P in beginning or end of scheduling
 				//first, try to put P in the beginning
 				position=0;
-				previousFinishTime=astTable.get(scheduledTasks.get(0));				
-				pcpOverhead = pathExecTime;
+				previousFinishTime = vmStartTable.get(vm.getVm())+vmOffers.getBootTime();
+				if (estTable.get(p.getFirst())>previousFinishTime) previousFinishTime = estTable.get(p.getFirst());
+				
+				long gap =  astTable.get(scheduledTasks.get(0))-previousFinishTime;	
+				pcpOverhead = pathExecTime-gap;
 				
 				//will the previously scheduled tasks violate LFT if P executes before?
 				for(int i=position;i<scheduledTasks.size();i++){
@@ -430,31 +420,56 @@ public class ICPCPPolicy extends Policy {
 			}
 			
 			//now, checks if each Task in P completes before its LFT in this vm
-			if(applicable){
-				for(Task t:p){
-					if (previousFinishTime+t.getCloudlet().getCloudletLength()/vm.getVm().getMips()>lftTable.get(t)){
-						applicable=false;
-						break;
-					} else {
-						previousFinishTime+=t.getCloudlet().getCloudletLength()/vm.getVm().getMips();
-					}
+			for(Task t:p){
+				if (previousFinishTime+t.getCloudlet().getCloudletLength()/vm.getVm().getMips()>lftTable.get(t)){
+					applicable=false;
+					break;
+				} else {
+					previousFinishTime+=t.getCloudlet().getCloudletLength()/vm.getVm().getMips();
 				}
 			}
 			
 			//-----> if case 1 was ok, check second case: does this schedule use the available time slot?
 			if(applicable){
-				long usedTime = astTable.get(scheduledTasks.get(scheduledTasks.size()-1))+metTable.get(scheduledTasks.get(scheduledTasks.size()-1))-astTable.get(scheduledTasks.get(0));
+				long currentUsedTime = vmEndTable.get(vm.getVm())-vmStartTable.get(vm.getVm());
 				
 				//how many timeslots the current scheduling is using?
-				long usedTimeSlots = usedTime/vmOffers.getTimeSlot();
-				if (usedTime%vmOffers.getTimeSlot()!=0) usedTimeSlots++;
+				long currentlyUsedTimeSlots = currentUsedTime/vmOffers.getTimeSlot();
+				if (currentUsedTime%vmOffers.getTimeSlot()!=0) currentlyUsedTimeSlots++;
 				
-				//how many will be necessary with the extra tasks?
+				//how many time slots will be necessary with the extra tasks?
+				long usedTime = astTable.get(scheduledTasks.get(scheduledTasks.size()-1)) + metTable.get(scheduledTasks.get(scheduledTasks.size()-1)) - astTable.get(scheduledTasks.get(0)) + vmOffers.getBootTime();
 				usedTime+=pcpOverhead;
+				
+				//account for changes in the beginning/end data transfer pattern
+				if (position==0){
+					List<Task> parentsOfFirst = p.getFirst().getParents();
+					long biggestTT=0;
+					for(Task parent: parentsOfFirst){
+						if (getTT(parent, p.getFirst())>biggestTT){
+							biggestTT=getTT(parent, p.getFirst());
+						}
+					}
+					
+					if (biggestTT>0) usedTime+=biggestTT;
+					
+				} else if (position==scheduledTasks.size()){
+					List<Task> childrenOfLast = p.getLast().getChildren();
+					long biggestTT=0;
+					for(Task child: childrenOfLast){
+						if (getTT(p.getLast(), child)>biggestTT){
+							biggestTT=getTT(p.getLast(), child);
+						}
+					}
+					
+					if (biggestTT>0) usedTime+=biggestTT;
+				}
+				
+				
 				long requiredTimeSlots = usedTime/vmOffers.getTimeSlot();
 				if(usedTime%vmOffers.getTimeSlot()!=0) requiredTimeSlots++;
 				
-				if(requiredTimeSlots!=usedTimeSlots) applicable=false;
+				if(requiredTimeSlots!=currentlyUsedTimeSlots) applicable=false;
 			}
 			
 			//both cases are ok: we found a reusable instance 
@@ -481,14 +496,16 @@ public class ICPCPPolicy extends Policy {
 					//create and store the vm
 					Vm newVm = new Vm(vmId,ownerId,instance.getMips(),instance.getNumberOfPes(),instance.getRam(),instance.getBw(),instance.getSize(),"",new CloudletSchedulerTimeShared());
 					int cost = vmOffers.getCost(newVm.getMips(), newVm.getRam(), newVm.getBw());
-					provisioningInfo.add(new ProvisionedVm(newVm,0,0,cost));
+					provisioningInfo.add(new ProvisionedVm(newVm,0,0,cost));		
 					schedulingTable.put(newVm.getId(), new ArrayList<Task>());
+					vmStartTable.put(newVm, 0L);
+					vmEndTable.put(newVm, 0L);
 					position=0;
 					vmId++;
 					sij=newVm;
 					break;
 				}
-			}		
+			}
 		}
 		
 		//choose the biggest instance
@@ -498,18 +515,21 @@ public class ICPCPPolicy extends Policy {
 			int cost = vmOffers.getCost(newVm.getMips(), newVm.getRam(), newVm.getBw());
 			provisioningInfo.add(new ProvisionedVm(newVm,0,0,cost));
 			schedulingTable.put(newVm.getId(), new ArrayList<Task>());
+			vmStartTable.put(newVm, 0L);
+			vmEndTable.put(newVm, 0L);
 			position=0;
 			vmId++;
 			sij=newVm;
 			position=0;
 		}
-	
+		
+		boolean PisInStart = (position==0);
+			
 		for(Task t:p){
 			//===== SCHEDULE P on sij and set SS(ti), AST(ti) for each ti \in P =====
 			t.setVmId(sij.getId());
-			taskScheduleTable.put(t, sij);
 			schedulingTable.get(sij.getId()).add(position, t);
-			
+											
 			for(DataItem data:t.getDataDependencies()){
 				if(!dataRequiredLocation.containsKey(data.getId())){
 					dataRequiredLocation.put(data.getId(), new HashSet<Integer>());
@@ -533,21 +553,21 @@ public class ICPCPPolicy extends Policy {
 				}
 			}
 			astTable.put(t, ast);
-			//System.out.println("AST of Task #"+t.getId()+": "+ast);
-			
+						
 			//update also MET, EST, and EFT of all tasks in P
 			long actualRuntime = (long) Math.ceil(t.getCloudlet().getCloudletLength()/sij.getMips());
 			metTable.put(t, actualRuntime);
 			estTable.put(t, ast);
 			eftTable.put(t, ast+actualRuntime);
-			
+						
 			//===== set all tasks of P as assigned =====
 			unassignedTasks.remove(t);
 			position++;
 		}
 
-		//if some tasks were delayed to make room for P, we update their tables as well
 		List<Task> scheduledTasks = schedulingTable.get(sij.getId());
+		
+		//if some tasks were delayed to make room for P, we update their tables as well
 		Task antecessor = scheduledTasks.get(position-1);
 		long ast = astTable.get(antecessor)+metTable.get(antecessor);
 		for(int i=position;i<scheduledTasks.size();i++){
@@ -557,6 +577,238 @@ public class ICPCPPolicy extends Policy {
 			eftTable.put(t, ast+metTable.get(t));
 			ast+=metTable.get(t);
 		}
+
+		//update provisioning tables based on the point where P was inserted
+		long startTime = vmStartTable.get(sij);
+		long endTime = vmEndTable.get(sij);
+		
+		if (PisInStart){
+			Task startTask = p.getFirst();
+			//now first task of P is the first task running in the VM. Update VM start time...
+			startTime = astTable.get(startTask);
+			
+			//but VM has to be active for such a task to receive input data (if any)
+			//check the longest tt for such task
+			List<Task> parentsOfFirst = startTask.getParents();
+			long biggestTT=0;
+			for(Task parent: parentsOfFirst){
+				if (getTT(parent, startTask)>biggestTT){
+					biggestTT=getTT(parent, startTask);
+				}
+			}
+			
+			//add such time, if any, to the beginning of VM
+			if (biggestTT>0){
+				startTime-=biggestTT;
+			}
+			
+			//finally, compensates for boot time
+			startTime-=vmOffers.getBootTime();
+		}
+		
+		//regardless the position where the PCP was inserted, the end time is definitely going to change
+		Task lastTask = scheduledTasks.get(scheduledTasks.size()-1);
+		endTime = astTable.get(lastTask) + metTable.get(lastTask);
+		
+		//account for data transfer to children
+		List<Task> childrenOfLast = lastTask.getChildren();
+		long biggestTT=0;
+		for(Task child: childrenOfLast){
+			if (getTT(lastTask, child)>biggestTT){
+				biggestTT=getTT(lastTask, child);
+			}
+		}
+		
+		if (biggestTT>0){
+			endTime+=biggestTT;
+		}
+		
+		//scale the actual runtime of VMs to full timeslots
+		long actualProvisioningTime = endTime-startTime;
+		long timeSlots = actualProvisioningTime/vmOffers.getTimeSlot();
+		if (actualProvisioningTime%vmOffers.getTimeSlot()!=0) timeSlots++;
+		
+		//this is the biggest amount of time we are paying for
+		actualProvisioningTime = timeSlots*vmOffers.getTimeSlot();
+		
+		//puts the extra time slot at the end of the leasing time
+		if(startTime+actualProvisioningTime>endTime){
+			endTime=startTime+actualProvisioningTime;
+		}
+					
+		//update the tables
+		vmStartTable.put(sij, startTime);
+		vmEndTable.put(sij, endTime);
+	}
+	
+	private void processReplication() {		
+		//first, define how much was already spent
+		long spent=0;
+		for (ProvisionedVm vm: provisioningInfo){
+			long vmRuntime = vm.getEndTime()-vm.getStartTime();
+			long timeslots = vmRuntime/vmOffers.getTimeSlot();
+			if (vmRuntime%vmOffers.getTimeSlot()!=0){
+				timeslots++;
+			}
+			spent+=timeslots*vm.getCost();
+		}
+		long budget = (long) Math.ceil(spent*0.5);
+		System.out.println("Available budget for replication: "+ budget + " cents.");
+		
+		//identify potential time slots for replication
+		//first, build time slots info
+		List<TimeSlot> slotsList = new LinkedList<TimeSlot>();
+		for (ProvisionedVm pvm: provisioningInfo){
+			long previousFreeTime = 0;
+			if (pvm.getStartTime()>0){
+				//we have an unpaid slot from 0 to the moment the first task starts on the vm
+				slotsList.add(new TimeSlot(pvm.getVm(),0,astTable.get(schedulingTable.get(pvm.getVm().getId()).get(0)),false));
+				previousFreeTime = astTable.get(schedulingTable.get(pvm.getVm().getId()).get(0))+metTable.get(schedulingTable.get(pvm.getVm().getId()).get(0));
+			}
+			
+			List<Task> tasks = schedulingTable.get(pvm.getVm().getId());
+			for(Task task:tasks){
+				if (previousFreeTime<astTable.get(task)){
+					//there is a gap between the previous free time and the time the task start
+					slotsList.add(new TimeSlot(pvm.getVm(),previousFreeTime,astTable.get(task),true));
+				}
+				previousFreeTime = astTable.get(task)+metTable.get(task);
+			}
+			
+			if (pvm.getEndTime()>previousFreeTime){
+				slotsList.add(new TimeSlot(pvm.getVm(),previousFreeTime,pvm.getEndTime(),true));
+			}
+			
+			if (pvm.getEndTime()<availableExecTime) slotsList.add(new TimeSlot(pvm.getVm(),pvm.getEndTime(),availableExecTime,false));
+		}
+		
+		//now, we have information on all paid and unpaid intervals. Sort the list in ascending order of size
+		Collections.sort(slotsList, new SlotComparator());
+		
+		//sort the tasks by decreasing "replication importance order"
+		Collections.sort(tasks, new ReverseReplicationImportanceComparator(this));
+				
+		//third: for each slot, finds the most important task that fits it	
+		int idx=0;
+		do {
+			TimeSlot slot = slotsList.get(idx);
+			idx++;
+			long slotCost = vmOffers.getCost(slot.getVm().getMips(), slot.getVm().getRam(), slot.getVm().getBw());
+			
+			//if the slot was not paid yet, check budget before going ahead
+			if (!slot.isAlreadyPaid() && budget<slotCost) continue;
+			
+			long size = slot.getEndTime()-slot.getStartTime();
+			Task chosenTask=null;
+			for(Task task:tasks){
+				if (estTable.get(task)<=slot.getStartTime() && //if the task is ready when the slot is free and 
+						slot.getStartTime()+task.getCloudlet().getCloudletLength()/slot.getVm().getMips()<=lftTable.get(task) && //it can finish on time
+						task.getCloudlet().getCloudletLength()/slot.getVm().getMips()<=size && //it fits in the slot
+						task.getReplicas().size()< MAX_REPLICAS){ //max replicas achieved
+					
+					boolean replicaAlreadyOnVm=false;
+					if (task.hasReplicas()){//is there a replica already running on this machine?
+						for (Task r:task.getReplicas()){
+							if (schedulingTable.get(slot.getVm().getId()).contains(r)){
+								replicaAlreadyOnVm=true;
+								break;
+							}
+						}
+						if (replicaAlreadyOnVm) continue; //yes: do not replicate this task
+					}
+											
+					//check for execution dependencies
+					ArrayList<Task> tasks = schedulingTable.get(slot.getVm().getId());
+					//what is the slot's position?
+					int position=0;
+					for (Task t:tasks){
+						if (astTable.get(t)<slot.getStartTime()) position++;
+						else break;
+					}
+					
+					//now position contains the place where the task would be inserted
+					//next, check if any of the earlier tasks is a child of the task to be replicated
+					boolean violateDependencies=false;
+					for (int i=0;i<position;i++){
+						Task t = tasks.get(i);
+						if (t.getAntecessors().contains(task)){
+							violateDependencies=true;
+							break;
+						}
+					}
+					if (!violateDependencies){
+						for (int i=position;i<tasks.size();i++){
+							Task t = tasks.get(i);
+							if (t.getSuccessors().contains(task)){
+								violateDependencies=true;
+								break;
+							}
+						}
+					}
+					
+					if (!violateDependencies){
+						chosenTask = task;	
+						break;
+					}
+				}	
+			}			
+			
+			if (chosenTask!=null){ //we found a valid task
+				//create replica
+				Cloudlet replicaCl = new Cloudlet(taskCont,chosenTask.getCloudlet().getCloudletLength(),1,0,0,new UtilizationModelFull(),new UtilizationModelFull(),new UtilizationModelFull());
+				Task replica = new Task(replicaCl,ownerId);
+				replica.setVmId(slot.getVm().getId());
+				
+				replica.addReplica(chosenTask);
+				chosenTask.addReplica(replica);
+
+				for(DataItem item:chosenTask.getDataDependencies()){
+					replica.addDataDependency(item);
+				}
+				
+				for(DataItem item:chosenTask.getOutput()){
+					replica.addOutput(item);
+				}
+				
+				taskCont++;
+				
+				//schedule it
+				int position=0;
+				ArrayList<Task> scheduleList = schedulingTable.get(slot.getVm().getId());
+				for(Task task:scheduleList){
+					if(slot.getStartTime()>astTable.get(task)) position++;
+					else break;
+				}
+							
+				scheduleList.add(position,replica);
+				for(DataItem item:replica.getDataDependencies()) dataRequiredLocation.get(item.getId()).add(slot.getVm().getId());
+				
+				estTable.put(replica, slot.getStartTime());
+				astTable.put(replica, slot.getStartTime());
+				long runtime = (long) Math.ceil(replica.getCloudlet().getCloudletLength()/slot.getVm().getMips());
+				metTable.put(replica, runtime);
+				eftTable.put(replica, slot.getStartTime()+runtime);
+				lftTable.put(replica, lftTable.get(chosenTask));
+								
+				tasks.remove(chosenTask);//reduce task priority for further replication
+				tasks.add(chosenTask);
+				
+				//update slot information: it can generate 1 extra slot (which goes to the end of the list), or just be updated
+				long replicaExecTime = (long) Math.ceil(replica.getCloudlet().getCloudletLength()/slot.getVm().getMips());
+				if (slot.getStartTime()<astTable.get(replica)){ //update slot information and let it be queried again
+					slot.setEndTime(astTable.get(replica));
+					slot.setAlreadyPaid(true);
+					idx--;//so this slot will be checked again
+				}
+				
+				if (slot.getEndTime()>astTable.get(replica)+replicaExecTime){
+					TimeSlot newSlot = new TimeSlot(slot.getVm(), astTable.get(replica)+replicaExecTime, slot.getEndTime(), true);
+					slotsList.add(newSlot);
+				}
+				
+				budget-=slotCost;
+			}
+		} while(idx<slotsList.size());
 	}
 	
 	private Task getCriticalParent(Task ti, HashSet<Task> unassignedTasks) {

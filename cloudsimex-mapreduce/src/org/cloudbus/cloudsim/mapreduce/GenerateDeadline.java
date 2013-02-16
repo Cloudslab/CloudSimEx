@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.workflow;
+package org.cloudbus.cloudsim.mapreduce;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -10,6 +10,7 @@ import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.NetworkTopology;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
+import org.cloudbus.cloudsim.VmSchedulerTimeShared;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
@@ -26,9 +27,9 @@ import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
  * is comments on how to add new properties to the experiment.
  *
  */
-public class Simulation {
+public class GenerateDeadline {
 	
-	public Simulation(){
+	public GenerateDeadline(){
 		
 	}
 
@@ -38,7 +39,13 @@ public class Simulation {
 	 * 
 	 */
 	public static void main(String[] args) {
-		new Simulation();
+		
+		if (args.length!=1){
+			System.out.println("Must specify DAG file.");
+			System.exit(1);
+		}
+		
+		new GenerateDeadline();
 		Log.printLine("========== Simulation configuration ==========");
 		for (Properties property: Properties.values()){
 			Log.printLine("= "+property+": "+property.getProperty());
@@ -46,10 +53,7 @@ public class Simulation {
 		Log.printLine("==============================================");
 		Log.printLine("");
 				
-		int rounds = Integer.parseInt(Properties.EXPERIMENT_ROUNDS.getProperty());
-		for (int round=1; round<=rounds; round++) {
-			runSimulationRound(round);
-		}
+		runSimulation(args[0]);
 	}
 				
 	/**
@@ -57,18 +61,14 @@ public class Simulation {
 	 * is printed to the log.
 	 * 
 	 */
-	private static void runSimulationRound(int round) {
-		Log.printLine("Starting simulation round "+round+".");
+	private static void runSimulation(String dagFile) {
+		Log.printLine("Starting simulation.");
 		
-		long seed1 = SeedGenerator.getSeed1(round-1);
-		long seed2 = SeedGenerator.getSeed2(round-1);
-		long seed3 = SeedGenerator.getSeed2(round-1);
-
 		try {
 			CloudSim.init(1,Calendar.getInstance(),false);
 
-			WorkflowDatacenter datacenter = createDatacenter("Datacenter", seed1, seed2);
-			WorkflowEngine engine = createWorkflowEngine(seed3);
+			OptimalWorkflowDatacenter datacenter = createDatacenter("Datacenter");
+			WorkflowEngine engine = createWorkflowEngine(dagFile);
 			
 			double latency = Double.parseDouble(Properties.NETWORK_LATENCY.getProperty());
 			NetworkTopology.addLink(datacenter.getId(),engine.getId(),100000,latency);
@@ -87,7 +87,7 @@ public class Simulation {
 		}
 	}
 
-	private static WorkflowDatacenter createDatacenter(String name, long seed1, long seed2) throws Exception{
+	private static OptimalWorkflowDatacenter createDatacenter(String name) throws Exception{
 		int hosts = Integer.parseInt(Properties.HOSTS_PERDATACENTER.getProperty());
 		int ram = 8*Integer.parseInt(Properties.MEMORY_PERHOST.getProperty());
 		int cores = 8*Integer.parseInt(Properties.CORES_PERHOST.getProperty());
@@ -113,33 +113,24 @@ public class Simulation {
 			for(int j=0;j<cores;j++) peList.add(new Pe(j, new PeProvisionerSimple(mips)));
 			
 			hostList.add(new Host(i,new RamProvisionerSimple(ram),new BwProvisionerSimple(1000000),
-								  storage,peList,new VmSchedulerIaaS(peList,seed1)));
+								  storage,peList,new VmSchedulerTimeShared(peList)));
 		}
 
 		DatacenterCharacteristics characteristics = new DatacenterCharacteristics("Xeon","Linux","Xen",hostList,10.0,0.0,0.00,0.00,0.00);
 				
-		return new WorkflowDatacenter(name,characteristics,new VmAllocationPolicySimple(hostList),bw,latency,mips,delay,offers,seed2);
+		return new OptimalWorkflowDatacenter(name,characteristics,new VmAllocationPolicySimple(hostList),bw,latency,mips,delay,offers);
 	}
 
-	private static WorkflowEngine createWorkflowEngine(long seed){
-		String dagFile = Properties.DAG_FILE.getProperty();
-		String className = Properties.SCHEDULING_POLICY.getProperty();
+	private static WorkflowEngine createWorkflowEngine(String dagFile){
 		String offerName = Properties.VM_OFFERS.getProperty();
-		double dbDeadline = Long.parseLong(Properties.DAG_DEADLINE.getProperty())*0.75; //makes the deadline 25% smaller
-		long deadline = (long) Math.ceil(dbDeadline);
-		
 		int baseMIPS = Integer.parseInt(Properties.MIPS_PERCORE.getProperty());
-		Policy policy = null;
 		VMOffers offers = null;
 		
 		try{		
-			Class<?> policyClass = Class.forName(className,true,Policy.class.getClassLoader());
-			policy = (Policy) policyClass.newInstance();
-			
 			Class<?> offerClass = Class.forName(offerName,true,VMOffers.class.getClassLoader());
 			offers = (VMOffers) offerClass.newInstance();
 		
-			return new WorkflowEngine(dagFile,deadline,baseMIPS,policy,offers,seed);
+			return new WorkflowEngine(dagFile,1000000000,baseMIPS,new OptimalPolicy(),offers,0);
 		} catch (Exception e){
 			e.printStackTrace();
 			return null;
