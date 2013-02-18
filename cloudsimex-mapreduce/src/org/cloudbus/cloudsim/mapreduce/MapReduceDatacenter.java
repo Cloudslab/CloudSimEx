@@ -24,7 +24,7 @@ import org.cloudbus.cloudsim.core.SimEvent;
  * transfer delays if data has to be moved for task
  * running in other VM.
  */
-public class WorkflowDatacenter extends Datacenter {
+public class MapReduceDatacenter extends Datacenter {
 	
 	public static final int UPDATE_NETWORK = 455671;
 	public static final int TRANSFER_DATA_ITEM = 455672;
@@ -53,7 +53,7 @@ public class WorkflowDatacenter extends Datacenter {
 	long budget; //output parameter: time of vms used during the simulation
 	VMOffers vmOffers;
 	
-	public WorkflowDatacenter(String name, DatacenterCharacteristics characteristics, VmAllocationPolicy vmAllocationPolicy,
+	public MapReduceDatacenter(String name, DatacenterCharacteristics characteristics, VmAllocationPolicy vmAllocationPolicy,
 			double bandwidth, double latency, int basicCpuUnit, long averageCreationDelay, VMOffers vmOffers, long seed) throws Exception {
 		super(name,characteristics,vmAllocationPolicy,null,0);
 		

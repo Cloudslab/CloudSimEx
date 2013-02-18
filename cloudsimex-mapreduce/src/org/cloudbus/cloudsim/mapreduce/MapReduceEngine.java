@@ -24,7 +24,7 @@ import org.cloudbus.cloudsim.core.SimEvent;
  * dispatching, and management of DAG tasks.
  * 
  */
-public class WorkflowEngine extends SimEntity{
+public class MapReduceEngine extends SimEntity{
 
 	private static final int DELAY_START_EVENT = 998877;
 	private int datacenterId;
@@ -47,7 +47,7 @@ public class WorkflowEngine extends SimEntity{
 	private HashSet<WETransmission> pendingTransmissions;
 	private List<? extends Cloudlet> cloudletReceivedList;
 
-	public WorkflowEngine(String dagFile, long execTime, long baseMIPS, Policy policy, VMOffers vmOffers, long seed) {
+	public MapReduceEngine(String dagFile, long execTime, long baseMIPS, Policy policy, VMOffers vmOffers, long seed) {
 		super("WorkflowEngine");
 		setCloudletReceivedList(new ArrayList<Cloudlet>());
 		this.dagFile = dagFile;
@@ -75,7 +75,7 @@ public class WorkflowEngine extends SimEntity{
 				case CloudSimTags.VM_CREATE_ACK: processVmCreate(ev); break;
 				case CloudSimTags.CLOUDLET_RETURN: processCloudletReturn(ev); break;
 				case CloudSimTags.CLOUDLET_CANCEL: processCloudletCancel(ev); break;
-				case WorkflowDatacenter.DATA_ITEM_AVAILABLE: processDataItemAvailable(ev); break;
+				case MapReduceDatacenter.DATA_ITEM_AVAILABLE: processDataItemAvailable(ev); break;
 				case DELAY_START_EVENT:	processStartDelayEvent(); break;
 				case CloudSimTags.END_OF_SIMULATION: break;
 				default: Log.printLine("Warning: "+CloudSim.clock()+": "+this.getName()+": Unknown event ignored. Tag: "+tag);
@@ -208,7 +208,7 @@ public class WorkflowEngine extends SimEntity{
 					if (runningVmList.containsKey(destVm) && runningVmList.get(destVm)==true){
 						//if vm was not created, delay transmission
 						TransferDataEvent event = new TransferDataEvent(data,originVm,destVm);
-						sendNow(datacenterId,WorkflowDatacenter.TRANSFER_DATA_ITEM,event);
+						sendNow(datacenterId,MapReduceDatacenter.TRANSFER_DATA_ITEM,event);
 					}
 				} else {
 					//Log.printLine(CloudSim.clock()+": DataItem #"+data.getId()+" is already available at VM #"+destVm);
@@ -226,7 +226,7 @@ public class WorkflowEngine extends SimEntity{
 				if (destVm==vmId && !data.isAvailableAt(destVm)){
 					Log.printLine(CloudSim.clock()+": Transferring dataItem #"+data.getId()+" from VM #"+originVm+" to VM #"+destVm);
 					TransferDataEvent event = new TransferDataEvent(data,originVm,destVm);
-					sendNow(datacenterId,WorkflowDatacenter.TRANSFER_DATA_ITEM,event);
+					sendNow(datacenterId,MapReduceDatacenter.TRANSFER_DATA_ITEM,event);
 				}
 			}
 		}
