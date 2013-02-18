@@ -7,7 +7,7 @@ maps:
 	  idsize: 0.5
 	  mipb: 100
 	  ds:
-	  	- id: gbr-sensors
+		- id: gbr-sensors
 	  	  file: temperature_gbr_1_20m.txt
 	  	  block: 1
 	  	- id: EEE-sensors

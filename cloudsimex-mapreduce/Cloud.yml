@@ -1,0 +1,49 @@
+Datacenters:
+		- name: aws-us-east-1
+		  hosts: 999999999
+		  memory = 32768
+		  cores = 8
+		  mips_precore = 999999999
+		  VMTypes:
+		  	- name = large-aws-us-east-1
+		  	  cost = 1.15
+		      transferring.cost = 0.005
+		      mips = 8000
+		      ar = 999999999
+		      core = 1
+			  size = 10000
+			  ram = 1024
+			  boot_time = 120
+			- name = small-aws-us-east-1
+		  	  cost = 0.57
+		      transferring.cost = 0.005
+		      mips = 4300
+		      ar = 999999999
+		      core = 1
+			  size = 10000
+			  ram = 1024
+			  boot_time = 120
+ 	 	- name: openstack-unimelb
+	   	  hosts: 15
+	   	  memory = 32768
+		  cores = 8
+		  mips_precore = 999999999
+	   	  VMTypes:
+		  	- name = private-openstack-unimelb
+		  	  cost = 0.00
+		      transferring.cost = 0.000
+		      mips = 2000
+		      ar = 100
+		      core = 1
+			  size = 10000
+			  ram = 1024
+			  boot_time = 120
+
+
+Datasources:
+		- name = gbr-sensors
+		  cost = 0.000
+		- name = EEE-sensors
+		  cost = 0.001
+		- name = S3-sensors
+		  cost = 0.005
