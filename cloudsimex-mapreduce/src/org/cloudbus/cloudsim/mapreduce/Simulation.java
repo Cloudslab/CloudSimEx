@@ -70,12 +70,12 @@ public class Simulation {
 			String datacentre1_name = Properties.DATACENTER1_NAME.getProperty();
 			int datacentre1_hosts = Integer.parseInt(Properties.DATACENTER1_HOSTS.getProperty());
 			
-			WorkflowDatacenter datacenter = createDatacenter(datacentre1_name, datacentre1_hosts, seed1, seed2);
-			//STOPPED HERE
-			WorkflowEngine engine = createWorkflowEngine(seed3);
+			//WARNING: This is just for one datacenter. We have several datacenters.
+			MapReduceDatacenter datacenter = createDatacenter(datacentre1_name, datacentre1_hosts, seed1, seed2);
+			MapReduceEngine engine = createWorkflowEngine(seed3);
 			
-			double latency = Double.parseDouble(Properties.NETWORK_LATENCY.getProperty());
-			NetworkTopology.addLink(datacenter.getId(),engine.getId(),100000,latency);
+			//WARNING: bandwidth is 100000 and latency is 0.5, is that OK?
+			NetworkTopology.addLink(datacenter.getId(),engine.getId(),100000,0.5);
 
 			CloudSim.startSimulation();
 			engine.printExecutionSummary();
@@ -91,7 +91,7 @@ public class Simulation {
 		}
 	}
 
-	private static WorkflowDatacenter createDatacenter(String name, int hosts, long seed1, long seed2) throws Exception{
+	private static MapReduceDatacenter createDatacenter(String name, int hosts, long seed1, long seed2) throws Exception{
 		int ram = 8*Integer.parseInt(Properties.MEMORY_PERHOST.getProperty());
 		int cores = 8*Integer.parseInt(Properties.CORES_PERHOST.getProperty());
 		int mips = 8*Integer.parseInt(Properties.MIPS_PERCORE.getProperty());
@@ -119,16 +119,19 @@ public class Simulation {
 
 		DatacenterCharacteristics characteristics = new DatacenterCharacteristics("Xeon","Linux","Xen",hostList,10.0,0.0,0.00,0.00,0.00);
 		
-		//bandwidth and latency are 0.0, is that OK?
-		return new WorkflowDatacenter(name,characteristics,new VmAllocationPolicySimple(hostList),0.0,0.0,mips,delay,offers,seed2);
+		//WARNING: bandwidth is 100000 and latency is 0.5, is that OK?
+		return new MapReduceDatacenter(name,characteristics,new VmAllocationPolicySimple(hostList),100000,0.5,mips,delay,offers,seed2);
 	}
 
-	private static WorkflowEngine createWorkflowEngine(long seed){
-		String dagFile = Properties.DAG_FILE.getProperty();
+	private static MapReduceEngine createWorkflowEngine(long seed){
+		//WARNING: This is just for one request. We have several jobs.
+		String jobFile = Properties.REQUEST1_JOB_FILE.getProperty();
 		String className = Properties.SCHEDULING_POLICY.getProperty();
 		String offerName = Properties.VM_OFFERS.getProperty();
-		double dbDeadline = Long.parseLong(Properties.DAG_DEADLINE.getProperty())*0.75; //makes the deadline 25% smaller
+		//WARNING: This is just for one request. We have several jobs.
+		double dbDeadline = Long.parseLong(Properties.REQUEST1_DEADLINE.getProperty())*0.75; //makes the deadline 25% smaller
 		long deadline = (long) Math.ceil(dbDeadline);
+		//WARNING: Missing budget and user class
 		
 		int baseMIPS = Integer.parseInt(Properties.MIPS_PERCORE.getProperty());
 		Policy policy = null;
@@ -141,7 +144,7 @@ public class Simulation {
 			Class<?> offerClass = Class.forName(offerName,true,VMOffers.class.getClassLoader());
 			offers = (VMOffers) offerClass.newInstance();
 		
-			return new WorkflowEngine(dagFile,deadline,baseMIPS,policy,offers,seed);
+			return new MapReduceEngine(jobFile,deadline,baseMIPS,policy,offers,seed);
 		} catch (Exception e){
 			e.printStackTrace();
 			return null;
