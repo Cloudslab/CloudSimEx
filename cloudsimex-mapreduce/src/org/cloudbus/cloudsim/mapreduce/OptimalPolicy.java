@@ -43,7 +43,8 @@ public class OptimalPolicy extends Policy {
 			//use only the best available VM, one task per VM
 			Vm instance = vmOffersList.get(vmOffersList.size()-1);
 			Vm newVm = new Vm(vmId,ownerId,instance.getMips(),instance.getNumberOfPes(),instance.getRam(),instance.getBw(),instance.getSize(),"",new CloudletSchedulerTimeShared());
-			int cost = vmOffers.getCost(newVm.getMips(), newVm.getRam(), newVm.getBw());
+			//int cost = vmOffers.getCost(newVm.getMips(), newVm.getRam(), newVm.getBw());
+			int cost =100;
 			provisioningInfo.add(new ProvisionedVm(newVm,0,availableExecTime,cost));
 			ArrayList<Task> tList = new ArrayList<Task>();
 			tList.add(ti);
@@ -72,15 +73,15 @@ public class OptimalPolicy extends Policy {
 		LinkedList<Vm> offers = new LinkedList<Vm>();
 		
 		//sorts offers
-		LinkedList<Entry<Vm,Integer>> tempList = new LinkedList<Entry<Vm,Integer>>();
-		Hashtable<Vm, Integer> table = vmOffers.getVmOffers();
+		LinkedList<Entry<Vm,Double>> tempList = new LinkedList<Entry<Vm,Double>>();
+		Hashtable<Vm, Double> table = vmOffers.getVmOffers();
 		
-		Iterator<Entry<Vm, Integer>> iter = table.entrySet().iterator();
+		Iterator<Entry<Vm, Double>> iter = table.entrySet().iterator();
 		while(iter.hasNext()){
 			tempList.add(iter.next());
 		}
 		Collections.sort(tempList, new OffersComparator());
-		for(Entry<Vm, Integer> entry:tempList){
+		for(Entry<Vm, Double> entry:tempList){
 			offers.add(entry.getKey());
 		}
 		

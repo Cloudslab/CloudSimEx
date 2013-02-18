@@ -23,7 +23,7 @@ import org.cloudbus.cloudsim.core.SimEvent;
  * transfer delays if data has to be moved for task
  * running in other VM.
  */
-public class OptimalWorkflowDatacenter extends Datacenter {
+public class OptimalMapReduceDatacenter extends Datacenter {
 	
 	public static final int UPDATE_NETWORK = 455671;
 	public static final int TRANSFER_DATA_ITEM = 455672;
@@ -40,7 +40,7 @@ public class OptimalWorkflowDatacenter extends Datacenter {
 	Hashtable<Integer,Vm> vmTable;
 	Hashtable<Long,Channel> vmChannelTable;
 	Hashtable<Vm,Long> vmCreationTime;
-	Hashtable<Vm,Long> vmPrice;
+	Hashtable<Vm,Double> vmPrice;
 	
 	long basicCpuUnit;
 	double bandwidth;
@@ -50,7 +50,7 @@ public class OptimalWorkflowDatacenter extends Datacenter {
 	long budget; //output parameter: time of vms used during the simulation
 	VMOffers vmOffers;
 	
-	public OptimalWorkflowDatacenter(String name, DatacenterCharacteristics characteristics, VmAllocationPolicy vmAllocationPolicy,
+	public OptimalMapReduceDatacenter(String name, DatacenterCharacteristics characteristics, VmAllocationPolicy vmAllocationPolicy,
 			double bandwidth, double latency, int basicCpuUnit, long averageCreationDelay, VMOffers vmOffers) throws Exception {
 		super(name,characteristics,vmAllocationPolicy,null,0);
 		
@@ -58,7 +58,7 @@ public class OptimalWorkflowDatacenter extends Datacenter {
 		this.basicCpuUnit = basicCpuUnit;
 		this.budget = 0;
 		this.vmCreationTime = new Hashtable<Vm,Long>();
-		this.vmPrice = new Hashtable<Vm,Long>();
+		this.vmPrice = new Hashtable<Vm,Double>();
 				
 		this.bandwidth = bandwidth;
 		this.latency = latency;
@@ -119,7 +119,7 @@ public class OptimalWorkflowDatacenter extends Datacenter {
 		//do last accounting for the vm
 		Vm vm = (Vm) ev.getData();
 		long startTime = vmCreationTime.remove(vm);
-		long price = vmPrice.remove(vm);
+		Double price = vmPrice.remove(vm);
 		long useInHours = updateVmUsage(startTime,price);
 		Log.printLine(CloudSim.clock()+": VM #"+vm.getId()+" destroyed. Total usage time: "+useInHours+" h. Cost = $"+price+" cents/hour.");
 		//vmTable.remove(vm.getId());
@@ -269,11 +269,11 @@ public class OptimalWorkflowDatacenter extends Datacenter {
 		return vmChannelTable.get(key);
 	}
 	
-	private long getPrice(Vm vm) {
-		Hashtable<Vm,Integer> vmOffersTable = vmOffers.getVmOffers();
-		int cost=0;
+	private Double getPrice(Vm vm) {
+		Hashtable<Vm,Double> vmOffersTable = vmOffers.getVmOffers();
+		Double cost=0.0;
 		
-		for (Entry<Vm, Integer> entry: vmOffersTable.entrySet()){
+		for (Entry<Vm, Double> entry: vmOffersTable.entrySet()){
 			Vm v = entry.getKey();
 			//use memory due to precision of equality
 			if (v.getRam()==vm.getRam()){
@@ -286,7 +286,7 @@ public class OptimalWorkflowDatacenter extends Datacenter {
 	}
 		
 	//Accounts utilization of VMs inside the data center
-	private long updateVmUsage(long startTime, long price) {
+	private long updateVmUsage(long startTime, Double price) {
 		long currentTime = (long) Math.ceil(CloudSim.clock());
 		long runTimeInSeconds = currentTime-startTime;
 		

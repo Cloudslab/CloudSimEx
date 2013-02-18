@@ -67,10 +67,10 @@ public class GenerateDeadline {
 		try {
 			CloudSim.init(1,Calendar.getInstance(),false);
 
-			OptimalWorkflowDatacenter datacenter = createDatacenter("Datacenter");
+			OptimalMapReduceDatacenter datacenter = createDatacenter("Datacenter");
 			MapReduceEngine engine = createWorkflowEngine(dagFile);
 			
-			double latency = Double.parseDouble(Properties.NETWORK_LATENCY.getProperty());
+			double latency = 0.5;
 			NetworkTopology.addLink(datacenter.getId(),engine.getId(),100000,latency);
 
 			CloudSim.startSimulation();
@@ -87,7 +87,7 @@ public class GenerateDeadline {
 		}
 	}
 
-	private static OptimalWorkflowDatacenter createDatacenter(String name) throws Exception{
+	private static OptimalMapReduceDatacenter createDatacenter(String name) throws Exception{
 		int hosts = Integer.parseInt(Properties.HOSTS_PERDATACENTER.getProperty());
 		int ram = 8*Integer.parseInt(Properties.MEMORY_PERHOST.getProperty());
 		int cores = 8*Integer.parseInt(Properties.CORES_PERHOST.getProperty());
@@ -118,7 +118,7 @@ public class GenerateDeadline {
 
 		DatacenterCharacteristics characteristics = new DatacenterCharacteristics("Xeon","Linux","Xen",hostList,10.0,0.0,0.00,0.00,0.00);
 				
-		return new OptimalWorkflowDatacenter(name,characteristics,new VmAllocationPolicySimple(hostList),bw,latency,mips,delay,offers);
+		return new OptimalMapReduceDatacenter(name,characteristics,new VmAllocationPolicySimple(hostList),bw,latency,mips,delay,offers);
 	}
 
 	private static MapReduceEngine createWorkflowEngine(String dagFile){

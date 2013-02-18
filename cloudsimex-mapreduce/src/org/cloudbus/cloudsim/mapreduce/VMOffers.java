@@ -12,18 +12,13 @@ import org.cloudbus.cloudsim.Vm;
  */
 public abstract class VMOffers {
 	
-	Hashtable<Vm,Integer> vmOffersTable;
+	Hashtable<Vm,Double> vmOffersTable;
 	
 	/**
 	 * Returns the instances offered by the provider, and the respective
 	 * prices per time slot (in cents).
 	 */
-	public abstract Hashtable<Vm,Integer> getVmOffers();
-	
-	/**
-	 * Returns the cost of a specific instance, per time slot, in cents.
-	 */
-	public abstract int getCost(double mips,int memory,long bw);
+	public abstract Hashtable<Vm,Double> getVmOffers();
 	
 	/**
 	 * Returns the duration of the lease time slot in seconds.
@@ -36,6 +31,6 @@ public abstract class VMOffers {
 	public abstract long getBootTime();
 
 	public VMOffers(){
-		vmOffersTable = new Hashtable<Vm,Integer>();
+		vmOffersTable = new Hashtable<Vm,Double>();
 	}
 }

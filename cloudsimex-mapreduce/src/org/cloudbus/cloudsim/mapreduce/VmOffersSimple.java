@@ -6,29 +6,30 @@ import org.cloudbus.cloudsim.Vm;
 
 public class VmOffersSimple extends VMOffers {
 	
+	int vmsCount;
+	int baseCore;
+	long baseSize;
 	int baseMem;
-	int baseCost;
-	long baseStorage;
+	
 	
 	@Override
-	public Hashtable<Vm, Integer> getVmOffers() {
-		double baseMips = Integer.parseInt(Properties.MIPS_PERCORE.getProperty());
-		baseMem = Integer.parseInt(Properties.MEMORY_PERHOST.getProperty());
-		baseStorage = Long.parseLong(Properties.STORAGE_PERHOST.getProperty());
-		baseCost = 10;
+	public Hashtable<Vm, Double> getVmOffers() {
+		vmsCount = Integer.parseInt(Properties.VMS_COUNT.getProperty());
 		
-		vmOffersTable.put(new Vm(0,0,baseMips,1,  baseMem,0,  baseStorage,"",null),   baseCost);
-		vmOffersTable.put(new Vm(1,0,2*baseMips,1,2*baseMem,0,2*baseStorage,"",null), 2*baseCost);
-		vmOffersTable.put(new Vm(2,0,4*baseMips,1,4*baseMem,0,4*baseStorage,"",null), 4*baseCost);
+		baseCore = Integer.parseInt(Properties.CORE_PERVM.getProperty());
+		baseSize = Long.parseLong(Properties.SIZE_PERVM.getProperty());
+		baseMem = Integer.parseInt(Properties.MEMORY_PERVM.getProperty());
+		
+		
+		for (int i=1; i<=vmsCount; i++) {
+			int mips = Integer.parseInt(Properties.VM1_MIPS.getProperty());
+			double cost = Double.parseDouble(Properties.VM1_COST.getProperty());
+			//WARNING: Missing transferring.cost, ar, and datacenter
+			//WARNING: bandwidth is 100000, is that OK?
+			vmOffersTable.put(new Vm(0,0,mips,baseCore,  baseMem,10000,  baseSize,"",null),   cost);
+		}
 		
 		return vmOffersTable;
-	}
-
-	@Override
-	public int getCost(double mips, int memory, long bw) {
-			if (memory==baseMem) return baseCost;
-			if (memory==2*baseMem) return 2*baseCost;
-			return 4*baseCost;
 	}
 
 	@Override
