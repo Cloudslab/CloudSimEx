@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.mapreduce.models;
+package org.cloudbus.cloudsim.mapreduce.models.cloud;
 
 import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.Vm;
