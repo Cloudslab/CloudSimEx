@@ -1,9 +1,9 @@
 Requests:
-	- budget = 1
-	  deadline = 5200
-	  job = Jobs/MapReduce_3_2.yaml
-	  user_class = silver
-	- budget = 0.5
-	  deadline = 4000
-	  job = Jobs/MapReduce_3_2.yaml
-	  user_class = gold
+ - budget: 1
+   deadline: 5200
+   job: Jobs/MapReduce_3_2.yaml
+   user_class: silver
+ - budget: 0.5
+   deadline: 4000
+   job: Jobs/MapReduce_3_2.yaml
+   user_class: gold
