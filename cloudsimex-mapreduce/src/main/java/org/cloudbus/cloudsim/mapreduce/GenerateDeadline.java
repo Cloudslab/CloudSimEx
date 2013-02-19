@@ -88,13 +88,13 @@ public class GenerateDeadline {
 	}
 
 	private static OptimalMapReduceDatacenter createDatacenter(String name) throws Exception{
-		int hosts = Integer.parseInt(Properties.HOSTS_PERDATACENTER.getProperty());
+		int hosts = 100;//Integer.parseInt(Properties.HOSTS_PERDATACENTER.getProperty());
 		int ram = 8*Integer.parseInt(Properties.MEMORY_PERHOST.getProperty());
 		int cores = 8*Integer.parseInt(Properties.CORES_PERHOST.getProperty());
 		int mips = 8*Integer.parseInt(Properties.MIPS_PERCORE.getProperty());
-		long storage = 8*Long.parseLong(Properties.STORAGE_PERHOST.getProperty());
-		double bw = Double.parseDouble(Properties.INTERNAL_BANDWIDTH.getProperty());
-		double latency = Double.parseDouble(Properties.INTERNAL_LATENCY.getProperty());
+		long storage = 10000;// 8*Long.parseLong(Properties.STORAGE_PERHOST.getProperty());
+		double bw = 10000;// Double.parseDouble(Properties.INTERNAL_BANDWIDTH.getProperty());
+		double latency = 0;// Double.parseDouble(Properties.INTERNAL_LATENCY.getProperty());
 		long delay = Long.parseLong(Properties.VM_DELAY.getProperty());
 		String offerName = Properties.VM_OFFERS.getProperty();
 		
