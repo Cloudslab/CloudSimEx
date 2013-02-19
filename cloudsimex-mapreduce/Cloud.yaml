@@ -1,10 +1,19 @@
-Datacenters:
+--- !!org.cloudbus.cloudsim.mapreduce.models.Cloud
+dataSources:
+ - name: gbr-sensors
+   cost: 0.000
+ - name: EEE-sensors
+   cost: 0.001
+ - name: S3-sensors
+   cost: 0.005
+
+mapReduceDatacenters:
  - name: aws-us-east-1
    hosts: 999999999
    memory: 32768
    cores: 8
    mips_precore: 999999999
-   VMTypes:
+   vmtypes:
     - name: large-aws-us-east-1
       cost: 1.15
       transferring.cost: 0.005
@@ -28,7 +37,7 @@ Datacenters:
    memory: 32768
    cores: 8
    mips_precore: 999999999
-   VMTypes:
+   vmtypes:
    - name: private-openstack-unimelb
      cost: 0.00
      transferring.cost: 0.000
@@ -39,10 +48,3 @@ Datacenters:
      ram: 1024
      boot_time: 120
 
-Datasources:
- - name: gbr-sensors
-   cost: 0.000
- - name: EEE-sensors
-   cost: 0.001
- - name: S3-sensors
-   cost: 0.005

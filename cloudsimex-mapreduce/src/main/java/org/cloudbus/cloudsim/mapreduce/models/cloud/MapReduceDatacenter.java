@@ -12,7 +12,6 @@ import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.mapreduce.SeedGenerator;
 import org.cloudbus.cloudsim.mapreduce.VmSchedulerIaaS;
-import org.cloudbus.cloudsim.mapreduce.models.*;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
