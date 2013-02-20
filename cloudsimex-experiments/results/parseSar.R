@@ -9,13 +9,14 @@ parseSar <- function(fileName) {
   values <- list()
   
   result <- NULL 
-  lastLineHeader <- FALSE
+  isPrevLineHeader <- FALSE
   lastHeaderTime <- NULL
   
   # Read and skip the first line with the system info
   line <- readLines(con, n = 1, warn = FALSE)
   print(paste0("System Info: " , line))
   
+  #Parse lines one by one
   while (length(line <- readLines(con, n = 1, warn = FALSE)) > 0) {
     # Skip empty lines
     if(line[1] == "") {
@@ -25,10 +26,10 @@ parseSar <- function(fileName) {
     elements <- unlist(strsplit(line, split="\\s+"))
     isHeader <- isHeaderLine(elements)
     lineTime <- as.POSIXlt(strptime(elements[1], "%H:%M:%S"))
-    
+        
     # If it does not start with time - skip it, because it is an average.
     # If it is a second value line after a header - skip it as well
-    if (is.na(lineTime) || (!isHeader && !lastLineHeader)) {
+    if (is.na(lineTime) || (!isHeader && !isPrevLineHeader)) {
       next
     }
     
@@ -39,12 +40,6 @@ parseSar <- function(fileName) {
     # Upon a change in the time of the headers, or whe headers start
     # repeating - put things in the data frame
     if (isHeader && (lineTime != lastHeaderTime || elements[2] %in% header) ) {
-      
-      if(length(values) > 38) {
-        print(line)
-        #print(values)
-      }
-      
       # If frame does not exists - create it
       if(is.null(result)) {
         result <- data.frame(t(rep(NA, length(header) )))  
@@ -56,7 +51,7 @@ parseSar <- function(fileName) {
       
       # Print a status message, so that user knows we are not blocked
       if(frameLine %% 100 == 0) {
-        print(paste0(frameLine, " rows have been generated ..."))
+        print(paste0(fileName, ": ", frameLine, " rows have been generated ..."))
       }
       
       lastHeaderTime <- lineTime
@@ -67,7 +62,7 @@ parseSar <- function(fileName) {
     }
     
     # If we are appending to existing values - then remove the fist element
-    if ((isHeader && length(header) != 0) || length(values) != 0) {
+    if ((isHeader && length(header) != 0) || (!isHeader && length(values) != 0)) {
       elements <- elements[-1]
     }
     
@@ -76,10 +71,14 @@ parseSar <- function(fileName) {
     } else {
       values <- append(values, elements)
     } 
-    lastLineHeader <- isHeader
+    isPrevLineHeader <- isHeader
   } 
   
   close(con)
+  
+  result$Time <- sapply(result$Time,
+                        function(e){as.POSIXct(strptime(e, "%H:%M:%S"))} )
+  
   return (result)
 }
 
