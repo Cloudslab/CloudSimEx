@@ -36,10 +36,14 @@ parseSar <- function(fileName) {
       lastHeaderTime <- lineTime
     }
     
-    # Upon a change in the time of the headers - put things in the data frame
-    if (isHeader && lineTime != lastHeaderTime) {
-      #print(header)
-      #print(values)
+    # Upon a change in the time of the headers, or whe headers start
+    # repeating - put things in the data frame
+    if (isHeader && (lineTime != lastHeaderTime || elements[2] %in% header) ) {
+      
+      if(length(values) > 38) {
+        print(line)
+        #print(values)
+      }
       
       # If frame does not exists - create it
       if(is.null(result)) {
