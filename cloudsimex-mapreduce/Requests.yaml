@@ -1,9 +1,11 @@
-Requests:
+!!org.cloudbus.cloudsim.ex.mapreduce.models.Requests
+
+requests:
  - budget: 1
    deadline: 5200
-   job: Jobs/MapReduce_3_2.yaml
-   user_class: silver
+   jobFile: Jobs/MapReduce_3_2.yaml
+   userClass: SILVER
  - budget: 0.5
    deadline: 4000
-   job: Jobs/MapReduce_3_2.yaml
-   user_class: gold
+   jobFile: Jobs/MapReduce_3_2.yaml
+   userClass: GOLD

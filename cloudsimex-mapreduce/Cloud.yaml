@@ -1,50 +1,52 @@
---- !!org.cloudbus.cloudsim.mapreduce.models.Cloud
-dataSources:
- - name: gbr-sensors
-   cost: 0.000
- - name: EEE-sensors
-   cost: 0.001
- - name: S3-sensors
-   cost: 0.005
+!!org.cloudbus.cloudsim.ex.mapreduce.models.Cloud
 
 mapReduceDatacenters:
- - name: aws-us-east-1
-   hosts: 999999999
-   memory: 32768
-   cores: 8
-   mips_precore: 999999999
-   vmtypes:
-    - name: large-aws-us-east-1
-      cost: 1.15
-      transferring.cost: 0.005
-      mips: 8000
-      ar: 999999999
-      core: 1
-      size: 10000
-      ram: 1024
-      boot_time: 120
-    - name: small-aws-us-east-1
-      cost: 0.57
-      transferring.cost: 0.005
-      mips: 4300
-      ar: 999999999
-      core: 1
-      size: 10000
-      ram: 1024
-      boot_time: 120
- - name: openstack-unimelb
-   hosts: 15
-   memory: 32768
-   cores: 8
-   mips_precore: 999999999
-   vmtypes:
-   - name: private-openstack-unimelb
-     cost: 0.00
-     transferring.cost: 0.000
-     mips: 2000
-     ar: 100
-     core: 1
-     size: 10000
-     ram: 1024
-     boot_time: 120
+ - [
+    # Datacenter info: [name, hosts, memory_perhost, cores_perhost, mips_precore_perhost]
+    aws-us-east-1, 200, 32768, 8, 100,
+      # VM Types info (You can have multiples): [name, cost, transferring.cost, mips, ar, cores, ram, boot_time]
+      [ 
+        !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType
+        [large-aws-us-east-1,1.15,0.005,8000,999999999,1,1024,120],
+        !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType
+        [small-aws-us-east-1,0.57,0.005,4300,999999999,1,1024,120]
+      ]
+   ]
+   
+ - [
+    # Datacenter info: [name, hosts, memory_perhost, cores_perhost, mips_precore_perhost]
+    openstack-unimelb, 15, 32768, 8, 100,
+      # VM Types info (You can have multiples): [name, cost, transferring.cost, mips, ar, cores, ram, boot_time]
+      [
+        !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType
+        [private-openstack-unimelb,0.00,0.000,1000,100,1,512,200]
+      ]
+   ]
 
+dataSources:
+   # Data Sources info (You have multiples): [name, cost]
+ - [gbr-sensors, 0.000]
+ - [EEE-sensors, 0.001]
+ - [S3-sensors, 0.005]
+
+
+throughputs_vm_vm:
+# Throughputs info between VM Types (You have multiples): [source, destination, throughput]
+- [large-aws-us-east-1, small-aws-us-east-1, 800]
+- [large-aws-us-east-1, private-openstack-unimelb, 60]
+- [small-aws-us-east-1, large-aws-us-east-1, 750]
+- [small-aws-us-east-1, private-openstack-unimelb, 40]
+- [private-openstack-unimelb, large-aws-us-east-1, 60]
+- [private-openstack-unimelb, small-aws-us-east-1, 40]
+
+throughputs_vm_ds:
+# Throughputs info between a VM Type and a Data Source (You have multiples): [source, destination, throughput]
+- [gbr-sensors, large-aws-us-east-1, 60]
+- [gbr-sensors, small-aws-us-east-1, 50]
+- [gbr-sensors, private-openstack-unimelb, 40]
+- [EEE-sensors, large-aws-us-east-1, 10]
+- [EEE-sensors, small-aws-us-east-1, 8]
+- [EEE-sensors, private-openstack-unimelb, 100]
+- [S3-sensors, large-aws-us-east-1, 800]
+- [S3-sensors, small-aws-us-east-1, 500]
+- [S3-sensors, private-openstack-unimelb ,60]

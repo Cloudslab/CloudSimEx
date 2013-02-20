@@ -7,14 +7,8 @@
     <artifactId>cloudsimex</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  <groupId>org.cloudbus</groupId>
   <artifactId>cloudsimex-mapreduce</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <name>cloudsimex-mapreduce</name>
-  <url>http://maven.apache.org</url>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+  
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -27,5 +21,10 @@
     	<artifactId>snakeyaml</artifactId>
     	<version>1.11</version>
 </dependency>
+<dependency>
+			<groupId>org.cloudbus</groupId>
+			<artifactId>cloudsimex-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
   </dependencies>
 </project>
