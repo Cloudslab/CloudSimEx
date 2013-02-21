@@ -4,17 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import org.cloudbus.cloudsim.DatacenterBroker;
-import org.cloudbus.cloudsim.DatacenterCharacteristics;
-import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Log;
-import org.cloudbus.cloudsim.NetworkTopology;
-import org.cloudbus.cloudsim.Pe;
-import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.ex.mapreduce.models.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.Requests;
@@ -22,9 +15,7 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.MapReduceDatacenter;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.MapTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.ReduceTask;
-import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
-import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
-import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -40,15 +31,12 @@ import org.yaml.snakeyaml.Yaml;
  */
 public class Simulation {
 	
+	//From Cloud.yaml
 	private static Cloud cloud;
+	
+	//From Requests.yaml
 	private static Requests requests;
-
-	/** The cloudlet list. */
-	private static List<MapTask> cloudletList_MapTasks;
-	private static List<ReduceTask> cloudletList_ReduceTasks;
-
-	/** The vmlist. */
-	private static List<VMType> vmlist;
+	
 	
 	public Simulation(){
 		
@@ -93,14 +81,54 @@ public class Simulation {
 			
 			// Create datacentres and cloudlets
 			loadYAMLFiles();
+			engine.setCloud(cloud);
+			
+			//Provision all types of virtual machines from Cloud
+			List<VMType> vmlist = cloud.getAllVMTypes();
 
+			engine.submitVmList(vmlist);
+
+			//Submit all Map and Reduce tasks to the broker 
+			for (Request request : requests.requests) {
+				engine.submitCloudletList(request.job.mapTasks);
+				engine.submitCloudletList(request.job.reduceTasks);
+			}
+			
+			//Bind Map and Reduce tasks to VMs
+			for (int i=0; i<requests.requests.size(); i++)
+			{
+				Request request = requests.requests.get(i);
+				
+				int vmID = i;
+				if(i==0) //bind the 1st request in the first vm (vm index = 0) in private cloud (datacentre index = 1)
+					vmID = cloud.mapReduceDatacenters.get(1).vmTypes.get(0).getId();
+				else
+					vmID = vmlist.get(i).getId();
+				
+				Log.printLine("==== Map Tasks ====");
+				for (MapTask mapTask : request.job.mapTasks) {
+					engine.bindCloudletToVm(mapTask.getCloudletId(),vmID);
+					Log.printLine("CloudLet ID: " + mapTask.getCloudletId() + " -> VM ID: " + vmlist.get(i).getId());
+				}
+				
+				Log.printLine("==== Reduce Tasks ====");
+				for (ReduceTask reduceTask : request.job.reduceTasks) {
+					engine.bindCloudletToVm(reduceTask.getCloudletId(),vmID);
+					Log.printLine("CloudLet ID: " + reduceTask.getCloudletId() + " -> VM ID: " + vmlist.get(i).getId());
+				}
+			}
+        	
+			//START
 			CloudSim.startSimulation();
 			engine.printExecutionSummary();
 
 
 			// Print the debt of each user to each datacenter
 			for (MapReduceDatacenter mapReduceDatacenter : cloud.mapReduceDatacenters)
+			{
+				mapReduceDatacenter.printDebts();
 				mapReduceDatacenter.printSummary();
+			}
 
 			Log.printLine("");
 			Log.printLine("");

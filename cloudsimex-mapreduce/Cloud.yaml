@@ -3,7 +3,7 @@
 mapReduceDatacenters:
  - [
     # Datacenter info: [name, hosts, memory_perhost, cores_perhost, mips_precore_perhost]
-    aws-us-east-1, 200, 32768, 8, 100,
+    aws-us-east-1, 200, 32768, 8, 10000,
       # VM Types info (You can have multiples): [name, cost, transferring.cost, mips, ar, cores, ram, boot_time]
       [ 
         !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType
@@ -15,7 +15,7 @@ mapReduceDatacenters:
    
  - [
     # Datacenter info: [name, hosts, memory_perhost, cores_perhost, mips_precore_perhost]
-    openstack-unimelb, 15, 32768, 8, 100,
+    openstack-unimelb, 15, 32768, 8, 5000,
       # VM Types info (You can have multiples): [name, cost, transferring.cost, mips, ar, cores, ram, boot_time]
       [
         !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType

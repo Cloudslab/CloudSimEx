@@ -11,6 +11,9 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.ex.mapreduce.models.Cloud;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.MapReduceDatacenter;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType;
 import org.cloudbus.cloudsim.lists.CloudletList;
 import org.cloudbus.cloudsim.lists.VmList;
 import org.cloudbus.cloudsim.*;
@@ -19,7 +22,7 @@ import org.cloudbus.cloudsim.*;
 public class MapReduceEngine extends SimEntity {
 
 	/** The vm list. */
-	protected List<? extends Vm> vmList;
+	protected List<? extends VMType> vmList;
 
 	/** The vms created list. */
 	protected List<? extends Vm> vmsCreatedList;
@@ -56,6 +59,16 @@ public class MapReduceEngine extends SimEntity {
 
 	/** The datacenter characteristics list. */
 	protected Map<Integer, DatacenterCharacteristics> datacenterCharacteristicsList;
+	
+	private Cloud cloud;
+
+	public Cloud getCloud() {
+		return cloud;
+	}
+
+	public void setCloud(Cloud cloud) {
+		this.cloud = cloud;
+	}
 
 	/**
 	 * Created a new DatacenterBroker object.
@@ -69,7 +82,7 @@ public class MapReduceEngine extends SimEntity {
 	public MapReduceEngine(String name) throws Exception {
 		super(name);
 
-		setVmList(new ArrayList<Vm>());
+		setVmList(new ArrayList<VMType>());
 		setVmsCreatedList(new ArrayList<Vm>());
 		setCloudletList(new ArrayList<Cloudlet>());
 		setCloudletSubmittedList(new ArrayList<Cloudlet>());
@@ -94,7 +107,7 @@ public class MapReduceEngine extends SimEntity {
 	 * @pre list !=null
 	 * @post $none
 	 */
-	public void submitVmList(List<? extends Vm> list) {
+	public void submitVmList(List<? extends VMType> list) {
 		getVmList().addAll(list);
 	}
 
@@ -304,10 +317,29 @@ public class MapReduceEngine extends SimEntity {
 		// send as much vms as possible for this datacenter before trying the next one
 		int requestedVms = 0;
 		String datacenterName = CloudSim.getEntityName(datacenterId);
-		for (Vm vm : getVmList()) {
+		for (VMType vm : getVmList()) {
 			if (!getVmsToDatacentersMap().containsKey(vm.getId())) {
 				Log.printLine(CloudSim.clock() + ": " + getName() + ": Trying to Create VM #" + vm.getId()
 						+ " in " + datacenterName);
+				// NEW CODE
+				boolean inDataCentre = false;
+				for (MapReduceDatacenter mapReduceDatacenter : cloud.mapReduceDatacenters) {
+					for (VMType vmType : mapReduceDatacenter.vmTypes) {
+						if(vm.getId() == vmType.getId() && mapReduceDatacenter.getId() == datacenterId)
+						{
+							inDataCentre = true;
+							break;
+						}
+						if(inDataCentre) break;
+					}
+					if(inDataCentre) break;
+				}
+				if(!inDataCentre)
+				{
+					Log.printLine(CloudSim.clock() + ": " + getName() + ": VM #" + vm.getId() + " is not in " + datacenterName + " --ignored");
+					break;
+				}
+				//END NEW CODE
 				sendNow(datacenterId, CloudSimTags.VM_CREATE_ACK, vm);
 				requestedVms++;
 			}
@@ -407,7 +439,7 @@ public class MapReduceEngine extends SimEntity {
 	 * @return the vm list
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends Vm> List<T> getVmList() {
+	public <T extends VMType> List<T> getVmList() {
 		return (List<T>) vmList;
 	}
 
@@ -417,7 +449,7 @@ public class MapReduceEngine extends SimEntity {
 	 * @param <T> the generic type
 	 * @param vmList the new vm list
 	 */
-	protected <T extends Vm> void setVmList(List<T> vmList) {
+	protected <T extends Vm> void setVmList(List<VMType> vmList) {
 		this.vmList = vmList;
 	}
 

@@ -3,22 +3,22 @@
 
 mapTasks:
 # Map task info: [description, dSize, idSize, mipb]
-- [Forward the values of 2011 and 2012 keys to the right reducer, 64, 64, 100,
+- [Forward the values of 2011 and 2012 keys to the right reducer, 64, 64, 10,
       # Data Sources info: list of data sources names where the replicas exists
       [gbr-sensors, EEE-sensors]
   ]
 # Map task info: [description, dSize, idSize, mipb]
-- [Forward the values of 2011 and 2012 keys to the right reducer, 64, 64, 100,
+- [Forward the values of 2011 and 2012 keys to the right reducer, 64, 64, 10,
       # Data Sources info: list of data sources names where the replicas exists
       [gbr-sensors, S3-sensors]
   ]
 # Map task info: [description, dSize, idSize, mipb]
-- [Forward the values of 2011 and 2012 keys to the right reducer, 10, 10, 100,
+- [Forward the values of 2011 and 2012 keys to the right reducer, 10, 10, 10,
       # Data Sources info: list of data sources names where the replicas exists
       [S3-sensors]
   ]
 
 reduceTasks:
 # Reduce task info:[description, idSize, mipb]
-- [This is the 2011 key reducer - to average the 2011 values, 100, 100]
-- [This is the 2012 key reducer - to average the 2012 values, 38, 100]
+- [This is the 2011 key reducer - to average the 2011 values, 100, 5]
+- [This is the 2012 key reducer - to average the 2012 values, 38, 5]
