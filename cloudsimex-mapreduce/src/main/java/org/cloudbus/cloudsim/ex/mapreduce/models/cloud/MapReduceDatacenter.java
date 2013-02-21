@@ -15,8 +15,6 @@ import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerSpaceShared;
-import org.cloudbus.cloudsim.ex.mapreduce.SeedGenerator;
-import org.cloudbus.cloudsim.ex.mapreduce.VmSchedulerIaaS;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
@@ -62,8 +60,6 @@ public class MapReduceDatacenter extends Datacenter {
 			
 			hostList.add(new Host(i,new RamProvisionerSimple(memory_perhost),new BwProvisionerSimple(1000000),
 					  storage,peList,new VmSchedulerSpaceShared(peList)));
-			//hostList.add(new Host(i,new RamProvisionerSimple(memory_perhost),new BwProvisionerSimple(1000000),
-			//		  storage,peList,new VmSchedulerIaaS(peList,SeedGenerator.getSeed1(1))));
 		}
 		
 		return hostList;
