@@ -2,8 +2,10 @@ package org.cloudbus.cloudsim.ex.mapreduce.models.cloud;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.cloudbus.cloudsim.Datacenter;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
@@ -69,12 +71,24 @@ public class MapReduceDatacenter extends Datacenter {
 	
 	//Simulation output
 	public void printSummary(){
+		
 		DecimalFormat df = new DecimalFormat("#.##");
 		double cost = 0.0;
 			
 		Log.printLine();
 		Log.printLine("======== DATACENTER SUMMARY ========");
 		Log.printLine("= Cost: "+df.format(cost));
+		
+		Log.printLine("User id\t\tDebt");
+
+		Set<Integer> keys = getDebts().keySet();
+		Iterator<Integer> iter = keys.iterator();
+		while (iter.hasNext()) {
+			int key = iter.next();
+			double value = getDebts().get(key);
+			Log.printLine(key + "\t\t" + df.format(value));
+		}
+		
 		Log.printLine("========== END OF SUMMARY =========");
 	}
 }

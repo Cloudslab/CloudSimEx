@@ -12,8 +12,13 @@ import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.ex.mapreduce.models.Cloud;
+import org.cloudbus.cloudsim.ex.mapreduce.models.ExecutionPlan;
+import org.cloudbus.cloudsim.ex.mapreduce.models.PairTaskDatasource;
+import org.cloudbus.cloudsim.ex.mapreduce.models.Requests;
+import org.cloudbus.cloudsim.ex.mapreduce.models.ResourceSet;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.MapReduceDatacenter;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.lists.CloudletList;
 import org.cloudbus.cloudsim.lists.VmList;
 import org.cloudbus.cloudsim.*;
@@ -61,6 +66,21 @@ public class MapReduceEngine extends SimEntity {
 	protected Map<Integer, DatacenterCharacteristics> datacenterCharacteristicsList;
 	
 	private Cloud cloud;
+	
+	private Requests requests;
+
+	public Requests getRequests() {
+		return requests;
+	}
+
+	public void setRequests(Requests requests) {
+		this.requests = requests;
+		
+		//Submit all Map and Reduce tasks to the broker 
+		for (Request request : requests.requests) {
+			submitUserRequest(request);
+		}
+	}
 
 	public Cloud getCloud() {
 		return cloud;
@@ -317,6 +337,7 @@ public class MapReduceEngine extends SimEntity {
 		// send as much vms as possible for this datacenter before trying the next one
 		int requestedVms = 0;
 		String datacenterName = CloudSim.getEntityName(datacenterId);
+		Log.printLine(CloudSim.clock() + ": " + getName() + ": In Data Centre: "+datacenterName);
 		for (VMType vm : getVmList()) {
 			if (!getVmsToDatacentersMap().containsKey(vm.getId())) {
 				Log.printLine(CloudSim.clock() + ": " + getName() + ": Trying to Create VM #" + vm.getId()
@@ -429,6 +450,29 @@ public class MapReduceEngine extends SimEntity {
 	@Override
 	public void startEntity() {
 		Log.printLine(getName() + " is starting...");
+		
+		// NEW CODE
+		Log.printLine(getName() + " is searching for the optimal Resource Set...");
+		ResourceSet resourceSet = new ResourceSet(cloud, requests);
+		//Provision all types of virtual machines from Cloud
+		Log.printLine(" =========== FINISHED SEARCHING ===========");
+		Log.printLine(getName() + " found optimal VMs to provision ...");
+		List<VMType> vmlist = resourceSet.getSelectedVMTypeIds();
+		submitVmList(vmlist);
+		for (VMType vmType : vmlist) {
+			Log.printLine(getName() + " will provition VM: " + vmType.name + " (ID: " + vmType.getId() + ")");
+		}
+		//Bind/Schedule Map and Reduce tasks to VMs based on the ResourceSet
+		Log.printLine(getName() + " found optimal plan to schedule MapReduce tasks ...");
+		List<ExecutionPlan> executionPlans = resourceSet.executionPlans;
+		for (ExecutionPlan executionPlan : executionPlans) 
+			for (PairTaskDatasource pairTaskDatasources : executionPlan.taskSet.pairs)
+			{
+				Log.printLine(getName() + " will schedule task: " + pairTaskDatasources.taskId + " on VM: " + executionPlan.vmTypeId);
+				bindCloudletToVm(pairTaskDatasources.taskId, executionPlan.vmTypeId);
+			}
+		// END NEW CODE
+		
 		schedule(getId(), 0, CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST);
 	}
 
@@ -676,7 +720,7 @@ public class MapReduceEngine extends SimEntity {
 			DecimalFormat dft = new DecimalFormat("#####.##");
 			String indent = "\t";
 			
-			Log.printLine("========== WORKFLOW EXECUTION SUMMARY ==========");
+			Log.printLine("========== MAPREDUCE EXECUTION SUMMARY ==========");
 			Log.printLine("= Task " + indent + "Status" + indent + indent + "Start Time" + indent + "Execution Time (s)" + indent + "Finish Time");
 			for (Cloudlet cloudlet: getCloudletReceivedList()) {
 				Log.print(" = "+cloudlet.getCloudletId() + indent);
@@ -704,6 +748,11 @@ public class MapReduceEngine extends SimEntity {
 			Log.printLine("= Violation: "+ violation);
 			Log.printLine("========== END OF SUMMARY =========");
 			Log.printLine();
+		}
+
+		public void submitUserRequest(Request request) {
+			submitCloudletList(request.job.mapTasks);
+			submitCloudletList(request.job.reduceTasks);
 		}
 
 }

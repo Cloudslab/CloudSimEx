@@ -25,4 +25,16 @@ public class Cloud {
 		
 		return vmlist;
 	}
+	
+	public VMType findVMType(int VMTypeId)
+	{
+		for (MapReduceDatacenter mapReduceDatacenter : mapReduceDatacenters) {
+			for (VMType vmType : mapReduceDatacenter.vmTypes) {
+				if(vmType.getId() == VMTypeId)
+					return vmType;
+			}
+		}
+		
+		return null;
+	}
 }

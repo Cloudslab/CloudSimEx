@@ -2,24 +2,73 @@
 
 mapReduceDatacenters:
  - [
-    # Datacenter info: [name, hosts, memory_perhost, cores_perhost, mips_precore_perhost]
-    aws-us-east-1, 200, 32768, 8, 10000,
-      # VM Types info (You can have multiples): [name, cost, transferring.cost, mips, ar, cores, ram, boot_time]
+    # Datacenter info: [name, hosts, memory_perhost, cores_perhost, mips_precore_perhost, [vmTypes]]
+    aws-us-east-1, 200, 32768, 8, 99999,
       [ 
         !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType
-        [large-aws-us-east-1,1.15,0.005,8000,999999999,1,1024,120],
+        [
+          # name
+          large-aws-us-east-1,
+          # cost
+          1.15,
+          # transferring.cost
+          0.005,
+          # mips
+          1000,
+          # ar
+          999999999,
+          # cores
+          1,
+          # ram
+          1024,
+          # boot_time
+          0
+        ],
         !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType
-        [small-aws-us-east-1,0.57,0.005,4300,999999999,1,1024,120]
+        [
+          # name
+          small-aws-us-east-1,
+          # cost
+          0.57,
+          # transferring.cost
+          0.005,
+          # mips
+          1000,
+          # ar
+          999999999,
+          # cores
+          1,
+          # ram
+          1024,
+          # boot_time
+          0
+        ]
       ]
    ]
    
  - [
-    # Datacenter info: [name, hosts, memory_perhost, cores_perhost, mips_precore_perhost]
-    openstack-unimelb, 15, 32768, 8, 5000,
-      # VM Types info (You can have multiples): [name, cost, transferring.cost, mips, ar, cores, ram, boot_time]
+    # Datacenter info: [name, hosts, memory_perhost, cores_perhost, mips_precore_perhost, [vmTypes]]
+    openstack-unimelb, 15, 32768, 8, 99999,
       [
         !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType
-        [private-openstack-unimelb,0.00,0.000,1000,100,1,512,200]
+        [
+          # name
+          private-openstack-unimelb,
+          # cost
+          0.00,
+          # transferring.cost
+          0.000,
+          # mips
+          1000,
+          # ar
+          100,
+          # cores
+          1,
+          # ram
+          512,
+          # boot_time
+          0
+        ]
       ]
    ]
 

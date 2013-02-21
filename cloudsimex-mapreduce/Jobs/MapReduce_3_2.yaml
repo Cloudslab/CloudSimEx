@@ -2,23 +2,20 @@
 # This job is to calculate the average temperature of one of the Great Barrier Reef (GBR) temperature sensor in 2011 and 2012
 
 mapTasks:
-# Map task info: [description, dSize, idSize, mipb]
-- [Forward the values of 2011 and 2012 keys to the right reducer, 64, 64, 10,
-      # Data Sources info: list of data sources names where the replicas exists
+# Map task info: [description, dSize, idSize, mipb, [dataSources]]
+- [Forward the values of 2011 and 2012 keys to the right reducer, 1, 64, 1000,
       [gbr-sensors, EEE-sensors]
   ]
-# Map task info: [description, dSize, idSize, mipb]
-- [Forward the values of 2011 and 2012 keys to the right reducer, 64, 64, 10,
-      # Data Sources info: list of data sources names where the replicas exists
+# Map task info: [description, dSize, idSize, mipb, [dataSources]]
+- [Forward the values of 2011 and 2012 keys to the right reducer, 1, 64, 1000,
       [gbr-sensors, S3-sensors]
   ]
-# Map task info: [description, dSize, idSize, mipb]
-- [Forward the values of 2011 and 2012 keys to the right reducer, 10, 10, 10,
-      # Data Sources info: list of data sources names where the replicas exists
+# Map task info: [description, dSize, idSize, mipb, [dataSources]]
+- [Forward the values of 2011 and 2012 keys to the right reducer, 1, 10, 1000,
       [S3-sensors]
   ]
 
 reduceTasks:
 # Reduce task info:[description, idSize, mipb]
-- [This is the 2011 key reducer - to average the 2011 values, 100, 5]
-- [This is the 2012 key reducer - to average the 2012 values, 38, 5]
+- [This is the 2011 key reducer - to average the 2011 values, 1, 1000]
+- [This is the 2012 key reducer - to average the 2012 values, 1, 1000]
