@@ -1,5 +1,6 @@
 package org.cloudbus.cloudsim.ex.mapreduce.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.*;
@@ -13,21 +14,15 @@ public class Cloud {
 	public List<List> throughputs_vm_ds;
 	
 	public static int brokerID = -1;
-	
-	public Cloud() {
+
+	public List<VMType> getAllVMTypes()
+	{
 		
+		List<VMType> vmlist = new ArrayList<VMType>();
+		for (MapReduceDatacenter mapReduceDatacenter : mapReduceDatacenters) {
+			vmlist.addAll(mapReduceDatacenter.vmTypes);
+		}
 		
-		
-		/*
-		List<DataSource> dataSources = new ArrayList<DataSource>();
-		List<MapReduceDatacenter> mapReduceDatacenters = new ArrayList<MapReduceDatacenter>();
-		Double[][] throughputs_vm_vm;
-		Double[][] throughputs_vm_ds;
-		
-		this.dataSources = dataSources;
-		this.mapReduceDatacenters = mapReduceDatacenters;
-		this.throughputs_vm_vm = throughputs_vm_vm;
-		this.throughputs_vm_ds = throughputs_vm_ds;
-		*/
+		return vmlist;
 	}
 }

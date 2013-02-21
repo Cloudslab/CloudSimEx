@@ -1,5 +1,6 @@
 package org.cloudbus.cloudsim.ex.mapreduce.models.cloud;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.List;
 import org.cloudbus.cloudsim.Datacenter;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
 import org.cloudbus.cloudsim.Host;
+import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
@@ -60,5 +62,16 @@ public class MapReduceDatacenter extends Datacenter {
 		}
 		
 		return hostList;
+	}
+	
+	//Simulation output
+	public void printSummary(){
+		DecimalFormat df = new DecimalFormat("#.##");
+		double cost = 0.0;
+			
+		Log.printLine();
+		Log.printLine("======== DATACENTER SUMMARY ========");
+		Log.printLine("= Cost: "+df.format(cost));
+		Log.printLine("========== END OF SUMMARY =========");
 	}
 }

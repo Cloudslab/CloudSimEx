@@ -1,49 +1,24 @@
+!!org.cloudbus.cloudsim.ex.mapreduce.models.request.Job
 # This job is to calculate the average temperature of one of the Great Barrier Reef (GBR) temperature sensor in 2011 and 2012
 
-maps:
-	- id: map00001
-	  description: Forward 2011 and 2012 values to the right reducer
-	  dsize: 64
-	  idsize: 0.5
-	  mipb: 100
-	  ds:
-		- id: gbr-sensors
-	  	  file: temperature_gbr_1_20m.txt
-	  	  block: 1
-	  	- id: EEE-sensors
-	  	  file: temperature_gbr_1_20m.txt
-	  	  block: 1
-	  
-	- id: map00002
-	  description: Forward 2011 and 2012 values to the right reducer
-	  dsize: 64
-	  idsize: 0.5
-	  mipb: 100
-	  ds:
-	  	- id: gbr-sensors
-	  	  file: temperature_gbr_1_20m.txt
-	  	  block: 2
-	  	- id: S3-sensors
-	  	  file: temperature_gbr_1_20m.txt
-	  	  block: 2
-	  
-	- id: map00003
-	  description: Forward 2011 and 2012 values to the right reducer
-	  dsize: 10
-	  idsize: 0.5
-	  mipb: 100
-	  ds:
-	  	- id: S3-sensors
-	  	  file: temperature_gbr_1_20m.txt
-	  	  block: 2
-	  	  
-reduces:
-	- id: reduce00001
-	  description: Average 2011 key values
-	  idsize: .5
-	  mipb: 100
-	  
-	- id: reduce00002
-	  description: Average 2012 key values
-	  idsize: .5
-	  mipb: 100
+mapTasks:
+# Map task info: [description, dSize, idSize, mipb]
+- [Forward the values of 2011 and 2012 keys to the right reducer, 64, 64, 100,
+      # Data Sources info: list of data sources names where the replicas exists
+      [gbr-sensors, EEE-sensors]
+  ]
+# Map task info: [description, dSize, idSize, mipb]
+- [Forward the values of 2011 and 2012 keys to the right reducer, 64, 64, 100,
+      # Data Sources info: list of data sources names where the replicas exists
+      [gbr-sensors, S3-sensors]
+  ]
+# Map task info: [description, dSize, idSize, mipb]
+- [Forward the values of 2011 and 2012 keys to the right reducer, 10, 10, 100,
+      # Data Sources info: list of data sources names where the replicas exists
+      [S3-sensors]
+  ]
+
+reduceTasks:
+# Reduce task info:[description, idSize, mipb]
+- [This is the 2011 key reducer - to average the 2011 values, 100, 100]
+- [This is the 2012 key reducer - to average the 2012 values, 38, 100]

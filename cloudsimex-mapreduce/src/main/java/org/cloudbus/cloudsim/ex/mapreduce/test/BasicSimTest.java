@@ -23,6 +23,9 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.Requests;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType;
 import org.yaml.snakeyaml.Yaml;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.*;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.MapTask;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.ReduceTask;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 
 
 public class BasicSimTest {
@@ -31,7 +34,8 @@ public class BasicSimTest {
 	private static Requests requests;
 
 	/** The cloudlet list. */
-	private static List<Cloudlet> cloudletList;
+	private static List<MapTask> cloudletList_MapTasks;
+	private static List<ReduceTask> cloudletList_ReduceTasks;
 
 	/** The vmlist. */
 	private static List<VMType> vmlist;
@@ -58,7 +62,6 @@ public class BasicSimTest {
 			
 			// Second step: Create Broker
 			DatacenterBroker broker = createBroker();
-			int brokerId = broker.getId();
 			Cloud.brokerID = broker.getId();
 			
 			// Third step: Create Datacenters
@@ -67,34 +70,18 @@ public class BasicSimTest {
 			loadYAMLFiles();
 			
 			// Fourth step: Create all types of virtual machines from Cloud
-			vmlist = new ArrayList<VMType>();
-			for (MapReduceDatacenter mapReduceDatacenter : cloud.mapReduceDatacenters) {
-				vmlist.addAll(mapReduceDatacenter.vmTypes);
-			}
+			vmlist = cloud.getAllVMTypes();
 
 			// submit vm list to the broke
 			broker.submitVmList(vmlist);
 
-			// Fifth step: Create one Cloudlet
-			cloudletList = new ArrayList<Cloudlet>();
-
-			// Cloudlet properties
-			int id = 0;
-			long length = 400000;
-			long fileSize = 300;
-			long outputSize = 300;
-			int pesNumber = 1; // number of cpus
-			UtilizationModel utilizationModel = new UtilizationModelFull();
-
-			Cloudlet cloudlet = new Cloudlet(id, length, pesNumber, fileSize, outputSize, utilizationModel, utilizationModel, utilizationModel);
-			cloudlet.setUserId(brokerId);
-
-			// add the cloudlet to the list
-			cloudletList.add(cloudlet);
-
-			// submit cloudlet list to the broker
-			broker.submitCloudletList(cloudletList);
-
+			// Fifth step: Submit all Cloudlets (Map and Reduce tasks) to the broker 
+			for (Request request : requests.requests) {
+				broker.submitCloudletList(request.job.mapTasks);
+				broker.submitCloudletList(request.job.reduceTasks);
+			}
+			
+			
 			// Sixth step: Starts the simulation
 			CloudSim.startSimulation();
 
@@ -141,8 +128,14 @@ public class BasicSimTest {
 		
 		InputStream document = null;
 		try {
+			if(Cloud.brokerID == -1)
+				throw new Exception("brokerID is not set");
+			
 			document = new FileInputStream(new File("Cloud.yaml"));
 		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

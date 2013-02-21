@@ -3,422 +3,675 @@ package org.cloudbus.cloudsim.ex.mapreduce;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
-import org.cloudbus.cloudsim.Cloudlet;
-import org.cloudbus.cloudsim.Log;
-import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.lists.CloudletList;
+import org.cloudbus.cloudsim.lists.VmList;
+import org.cloudbus.cloudsim.*;
 
-/**
- * This class handles the whole process of workflow
- * execution, including: parsing xml file, defining
- * number, types, and start times of vms, and scheduling,
- * dispatching, and management of DAG tasks.
- * 
- */
-public class MapReduceEngine extends SimEntity{
 
-	private static final int DELAY_START_EVENT = 998877;
-	private int datacenterId;
-	private long seed;
-	
-	private double actualStartTime = 0.0;
-	private double endTime;
-	private String dagFile;
-	private long execTime;
-	private long baseMIPS;
-	private Policy policy;
-	private VMOffers vmOffers;
-	
-	private HashMap<Integer,Boolean> freeVmList;
-	private HashMap<Integer,Boolean> runningVmList; 
-	private HashMap<Cloudlet,Task> cloudletTaskMap;
-	private Hashtable<Integer,HashSet<Integer>> dataRequiredLocation;
-	private Hashtable<Integer,ArrayList<Task>> schedulingTable;
-	private Hashtable<Integer,Vm> vmTable;
-	private HashSet<WETransmission> pendingTransmissions;
-	private List<? extends Cloudlet> cloudletReceivedList;
+public class MapReduceEngine extends SimEntity {
 
-	public MapReduceEngine(String dagFile, long execTime, long baseMIPS, Policy policy, VMOffers vmOffers, long seed) {
-		super("WorkflowEngine");
+	/** The vm list. */
+	protected List<? extends Vm> vmList;
+
+	/** The vms created list. */
+	protected List<? extends Vm> vmsCreatedList;
+
+	/** The cloudlet list. */
+	protected List<? extends Cloudlet> cloudletList;
+
+	/** The cloudlet submitted list. */
+	protected List<? extends Cloudlet> cloudletSubmittedList;
+
+	/** The cloudlet received list. */
+	protected List<? extends Cloudlet> cloudletReceivedList;
+
+	/** The cloudlets submitted. */
+	protected int cloudletsSubmitted;
+
+	/** The vms requested. */
+	protected int vmsRequested;
+
+	/** The vms acks. */
+	protected int vmsAcks;
+
+	/** The vms destroyed. */
+	protected int vmsDestroyed;
+
+	/** The datacenter ids list. */
+	protected List<Integer> datacenterIdsList;
+
+	/** The datacenter requested ids list. */
+	protected List<Integer> datacenterRequestedIdsList;
+
+	/** The vms to datacenters map. */
+	protected Map<Integer, Integer> vmsToDatacentersMap;
+
+	/** The datacenter characteristics list. */
+	protected Map<Integer, DatacenterCharacteristics> datacenterCharacteristicsList;
+
+	/**
+	 * Created a new DatacenterBroker object.
+	 * 
+	 * @param name name to be associated with this entity (as required by Sim_entity class from
+	 *            simjava package)
+	 * @throws Exception the exception
+	 * @pre name != null
+	 * @post $none
+	 */
+	public MapReduceEngine(String name) throws Exception {
+		super(name);
+
+		setVmList(new ArrayList<Vm>());
+		setVmsCreatedList(new ArrayList<Vm>());
+		setCloudletList(new ArrayList<Cloudlet>());
+		setCloudletSubmittedList(new ArrayList<Cloudlet>());
 		setCloudletReceivedList(new ArrayList<Cloudlet>());
-		this.dagFile = dagFile;
-		this.execTime = execTime;
-		this.baseMIPS = baseMIPS;
-		this.policy = policy;
-		this.vmOffers = vmOffers;
-		this.seed = seed;
-		
-		this.freeVmList = new HashMap<Integer,Boolean>();
-		this.runningVmList = new HashMap<Integer,Boolean>();
-		this.cloudletTaskMap = new HashMap<Cloudlet,Task>();
-		this.vmTable = new Hashtable<Integer,Vm>();
-		pendingTransmissions = new HashSet<WETransmission>();
+
+		cloudletsSubmitted = 0;
+		setVmsRequested(0);
+		setVmsAcks(0);
+		setVmsDestroyed(0);
+
+		setDatacenterIdsList(new LinkedList<Integer>());
+		setDatacenterRequestedIdsList(new ArrayList<Integer>());
+		setVmsToDatacentersMap(new HashMap<Integer, Integer>());
+		setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
 	}
 
+	/**
+	 * This method is used to send to the broker the list with virtual machines that must be
+	 * created.
+	 * 
+	 * @param list the list
+	 * @pre list !=null
+	 * @post $none
+	 */
+	public void submitVmList(List<? extends Vm> list) {
+		getVmList().addAll(list);
+	}
+
+	/**
+	 * This method is used to send to the broker the list of cloudlets.
+	 * 
+	 * @param list the list
+	 * @pre list !=null
+	 * @post $none
+	 */
+	public void submitCloudletList(List<? extends Cloudlet> list) {
+		getCloudletList().addAll(list);
+	}
+
+	/**
+	 * Specifies that a given cloudlet must run in a specific virtual machine.
+	 * 
+	 * @param cloudletId ID of the cloudlet being bount to a vm
+	 * @param vmId the vm id
+	 * @pre cloudletId > 0
+	 * @pre id > 0
+	 * @post $none
+	 */
+	public void bindCloudletToVm(int cloudletId, int vmId) {
+		CloudletList.getById(getCloudletList(), cloudletId).setVmId(vmId);
+	}
+
+	/**
+	 * Processes events available for this Broker.
+	 * 
+	 * @param ev a SimEvent object
+	 * @pre ev != null
+	 * @post $none
+	 */
 	@Override
 	public void processEvent(SimEvent ev) {
-		if (ev == null){
-			Log.printLine("Warning: "+CloudSim.clock()+": "+this.getName()+": Null event ignored.");
-		} else {
-			int tag = ev.getTag();
-			switch(tag){
-				case CloudSimTags.RESOURCE_CHARACTERISTICS: doProvisioning(); break;
-				case CloudSimTags.VM_CREATE_ACK: processVmCreate(ev); break;
-				case CloudSimTags.CLOUDLET_RETURN: processCloudletReturn(ev); break;
-				case CloudSimTags.CLOUDLET_CANCEL: processCloudletCancel(ev); break;
-				case MapReduceDatacenter.DATA_ITEM_AVAILABLE: processDataItemAvailable(ev); break;
-				case DELAY_START_EVENT:	processStartDelayEvent(); break;
-				case CloudSimTags.END_OF_SIMULATION: break;
-				default: Log.printLine("Warning: "+CloudSim.clock()+": "+this.getName()+": Unknown event ignored. Tag: "+tag);
-			}
+		switch (ev.getTag()) {
+		// Resource characteristics request
+			case CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST:
+				processResourceCharacteristicsRequest(ev);
+				break;
+			// Resource characteristics answer
+			case CloudSimTags.RESOURCE_CHARACTERISTICS:
+				processResourceCharacteristics(ev);
+				break;
+			// VM Creation answer
+			case CloudSimTags.VM_CREATE_ACK:
+				processVmCreate(ev);
+				break;
+			// A finished cloudlet returned
+			case CloudSimTags.CLOUDLET_RETURN:
+				processCloudletReturn(ev);
+				break;
+			// if the simulation finishes
+			case CloudSimTags.END_OF_SIMULATION:
+				shutdownEntity();
+				break;
+			// other unknown tags are processed by this method
+			default:
+				processOtherEvent(ev);
+				break;
 		}
 	}
 
-	// all the simulation entities are ready: start operation
-	protected void doProvisioning() {
-		Log.printLine(CloudSim.clock()+": Workflow execution started.");
-		actualStartTime = CloudSim.clock();
-		
-		//runs the policy
-		policy.processDagFile(dagFile,this.getId(),execTime, baseMIPS, vmOffers,seed);
-		dataRequiredLocation = policy.getDataRequiredLocation();
-		schedulingTable = policy.getScheduling();
-		ArrayList<ProvisionedVm> vms = policy.getProvisioning();
-		
-		//trigger creation of vms
-		for (ProvisionedVm pvm: vms){
-			Vm vm = pvm.getVm();
+	/**
+	 * Process the return of a request for the characteristics of a PowerDatacenter.
+	 * 
+	 * @param ev a SimEvent object
+	 * @pre ev != $null
+	 * @post $none
+	 */
+	protected void processResourceCharacteristics(SimEvent ev) {
+		DatacenterCharacteristics characteristics = (DatacenterCharacteristics) ev.getData();
+		getDatacenterCharacteristicsList().put(characteristics.getId(), characteristics);
 
-			freeVmList.put(vm.getId(), false);
-			runningVmList.put(vm.getId(), false);
-			vmTable.put(vm.getId(), vm);
-			send(datacenterId,actualStartTime+pvm.getStartTime(),CloudSimTags.VM_CREATE_ACK,vm);
-		}		
+		if (getDatacenterCharacteristicsList().size() == getDatacenterIdsList().size()) {
+			setDatacenterRequestedIdsList(new ArrayList<Integer>());
+			createVmsInDatacenter(getDatacenterIdsList().get(0));
+		}
 	}
 
+	/**
+	 * Process a request for the characteristics of a PowerDatacenter.
+	 * 
+	 * @param ev a SimEvent object
+	 * @pre ev != $null
+	 * @post $none
+	 */
+	protected void processResourceCharacteristicsRequest(SimEvent ev) {
+		setDatacenterIdsList(CloudSim.getCloudResourceList());
+		setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
+
+		Log.printLine(CloudSim.clock() + ": " + getName() + ": Cloud Resource List received with "
+				+ getDatacenterIdsList().size() + " resource(s)");
+
+		for (Integer datacenterId : getDatacenterIdsList()) {
+			sendNow(datacenterId, CloudSimTags.RESOURCE_CHARACTERISTICS, getId());
+		}
+	}
+
+	/**
+	 * Process the ack received due to a request for VM creation.
+	 * 
+	 * @param ev a SimEvent object
+	 * @pre ev != null
+	 * @post $none
+	 */
 	protected void processVmCreate(SimEvent ev) {
 		int[] data = (int[]) ev.getData();
+		int datacenterId = data[0];
 		int vmId = data[1];
-		
-		freeVmList.put(vmId,true);
-		runningVmList.put(vmId, true);
-		
-		if (hasPendingTransmissions(vmId)){
-			for(Task t: getTransmissionsDestinatedTo(vmId)){
-				moveData(t,vmId);
+		int result = data[2];
+
+		if (result == CloudSimTags.TRUE) {
+			getVmsToDatacentersMap().put(vmId, datacenterId);
+			getVmsCreatedList().add(VmList.getById(getVmList(), vmId));
+			Log.printLine(CloudSim.clock() + ": " + getName() + ": VM #" + vmId
+					+ " has been created in Datacenter #" + datacenterId + ", Host #"
+					+ VmList.getById(getVmsCreatedList(), vmId).getHost().getId());
+		} else {
+			Log.printLine(CloudSim.clock() + ": " + getName() + ": Creation of VM #" + vmId
+					+ " failed in Datacenter #" + datacenterId);
+		}
+
+		incrementVmsAcks();
+
+		// all the requested VMs have been created
+		if (getVmsCreatedList().size() == getVmList().size() - getVmsDestroyed()) {
+			submitCloudlets();
+		} else {
+			// all the acks received, but some VMs were not created
+			if (getVmsRequested() == getVmsAcks()) {
+				// find id of the next datacenter that has not been tried
+				for (int nextDatacenterId : getDatacenterIdsList()) {
+					if (!getDatacenterRequestedIdsList().contains(nextDatacenterId)) {
+						createVmsInDatacenter(nextDatacenterId);
+						return;
+					}
+				}
+
+				// all datacenters already queried
+				if (getVmsCreatedList().size() > 0) { // if some vm were created
+					submitCloudlets();
+				} else { // no vms created. abort
+					Log.printLine(CloudSim.clock() + ": " + getName()
+							+ ": none of the required VMs could be created. Aborting");
+					finishExecution();
+				}
 			}
 		}
-		
-		dispatchTasks();
 	}
-	
 
-
+	/**
+	 * Process a cloudlet return event.
+	 * 
+	 * @param ev a SimEvent object
+	 * @pre ev != $null
+	 * @post $none
+	 */
 	protected void processCloudletReturn(SimEvent ev) {
 		Cloudlet cloudlet = (Cloudlet) ev.getData();
 		getCloudletReceivedList().add(cloudlet);
-		Log.printLine(CloudSim.clock()+": Task "+cloudlet.getCloudletId()+" finished.");
-		
-		Task task = cloudletTaskMap.remove(cloudlet);
-		freeVmList.put(task.getVmId(), true);
-		task.hasFinished();
-		
-		if (task.hasReplicas()){
-			for (Task replica:task.getReplicas()){
-				int data[] = new int[3];
-				data[0] = replica.getId();
-				data[1] = this.getId();
-				data[2] = replica.getVmId();
-				
-				//if the replica is running, request its cancelation
-				if (replica.getCloudlet().getCloudletStatus()==Cloudlet.INEXEC){
-					Log.printLine(CloudSim.clock()+": Requesting cancelation of Task #"+replica.getId());
-					sendNow(datacenterId,CloudSimTags.CLOUDLET_CANCEL,data);
-				} else {
-					//don't send it for execution
-					try { replica.getCloudlet().setCloudletStatus(Cloudlet.CANCELED);} catch (Exception e) {}
-				}
+		Log.printLine(CloudSim.clock() + ": " + getName() + ": Cloudlet " + cloudlet.getCloudletId()
+				+ " received");
+		cloudletsSubmitted--;
+		if (getCloudletList().size() == 0 && cloudletsSubmitted == 0) { // all cloudlets executed
+			Log.printLine(CloudSim.clock() + ": " + getName() + ": All Cloudlets executed. Finishing...");
+			clearDatacenters();
+			finishExecution();
+		} else { // some cloudlets haven't finished yet
+			if (getCloudletList().size() > 0 && cloudletsSubmitted == 0) {
+				// all the cloudlets sent finished. It means that some bount
+				// cloudlet is waiting its VM be created
+				clearDatacenters();
+				createVmsInDatacenter(0);
 			}
+
 		}
-		
-		moveData(task);		
-		dispatchTasks();
-	}
-	
-	private void processCloudletCancel(SimEvent ev) {
-		Cloudlet cloudlet = (Cloudlet) ev.getData();
-		
-		if (cloudlet!=null){
-			getCloudletReceivedList().add(cloudlet);
-			Log.printLine(CloudSim.clock()+": Task "+cloudlet.getCloudletId()+" cancelled.");
-				
-			Task task = cloudletTaskMap.remove(cloudlet);
-			freeVmList.put(task.getVmId(), true);
-		}
-		
-		dispatchTasks();
-	}
-	
-	private void processDataItemAvailable(SimEvent ev) {
-		Transmission tr = (Transmission) ev.getData();
-		Log.printLine(CloudSim.clock()+": DataItem #"+tr.getDataItem().getId()+" is now available at VM #"+tr.getDestinationId());
-		removeOngoingTransmission(tr.getSourceId(),tr.getDestinationId(),tr.getDataItem().getId());
-		
-		dispatchTasks();
-	}
-	
-	private void processStartDelayEvent() {
-		// we gave data center enough time to initialize. Start the action...
-		datacenterId = CloudSim.getCloudResourceList().get(0);
-		sendNow(datacenterId, CloudSimTags.RESOURCE_CHARACTERISTICS, getId());
 	}
 
+	/**
+	 * Overrides this method when making a new and different type of Broker. This method is called
+	 * by {@link #body()} for incoming unknown tags.
+	 * 
+	 * @param ev a SimEvent object
+	 * @pre ev != null
+	 * @post $none
+	 */
+	protected void processOtherEvent(SimEvent ev) {
+		if (ev == null) {
+			Log.printLine(getName() + ".processOtherEvent(): " + "Error - an event is null.");
+			return;
+		}
+
+		Log.printLine(getName() + ".processOtherEvent(): "
+				+ "Error - event unknown by this DatacenterBroker.");
+	}
+
+	/**
+	 * Create the virtual machines in a datacenter.
+	 * 
+	 * @param datacenterId Id of the chosen PowerDatacenter
+	 * @pre $none
+	 * @post $none
+	 */
+	protected void createVmsInDatacenter(int datacenterId) {
+		// send as much vms as possible for this datacenter before trying the next one
+		int requestedVms = 0;
+		String datacenterName = CloudSim.getEntityName(datacenterId);
+		for (Vm vm : getVmList()) {
+			if (!getVmsToDatacentersMap().containsKey(vm.getId())) {
+				Log.printLine(CloudSim.clock() + ": " + getName() + ": Trying to Create VM #" + vm.getId()
+						+ " in " + datacenterName);
+				sendNow(datacenterId, CloudSimTags.VM_CREATE_ACK, vm);
+				requestedVms++;
+			}
+		}
+
+		getDatacenterRequestedIdsList().add(datacenterId);
+
+		setVmsRequested(requestedVms);
+		setVmsAcks(0);
+	}
+
+	/**
+	 * Submit cloudlets to the created VMs.
+	 * 
+	 * @pre $none
+	 * @post $none
+	 */
+	protected void submitCloudlets() {
+		int vmIndex = 0;
+		for (Cloudlet cloudlet : getCloudletList()) {
+			Vm vm;
+			// if user didn't bind this cloudlet and it has not been executed yet
+			if (cloudlet.getVmId() == -1) {
+				vm = getVmsCreatedList().get(vmIndex);
+			} else { // submit to the specific vm
+				vm = VmList.getById(getVmsCreatedList(), cloudlet.getVmId());
+				if (vm == null) { // vm was not created
+					Log.printLine(CloudSim.clock() + ": " + getName() + ": Postponing execution of cloudlet "
+							+ cloudlet.getCloudletId() + ": bount VM not available");
+					continue;
+				}
+			}
+
+			Log.printLine(CloudSim.clock() + ": " + getName() + ": Sending cloudlet "
+					+ cloudlet.getCloudletId() + " to VM #" + vm.getId());
+			cloudlet.setVmId(vm.getId());
+			sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
+			cloudletsSubmitted++;
+			vmIndex = (vmIndex + 1) % getVmsCreatedList().size();
+			getCloudletSubmittedList().add(cloudlet);
+		}
+
+		// remove submitted cloudlets from waiting list
+		for (Cloudlet cloudlet : getCloudletSubmittedList()) {
+			getCloudletList().remove(cloudlet);
+		}
+	}
+
+	/**
+	 * Destroy the virtual machines running in datacenters.
+	 * 
+	 * @pre $none
+	 * @post $none
+	 */
+	protected void clearDatacenters() {
+		for (Vm vm : getVmsCreatedList()) {
+			Log.printLine(CloudSim.clock() + ": " + getName() + ": Destroying VM #" + vm.getId());
+			sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.VM_DESTROY, vm);
+		}
+
+		getVmsCreatedList().clear();
+	}
+
+	/**
+	 * Send an internal event communicating the end of the simulation.
+	 * 
+	 * @pre $none
+	 * @post $none
+	 */
+	protected void finishExecution() {
+		sendNow(getId(), CloudSimTags.END_OF_SIMULATION);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see cloudsim.core.SimEntity#shutdownEntity()
+	 */
 	@Override
 	public void shutdownEntity() {
-		//do nothing
+		Log.printLine(getName() + " is shutting down...");
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see cloudsim.core.SimEntity#startEntity()
+	 */
 	@Override
 	public void startEntity() {
-		//give time to the data center to start
-		send(getId(),2,DELAY_START_EVENT);
-	}
-	
-	//Triggers the process of copying data necessary in other vms
-	private void moveData(Task task) {
-		int originVm = task.getVmId();
-		
-		for(DataItem data:task.getOutput()){
-			for (int destVm: dataRequiredLocation.get(data.getId())){
-				WETransmission tr = new WETransmission(task, originVm, destVm,data.getId());
-							
-				if (!data.isAvailableAt(destVm)){//if origin != destiny and data is not in destiny, trigger transfer
-					Log.printLine(CloudSim.clock()+": Transferring dataItem #"+data.getId()+" from VM #"+originVm+" to VM #"+destVm);
-					
-					pendingTransmissions.add(tr);
-					if (runningVmList.containsKey(destVm) && runningVmList.get(destVm)==true){
-						//if vm was not created, delay transmission
-						TransferDataEvent event = new TransferDataEvent(data,originVm,destVm);
-						sendNow(datacenterId,MapReduceDatacenter.TRANSFER_DATA_ITEM,event);
-					}
-				} else {
-					//Log.printLine(CloudSim.clock()+": DataItem #"+data.getId()+" is already available at VM #"+destVm);
-				}
-			}
-		}
-	}
-	
-	//Triggers the process of copying data necessary to a delayed vm
-	private void moveData(Task task, int vmId) {
-		int originVm = task.getVmId();
-		
-		for(DataItem data:task.getOutput()){
-			for (int destVm: dataRequiredLocation.get(data.getId())){
-				if (destVm==vmId && !data.isAvailableAt(destVm)){
-					Log.printLine(CloudSim.clock()+": Transferring dataItem #"+data.getId()+" from VM #"+originVm+" to VM #"+destVm);
-					TransferDataEvent event = new TransferDataEvent(data,originVm,destVm);
-					sendNow(datacenterId,MapReduceDatacenter.TRANSFER_DATA_ITEM,event);
-				}
-			}
-		}
-	}
-	
-	private void dispatchTasks() {
-		//checks which VMs are free and schedules tasks to them
-		ArrayList<Integer> finishedVms = new ArrayList<Integer>();
-		
-		for(int vmId:schedulingTable.keySet()){
-			if (freeVmList.get(vmId)==true){//this vm is available
-				//first, checks if this VM is still in use
-				if(schedulingTable.get(vmId).isEmpty()){//no more cloudlets in this vm
-					//check for pending communication
-					if (!hasPendingTransmissions(vmId)) finishedVms.add(vmId);
-				} else {
-					//get the next task schedule for this VM
-					Task task = schedulingTable.get(vmId).get(0);
-					
-					while (task.getCloudlet().getCloudletStatus()==Cloudlet.CANCELED){
-						//don't submit
-						schedulingTable.get(vmId).remove(0);
-						getCloudletReceivedList().add(task.getCloudlet());
-						cloudletTaskMap.remove(task);
-						
-						if(schedulingTable.get(vmId).isEmpty()){
-							if (!hasPendingTransmissions(vmId)) finishedVms.add(vmId);
-							task=null;
-							break;
-						} else {
-							task = schedulingTable.get(vmId).get(0);
-						}
-					}
-					
-					if (task!=null) {
-						//are the data it needs already transferred?
-						boolean dataDependenciesMet = true;
-						for(DataItem data:task.getDataDependencies()){
-							if(!data.isAvailableAt(vmId)){
-								dataDependenciesMet=false;
-								break;
-							}
-						}
-
-						if(dataDependenciesMet){//required data is available in the VM
-							Log.printLine(CloudSim.clock()+": Task "+task.getId()+" dispatched to VM#"+task.getVmId());
-							schedulingTable.get(vmId).remove(0);//remove task from the scheduling table
-							freeVmList.put(vmId, false); //vm is busy now
-							cloudletTaskMap.put(task.getCloudlet(), task);
-							sendNow(datacenterId,CloudSimTags.CLOUDLET_SUBMIT,task.getCloudlet());
-						} else {//data is not there yet
-							//Log.printLine(CloudSim.clock()+": Task "+task.getId()+" postponed at VM#"+task.getVmId()+".");
-						}
-					}
-				}
-			}
-		}
-		
-		//remove VMs that are not in use anymore
-		for(int id:finishedVms){
-			Vm vm = vmTable.remove(id);
-			sendNow(datacenterId,CloudSimTags.VM_DESTROY,vm);
-			schedulingTable.remove(id);
-			freeVmList.remove(vm);
-			runningVmList.put(vm.getId(),false);
-		}
-		
-		//check execution completion
-		if (schedulingTable.isEmpty()){
-			Log.printLine(CloudSim.clock()+": Workflow execution finished.");
-			endTime = (long) CloudSim.clock();
-		}
-	}
-	
-	protected <T extends Cloudlet> void setCloudletReceivedList(List<T> cloudletReceivedList) {
-		this.cloudletReceivedList = cloudletReceivedList;
+		Log.printLine(getName() + " is starting...");
+		schedule(getId(), 0, CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST);
 	}
 
+	/**
+	 * Gets the vm list.
+	 * 
+	 * @param <T> the generic type
+	 * @return the vm list
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends Vm> List<T> getVmList() {
+		return (List<T>) vmList;
+	}
+
+	/**
+	 * Sets the vm list.
+	 * 
+	 * @param <T> the generic type
+	 * @param vmList the new vm list
+	 */
+	protected <T extends Vm> void setVmList(List<T> vmList) {
+		this.vmList = vmList;
+	}
+
+	/**
+	 * Gets the cloudlet list.
+	 * 
+	 * @param <T> the generic type
+	 * @return the cloudlet list
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends Cloudlet> List<T> getCloudletList() {
+		return (List<T>) cloudletList;
+	}
+
+	/**
+	 * Sets the cloudlet list.
+	 * 
+	 * @param <T> the generic type
+	 * @param cloudletList the new cloudlet list
+	 */
+	protected <T extends Cloudlet> void setCloudletList(List<T> cloudletList) {
+		this.cloudletList = cloudletList;
+	}
+
+	/**
+	 * Gets the cloudlet submitted list.
+	 * 
+	 * @param <T> the generic type
+	 * @return the cloudlet submitted list
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends Cloudlet> List<T> getCloudletSubmittedList() {
+		return (List<T>) cloudletSubmittedList;
+	}
+
+	/**
+	 * Sets the cloudlet submitted list.
+	 * 
+	 * @param <T> the generic type
+	 * @param cloudletSubmittedList the new cloudlet submitted list
+	 */
+	protected <T extends Cloudlet> void setCloudletSubmittedList(List<T> cloudletSubmittedList) {
+		this.cloudletSubmittedList = cloudletSubmittedList;
+	}
+
+	/**
+	 * Gets the cloudlet received list.
+	 * 
+	 * @param <T> the generic type
+	 * @return the cloudlet received list
+	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Cloudlet> List<T> getCloudletReceivedList() {
 		return (List<T>) cloudletReceivedList;
 	}
-		
+
+	/**
+	 * Sets the cloudlet received list.
+	 * 
+	 * @param <T> the generic type
+	 * @param cloudletReceivedList the new cloudlet received list
+	 */
+	protected <T extends Cloudlet> void setCloudletReceivedList(List<T> cloudletReceivedList) {
+		this.cloudletReceivedList = cloudletReceivedList;
+	}
+
+	/**
+	 * Gets the vm list.
+	 * 
+	 * @param <T> the generic type
+	 * @return the vm list
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends Vm> List<T> getVmsCreatedList() {
+		return (List<T>) vmsCreatedList;
+	}
+
+	/**
+	 * Sets the vm list.
+	 * 
+	 * @param <T> the generic type
+	 * @param vmsCreatedList the vms created list
+	 */
+	protected <T extends Vm> void setVmsCreatedList(List<T> vmsCreatedList) {
+		this.vmsCreatedList = vmsCreatedList;
+	}
+
+	/**
+	 * Gets the vms requested.
+	 * 
+	 * @return the vms requested
+	 */
+	protected int getVmsRequested() {
+		return vmsRequested;
+	}
+
+	/**
+	 * Sets the vms requested.
+	 * 
+	 * @param vmsRequested the new vms requested
+	 */
+	protected void setVmsRequested(int vmsRequested) {
+		this.vmsRequested = vmsRequested;
+	}
+
+	/**
+	 * Gets the vms acks.
+	 * 
+	 * @return the vms acks
+	 */
+	protected int getVmsAcks() {
+		return vmsAcks;
+	}
+
+	/**
+	 * Sets the vms acks.
+	 * 
+	 * @param vmsAcks the new vms acks
+	 */
+	protected void setVmsAcks(int vmsAcks) {
+		this.vmsAcks = vmsAcks;
+	}
+
+	/**
+	 * Increment vms acks.
+	 */
+	protected void incrementVmsAcks() {
+		vmsAcks++;
+	}
+
+	/**
+	 * Gets the vms destroyed.
+	 * 
+	 * @return the vms destroyed
+	 */
+	protected int getVmsDestroyed() {
+		return vmsDestroyed;
+	}
+
+	/**
+	 * Sets the vms destroyed.
+	 * 
+	 * @param vmsDestroyed the new vms destroyed
+	 */
+	protected void setVmsDestroyed(int vmsDestroyed) {
+		this.vmsDestroyed = vmsDestroyed;
+	}
+
+	/**
+	 * Gets the datacenter ids list.
+	 * 
+	 * @return the datacenter ids list
+	 */
+	protected List<Integer> getDatacenterIdsList() {
+		return datacenterIdsList;
+	}
+
+	/**
+	 * Sets the datacenter ids list.
+	 * 
+	 * @param datacenterIdsList the new datacenter ids list
+	 */
+	protected void setDatacenterIdsList(List<Integer> datacenterIdsList) {
+		this.datacenterIdsList = datacenterIdsList;
+	}
+
+	/**
+	 * Gets the vms to datacenters map.
+	 * 
+	 * @return the vms to datacenters map
+	 */
+	protected Map<Integer, Integer> getVmsToDatacentersMap() {
+		return vmsToDatacentersMap;
+	}
+
+	/**
+	 * Sets the vms to datacenters map.
+	 * 
+	 * @param vmsToDatacentersMap the vms to datacenters map
+	 */
+	protected void setVmsToDatacentersMap(Map<Integer, Integer> vmsToDatacentersMap) {
+		this.vmsToDatacentersMap = vmsToDatacentersMap;
+	}
+
+	/**
+	 * Gets the datacenter characteristics list.
+	 * 
+	 * @return the datacenter characteristics list
+	 */
+	protected Map<Integer, DatacenterCharacteristics> getDatacenterCharacteristicsList() {
+		return datacenterCharacteristicsList;
+	}
+
+	/**
+	 * Sets the datacenter characteristics list.
+	 * 
+	 * @param datacenterCharacteristicsList the datacenter characteristics list
+	 */
+	protected void setDatacenterCharacteristicsList(
+			Map<Integer, DatacenterCharacteristics> datacenterCharacteristicsList) {
+		this.datacenterCharacteristicsList = datacenterCharacteristicsList;
+	}
+
+	/**
+	 * Gets the datacenter requested ids list.
+	 * 
+	 * @return the datacenter requested ids list
+	 */
+	protected List<Integer> getDatacenterRequestedIdsList() {
+		return datacenterRequestedIdsList;
+	}
+
+	/**
+	 * Sets the datacenter requested ids list.
+	 * 
+	 * @param datacenterRequestedIdsList the new datacenter requested ids list
+	 */
+	protected void setDatacenterRequestedIdsList(List<Integer> datacenterRequestedIdsList) {
+		this.datacenterRequestedIdsList = datacenterRequestedIdsList;
+	}
+	
 	//Output information supplied at the end of the simulation
-	public void printExecutionSummary() {
-		DecimalFormat dft = new DecimalFormat("#####.##");
-		String indent = "\t";
-		
-		Log.printLine("========== WORKFLOW EXECUTION SUMMARY ==========");
-		Log.printLine("= Task " + indent + "Status" + indent + indent + "Start Time" + indent + "Execution Time (s)" + indent + "Finish Time");
-		for (Cloudlet cloudlet: getCloudletReceivedList()) {
-			Log.print(" = "+cloudlet.getCloudletId() + indent);
+		public void printExecutionSummary() {
+			DecimalFormat dft = new DecimalFormat("#####.##");
+			String indent = "\t";
+			
+			Log.printLine("========== WORKFLOW EXECUTION SUMMARY ==========");
+			Log.printLine("= Task " + indent + "Status" + indent + indent + "Start Time" + indent + "Execution Time (s)" + indent + "Finish Time");
+			for (Cloudlet cloudlet: getCloudletReceivedList()) {
+				Log.print(" = "+cloudlet.getCloudletId() + indent);
 
-			if (cloudlet.getCloudletStatus() == Cloudlet.SUCCESS){
-				Log.print("SUCCESS");
+				if (cloudlet.getCloudletStatus() == Cloudlet.SUCCESS){
+					Log.print("SUCCESS");
 
-				double executionTime = cloudlet.getFinishTime()-cloudlet.getExecStartTime();
-				Log.printLine(indent + indent + dft.format(cloudlet.getSubmissionTime()) + indent + indent + dft.format(executionTime) + indent + indent + dft.format(cloudlet.getFinishTime()));
-			} else if (cloudlet.getCloudletStatus() == Cloudlet.FAILED) {
-				Log.printLine("FAILED");
-			} else if (cloudlet.getCloudletStatus() == Cloudlet.CANCELED) {
-				Log.printLine("CANCELLED");
+					double executionTime = cloudlet.getFinishTime()-cloudlet.getExecStartTime();
+					Log.printLine(indent + indent + dft.format(cloudlet.getSubmissionTime()) + indent + indent + dft.format(executionTime) + indent + indent + dft.format(cloudlet.getFinishTime()));
+				} else if (cloudlet.getCloudletStatus() == Cloudlet.FAILED) {
+					Log.printLine("FAILED");
+				} else if (cloudlet.getCloudletStatus() == Cloudlet.CANCELED) {
+					Log.printLine("CANCELLED");
+				}
 			}
+			//WARNING: FIX THIS
+			long deadline = 0;
+			Log.printLine("= Deadline: "+deadline);
+			//WARNING: FIX THIS
+			Log.printLine("= Finish time: "+0);
+			long makespan = 0;
+			Log.printLine("= Makespan: "+ makespan);
+			//WARNING: FIX THIS
+			boolean violation= (0>deadline);
+			Log.printLine("= Violation: "+ violation);
+			Log.printLine("========== END OF SUMMARY =========");
+			Log.printLine();
 		}
-		long deadline = (long) (actualStartTime + execTime);
-		Log.printLine("= Deadline: "+deadline);
-		Log.printLine("= Finish time: "+endTime);
-		long makespan = (long) (endTime-actualStartTime);
-		Log.printLine("= Makespan: "+ makespan);
-		boolean violation= (endTime>deadline);
-		Log.printLine("= Violation: "+ violation);
-		Log.printLine("========== END OF SUMMARY =========");
-		Log.printLine();
-	}
-	
-	public boolean hasPendingTransmissions(int vmId){
-		Iterator<WETransmission> iter = pendingTransmissions.iterator();
-		while (iter.hasNext()){
-			WETransmission tr = iter.next();
-			if (tr.getOriginId()==vmId || tr.getDestId()==vmId) return true;
-		}
-		
-		return false;
-	}
-	
-	private HashSet<Task> getTransmissionsDestinatedTo(int vmId) {
-		HashSet<Task> tasks = new HashSet<Task>();
-		
-		Iterator<WETransmission> iter = pendingTransmissions.iterator();
-		while (iter.hasNext()){
-			WETransmission tr = iter.next();
-			if (tr.getDestId()==vmId) tasks.add(tr.getTask());
-		}
-		
-		return tasks;
-	}
-	
-	private void removeOngoingTransmission(int sourceId, int destinationId, int dataId) {
-		LinkedList<WETransmission> toRemove = new LinkedList<WETransmission>();
-		
-		Iterator<WETransmission> iter = pendingTransmissions.iterator();
-		while (iter.hasNext()){
-			WETransmission tr = iter.next();
-			if (tr.getOriginId()==sourceId && tr.getDestId()==destinationId && tr.getDataId()==dataId) {
-				toRemove.add(tr);
-			}
-		}
-		
-		pendingTransmissions.removeAll(toRemove);
-	}
-}
 
-class WETransmission {
-	Task task;
-	int originId;
-	int destId;
-	int dataId;
-
-	public WETransmission(Task task, int originId, int destId, int dataId) {
-		this.task = task;
-		this.originId = originId;
-		this.destId = destId;
-		this.dataId = dataId;
-	}
-
-	public Task getTask() {
-		return task;
-	}
-
-	public int getOriginId() {
-		return originId;
-	}
-
-	public int getDestId() {
-		return destId;
-	}
-	
-	public int getDataId() {
-		return dataId;
-	}
-	
-	@Override
-	public boolean equals(Object o){
-		int oid = ((WETransmission)o).getOriginId();
-		int dit = ((WETransmission)o).getDestId();
-		int tit = ((WETransmission)o).getDataId();
-		
-		return (dataId==tit && originId==oid && destId==dit);
-	}
-	
-	@Override
-	public int hashCode(){
-		return dataId*100000+originId*1000+destId;
-	}
 }

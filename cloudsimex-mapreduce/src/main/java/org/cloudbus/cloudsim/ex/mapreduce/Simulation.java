@@ -1,9 +1,14 @@
 package org.cloudbus.cloudsim.ex.mapreduce;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import org.cloudbus.cloudsim.DatacenterBroker;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Log;
@@ -11,9 +16,16 @@ import org.cloudbus.cloudsim.NetworkTopology;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.ex.mapreduce.models.Cloud;
+import org.cloudbus.cloudsim.ex.mapreduce.models.Requests;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.MapReduceDatacenter;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.MapTask;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.ReduceTask;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * This class contains the main method for execution of the simulation.
@@ -27,6 +39,16 @@ import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
  *
  */
 public class Simulation {
+	
+	private static Cloud cloud;
+	private static Requests requests;
+
+	/** The cloudlet list. */
+	private static List<MapTask> cloudletList_MapTasks;
+	private static List<ReduceTask> cloudletList_ReduceTasks;
+
+	/** The vmlist. */
+	private static List<VMType> vmlist;
 	
 	public Simulation(){
 		
@@ -59,27 +81,26 @@ public class Simulation {
 	 */
 	private static void runSimulationRound(int round) {
 		Log.printLine("Starting simulation round "+round+".");
-		
-		long seed1 = SeedGenerator.getSeed1(round-1);
-		long seed2 = SeedGenerator.getSeed2(round-1);
-		long seed3 = SeedGenerator.getSeed2(round-1);
 
 		try {
+			// Initialize the CloudSim library
 			CloudSim.init(1,Calendar.getInstance(),false);
+						
+						
+			// Create Broker
+			MapReduceEngine engine = createMapReduceEngine();
+			Cloud.brokerID = engine.getId();
 			
-			String datacentre1_name = Properties.DATACENTER1_NAME.getProperty();
-			int datacentre1_hosts = Integer.parseInt(Properties.DATACENTER1_HOSTS.getProperty());
-			
-			//WARNING: This is just for one datacenter. We have several datacenters.
-			MapReduceDatacenter datacenter = createDatacenter(datacentre1_name, datacentre1_hosts, seed1, seed2);
-			MapReduceEngine engine = createWorkflowEngine(seed3);
-			
-			//WARNING: bandwidth is 100000 and latency is 0.5, is that OK?
-			NetworkTopology.addLink(datacenter.getId(),engine.getId(),100000,0.5);
+			// Create datacentres and cloudlets
+			loadYAMLFiles();
 
 			CloudSim.startSimulation();
 			engine.printExecutionSummary();
-			datacenter.printSummary();
+
+
+			// Print the debt of each user to each datacenter
+			for (MapReduceDatacenter mapReduceDatacenter : cloud.mapReduceDatacenters)
+				mapReduceDatacenter.printSummary();
 
 			Log.printLine("");
 			Log.printLine("");
@@ -91,63 +112,44 @@ public class Simulation {
 		}
 	}
 
-	private static MapReduceDatacenter createDatacenter(String name, int hosts, long seed1, long seed2) throws Exception{
-		int ram = 8*Integer.parseInt(Properties.MEMORY_PERHOST.getProperty());
-		int cores = 8*Integer.parseInt(Properties.CORES_PERHOST.getProperty());
-		int mips = 8*Integer.parseInt(Properties.MIPS_PERCORE.getProperty());
-		long storage = 8*Long.parseLong(Properties.STORAGE_PERHOST.getProperty());
-		long delay = Long.parseLong(Properties.VM_DELAY.getProperty());
-		String offerName = Properties.VM_OFFERS.getProperty();
-		
-		VMOffers offers = null;
-		try{				
-			Class<?> offerClass = Class.forName(offerName,true,VMOffers.class.getClassLoader());
-			offers = (VMOffers) offerClass.newInstance();
-		} catch (Exception e){
-			e.printStackTrace();
-			return null;
-		}
-							
-		List<Host> hostList = new ArrayList<Host>();
-		for(int i=0;i<hosts;i++){
-			List<Pe> peList = new ArrayList<Pe>();
-			for(int j=0;j<cores;j++) peList.add(new Pe(j, new PeProvisionerSimple(mips)));
-			
-			hostList.add(new Host(i,new RamProvisionerSimple(ram),new BwProvisionerSimple(1000000),
-								  storage,peList,new VmSchedulerIaaS(peList,seed1)));
-		}
 
-		DatacenterCharacteristics characteristics = new DatacenterCharacteristics("Xeon","Linux","Xen",hostList,10.0,0.0,0.00,0.00,0.00);
+	private static void loadYAMLFiles()
+	{
+		Yaml yaml = new Yaml();
 		
-		//WARNING: bandwidth is 100000 and latency is 0.5, is that OK?
-		return new MapReduceDatacenter(name,characteristics,new VmAllocationPolicySimple(hostList),100000,0.5,mips,delay,offers,seed2);
+		InputStream document = null;
+		try {
+			if(Cloud.brokerID == -1)
+				throw new Exception("brokerID is not set");
+			
+			document = new FileInputStream(new File("Cloud.yaml"));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		cloud = (Cloud) yaml.load(document);
+		
+		try {
+			document = new FileInputStream(new File("Requests.yaml"));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		requests = (Requests) yaml.load(document);
 	}
 
-	private static MapReduceEngine createWorkflowEngine(long seed){
-		//WARNING: This is just for one request. We have several jobs.
-		String jobFile = Properties.REQUEST1_JOB_FILE.getProperty();
-		String className = Properties.SCHEDULING_POLICY.getProperty();
-		String offerName = Properties.VM_OFFERS.getProperty();
-		//WARNING: This is just for one request. We have several jobs.
-		double dbDeadline = Long.parseLong(Properties.REQUEST1_DEADLINE.getProperty())*0.75; //makes the deadline 25% smaller
-		long deadline = (long) Math.ceil(dbDeadline);
-		//WARNING: Missing budget and user class
-		
-		int baseMIPS = Integer.parseInt(Properties.MIPS_PERCORE.getProperty());
-		Policy policy = null;
-		VMOffers offers = null;
-		
-		try{		
-			Class<?> policyClass = Class.forName(className,true,Policy.class.getClassLoader());
-			policy = (Policy) policyClass.newInstance();
-			
-			Class<?> offerClass = Class.forName(offerName,true,VMOffers.class.getClassLoader());
-			offers = (VMOffers) offerClass.newInstance();
-		
-			return new MapReduceEngine(jobFile,deadline,baseMIPS,policy,offers,seed);
-		} catch (Exception e){
+	
+	private static MapReduceEngine createMapReduceEngine(){
+		MapReduceEngine engine = null;
+		try {
+			engine = new MapReduceEngine("MapReduce_Broker");
+		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
+		return engine;
 	}
 }

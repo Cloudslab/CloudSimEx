@@ -9,6 +9,7 @@ import java.util.Calendar;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.ex.mapreduce.models.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.Requests;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.Job;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.UserClass;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
@@ -35,7 +36,7 @@ public class YAMLTest extends TestCase {
 		assertEquals("aws-us-east-1", obj.mapReduceDatacenters.get(0).getName());
 		assertEquals(200, obj.mapReduceDatacenters.get(0).getHostList().size());
 		assertEquals(8, obj.mapReduceDatacenters.get(0).getHostList().get(0).getPeList().size());
-		assertEquals(999999999, obj.mapReduceDatacenters.get(0).getHostList().get(0).getPeList().get(0).getMips());
+		assertEquals(100, obj.mapReduceDatacenters.get(0).getHostList().get(0).getPeList().get(0).getMips());
 		
 		assertEquals("large-aws-us-east-1", obj.mapReduceDatacenters.get(0).vmTypes.get(0).name);
 		assertEquals("private-openstack-unimelb", obj.mapReduceDatacenters.get(1).vmTypes.get(0).name);
@@ -63,8 +64,29 @@ public class YAMLTest extends TestCase {
 		InputStream document = new FileInputStream(new File("Requests.yaml"));
 		Requests obj = (Requests) yaml.load(document);
 		
-		assertEquals("Jobs/MapReduce_3_2.yaml", obj.requests.get(0).jobFile);
 		assertEquals(UserClass.SILVER, obj.requests.get(0).userClass);
+		
+		System.out.println(yaml.dump(obj));
+	}
+	
+	@Test
+	public void testLoadJobFile() throws FileNotFoundException {
+		// First step: Initialize the CloudSim package. It should be called
+		// before creating any entities.
+		int num_user = 1; // number of cloud users
+		Calendar calendar = Calendar.getInstance();
+		boolean trace_flag = false; // mean trace events
+
+		// Initialize the CloudSim library
+		CloudSim.init(num_user, calendar, trace_flag);
+		
+		Yaml yaml = new Yaml();
+		
+		InputStream document = new FileInputStream(new File("Jobs/MapReduce_3_2.yaml"));
+		Job obj = (Job) yaml.load(document);
+		
+		assertEquals(1, obj.mapTasks.get(0).getNumberOfPes());
+		assertEquals(1, obj.reduceTasks.get(0).getNumberOfPes());
 		
 		System.out.println(yaml.dump(obj));
 	}
