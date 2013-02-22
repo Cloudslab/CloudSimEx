@@ -95,14 +95,9 @@ public class MapReduceEngine extends DatacenterBroker {
 
 	}
 
-	@Override
-	public void startEntity() {
-		// TODO Auto-generated method stub
-		super.startEntity();
-
-		// NEW CODE
-		// Wrong place, it should be in a new event, and we should run it
-		// several times based on the number of user requests.
+	protected void processResourceCharacteristicsRequest(SimEvent ev) {
+		super.processResourceCharacteristicsRequest(ev);
+		
 		String policyName = Properties.POLICY.getProperty();
 		Policy policy = null;
 		try {
@@ -132,10 +127,10 @@ public class MapReduceEngine extends DatacenterBroker {
 			e.printStackTrace();
 		}
 		runAlgorithm(policy);
-		// END NEW CODE
 	}
 
 	private void runAlgorithm(Policy policy) {
+		//ToDo: increase the clock during the ALGORITHM search
 		Log.printLine(" =========== ALGORITHM: SEARCHING START ===========");
 		Log.printLine(getName() + " is searching for the optimal Resource Set...");
 		policy.runAlgorithm();
