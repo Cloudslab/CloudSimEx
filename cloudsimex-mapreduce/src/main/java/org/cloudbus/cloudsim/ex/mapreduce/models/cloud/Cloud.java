@@ -8,7 +8,8 @@ import org.cloudbus.cloudsim.ex.util.Id;
 
 public class Cloud {
 	
-	public List<MapReduceDatacenter> mapReduceDatacenters;
+	public List<PublicCloudDatacenter> publicCloudDatacenters;
+	public List<PrivateCloudDatacenter> privateCloudDatacenters;
 	public List<DataSource> dataSources;
 	public List<List> throughputs_vm_vm;
 	public List<List> throughputs_vm_ds;
@@ -19,8 +20,12 @@ public class Cloud {
 	{
 		
 		List<VMType> vmlist = new ArrayList<VMType>();
-		for (MapReduceDatacenter mapReduceDatacenter : mapReduceDatacenters) {
-			vmlist.addAll(mapReduceDatacenter.vmTypes);
+		for (PublicCloudDatacenter publicCloudDatacenter : publicCloudDatacenters) {
+			vmlist.addAll(publicCloudDatacenter.vmTypes);
+		}
+		
+		for (PrivateCloudDatacenter privateCloudDatacenter : privateCloudDatacenters) {
+			vmlist.addAll(privateCloudDatacenter.vmTypes);
 		}
 		
 		return vmlist;
@@ -28,11 +33,33 @@ public class Cloud {
 	
 	public VMType findVMType(int VMTypeId)
 	{
-		for (MapReduceDatacenter mapReduceDatacenter : mapReduceDatacenters) {
-			for (VMType vmType : mapReduceDatacenter.vmTypes) {
+		for (PublicCloudDatacenter publicCloudDatacenter : publicCloudDatacenters) {
+			for (VMType vmType : publicCloudDatacenter.vmTypes) {
 				if(vmType.getId() == VMTypeId)
 					return vmType;
 			}
+		}
+		
+		for (PrivateCloudDatacenter privateCloudDatacenter : privateCloudDatacenters) {
+			for (VMType vmType : privateCloudDatacenter.vmTypes) {
+				if(vmType.getId() == VMTypeId)
+					return vmType;
+			}
+		}
+		
+		return null;
+	}
+	
+	public CloudDatacenter getCloudDatacenter(int cloudDatacenterId)
+	{
+		for (PublicCloudDatacenter publicCloudDatacenter : publicCloudDatacenters) {
+			if(publicCloudDatacenter.getId() == cloudDatacenterId)
+				return publicCloudDatacenter;
+		}
+		
+		for (PrivateCloudDatacenter privateCloudDatacenter : privateCloudDatacenters) {
+			if(privateCloudDatacenter.getId() == cloudDatacenterId)
+				return privateCloudDatacenter;
 		}
 		
 		return null;

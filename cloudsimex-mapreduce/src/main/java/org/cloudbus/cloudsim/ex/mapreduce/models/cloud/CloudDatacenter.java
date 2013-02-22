@@ -19,12 +19,12 @@ import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 
-public class MapReduceDatacenter extends Datacenter {
+public class CloudDatacenter extends Datacenter {
 	
 	public List<VMType> vmTypes;
 
 	
-	public MapReduceDatacenter (String name, int hosts, int memory_perhost, int cores_perhost, int mips_precore_perhost, List<VMType> vmtypes) throws Exception {
+	public CloudDatacenter (String name, int hosts, int memory_perhost, int cores_perhost, int mips_precore_perhost, List<VMType> vmtypes) throws Exception {
 		super(name,
 				createChars(hosts, cores_perhost, mips_precore_perhost, memory_perhost, 1000000),
 				new VmAllocationPolicySimple( getHostList(hosts, cores_perhost, mips_precore_perhost, memory_perhost, 1000000)),
@@ -35,7 +35,7 @@ public class MapReduceDatacenter extends Datacenter {
 	}
 	
 	
-	public MapReduceDatacenter (String name, int hosts, int memory_perhost, int cores_perhost, int mips_precore_perhost) throws Exception {
+	public CloudDatacenter (String name, int hosts, int memory_perhost, int cores_perhost, int mips_precore_perhost) throws Exception {
 		super(name,
 				createChars(hosts, cores_perhost, mips_precore_perhost, memory_perhost, 1000000),
 				new VmAllocationPolicySimple( getHostList(hosts, cores_perhost, mips_precore_perhost, memory_perhost, 1000000)),
@@ -65,6 +65,15 @@ public class MapReduceDatacenter extends Datacenter {
 		return hostList;
 	}
 	
+	public boolean isVMInCloudDatacenter(int vmTypeId)
+	{
+		for (VMType vmType : vmTypes) {
+			if(vmType.getId() == vmTypeId)
+				return true;
+		}
+		return false;
+	}
+	
 	//Simulation output
 	public void printSummary(){
 		
@@ -72,7 +81,7 @@ public class MapReduceDatacenter extends Datacenter {
 		double cost = 0.0;
 			
 		Log.printLine();
-		Log.printLine("======== DATACENTER SUMMARY ========");
+		Log.printLine("======== "+ getName() +" DATACENTER SUMMARY ========");
 		Log.printLine("= Cost: "+df.format(cost));
 		
 		Log.printLine("User id\t\tDebt");

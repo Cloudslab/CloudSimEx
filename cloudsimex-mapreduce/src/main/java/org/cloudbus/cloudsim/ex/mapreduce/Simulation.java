@@ -14,7 +14,9 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.ExecutionPlan;
 import org.cloudbus.cloudsim.ex.mapreduce.models.ResourceSet;
 import org.cloudbus.cloudsim.ex.mapreduce.models.PairTaskDatasource;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
-import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.MapReduceDatacenter;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.CloudDatacenter;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PrivateCloudDatacenter;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PublicCloudDatacenter;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.MapTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.ReduceTask;
@@ -92,8 +94,11 @@ public class Simulation {
 			engine.printExecutionSummary();
 			
 			// Print the debt of each user to each datacenter
-			for (MapReduceDatacenter mapReduceDatacenter : cloud.mapReduceDatacenters)
-				mapReduceDatacenter.printSummary();
+			for (PublicCloudDatacenter publicCloudDatacenter : cloud.publicCloudDatacenters)
+				publicCloudDatacenter.printSummary();
+			for (PrivateCloudDatacenter privateCloudDatacenter : cloud.privateCloudDatacenters)
+				privateCloudDatacenter.printSummary();
+			
 
 			Log.printLine("");
 			Log.printLine("");

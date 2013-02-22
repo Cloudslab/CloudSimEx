@@ -33,17 +33,15 @@ public class ResourceSet {
 					taskSet.pairs.add(pairTaskDatasource);
 
 					// This is a very simple ExecutionPlan, where GOLD users
-					// uses will use the 1st VM in private cloud (datacentre
-					// index = 1)
-					// and other will use the 1st VM in the public cloud
-					// (datacentre index = 0)
+					// uses will use the 1st VM in the first data center in private cloud
+					// and other will use the 1st VM in the first data center in the public cloud
 					ExecutionPlan executionPlan = new ExecutionPlan();
 					executionPlan.taskSet = taskSet;
 					if (request.userClass == UserClass.GOLD)
-						executionPlan.vmTypeId = cloud.mapReduceDatacenters
-								.get(1).vmTypes.get(0).getId();
+						executionPlan.vmTypeId = cloud.privateCloudDatacenters
+								.get(0).vmTypes.get(0).getId();
 					else
-						executionPlan.vmTypeId = cloud.mapReduceDatacenters
+						executionPlan.vmTypeId = cloud.publicCloudDatacenters
 								.get(0).vmTypes.get(0).getId();
 					executionPlans.add(executionPlan);
 					Log.printLine("MapTask/CloudLet ID: "
@@ -64,20 +62,19 @@ public class ResourceSet {
 				pairTaskDatasource.dataSourceName = null;
 				taskSet.pairs.add(pairTaskDatasource);
 
-				// This is a very simple ExecutionPlan, where GOLD users uses
-				// will use the 1st VM in private cloud (datacentre index = 1)
-				// and others will use the 1st VM in the public cloud (datacentre
-				// index = 0)
+				// This is a very simple ExecutionPlan, where GOLD users
+				// uses will use the 1st VM in the first data center in private cloud
+				// and other will use the 1st VM in the first data center in the public cloud
 				ExecutionPlan executionPlan = new ExecutionPlan();
 				executionPlan.taskSet = taskSet;
 				if (request.userClass == UserClass.GOLD)
-					executionPlan.vmTypeId = cloud.mapReduceDatacenters.get(1).vmTypes
+					executionPlan.vmTypeId = cloud.privateCloudDatacenters.get(0).vmTypes
 							.get(0).getId();
 				else
-					executionPlan.vmTypeId = cloud.mapReduceDatacenters.get(0).vmTypes
+					executionPlan.vmTypeId = cloud.publicCloudDatacenters.get(0).vmTypes
 							.get(0).getId();
 				executionPlans.add(executionPlan);
-				Log.printLine("ReduTask/CloudLet ID: "
+				Log.printLine("ReduceTask/CloudLet ID: "
 						+ reduceTask.getCloudletId() + " -> VM ID: "
 						+ executionPlan.vmTypeId);
 			}

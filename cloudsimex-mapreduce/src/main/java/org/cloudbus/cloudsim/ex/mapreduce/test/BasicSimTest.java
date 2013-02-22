@@ -18,6 +18,8 @@ import org.cloudbus.cloudsim.UtilizationModel;
 import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PrivateCloudDatacenter;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PublicCloudDatacenter;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType;
 import org.yaml.snakeyaml.Yaml;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.*;
@@ -91,9 +93,10 @@ public class BasicSimTest {
 			printCloudletList(newList);
 
 			// Print the debt of each user to each datacenter
-			for (MapReduceDatacenter mapReduceDatacenter : cloud.mapReduceDatacenters) {
-				mapReduceDatacenter.printDebts();
-			}
+			for (PrivateCloudDatacenter privateCloudDatacenter : cloud.privateCloudDatacenters)
+				privateCloudDatacenter.printDebts();
+			for (PublicCloudDatacenter publicCloudDatacenter : cloud.publicCloudDatacenters)
+				publicCloudDatacenter.printDebts();
 
 			Log.printLine("CloudSimExample1 finished!");
 		} catch (Exception e) {

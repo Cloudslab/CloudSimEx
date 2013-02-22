@@ -33,13 +33,13 @@ public class YAMLTest extends TestCase {
 		
 		InputStream document = new FileInputStream(new File("Cloud.yaml"));
 		Cloud obj = (Cloud) yaml.load(document);
-		assertEquals("aws-us-east-1", obj.mapReduceDatacenters.get(0).getName());
-		assertEquals(200, obj.mapReduceDatacenters.get(0).getHostList().size());
-		assertEquals(8, obj.mapReduceDatacenters.get(0).getHostList().get(0).getPeList().size());
-		assertEquals(100, obj.mapReduceDatacenters.get(0).getHostList().get(0).getPeList().get(0).getMips());
+		assertEquals("aws-us-east-1", obj.publicCloudDatacenters.get(0).getName());
+		assertEquals(200, obj.publicCloudDatacenters.get(0).getHostList().size());
+		assertEquals(8, obj.publicCloudDatacenters.get(0).getHostList().get(0).getPeList().size());
+		assertEquals(100, obj.publicCloudDatacenters.get(0).getHostList().get(0).getPeList().get(0).getMips());
 		
-		assertEquals("large-aws-us-east-1", obj.mapReduceDatacenters.get(0).vmTypes.get(0).name);
-		assertEquals("private-openstack-unimelb", obj.mapReduceDatacenters.get(1).vmTypes.get(0).name);
+		assertEquals("large-aws-us-east-1", obj.publicCloudDatacenters.get(0).vmTypes.get(0).name);
+		assertEquals("private-openstack-unimelb", obj.privateCloudDatacenters.get(1).vmTypes.get(0).name);
 		
 		assertEquals("gbr-sensors", obj.dataSources.get(0).name);
 		
