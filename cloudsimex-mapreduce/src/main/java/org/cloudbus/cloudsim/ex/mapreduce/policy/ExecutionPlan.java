@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.ex.mapreduce.models;
+package org.cloudbus.cloudsim.ex.mapreduce.policy;
 
 import java.util.List;
 import java.util.Map;

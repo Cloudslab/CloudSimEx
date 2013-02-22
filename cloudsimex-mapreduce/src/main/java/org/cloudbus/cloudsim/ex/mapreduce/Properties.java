@@ -17,7 +17,8 @@ package org.cloudbus.cloudsim.ex.mapreduce;
 
 public enum Properties {
 
-	EXPERIMENT_ROUNDS("simulation.rounds");
+	EXPERIMENT_ROUNDS("simulation.rounds"),
+	POLICY("provisioning_scheduling.policy");
 	
 	private String key;
 	private Configuration configuration = Configuration.INSTANCE;

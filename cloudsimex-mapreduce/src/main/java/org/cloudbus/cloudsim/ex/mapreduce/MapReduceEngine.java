@@ -1,8 +1,11 @@
 package org.cloudbus.cloudsim.ex.mapreduce;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.DatacenterBroker;
@@ -12,15 +15,14 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
-import org.cloudbus.cloudsim.ex.mapreduce.models.ExecutionPlan;
-import org.cloudbus.cloudsim.ex.mapreduce.models.PairTaskDatasource;
-import org.cloudbus.cloudsim.ex.mapreduce.models.ResourceSet;
+import org.cloudbus.cloudsim.ex.mapreduce.policy.*;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.CloudDatacenter;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Requests;
 import org.cloudbus.cloudsim.lists.VmList;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 public class MapReduceEngine extends DatacenterBroker {
 
@@ -101,30 +103,68 @@ public class MapReduceEngine extends DatacenterBroker {
 		// NEW CODE
 		// Wrong place, it should be in a new event, and we should run it
 		// several times based on the number of user requests.
-		runAlgorithm();
+		String policyName = Properties.POLICY.getProperty();
+		Policy policy = null;
+		try {
+			Class<?> policyClass = Class.forName(policyName,false,Policy.class.getClassLoader());
+			policy = (Policy) policyClass.getConstructor(Cloud.class,Requests.class).newInstance(cloud,requests);
+			
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		runAlgorithm(policy);
 		// END NEW CODE
 	}
 
-	private void runAlgorithm() {
+	private void runAlgorithm(Policy policy) {
 		Log.printLine(" =========== ALGORITHM: SEARCHING START ===========");
-		Log.printLine(getName()
-				+ " is searching for the optimal Resource Set...");
-		ResourceSet resourceSet = new ResourceSet(cloud, requests);
+		Log.printLine(getName() + " is searching for the optimal Resource Set...");
+		policy.runAlgorithm();
 		// Provision all types of virtual machines from Cloud
 		Log.printLine(" =========== ALGORITHM: FINISHED SEARCHING ===========");
 		Log.printLine(getName() + " SELECTED THE FOLLOWING VMs: ");
-		List<VMType> vmlist = resourceSet.getSelectedVMTypeIds();
+		List<VMType> vmlist = getVMTypesFromIds(policy.getSelectedVMIds());
 		submitVmList(vmlist);
 		for (VMType vmType : vmlist) {
 			Log.printLine("- " + vmType.name + " (ID: " + vmType.getId() + ")");
 		}
 		// Bind/Schedule Map and Reduce tasks to VMs based on the ResourceSet
-		List<ExecutionPlan> executionPlans = resourceSet.executionPlans;
-		for (ExecutionPlan executionPlan : executionPlans)
-			for (PairTaskDatasource pairTaskDatasources : executionPlan.taskSet.pairs)
-				bindCloudletToVm(pairTaskDatasources.taskId,
-						executionPlan.vmTypeId);
+		Map<Integer, Integer> schedulingPlan = policy.getSchedulingPlan();
+		for (Cloudlet task : getCloudletList()) {
+			int taskId = task.getCloudletId();
+			int vmId = schedulingPlan.get(taskId);
+			bindCloudletToVm(taskId, vmId);
+		}
+	}
+	
+	public List<VMType> getVMTypesFromIds(List<Integer> selectedVMIds) {
+		List<VMType> selectedVMTypes = new ArrayList<VMType>();
+		for (int vmId : selectedVMIds) {
+			VMType vmType = cloud.findVMType(vmId);
+			if (!selectedVMTypes.contains(vmType))
+				selectedVMTypes.add(vmType);
+		}
 
+		return selectedVMTypes;
 	}
 
 	// Output information supplied at the end of the simulation
@@ -167,5 +207,4 @@ public class MapReduceEngine extends DatacenterBroker {
 		Log.printLine("========== END OF SUMMARY =========");
 		Log.printLine();
 	}
-
 }
