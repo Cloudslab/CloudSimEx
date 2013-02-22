@@ -1,40 +1,89 @@
 source('parseSar.R')
 
-dbServersFiles <- list("db_server_10",
+dbBaseline <- "db_server_0"
+dbServersFiles <- list("db_server_0",
+                       "db_server_1",
+                       "db_server_5",
+                       "db_server_10",
                        "db_server_100",
-                       "db_server_1000")
-
-webServersFiles <- list("web_server_10",
+                       "db_server_200"
+                       #, "db_server_1000"
+                       )
+webBaseline <- "web_server_0"
+webServersFiles <- list("web_server_0",
+                        "web_server_1",
+                        "web_server_5",
+                        "web_server_10",
                         "web_server_100",
-                        "web_server_1000"
+                        "web_server_200"
+                        #, "web_server_1000"
                         )
 
-plotCPU <- function(){
+maxTPS <- 1000
+
+#colors = rainbow(length(files))
+#colors <- c("black", "red", "green", "blue")
+
+# Typical proerties - %memused, "%CPUUtil", UsedMem, tps
+plotComparison <- function(property="%CPUUtil", baseLineFile, files, useColors = T) {
+  colors= if(!useColors) {
+    sapply(1:length(files), function(x){"black"})
+  } else {
+    rainbow(length(files))
+  }
   
-  plot(1,2, ylim=c(0, 100), xlim=c(1361316536, 1361317019), type = "n",
-       main = "title1",
-       xlab = "xLable",
-       ylab = "yLable")
-  colors <- c("red", "green", "blue")
+  baseLineFrame <- parseSar(baseLineFile)
   
-  frames <- lapply(webServersFiles, function(f){normaliseTime(parseSar(f))})
+  frames <- lapply(files, function(f){prepareFrame(parseSar(f), baseLineFrame)})
   minTime <- min(sapply(frames, function(fr) {min(fr$Time)} ) )
   maxTime <- max(sapply(frames, function(fr) {max(fr$Time)} ) )
+
+  minProp <- 0
+  maxProp <- 100
+  if (!grepl("^%", property)) {
+    minProp <- min(sapply(frames, function(fr) {min(as.numeric(fr[, property]))} ) )
+    maxProp <- max(sapply(frames, function(fr) {max(as.numeric(fr[, property]))} ) )
+    print(c(minProp, maxProp))
+  }
   
-  plot(0, 0, ylim=c(0, 100), xlim=c(minTime, maxTime), type = "n")
+  plot(minProp, minTime, ylim=c(minProp, maxProp), xlim=c(minTime, maxTime), type = "n", main = property,
+       xlab = "Time in seconds",
+       ylab = property)
+
+  linetype <- c(1:length(files))
+  plotchar <- seq(18, 18 + length(files), 1)
   
   i <- 1
   for(frame in frames) {
-    lines(frame[,"%idle"]~frame$Time,  type="l", col=colors[i])
+    print(paste("Summary for :", property, "in", files[i]))
+    print(summary(as.numeric(frame[,property])))
+    
+    lines(frame[,property]~frame$Time,  type="l", col=colors[i], lty = linetype[i], pch = plotchar[i])
     i<- i + 1
   }
   
+  legend(0, maxProp, files, col = colors, lty = linetype, pch = plotchar, cex=0.8)
 }
 
-normaliseTime <- function(df) {
+prepareFrame <- function(df, baseLineFrame) {
+  # Make the time start from 0
   df$Time = df$Time - min(df$Time)
+  df[,"%CPUUtil"] = 100 - as.numeric(df[,"%idle"])
+  
+  df[,"KBMemory"] = as.numeric(df$kbmemused) + as.numeric(df$kbmemfree);
+  df[,"UsedMem"] = as.numeric(df$kbmemused) - as.numeric(df$kbcached) - as.numeric(df$kbbuffers)
+  df[,"%UsedMem"] = 100 * df[,"UsedMem"] / df[,"KBMemory"]
+  
+  baseLineFrame[,"UsedMem"] = as.numeric(baseLineFrame$kbmemused) - as.numeric(baseLineFrame$kbcached) - as.numeric(baseLineFrame$kbbuffers)
+  df[,"SessionMem"] = abs((as.numeric(df$UsedMem) - as.numeric(baseLineFrame$UsedMem)))
+  df[,"%SessionMem"] = 100 * df[,"SessionMem"] / (df[,"KBMemory"] - as.numeric(baseLineFrame$UsedMem))
+  
+  df[,"ActiveMem"] = abs((as.numeric(df$kbactive) - as.numeric(baseLineFrame$kbactive)))
+  df[,"%ActiveMem"] = 100 * df[,"ActiveMem"] / df[,"KBMemory"]
+  
+  df[,"%tps"] = 100 * as.numeric(df[,"tps"]) / maxTPS
+  
   df
 }
-
 
 

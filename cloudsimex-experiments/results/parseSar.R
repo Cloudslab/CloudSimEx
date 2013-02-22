@@ -50,7 +50,7 @@ parseSar <- function(fileName) {
       result[frameLine, ] <- values
       
       # Print a status message, so that user knows we are not blocked
-      if(frameLine %% 100 == 0) {
+      if(frameLine %% 200 == 0) {
         print(paste0(fileName, ": ", frameLine, " rows have been generated ..."))
       }
       
