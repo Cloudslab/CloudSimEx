@@ -1,4 +1,4 @@
-!!org.cloudbus.cloudsim.ex.mapreduce.models.Cloud
+!!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud
 
 mapReduceDatacenters:
  - [

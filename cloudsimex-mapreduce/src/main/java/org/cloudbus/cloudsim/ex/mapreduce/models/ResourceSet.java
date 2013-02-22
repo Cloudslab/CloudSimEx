@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.cloudbus.cloudsim.Log;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.*;
 

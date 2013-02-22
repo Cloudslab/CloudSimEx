@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.UtilizationModelFull;
-import org.cloudbus.cloudsim.ex.mapreduce.models.Cloud;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
 import org.cloudbus.cloudsim.ex.util.Id;
 
 public class Task extends Cloudlet {

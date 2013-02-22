@@ -7,9 +7,9 @@ import java.io.InputStream;
 import java.util.Calendar;
 
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.ex.mapreduce.models.Cloud;
-import org.cloudbus.cloudsim.ex.mapreduce.models.Requests;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Job;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.Requests;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.UserClass;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;

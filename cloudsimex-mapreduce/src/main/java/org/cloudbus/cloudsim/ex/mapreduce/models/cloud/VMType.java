@@ -1,10 +1,7 @@
 package org.cloudbus.cloudsim.ex.mapreduce.models.cloud;
 
-import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.CloudletSchedulerSpaceShared;
-import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.Vm;
-import org.cloudbus.cloudsim.ex.mapreduce.models.Cloud;
 import org.cloudbus.cloudsim.ex.util.*;
 
 public class VMType extends Vm {

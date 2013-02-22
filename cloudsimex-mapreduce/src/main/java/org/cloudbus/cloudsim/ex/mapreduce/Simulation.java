@@ -10,16 +10,16 @@ import java.util.Map;
 
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.ex.mapreduce.models.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.ExecutionPlan;
-import org.cloudbus.cloudsim.ex.mapreduce.models.Requests;
 import org.cloudbus.cloudsim.ex.mapreduce.models.ResourceSet;
 import org.cloudbus.cloudsim.ex.mapreduce.models.PairTaskDatasource;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.MapReduceDatacenter;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.MapTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.ReduceTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.Requests;
 import org.yaml.snakeyaml.Yaml;
 
 /**

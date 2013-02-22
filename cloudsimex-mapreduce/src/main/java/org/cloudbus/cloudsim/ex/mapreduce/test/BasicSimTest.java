@@ -18,14 +18,13 @@ import org.cloudbus.cloudsim.UtilizationModel;
 import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.ex.mapreduce.models.Cloud;
-import org.cloudbus.cloudsim.ex.mapreduce.models.Requests;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType;
 import org.yaml.snakeyaml.Yaml;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.*;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.MapTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.ReduceTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.Requests;
 
 
 public class BasicSimTest {

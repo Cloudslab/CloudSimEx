@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.ex.mapreduce.models;
+package org.cloudbus.cloudsim.ex.mapreduce.models.request;
 
 import java.util.List;
 

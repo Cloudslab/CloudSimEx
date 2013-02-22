@@ -1,4 +1,4 @@
-!!org.cloudbus.cloudsim.ex.mapreduce.models.Requests
+!!org.cloudbus.cloudsim.ex.mapreduce.models.request.Requests
 requests:
 # Requests info (You have multiples): [budget, deadline, jobFile, userClass]
 - !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
