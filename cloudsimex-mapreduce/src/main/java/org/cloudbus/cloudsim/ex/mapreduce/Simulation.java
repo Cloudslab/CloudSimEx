@@ -71,11 +71,12 @@ public class Simulation {
 			CloudSim.init(1,Calendar.getInstance(),false);
 					
 			// Create Broker
-			MapReduceEngine engine = createMapReduceEngine();
+			MapReduceEngine engine = new MapReduceEngine("MapReduce_Broker");
 			Cloud.brokerID = engine.getId();
 			
 			// Create datacentres and cloudlets
-			loadYAMLFiles();
+			cloud = YamlFile.getCloudFromYaml(Properties.CLOUD.getProperty());
+			requests = YamlFile.getRequestsFromYaml(Properties.REQUESTS.getProperty());
 			engine.setCloud(cloud);
 			engine.setRequests(requests);
 			
@@ -98,46 +99,5 @@ public class Simulation {
 		} finally {
 			CloudSim.stopSimulation();
 		}
-	}
-
-
-	private static void loadYAMLFiles()
-	{
-		Yaml yaml = new Yaml();
-		
-		InputStream document = null;
-		try {
-			if(Cloud.brokerID == -1)
-				throw new Exception("brokerID is not set");
-			
-			document = new FileInputStream(new File("Cloud.yaml"));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		cloud = (Cloud) yaml.load(document);
-		
-		try {
-			document = new FileInputStream(new File("Requests.yaml"));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		requests = (Requests) yaml.load(document);
-	}
-
-	
-	private static MapReduceEngine createMapReduceEngine(){
-		MapReduceEngine engine = null;
-		try {
-			engine = new MapReduceEngine("MapReduce_Broker");
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-		return engine;
 	}
 }
