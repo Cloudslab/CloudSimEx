@@ -30,8 +30,12 @@ public class MapTask extends Task {
 
 	public double predictFileTransferTimeFromDataSource() {
 		Cloud cloud = ((MapReduceEngine) CloudSim.getEntity("MapReduceEngine")).getCloud();
+		return predictFileTransferTimeFromDataSource(cloud.getVMTypeFromId(getVmId()));
+	}
+	
+	public double predictFileTransferTimeFromDataSource(VMType currentVmType) {
+		Cloud cloud = ((MapReduceEngine) CloudSim.getEntity("MapReduceEngine")).getCloud();
 
-		VMType currentVmType = cloud.getVMTypeFromId(getVmId());
 		String currentVmTypeName = currentVmType.name;
 
 		for (List<Object> throughputs_vm_ds : cloud.throughputs_vm_ds) {
@@ -48,9 +52,12 @@ public class MapTask extends Task {
 
 	public double predictFileTransferTimeToReduceVms() {
 		Cloud cloud = ((MapReduceEngine) CloudSim.getEntity("MapReduceEngine")).getCloud();
+		return predictFileTransferTimeToReduceVms(cloud.getVMTypeFromId(getVmId()));
+	}
+	
+	public double predictFileTransferTimeToReduceVms(VMType currentVmType) {
+		Cloud cloud = ((MapReduceEngine) CloudSim.getEntity("MapReduceEngine")).getCloud();
 		Requests requests = ((MapReduceEngine) CloudSim.getEntity("MapReduceEngine")).getRequests();
-
-		VMType currentVmType = cloud.getVMTypeFromId(getVmId());
 		String currentVmTypeName = currentVmType.name;
 
 		double transferTime = 0.0;
