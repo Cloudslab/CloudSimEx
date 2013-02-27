@@ -31,7 +31,7 @@ public class Cloud {
 		return vmlist;
 	}
 	
-	public VMType findVMType(int VMTypeId)
+	public VMType getVMTypeFromId(int VMTypeId)
 	{
 		for (PublicCloudDatacenter publicCloudDatacenter : publicCloudDatacenters) {
 			for (VMType vmType : publicCloudDatacenter.vmTypes) {
@@ -50,7 +50,7 @@ public class Cloud {
 		return null;
 	}
 	
-	public CloudDatacenter getCloudDatacenter(int cloudDatacenterId)
+	public CloudDatacenter getCloudDatacenterFromId(int cloudDatacenterId)
 	{
 		for (PublicCloudDatacenter publicCloudDatacenter : publicCloudDatacenters) {
 			if(publicCloudDatacenter.getId() == cloudDatacenterId)
@@ -62,6 +62,16 @@ public class Cloud {
 				return privateCloudDatacenter;
 		}
 		
+		return null;
+	}
+	
+	
+	public DataSource getDataSourceFromName(String dataSourceName)
+	{
+		for (DataSource dataSource : dataSources) {
+			if(dataSource.getName().equals(dataSourceName))
+				return dataSource;
+		}
 		return null;
 	}
 }

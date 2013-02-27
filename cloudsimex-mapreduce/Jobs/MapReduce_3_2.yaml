@@ -2,20 +2,30 @@
 # This job is to calculate the average temperature of one of the Great Barrier Reef (GBR) temperature sensor in 2011 and 2012
 
 mapTasks:
-# Map task info: [description, dSize, idSize, mipb, [dataSources]]
-- [Forward the values of 2011 and 2012 keys to the right reducer, 1, 64, 1000,
-      [gbr-sensors, EEE-sensors]
+# Map task info: [name, description, data Size in mega byte, million instructions per byte, [dataSources], [intermediate Data]]
+- [map0001, Forward the values of 2011 and 2012 keys to the right reducer, 1, 10,
+      [gbr-sensors, EEE-sensors],
+      {
+        # intermediate Data information: [Reduce Task ID, data size in mega byte]
+        reduce0001: 3,
+        reduce0002: 7
+      }
   ]
-# Map task info: [description, dSize, idSize, mipb, [dataSources]]
-- [Forward the values of 2011 and 2012 keys to the right reducer, 1, 64, 1000,
-      [gbr-sensors, S3-sensors]
+- [map0002, Forward the values of 2011 and 2012 keys to the right reducer, 1, 10,
+      [gbr-sensors, S3-sensors],
+      {
+        reduce0001: 10
+      }
   ]
-# Map task info: [description, dSize, idSize, mipb, [dataSources]]
-- [Forward the values of 2011 and 2012 keys to the right reducer, 1, 10, 1000,
-      [S3-sensors]
+- [map0003, Forward the values of 2011 and 2012 keys to the right reducer, 1, 10,
+      [S3-sensors],
+      {
+        reduce0001: 1,
+        reduce0002: 9
+      }
   ]
 
 reduceTasks:
-# Reduce task info:[description, idSize, mipb]
-- [This is the 2011 key reducer - to average the 2011 values, 1, 1000]
-- [This is the 2012 key reducer - to average the 2012 values, 1, 1000]
+# Reduce task info:[name, description, mipb]
+- [reduce0001, This is the 2011 key reducer - to average the 2011 values, 3]
+- [reduce0002, This is the 2012 key reducer - to average the 2012 values, 3]
