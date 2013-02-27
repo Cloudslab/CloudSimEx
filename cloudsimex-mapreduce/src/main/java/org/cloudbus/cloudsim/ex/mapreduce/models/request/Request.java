@@ -20,7 +20,8 @@ public class Request extends SimEvent {
 	public Job job;
 	public UserClass userClass;
 	public List<VMType> provisionedVms;
-	public double lastTaskFinishExecutionTime;
+	public double firstSubmissionTime;
+	public double lastFinishTime;
 
 	public Request(double submissionTime, double budget, int deadline, String jobFile, UserClass userClass) {
 		id = Id.pollId(Request.class);
@@ -30,7 +31,8 @@ public class Request extends SimEvent {
 		this.userClass = userClass;
 		job = readJobYAML(jobFile);
 		provisionedVms = new ArrayList<VMType>();
-		lastTaskFinishExecutionTime = 0.0;
+		firstSubmissionTime = -1;
+		lastFinishTime = -1;
 
 		for (MapTask mapTask : job.mapTasks) {
 			mapTask.requestId = id;

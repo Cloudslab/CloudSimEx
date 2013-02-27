@@ -269,6 +269,7 @@ public class MapReduceEngine extends DatacenterBroker {
 		Log.printLine("= Request " + indent + "Task " + indent + "Type" + indent + "Status" + indent + indent
 				+ "Submission Time" + indent + "Start Time" + indent + "Execution Time (s)" + indent + "Finish Time"
 				+ indent + "VM ID" + indent + "VM Type");
+
 		for (Cloudlet cloudlet : getCloudletReceivedList()) {
 			Task task = (Task) cloudlet;
 			Log.print(" = " + task.requestId + indent + indent + task.getCloudletId() + indent);
@@ -293,18 +294,26 @@ public class MapReduceEngine extends DatacenterBroker {
 				// Set the executionTime in the vm
 				vm.ExecutionTime += executionTime;
 
-				// set the last execution time on request
+				// set the first Submission Time and last execution time on
+				// request
 				Request request = requests.getRequestFromId(task.requestId);
-				double requestExecutionTime = task.getFinishTime() - task.getSubmissionTime();
-				if (request.lastTaskFinishExecutionTime < requestExecutionTime)
-					request.lastTaskFinishExecutionTime = requestExecutionTime;
 
+				if (task.getSubmissionTime() == -1)
+					request.firstSubmissionTime = task.getSubmissionTime();
+				else if (task.getSubmissionTime() < request.firstSubmissionTime)
+					request.firstSubmissionTime = task.getSubmissionTime();
+
+				if (request.firstSubmissionTime == -1)
+					request.firstSubmissionTime = task.getFinishTime();
+				else if (task.getFinishTime() > request.lastFinishTime)
+					request.lastFinishTime = task.getFinishTime();
 			} else if (task.getCloudletStatus() == Cloudlet.FAILED) {
 				Log.printLine("FAILED");
 			} else if (task.getCloudletStatus() == Cloudlet.CANCELED) {
 				Log.printLine("CANCELLED");
 			}
 		}
+
 		Log.printLine();
 		for (Request request : requests.requests) {
 			Log.printLine(" ======== Request ID: " + request.id + " - USER CLASS: [" + request.userClass + "]");
@@ -313,20 +322,20 @@ public class MapReduceEngine extends DatacenterBroker {
 			double jobTotalCost = 0.0;
 			for (VMType vmType : request.provisionedVms) {
 				Log.printLine("   - VM ID#" + vmType.getId() + ": " + vmType.name);
-				Log.printLine("     - Processing Time: " + vmType.ExecutionTime + " seconds");
+				Log.printLine("     > Processing Time: " + vmType.ExecutionTime + " seconds");
 				double cost = Math.ceil(vmType.ExecutionTime / 3600.0) * vmType.cost;
-				Log.printLine("     - Cost: $" + cost);
+				Log.printLine("     > Cost: $" + cost);
 				jobTotalCost += cost;
 			}
 
 			Log.printLine("= Deadline: " + request.deadline + " seconds");
-			double jobExecutionTime = request.lastTaskFinishExecutionTime;
-			Log.printLine("= Job Execution Time: " + jobExecutionTime + " seconds");
+			double jobExecutionTime = request.lastFinishTime - request.firstSubmissionTime;
+			Log.printLine("= Execution Time: " + jobExecutionTime + " seconds");
 			boolean TimeViolation = (jobExecutionTime > request.deadline);
 			Log.printLine("= Deadline Violation: " + TimeViolation);
 
 			Log.printLine("= Budget: $" + request.budget);
-			Log.printLine("= Job Total Cost: $" + jobTotalCost);
+			Log.printLine("= Cost: $" + jobTotalCost);
 			boolean costViolation = (jobTotalCost > request.budget);
 			Log.printLine("= Budget Violation: " + costViolation);
 			Log.printLine();
