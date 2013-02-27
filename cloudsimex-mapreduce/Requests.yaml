@@ -1,8 +1,8 @@
 !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Requests
 
 requests:
-# Requests info (You have multiples): [submission time, budget, deadline, jobFile, userClass]
+# Requests info (You have multiples): [submission time in seconds, budget in $, deadline in seconds, jobFile, userClass]
 - !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
   [0.0, 1.0, 5200, Jobs/MapReduce_3_2.yaml, SILVER]
 - !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-  [3.0, 0.5, 4000, Jobs/MapReduce_3_2.yaml, GOLD]
+  [300.0, 0.5, 4000, Jobs/MapReduce_3_2.yaml, GOLD]

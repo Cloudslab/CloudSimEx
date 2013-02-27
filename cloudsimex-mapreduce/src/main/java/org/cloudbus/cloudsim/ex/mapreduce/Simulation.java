@@ -84,12 +84,6 @@ public class Simulation {
 			CloudSim.startSimulation();
 			engine.printExecutionSummary();
 			
-			// Print the debt of each user to each datacenter
-			for (PublicCloudDatacenter publicCloudDatacenter : cloud.publicCloudDatacenters)
-				publicCloudDatacenter.printSummary();
-			for (PrivateCloudDatacenter privateCloudDatacenter : cloud.privateCloudDatacenters)
-				privateCloudDatacenter.printSummary();
-			
 
 			Log.printLine("");
 			Log.printLine("");

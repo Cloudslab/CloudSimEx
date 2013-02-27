@@ -4,8 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.yaml.snakeyaml.Yaml;
 
@@ -16,6 +19,8 @@ public class Request extends SimEvent {
 	public int deadline;
 	public Job job;
 	public UserClass userClass;
+	public List<VMType> provisionedVms;
+	public double lastTaskFinishExecutionTime;
 
 	public Request(double submissionTime, double budget, int deadline, String jobFile, UserClass userClass) {
 		id = Id.pollId(Request.class);
@@ -24,6 +29,8 @@ public class Request extends SimEvent {
 		this.deadline = deadline;
 		this.userClass = userClass;
 		job = readJobYAML(jobFile);
+		provisionedVms = new ArrayList<VMType>();
+		lastTaskFinishExecutionTime = 0.0;
 
 		for (MapTask mapTask : job.mapTasks) {
 			mapTask.requestId = id;

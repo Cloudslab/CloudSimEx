@@ -7,15 +7,14 @@ import org.cloudbus.cloudsim.ex.util.*;
 public class VMType extends Vm {
 
 	public String name;
-	public Double cost;
-	public Double transferringCost;
-	public int ar;
+	public double cost;
+	public double transferringCost;
 	public int bootTime;
-	
+	public int ExecutionTime;
 	
 
 	
-	public VMType(String name, Double cost, Double transferringCost, int mips, int ar, int cores, int ram, int bootTime) {
+	public VMType(String name, Double cost, Double transferringCost, int mips, int cores, int ram, int bootTime) {
 		//WARNING: bw is 1000, is that OK?
 		//WARNING: userId (Broker ID) is Cloud.brokerID, is that Ok?
 		//WARNING: Size is 0, is that OK?
@@ -24,8 +23,8 @@ public class VMType extends Vm {
 		this.name = name;
 		this.cost = cost;
 		this.transferringCost = transferringCost;
-		this.ar = ar;
 		this.bootTime = bootTime;
+		ExecutionTime = 0;
 	}
 
 }

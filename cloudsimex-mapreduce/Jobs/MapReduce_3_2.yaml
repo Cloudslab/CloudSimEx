@@ -26,6 +26,6 @@ mapTasks:
   ]
 
 reduceTasks:
-# Reduce task info:[name, description, mipb]
+# Reduce task info:[name, description, million instructions per byte]
 - [reduce0001, This is the 2011 key reducer - to average the 2011 values, 3]
 - [reduce0002, This is the 2012 key reducer - to average the 2012 values, 3]
