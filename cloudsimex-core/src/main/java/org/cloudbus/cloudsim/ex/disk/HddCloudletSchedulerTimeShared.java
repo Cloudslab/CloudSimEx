@@ -194,8 +194,8 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 
 	    Double estimatedFinishTime = refMin(estimatedFinishCPUTime, estimatedFinishIOTime);
 
-	    if (estimatedFinishTime - currentTime < 0.1) {
-		estimatedFinishTime = currentTime + 0.1;
+	    if (estimatedFinishTime - currentTime < CloudSim.getMinTimeBetweenEvents()) {
+		estimatedFinishTime = currentTime + CloudSim.getMinTimeBetweenEvents();
 	    }
 
 	    if (estimatedFinishTime < nextEvent) {

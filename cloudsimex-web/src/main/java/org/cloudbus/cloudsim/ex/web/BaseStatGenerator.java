@@ -198,8 +198,12 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
      *         for the key.
      */
     protected Double generateNumericValue(final String key) {
-	return !seqGenerators.containsKey(key) ? 0 : Math.max(0, seqGenerators
-		.get(key).nextValue().doubleValue());
+	Number genValue = !seqGenerators.containsKey(key) ? 0: seqGenerators.get(key).nextValue();
+	if (genValue == null) {
+	    return null;
+	} else {
+	    return Math.max(0, genValue.doubleValue());
+	}
     }
 
     /**
@@ -213,9 +217,13 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
      *         False is returned.
      */
     protected Boolean generateBooleanValue(final String key) {
-	int result = !seqGenerators.containsKey(key) ? 0 : Math.max(0, seqGenerators
-		.get(key).nextValue().intValue());
-	return result != 1;
+	Number genValue = !seqGenerators.containsKey(key) ? 0 : seqGenerators.get(key).nextValue();
+	if(genValue == null) {
+	    return null;
+	} else {
+	    int result = Math.max(0, genValue.intValue());
+	    return result != 1;
+	}
     }
 
 }

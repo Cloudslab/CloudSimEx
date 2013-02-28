@@ -23,7 +23,7 @@ public class IterableNumberGenerator<N extends Number> implements NumberGenerato
 
     @Override
     public N nextValue() {
-	return iter.next();
+	return iter.hasNext() ? iter.next() : null;
     }
 
 }

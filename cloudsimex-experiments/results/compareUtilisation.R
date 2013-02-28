@@ -55,13 +55,15 @@ prepareSessionData <- function(type, size = 10, step = 5, ram = 512, cpu = 1000,
   
   #Convert in form suitable for CloudSim
   perfFrame[,"%CPUUtil"] <- (perfFrame[,"%CPUUtil"] * cpu * step) / (100 * size)
+  perfFrame[,"%CPUUtil"] <- sapply(perfFrame[,"%CPUUtil"], function(x){if(x == 0) 1 else x})
+  
   perfFrame[,"%SessionMem"] <- (perfFrame[,"%SessionMem"] * ram) / (100 * size)
   if(type == "db") {
     perfFrame[,"%tps"] <- (perfFrame[,"%tps"] * io * step) / (100 * size)
   }
   
   #Get only the data for the seconds we need
-  perfFrame <- perfFrame[seq(1, nrow(df), step),]
+  perfFrame <- perfFrame[seq(1, nrow(perfFrame), step),]
   perfFrame <- perfFrame[complete.cases(perfFrame),]
   
   newNamesVector <- c("Time"="Time", "%CPUUtil"="CLOUDLET_MIPS", "%SessionMem"="CLOUDLET_RAM", "%tps"="CLOUDLET_IO")

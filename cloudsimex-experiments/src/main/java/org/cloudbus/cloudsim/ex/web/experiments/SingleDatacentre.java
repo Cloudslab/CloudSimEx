@@ -54,7 +54,7 @@ import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
  */
 public class SingleDatacentre {
 
-    private static final int NUMBER_OF_SESSIONS = 20;
+    private static final int NUMBER_OF_SESSIONS = 50;
     protected int simulationLength = DAY;
     protected int refreshTime = 5;
     protected String experimentName;
@@ -94,7 +94,7 @@ public class SingleDatacentre {
 	    // before creating any entities.
 	    int numBrokers = 1; // number of brokers we'll be using
 	    boolean trace_flag = false; // mean trace events
-	    CloudSim.init(numBrokers, Calendar.getInstance(), trace_flag);
+	    CloudSim.init(numBrokers, Calendar.getInstance(), trace_flag, 0.001);
 
 	    // Step 2: Create Datacenters
 	    Datacenter dc1 = createDatacenter("WebDataCenter1");

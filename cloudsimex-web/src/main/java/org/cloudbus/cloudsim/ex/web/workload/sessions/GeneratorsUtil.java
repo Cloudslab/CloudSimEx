@@ -39,7 +39,7 @@ public class GeneratorsUtil {
 	BufferedReader br = new BufferedReader(new InputStreamReader(in));
 	String line = br.readLine();
 	List<String> headers = new ArrayList<>();
-	for (String s : line.replaceAll("\"", "").split("\\s*,\\s*")) {
+	for (String s : line.replaceAll("\"", "").replace("\\s+", "").split(",")) {
 	    headers.add(s.trim());
 	}
 
@@ -47,8 +47,8 @@ public class GeneratorsUtil {
 
 	while ((line = br.readLine()) != null) {
 	    List<Double> lineValues = new ArrayList<>();
-	    for (String s : line.split("\\s*,\\s*")) {
-		lineValues.add(Double.parseDouble(s.replaceAll("\"", "").trim()));
+	    for (String s : line.split(",")) {
+		lineValues.add(Double.parseDouble(s.replaceAll("\"", "").replace("\\s+", "").trim()));
 	    }
 	    for (int i = 0; i < headers.size(); i++) {
 		if (!values.containsKey(headers.get(i))) {
