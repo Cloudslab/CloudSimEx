@@ -23,7 +23,7 @@ public class HddHost extends Host {
     /** The list of harddisks. */
     private final List<? extends HddPe> hddList;
     /** A scheduler for the harddisk operations. */
-    private final VmSchedulerWithIndependentPes<HddPe, HddVm> hddIOScheduler;
+    private final VmSchedulerWithIndependentPes<HddPe> hddIOScheduler;
 
     /**
      * Constructor.
@@ -40,7 +40,7 @@ public class HddHost extends Host {
      */
     public HddHost(final RamProvisioner ramProvisioner, final BwProvisioner bwProvisioner, final long storage,
 	    final List<? extends Pe> peList, final List<? extends HddPe> hddList, final VmScheduler vmCPUScheduler,
-	    final VmSchedulerWithIndependentPes<HddPe, HddVm> vmHDDScheduler) {
+	    final VmSchedulerWithIndependentPes<HddPe> vmHDDScheduler) {
 	super(Id.pollId(HddHost.class), ramProvisioner, bwProvisioner, storage, peList, vmCPUScheduler);
 	this.hddIOScheduler = vmHDDScheduler;
 	this.hddList = hddList;
@@ -76,10 +76,11 @@ public class HddHost extends Host {
      */
     @Override
     public boolean vmCreate(final Vm vm) {
-	boolean allocatednOfCPUFlag = super.vmCreate(vm);
 	boolean allocationOfHDD = false;
 	Host prevHost = vm.getHost();
+	vm.setHost(this);
 
+	boolean allocatednOfCPUFlag = super.vmCreate(vm);
 	HddVm hddVm = (HddVm) vm;
 	allocationOfHDD = allocatednOfCPUFlag
 		&& getHddIOScheduler().allocatePesForVm(hddVm, hddVm.getCurrentRequestedIOMips());
@@ -186,7 +187,7 @@ public class HddHost extends Host {
      * @return the scheduler, that manages the distribution of the I/O
      *         operations among VMs.
      */
-    public VmSchedulerWithIndependentPes<HddPe, HddVm> getHddIOScheduler() {
+    public VmSchedulerWithIndependentPes<HddPe> getHddIOScheduler() {
 	return hddIOScheduler;
     }
 

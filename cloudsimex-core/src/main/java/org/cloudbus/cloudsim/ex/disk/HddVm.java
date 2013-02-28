@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.ex.VmSchedulerMapVmsToPes;
 import org.cloudbus.cloudsim.ex.util.Id;
 
 /**
@@ -129,6 +131,32 @@ public class HddVm extends Vm {
 	    }
 	}
 	return result;
+    }
+
+    @Override
+    public List<Double> getCurrentRequestedMips() {
+	if (getHost().getVmScheduler() instanceof VmSchedulerMapVmsToPes) {
+	    VmSchedulerMapVmsToPes<?> scheduler = (VmSchedulerMapVmsToPes<?>) getHost().getVmScheduler();
+
+	    List<Double> currentRequestedMips = getCloudletScheduler().getCurrentRequestedMips();
+	    if (isBeingInstantiated()) {
+		currentRequestedMips = new ArrayList<Double>();
+		for (Pe pe : getHost().getPeList()) {
+		    if (scheduler.doesVmUse(this, pe)) {
+			currentRequestedMips.add(getMips());
+		    } else {
+			currentRequestedMips.add(0.0);
+		    }
+		}
+		for (int i = 0; i < getNumberOfPes(); i++) {
+		    currentRequestedMips.add(getMips());
+		}
+	    }
+	    return currentRequestedMips;
+
+	} else {
+	    return super.getCurrentRequestedMips();
+	}
     }
 
     /**

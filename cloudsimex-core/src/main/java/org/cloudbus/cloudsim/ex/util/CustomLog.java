@@ -3,6 +3,7 @@ package org.cloudbus.cloudsim.ex.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
@@ -155,6 +156,96 @@ public class CustomLog {
      */
     public static void printf(final String format, final Object... args) {
 	LOGGER.log(DEFAULT_LEVEL, String.format(format, args));
+    }
+
+    /**
+     * Prints a header for the specified class. The format is as per the
+     * specification in {@link TextUtil}
+     * 
+     * @param klass
+     *            - the class. Must not be null.
+     * @param delim
+     *            - the delimeter. Must not be null.
+     */
+    public static void printHeader(final Class<?> klass, final String delim) {
+	CustomLog.printLine(TextUtil.getCaptionLine(klass, delim));
+    }
+
+    /**
+     * Prints a header for the specified class. The format is as per the
+     * specification in {@link TextUtil}
+     * 
+     * @param klass
+     *            - the class. Must not be null.
+     */
+    public static void printHeader(final Class<?> klass) {
+	CustomLog.printLine(TextUtil.getCaptionLine(klass));
+    }
+
+    /**
+     * Prints a line for the object. The format is as per the specification in
+     * {@link TextUtil}
+     * 
+     * @param o
+     *            - the object. Must not be null.
+     * @param delim
+     *            - the delimeter. Must not be null.
+     */
+    public static void printLineForObject(final Object o, final String delim) {
+	CustomLog.print(TextUtil.getTxtLine(o, delim, false));
+    }
+
+    /**
+     * Prints a line for the object. The format is as per the specification in
+     * {@link TextUtil}
+     * 
+     * @param o
+     *            - the object. Must not be null.
+     */
+    public static void printLineForObject(final Object o) {
+	CustomLog.print(TextUtil.getTxtLine(o));
+    }
+
+    /**
+     * Prints the objects' details with a header in a CSV - like format.
+     * 
+     * @param klass
+     *            - the class to be used for the header,
+     * @param list
+     *            - list of objects. All objects, must be of type klass.
+     */
+    public static void printResults(final Class<?> klass, final List<?>... lines) {
+	// Print header line
+	printHeader(klass);
+
+	// Print details for each cloudlet
+	for (List<?> list : lines) {
+	    for (Object o : list) {
+		printLineForObject(o);
+	    }
+	}
+    }
+
+    /**
+     * Prints the objects' details with a header in a CSV - like format.
+     * 
+     * @param klass
+     *            - the class to be used for the header,
+     * @param delim
+     *            - the delimeter to use.
+     * @param list
+     *            - list of objects. All objects, must be of type klass.
+     */
+    public static void printResults(final Class<?> klass, final String delim, final List<?>... lines) {
+	// Print header line
+	printHeader(klass, delim);
+
+	// Print details for each cloudlet
+	for (List<?> list : lines) {
+	    for (Object o : list) {
+		printLineForObject(o, delim);
+	    }
+	}
     }
 
     /**

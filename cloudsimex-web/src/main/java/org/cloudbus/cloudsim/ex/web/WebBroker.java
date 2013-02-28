@@ -1,7 +1,6 @@
 package org.cloudbus.cloudsim.ex.web;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -15,7 +14,7 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
-import org.cloudbus.cloudsim.ex.web.workload.WorkloadGenerator;
+import org.cloudbus.cloudsim.ex.web.workload.IWorkloadGenerator;
 
 /**
  * A broker that takes care of the submission of web sessions to the data
@@ -37,7 +36,7 @@ public class WebBroker extends DatacenterBroker {
     private final double lifeLength;
 
     private final Map<Long, ILoadBalancer> loadBalancers = new HashMap<>();
-    private final Map<Long, List<WorkloadGenerator>> loadBalancersToGenerators = new HashMap<>();
+    private final Map<Long, List<IWorkloadGenerator>> loadBalancersToGenerators = new HashMap<>();
 
     private final List<WebSession> servedSessions = new ArrayList<>();
     private final List<WebSession> canceledSessions = new ArrayList<>();
@@ -189,7 +188,7 @@ public class WebBroker extends DatacenterBroker {
      */
     public void addLoadBalancer(final ILoadBalancer balancer) {
 	loadBalancers.put(balancer.getId(), balancer);
-	loadBalancersToGenerators.put(balancer.getId(), new ArrayList<WorkloadGenerator>());
+	loadBalancersToGenerators.put(balancer.getId(), new ArrayList<IWorkloadGenerator>());
     }
 
     /**
@@ -201,7 +200,7 @@ public class WebBroker extends DatacenterBroker {
      *            - the id of the load balancer. There must such a load balancer
      *            registered before this method is called.
      */
-    public void addWorkloadGenerators(final List<WorkloadGenerator> workloads, final long loadBalancerId) {
+    public void addWorkloadGenerators(final List<? extends IWorkloadGenerator> workloads, final long loadBalancerId) {
 	loadBalancersToGenerators.get(loadBalancerId).addAll(workloads);
     }
 
@@ -234,15 +233,15 @@ public class WebBroker extends DatacenterBroker {
 
     private void generateWorkload() {
 	double currTime = CloudSim.clock();
-	for (Map.Entry<Long, List<WorkloadGenerator>> balancersToWorkloadGens : loadBalancersToGenerators.entrySet()) {
+	for (Map.Entry<Long, List<IWorkloadGenerator>> balancersToWorkloadGens : loadBalancersToGenerators.entrySet()) {
 	    long balancerId = balancersToWorkloadGens.getKey();
-	    for (WorkloadGenerator gen : balancersToWorkloadGens.getValue()) {
-		Map<Double, WebSession> timeToSessions = gen.generateSessions(currTime, refreshPeriod);
-		for (Map.Entry<Double, WebSession> sessEntry : timeToSessions.entrySet()) {
+	    for (IWorkloadGenerator gen : balancersToWorkloadGens.getValue()) {
+		Map<Double, List<WebSession>> timeToSessions = gen.generateSessions(currTime, refreshPeriod);
+		for (Map.Entry<Double, List<WebSession>> sessEntry : timeToSessions.entrySet()) {
 		    if (currTime == sessEntry.getKey()) {
-			submitSessions(Arrays.asList(sessEntry.getValue()), balancerId);
+			submitSessions(sessEntry.getValue(), balancerId);
 		    } else {
-			submitSessionsAtTime(Arrays.asList(sessEntry.getValue()), balancerId,
+			submitSessionsAtTime(sessEntry.getValue(), balancerId,
 				sessEntry.getKey() - currTime);
 		    }
 		}

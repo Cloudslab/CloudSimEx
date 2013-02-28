@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.cloudbus.cloudsim.Pe;
+import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmScheduler;
 import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
 import org.cloudbus.cloudsim.ex.VmSchedulerWithIndependentPes;
@@ -15,7 +16,7 @@ import org.cloudbus.cloudsim.ex.VmSchedulerWithIndependentPes;
  * @author nikolay.grozev
  * 
  */
-public class VmDiskScheduler extends VmSchedulerWithIndependentPes<HddPe, HddVm> {
+public class VmDiskScheduler extends VmSchedulerWithIndependentPes<HddPe> {
 
     public VmDiskScheduler(final List<HddPe> pelist) {
 	super(pelist);
@@ -27,8 +28,8 @@ public class VmDiskScheduler extends VmSchedulerWithIndependentPes<HddPe, HddVm>
     }
 
     @Override
-    protected boolean doesVmUse(final HddVm vm, final Pe pe) {
-	return vm.getHddsIds().contains(pe.getId());
+    protected boolean doesVmUse(final Vm vm, final Pe pe) {
+	return (vm instanceof HddVm) ? ((HddVm) vm).getHddsIds().contains(pe.getId()) : false;
     }
 
 }
