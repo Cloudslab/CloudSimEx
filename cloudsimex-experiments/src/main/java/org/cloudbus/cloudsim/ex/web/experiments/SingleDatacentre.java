@@ -54,7 +54,7 @@ import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
  */
 public class SingleDatacentre {
 
-    private static final int NUMBER_OF_SESSIONS = 50;
+    private static final int NUMBER_OF_SESSIONS = 100;
     protected int simulationLength = DAY;
     protected int refreshTime = 5;
     protected String experimentName;
@@ -94,7 +94,7 @@ public class SingleDatacentre {
 	    // before creating any entities.
 	    int numBrokers = 1; // number of brokers we'll be using
 	    boolean trace_flag = false; // mean trace events
-	    CloudSim.init(numBrokers, Calendar.getInstance(), trace_flag, 0.001);
+	    CloudSim.init(numBrokers, Calendar.getInstance(), trace_flag, 0.01);
 
 	    // Step 2: Create Datacenters
 	    Datacenter dc1 = createDatacenter("WebDataCenter1");
@@ -131,10 +131,12 @@ public class SingleDatacentre {
 
 	    // Step 9: get the results
 	    List<WebSession> resultDC1Sessions = brokerDC1.getServedSessions();
+	    // List<Cloudlet> cloudlets = brokerDC1.getCloudletReceivedList();
 
 	    // Step 10 : stop the simulation and print the results
 	    CloudSim.stopSimulation();
 	    CustomLog.printResults(WebSession.class, resultDC1Sessions);
+	    // CustomLog.printResults(WebCloudlet.class, cloudlets);
 
 	    System.err.println();
 	    System.err.println(experimentName + ": Simulation is finished!");
@@ -148,8 +150,8 @@ public class SingleDatacentre {
 
     private List<SimpleWorkloadGenerator> generateWorkloadsDC1(final int userId) {
 
-	try (InputStream asIO = new FileInputStream("results/web_cloudlets.txt");
-		InputStream dbIO = new FileInputStream("results/db_cloudlets.txt")) {
+	try (InputStream asIO = new FileInputStream("results/stat/web_cloudlets.txt");
+		InputStream dbIO = new FileInputStream("results/stat/db_cloudlets.txt")) {
 	    StatSessionGenerator sessionGenerator = new StatSessionGenerator(GeneratorsUtil.parseStream(asIO),
 		    GeneratorsUtil.parseStream(dbIO), userId, DATA);
 	    return Arrays.asList(new SimpleWorkloadGenerator(NUMBER_OF_SESSIONS, sessionGenerator, null, null, 1));
