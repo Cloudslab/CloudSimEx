@@ -59,4 +59,12 @@ Thumbs.db
 *.snm
 *.vrb
 
+# Backup files #
+##################
+*~
+
+# R's hidden files - .RData .Rhistory #
+####################
+.RData
+.Rhistory
 
