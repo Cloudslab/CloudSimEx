@@ -22,7 +22,7 @@ public class StatSessionGenerator implements ISessionGenerator {
 
     public StatSessionGenerator(final Map<String, List<Double>> asSessionParams,
 	    final Map<String, List<Double>> dbSessionParams,
-	    final int userId, final DataItem data) {
+	    final int userId, final DataItem data, final int step) {
 	super();
 	this.asSessionParams = asSessionParams;
 	this.dbSessionParams = dbSessionParams;
@@ -30,7 +30,7 @@ public class StatSessionGenerator implements ISessionGenerator {
 	this.data = data;
 
 	this.idealLength = Math.max(Collections.max(asSessionParams.get("Time")),
-		Collections.max(dbSessionParams.get("Time")));
+		Collections.max(dbSessionParams.get("Time"))) + step;
     }
 
     @Override

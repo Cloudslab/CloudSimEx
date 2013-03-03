@@ -4,11 +4,13 @@ maxTPS <- 1000
 maxIOPS <- 1000
 ram = 512
 
+
 # Prints the delays of all sessions form RUBIS
 printDelays <- function(baseSize){
   pattern <- "sessions_\\d+.txt$"
-  files <-sort(list.files("stat")[grep(pattern, list.files())])
-  baseLineFile <- paste0("sessions_", baseSize, ".txt")
+  files <- getFiles(pattern)
+  
+  baseLineFile <- paste0("stat/sessions_", baseSize, ".txt")
   
   baseLineFrame <- read.csv(baseLineFile)
   
@@ -64,8 +66,6 @@ prepareSessionDataForType <- function(type, size = 10, step = 5, ram = 512, cpu 
     c("Time", "%CPUUtil", "%SessionMem", "%ActiveMem", "%tps")  
   }
   perfFrame <- perfFrame[,(names(perfFrame) %in% columns)]
-  
-  #Convert in form suitable for CloudSim
   perfFrame[,"%CPUUtil"] <- (perfFrame[,"%CPUUtil"] * cpu * step) / (100 * size)
   perfFrame[,"%CPUUtil"] <- sapply(perfFrame[,"%CPUUtil"], function(x){if(x == 0) 1 else x})
   perfFrame[,"%SessionMem"] <- (perfFrame[,"%SessionMem"] * ram) / (100 * size)
@@ -75,7 +75,8 @@ prepareSessionDataForType <- function(type, size = 10, step = 5, ram = 512, cpu 
   perfFrame[,"%CPUUtil"] <- averageSteps(perfFrame[,"%CPUUtil"], step)
   perfFrame[,"%SessionMem"] <- averageSteps(perfFrame[,"%SessionMem"], step)
   perfFrame[,"%ActiveMem"] <- averageSteps(perfFrame[,"%ActiveMem"], step) 
-    
+  
+  
   if(type == "db") {
     perfFrame[,"%tps"] <- (perfFrame[,"%tps"] * io * step) / (100 * size)
     perfFrame[,"%tps"] <- averageSteps(perfFrame[,"%tps"], step) 
@@ -113,11 +114,11 @@ prepareSessionDataForType <- function(type, size = 10, step = 5, ram = 512, cpu 
 plotComparison <- function(type, property="%CPUUtil", useColors = T, forWorkload = "All") {
   pattern <- paste0(type, "_server_\\d+$")
   files <- if(forWorkload[1] == "All") {
-    list.files()[grep(pattern, list.files("stat")) ]
+    getFiles(pattern)
   } else {
-    sapply(forWorkload, function(w) {paste0(type,"_server_",w)})
+    sapply(forWorkload, function(w) {paste0("stat/", type,"_server_",w)})
   }
-  baseLineFile <- paste0(type, "_server_0")
+  baseLineFile <- paste0("stat/", type, "_server_0")
   
   colors= if(!useColors) {
     sapply(1:length(files), function(x){"black"})
@@ -187,10 +188,25 @@ lambdaAverageSteps <- function(i, lst, step) {
   indx <- i-1
   from <- (indx %/% step) * step + 1
   end <- min((indx %/% step + 1) * step, length(lst))
-  mean(lst[from: end])
+
+  m1 = median(lst[from: end])
+  m2 = mean(lst[from: end])
+  mean(c(m1, m2))
 }
 
 averageSteps <- function(lst, step) {
   idx <- 1: length(lst)
   sapply(idx, lambdaAverageSteps, lst, step )
+  #lst
 }
+
+getFiles <- function(pattern) {
+  files <-sort(list.files("stat")[grep(pattern, list.files("stat"))])
+  files <- sapply(files, function(f){paste0("stat/", f)})
+  
+  numbersInNames <- sapply(files, function(f) {as.numeric(gsub("[^0-9]", "", f))}) 
+  files <- files[order(numbersInNames)]
+  
+  files
+}
+

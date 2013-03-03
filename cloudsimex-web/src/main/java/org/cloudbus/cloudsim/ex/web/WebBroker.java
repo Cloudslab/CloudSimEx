@@ -154,11 +154,14 @@ public class WebBroker extends DatacenterBroker {
 		canceledSessions.add(session);
 		CustomLog.printf(
 			"Session could not be served and is canceled. Session id:%d", session.getSessionId());
+	    } else{
+		session.notifyOfTime(session.areVirtualMachinesReady()? CloudSim.clock() : CloudSim.clock() + refreshPeriod);
 	    }
 	    session.setUserId(getId());
 	}
 
 	servedSessions.addAll(copyWebSessions);
+	updateSessions();
     }
 
     /**
@@ -218,6 +221,7 @@ public class WebBroker extends DatacenterBroker {
 	    case TIMER_TAG:
 		if (CloudSim.clock() < lifeLength) {
 		    send(getId(), refreshPeriod, TIMER_TAG);
+		    
 		    updateSessions();
 		    generateWorkload();
 		}
@@ -258,13 +262,15 @@ public class WebBroker extends DatacenterBroker {
 	    if (sess.areVirtualMachinesReady()) {
 		double currTime = CloudSim.clock();
 
-		sess.notifyOfTime(currTime);
+//		sess.notifyOfTime(currTime);
 		WebSession.StepCloudlets webCloudlets = sess.pollCloudlets(currTime);
 
 		if (webCloudlets != null) {
 		    getCloudletList().add(webCloudlets.asCloudlet);
 		    getCloudletList().addAll(webCloudlets.dbCloudlets);
 		    submitCloudlets();
+		    
+		    sess.notifyOfTime(currTime + refreshPeriod);
 		}
 	    }
 	}
@@ -286,9 +292,10 @@ public class WebBroker extends DatacenterBroker {
 	} else {
 	    getCloudletReceivedList().add(cloudlet);
 	    cloudletsSubmitted--;
+	    updateSessions();
 	}
     }
-
+    
     /*
      * (non-Javadoc)
      * 
