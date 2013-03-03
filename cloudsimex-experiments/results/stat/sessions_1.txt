@@ -1,2 +1,0 @@
-startTime, endTime, duration, transitionsDone, transitionsLeft, summary, sessionName
-1362126949, 1362127283, 334, 150, 0, MAX_NUMBER_TRANSITIONS, UserSession0
