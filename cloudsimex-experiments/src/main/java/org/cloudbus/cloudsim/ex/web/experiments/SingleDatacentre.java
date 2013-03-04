@@ -5,14 +5,11 @@ import static org.cloudbus.cloudsim.ex.web.experiments.ExperimentsUtil.DAY;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.Datacenter;
@@ -39,7 +36,6 @@ import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleDBBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleWebLoadBalancer;
 import org.cloudbus.cloudsim.ex.web.WebBroker;
-import org.cloudbus.cloudsim.ex.web.WebCloudlet;
 import org.cloudbus.cloudsim.ex.web.WebSession;
 import org.cloudbus.cloudsim.ex.web.workload.IWorkloadGenerator;
 import org.cloudbus.cloudsim.ex.web.workload.SimpleWorkloadGenerator;
@@ -56,7 +52,7 @@ import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
  */
 public class SingleDatacentre {
 
-    private static final int NUMBER_OF_SESSIONS = 250;
+    protected int numOfSessions = 500;
     protected int simulationLength = DAY;
     protected int refreshTime = 5;
     protected String experimentName;
@@ -72,13 +68,7 @@ public class SingleDatacentre {
      * @throws IOException
      */
     public static void main(final String[] args) throws IOException {
-	// Step 0: Set up the logger
-	Properties props = new Properties();
-	try (InputStream is = Files.newInputStream(Paths.get("../custom_log.properties"))) {
-	    props.load(is);
-	}
-	CustomLog.configLogger(props);
-
+	ExperimentsUtil.parseExperimentParameters(args);
 	new SingleDatacentre().runExperimemt();
     }
 
@@ -91,6 +81,8 @@ public class SingleDatacentre {
     public final void runExperimemt() throws SecurityException, IOException {
 	long simulationStart = System.currentTimeMillis();
 
+	CustomLog.redirectToFile("results/stat/performance_sessions_" + numOfSessions + ".csv");
+
 	try {
 	    // Step1: Initialize the CloudSim package. It should be called
 	    // before creating any entities.
@@ -102,7 +94,7 @@ public class SingleDatacentre {
 	    Datacenter dc1 = createDatacenter("WebDataCenter1");
 
 	    // Step 3: Create Brokers
-	    WebBroker brokerDC1 = new WebBroker("BrokerDC1", refreshTime, simulationLength,
+	    WebBroker brokerDC1 = new LoggingWebBroker("BrokerDC1", refreshTime, simulationLength,
 		    Arrays.asList(dc1.getId()));
 
 	    // Step 4: Create virtual machines
@@ -133,12 +125,13 @@ public class SingleDatacentre {
 
 	    // Step 9: get the results
 	    List<WebSession> resultDC1Sessions = brokerDC1.getServedSessions();
-	     List<Cloudlet> cloudlets = brokerDC1.getCloudletReceivedList();
+	    List<Cloudlet> cloudlets = brokerDC1.getCloudletReceivedList();
 
 	    // Step 10 : stop the simulation and print the results
 	    CloudSim.stopSimulation();
+	    CustomLog.redirectToFile("results/stat/simulation_sessions_" + numOfSessions + ".csv");
 	    CustomLog.printResults(WebSession.class, resultDC1Sessions);
-//	    CustomLog.printResults(WebCloudlet.class, cloudlets);
+	    // CustomLog.printResults(WebCloudlet.class, cloudlets);
 
 	    System.err.println();
 	    System.err.println(experimentName + ": Simulation is finished!");
@@ -156,7 +149,7 @@ public class SingleDatacentre {
 		InputStream dbIO = new FileInputStream("results/stat/db_cloudlets.txt")) {
 	    StatSessionGenerator sessionGenerator = new StatSessionGenerator(GeneratorsUtil.parseStream(asIO),
 		    GeneratorsUtil.parseStream(dbIO), userId, DATA, refreshTime);
-	    return Arrays.asList(new SimpleWorkloadGenerator(NUMBER_OF_SESSIONS, sessionGenerator, null, null, 1));
+	    return Arrays.asList(new SimpleWorkloadGenerator(numOfSessions, sessionGenerator, null, null, 1));
 	} catch (IOException e) {
 	    e.printStackTrace();
 	}

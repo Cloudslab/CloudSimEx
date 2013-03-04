@@ -1,7 +1,9 @@
 package org.cloudbus.cloudsim.ex.web;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -28,8 +30,8 @@ import org.cloudbus.cloudsim.ex.web.workload.IWorkloadGenerator;
 public class WebBroker extends DatacenterBroker {
 
     // FIXME find a better way to get an unused tag instead of hardcoding 123456
-    private static final int TIMER_TAG = 123456;
-    private static final int SUBMIT_SESSION_TAG = TIMER_TAG + 1;
+    protected static final int TIMER_TAG = 123456;
+    protected static final int SUBMIT_SESSION_TAG = TIMER_TAG + 1;
 
     private boolean isTimerRunning = false;
     private final double refreshPeriod;
@@ -38,7 +40,7 @@ public class WebBroker extends DatacenterBroker {
     private final Map<Long, ILoadBalancer> loadBalancers = new HashMap<>();
     private final Map<Long, List<IWorkloadGenerator>> loadBalancersToGenerators = new HashMap<>();
 
-    private final List<WebSession> servedSessions = new ArrayList<>();
+    private final LinkedHashMap<Integer, WebSession> servedSessions = new LinkedHashMap<>();
     private final List<WebSession> canceledSessions = new ArrayList<>();
 
     private final List<PresetEvent> presetEvents = new ArrayList<>();
@@ -109,7 +111,11 @@ public class WebBroker extends DatacenterBroker {
      * @return the sessions that were sucessfully served.
      */
     public List<WebSession> getServedSessions() {
-	return servedSessions;
+	return new ArrayList<>(servedSessions.values());
+    }
+
+    public Map<Long, ILoadBalancer> getLoadBalancers() {
+	return loadBalancers;
     }
 
     /*
@@ -154,14 +160,17 @@ public class WebBroker extends DatacenterBroker {
 		canceledSessions.add(session);
 		CustomLog.printf(
 			"Session could not be served and is canceled. Session id:%d", session.getSessionId());
-	    } else{
-		session.notifyOfTime(session.areVirtualMachinesReady()? CloudSim.clock() : CloudSim.clock() + refreshPeriod);
+	    } else {
+		session.notifyOfTime(session.areVirtualMachinesReady() ? CloudSim.clock() : CloudSim.clock()
+			+ refreshPeriod);
 	    }
 	    session.setUserId(getId());
 	}
 
-	servedSessions.addAll(copyWebSessions);
-	updateSessions();
+	for (WebSession sess : copyWebSessions) {
+	    servedSessions.put(sess.getSessionId(), sess);
+	    updateSessions(sess.getSessionId());
+	}
     }
 
     /**
@@ -221,7 +230,6 @@ public class WebBroker extends DatacenterBroker {
 	    case TIMER_TAG:
 		if (CloudSim.clock() < lifeLength) {
 		    send(getId(), refreshPeriod, TIMER_TAG);
-		    
 		    updateSessions();
 		    generateWorkload();
 		}
@@ -253,8 +261,10 @@ public class WebBroker extends DatacenterBroker {
 	}
     }
 
-    private void updateSessions() {
-	for (WebSession sess : servedSessions) {
+    private void updateSessions(final Integer... sessionIds) {
+
+	for (Integer id : sessionIds.length == 0 ? servedSessions.keySet() : Arrays.asList(sessionIds)) {
+	    WebSession sess = servedSessions.get(id);
 
 	    // Check if all VMs for the sessions are set. In the simulation
 	    // start, this may not be so, as the refreshing action of the broker
@@ -262,14 +272,14 @@ public class WebBroker extends DatacenterBroker {
 	    if (sess.areVirtualMachinesReady()) {
 		double currTime = CloudSim.clock();
 
-//		sess.notifyOfTime(currTime);
+		// sess.notifyOfTime(currTime);
 		WebSession.StepCloudlets webCloudlets = sess.pollCloudlets(currTime);
 
 		if (webCloudlets != null) {
 		    getCloudletList().add(webCloudlets.asCloudlet);
 		    getCloudletList().addAll(webCloudlets.dbCloudlets);
 		    submitCloudlets();
-		    
+
 		    sess.notifyOfTime(currTime + refreshPeriod);
 		}
 	    }
@@ -292,10 +302,12 @@ public class WebBroker extends DatacenterBroker {
 	} else {
 	    getCloudletReceivedList().add(cloudlet);
 	    cloudletsSubmitted--;
-	    updateSessions();
+	    if (cloudlet instanceof WebCloudlet) {
+		updateSessions(((WebCloudlet) cloudlet).getSessionId());
+	    }
 	}
     }
-    
+
     /*
      * (non-Javadoc)
      * 

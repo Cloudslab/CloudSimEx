@@ -8,6 +8,7 @@ import java.util.Properties;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -318,8 +319,7 @@ public class CustomLog {
      */
     public static void configLogger(final Properties props)
 	    throws SecurityException, IOException {
-	final boolean logInFile = props.containsKey(FILE_PATH_PROP_KEY);
-	final String fileName = logInFile ? props.getProperty(
+	final String fileName = props.containsKey(FILE_PATH_PROP_KEY) ? props.getProperty(
 		FILE_PATH_PROP_KEY).toString() : null;
 	final String format = props.getProperty(LOG_FORMAT_PROP_KEY,
 		"getLevel;getMessage").toString();
@@ -337,19 +337,39 @@ public class CustomLog {
 	}
 
 	LOGGER.setUseParentHandlers(false);
-
 	formatter = new CustomFormatter(prefixCloudSimClock, format);
 
-	if (logInFile) {
+	redirectToFile(fileName);
+    }
+
+    /**
+     * Redirects this logger to a file.
+     * 
+     * @param fileName
+     *            - the name of the new log file. If null the log is redirected
+     *            to the standard output.
+     */
+    public static void redirectToFile(final String fileName) {
+	for (Handler h : LOGGER.getHandlers()) {
+	    LOGGER.removeHandler(h);
+	}
+
+	if (fileName != null) {
 	    System.err.println("Rediricting output to " + new File(fileName).getAbsolutePath());
 	}
 
-	final StreamHandler handler = logInFile ? new FileHandler(fileName, false)
-		: new ConsoleHandler();
-	handler.setLevel(granularityLevel);
-	handler.setFormatter(formatter);
-	LOGGER.addHandler(handler);
-	LOGGER.setLevel(granularityLevel);
+	StreamHandler handler;
+	try {
+	    handler = fileName != null ? new FileHandler(fileName, false)
+		    : new ConsoleHandler();
+	    handler.setLevel(granularityLevel);
+	    handler.setFormatter(formatter);
+	    LOGGER.addHandler(handler);
+	    LOGGER.setLevel(granularityLevel);
+
+	} catch (SecurityException | IOException e) {
+	    e.printStackTrace();
+	}
     }
 
     private static class CustomFormatter extends Formatter {

@@ -147,7 +147,8 @@ public class ExperimentsRunner {
      * @throws IOException
      * @throws InterruptedException
      */
-    private static int exec(Class<?> klass, String logFile, String logPropertiesFile) throws IOException,
+    private static int exec(final Class<?> klass, final String logFile, final String logPropertiesFile)
+	    throws IOException,
 	    InterruptedException {
 	String javaHome = System.getProperty("java.home");
 	String javaBin = javaHome +

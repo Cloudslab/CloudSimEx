@@ -2,15 +2,16 @@ source('parseSar.R')
 
 maxTPS <- 1000
 maxIOPS <- 1000
-ram = 512
+ram <- 512
 
+subDir <- "stat"
 
 # Prints the delays of all sessions form RUBIS
-printDelays <- function(baseSize){
+printDelays <- function(baseSize) {
   pattern <- "sessions_\\d+.txt$"
   files <- getFiles(pattern)
   
-  baseLineFile <- paste0("stat/sessions_", baseSize, ".txt")
+  baseLineFile <- paste0(subDir, "/sessions_", baseSize, ".txt")
   
   baseLineFrame <- read.csv(baseLineFile)
   
@@ -25,36 +26,33 @@ printDelays <- function(baseSize){
 }
 
 # Creates the files, defining the session behaviour
-prepareSessionData <- function(size = 10, step = 5, ram = 512, cpu = 1000, io = 1000) {
+prepareSessionData <- function(size = 10, step = 5, ram = 512, cpu = 1000, io = 1000, stepFunc=mean) {
   print("Generating AS server data")
-  prepareSessionDataForType(type = "web", size=size, step=step, ram=ram, cpu=cpu, io=io)
+  prepareSessionDataForType(type = "web", size=size, step=step, ram=ram, cpu=cpu, io=io, stepFunc=stepFunc)
   print("")
   print("Generating DB server data")
-  prepareSessionDataForType(type = "db", size=size, step=step, ram=ram, cpu=cpu, io=io)
+  prepareSessionDataForType(type = "db", size=size, step=step, ram=ram, cpu=cpu, io=io, stepFunc=stepFunc)
 }
 
 # Creates the file, defining the session behaviour for the db or web server, as
 # specified by the type parameter, which should be either "db" or "web"
-prepareSessionDataForType <- function(type, size = 10, step = 5, ram = 512, cpu = 1000, io = 1000) {
+prepareSessionDataForType <- function(type, size = 10, step = 5, ram = 512, cpu = 1000, io = 1000, stepFunc=mean) {
   # Get the names of the files to use for baselining and performance characteristics
   perfFile <- ""
   baseLineFile <- ""
   if(type == "web") {
-    perfFile <- paste0("stat/web_server_", size)
-    baseLineFile <- paste0("stat/web_server_", 0)
+    perfFile <- paste0(subDir, "/web_server_", size)
+    baseLineFile <- paste0(subDir, "/web_server_", 0)
   } else {
-    perfFile <- paste0("stat/db_server_", size)
-    baseLineFile <- paste0("stat/db_server_", 0)
+    perfFile <- paste0(subDir, "/db_server_", size)
+    baseLineFile <- paste0(subDir, "/db_server_", 0)
   }
-  sessionsFile <- paste0("stat/sessions_", size, ".txt")
   
   # Parse the files...
   baseLineFrame <- parseSar(baseLineFile)
   perfFrame <- prepareSarFrame(parseSar(perfFile), baseLineFrame)
-  sessionsFrame <- read.csv(sessionsFile)
   
-  # Define the timespan we are interested in
-  timeSpan <- max(sessionsFrame$endTime) - min(sessionsFrame$startTime)
+  timeSpan <- getSessionLastTimeByWorkload(size)
   
   # Remove the perormance characteristics outside the timespan
   perfFrame <- perfFrame[perfFrame$Time < timeSpan,]
@@ -71,10 +69,10 @@ prepareSessionDataForType <- function(type, size = 10, step = 5, ram = 512, cpu 
   perfFrame[,"%SessionMem"] <- (perfFrame[,"%SessionMem"] * ram) / (100 * size)
   perfFrame[,"%ActiveMem"] <- (perfFrame[,"%ActiveMem"] * ram) / (100 * size)
   
-  perfFrame[,"%CPUUtil"] <- averageSteps(perfFrame[,"%CPUUtil"], step)
-  perfFrame[,"%CPUUtil"] <- averageSteps(perfFrame[,"%CPUUtil"], step)
-  perfFrame[,"%SessionMem"] <- averageSteps(perfFrame[,"%SessionMem"], step)
-  perfFrame[,"%ActiveMem"] <- averageSteps(perfFrame[,"%ActiveMem"], step) 
+  perfFrame[,"%CPUUtil"] <- averageSteps(perfFrame[,"%CPUUtil"], step, stepFunc = stepFunc)
+  perfFrame[,"%CPUUtil"] <- averageSteps(perfFrame[,"%CPUUtil"], step, stepFunc = stepFunc)
+  perfFrame[,"%SessionMem"] <- averageSteps(perfFrame[,"%SessionMem"], step, stepFunc = stepFunc)
+  perfFrame[,"%ActiveMem"] <- averageSteps(perfFrame[,"%ActiveMem"], step, stepFunc = stepFunc) 
   
   
   if(type == "db") {
@@ -111,32 +109,35 @@ prepareSessionDataForType <- function(type, size = 10, step = 5, ram = 512, cpu 
 
 # Plots the utilisation of different properties
 # Typical proerties - %memused, "%CPUUtil", UsedMem, tps
-plotComparison <- function(type, property="%CPUUtil", useColors = T, forWorkload = "All") {
-  pattern <- paste0(type, "_server_\\d+$")
-  files <- if(forWorkload[1] == "All") {
-    getFiles(pattern)
+plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend = T, forWorkload = "All", maxY = NA) {
+  benchPattern <- paste0(type, "_server_\\d+$")
+  sessionPattern <- paste0("sessions_\\d+.txt$")
+  if(forWorkload[1] == "All") {
+    benchFiles <- getFiles(benchPattern)
+    sessionFiles <- getFiles(sessionPattern)
   } else {
-    sapply(forWorkload, function(w) {paste0("stat/", type,"_server_",w)})
+    benchFiles <-sapply(forWorkload, function(w) {paste0("stat/", type,"_server_",w)})
+    sessionFiles <- sapply(forWorkload, function(w) {paste0("stat/", "sessions_", w, ".txt")})
   }
-  baseLineFile <- paste0("stat/", type, "_server_0")
+  baseLineFile <- paste0(subDir, "/", type, "_server_0")
   
   colors= if(!useColors) {
-    sapply(1:length(files), function(x){"black"})
+    sapply(1:length(benchFiles), function(x){"black"})
   } else {
-    rainbow(length(files))
+    rainbow(length(benchFiles))
   }
   
   baseLineFrame <- parseSar(baseLineFile)
   
-  frames <- lapply(files, function(f){prepareSarFrame(parseSar(f), baseLineFrame)})
+  frames <- lapply(benchFiles, function(f){prepareSarFrame(parseSar(f), baseLineFrame)})
   minTime <- min(sapply(frames, function(fr) {min(fr$Time)} ) )
-  maxTime <- max(sapply(frames, function(fr) {max(fr$Time)} ) )
-
+  maxTime <- max(sapply(sessionFiles, function(f) {getSessionLastTime(f)} ) )
+  
   minProp <- 0
-  maxProp <- 100
+  maxProp <- if (is.na(maxY)) 100 else maxY
   if (!grepl("^%", property)) {
     minProp <- min(sapply(frames, function(fr) {min(as.numeric(fr[, property]))} ) )
-    maxProp <- max(sapply(frames, function(fr) {max(as.numeric(fr[, property]))} ) )
+    maxProp <- if (is.na(maxY)) max(sapply(frames, function(fr) {max(as.numeric(fr[, property]))})) else maxY
     print(c(minProp, maxProp))
   }
   
@@ -144,19 +145,21 @@ plotComparison <- function(type, property="%CPUUtil", useColors = T, forWorkload
        xlab = "Time in seconds",
        ylab = property)
 
-  linetype <- c(1:length(files))
-  plotchar <- seq(18, 18 + length(files), 1)
+  linetype <- c(1:length(benchFiles))
+  plotchar <- seq(18, 18 + length(benchFiles), 1)
   
   i <- 1
   for(frame in frames) {
-    print(paste("Summary for :", property, "in", files[i]))
+    print(paste("Summary for :", property, "in", benchFiles[i]))
     print(summary(as.numeric(frame[,property])))
     
     lines(frame[,property]~frame$Time,  type="l", col=colors[i], lty = linetype[i], pch = plotchar[i])
     i<- i + 1
   }
   
-  legend(0, maxProp, files, col = colors, lty = linetype, pch = plotchar, cex=0.8)
+  if (plotLegend) {
+    legend(0, maxProp, benchFiles, col = colors, lty = linetype, cex=0.7)
+  }
 }
 
 # Based on the provided SAR frames - one from a baseline (sessions with 0 or so users)
@@ -183,26 +186,24 @@ prepareSarFrame <- function(df, baseLineFrame) {
   df
 }
 
-lambdaAverageSteps <- function(i, lst, step) {
+lambdaAverageSteps <- function(i, lst, step, stepFunc = median) {
   #zero-based index
   indx <- i-1
   from <- (indx %/% step) * step + 1
   end <- min((indx %/% step + 1) * step, length(lst))
-
-  m1 = median(lst[from: end])
-  m2 = mean(lst[from: end])
-  mean(c(m1, m2))
+  
+  stepFunc(lst[from: end])
 }
 
-averageSteps <- function(lst, step) {
+averageSteps <- function(lst, step, stepFunc = median) {
   idx <- 1: length(lst)
-  sapply(idx, lambdaAverageSteps, lst, step )
+  sapply(idx, lambdaAverageSteps, lst, step, stepFunc=stepFunc)
   #lst
 }
 
 getFiles <- function(pattern) {
-  files <-sort(list.files("stat")[grep(pattern, list.files("stat"))])
-  files <- sapply(files, function(f){paste0("stat/", f)})
+  files <-sort(list.files(subDir)[grep(pattern, list.files(subDir))])
+  files <- sapply(files, function(f){paste0(subDir, "/", f)})
   
   numbersInNames <- sapply(files, function(f) {as.numeric(gsub("[^0-9]", "", f))}) 
   files <- files[order(numbersInNames)]
@@ -210,3 +211,24 @@ getFiles <- function(pattern) {
   files
 }
 
+getSessionLastTimeByWorkload <- function(size) {
+  sessionsFile <- paste0(subDir, "/sessions_", size, ".txt")
+  getSessionLastTime(sessionsFile)
+}
+
+getSessionLastTime <- function(sessionsFile) {
+  sessionsFrame <- read.csv(sessionsFile)
+  
+  # Define the timespan we are interested in
+  if(length(sessionsFrame$endTime) > 0) {
+    max(sessionsFrame$endTime) - min(sessionsFrame$startTime)
+  } else {
+    0
+  }
+}
+
+meanOfMeanAndMed <- function(lst) {
+  med = median(lst)
+  mn = mean(lst)
+  mean(c(med, mn))
+}
