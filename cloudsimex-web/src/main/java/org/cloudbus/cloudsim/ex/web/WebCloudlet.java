@@ -48,7 +48,7 @@ public class WebCloudlet extends HddCloudlet {
     public WebCloudlet(final double idealStartTime,
 	    final long cloudletLength,
 	    final long cloudletIOLength,
-	    final int ram,
+	    final double ram,
 	    final int userId,
 	    final boolean dataModifying,
 	    final DataItem data,
@@ -76,7 +76,7 @@ public class WebCloudlet extends HddCloudlet {
     public WebCloudlet(final double idealStartTime,
 	    final long cloudletLength,
 	    final long cloudletIOLength,
-	    final int ram,
+	    final double ram,
 	    final int userId,
 	    final boolean dataModifying,
 	    final DataItem data) {

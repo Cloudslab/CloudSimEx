@@ -141,7 +141,6 @@ public class TextUtil {
 	    }
 
 	    result.append(i < objects.size() - 1 ? delimeter : "");
-	    i++;
 	}
 
 	return result.toString();

@@ -95,7 +95,7 @@ public class SingleDatacentre {
 	    Datacenter dc1 = createDatacenter("WebDataCenter1");
 
 	    // Step 3: Create Brokers
-	    WebBroker brokerDC1 = new PerformanceLoggingWebBroker("BrokerDC1", refreshTime, simulationLength, 5,
+	    WebBroker brokerDC1 = new PerformanceLoggingWebBroker("BrokerDC1", refreshTime, simulationLength, 1, 0.01,
 		    Arrays.asList(dc1.getId()));
 
 	    // Step 4: Create virtual machines
@@ -133,8 +133,8 @@ public class SingleDatacentre {
 	    CustomLog.redirectToFile("results/stat/simulation_sessions_" + numOfSessions + ".csv");
 	    CustomLog.printResults(WebSession.class, resultDC1Sessions);
 
-	    CustomLog.redirectToFile("results/stat/simulation_cloudlets_" + numOfSessions + ".csv");
-	    CustomLog.printResults(WebCloudlet.class, cloudlets);
+//	    CustomLog.redirectToFile("results/stat/simulation_cloudlets_" + numOfSessions + ".csv");
+//	    CustomLog.printResults(WebCloudlet.class, cloudlets);
 
 	    System.err.println();
 	    System.err.println(experimentName + ": Simulation is finished!");

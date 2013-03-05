@@ -26,7 +26,7 @@ printDelays <- function(baseSize) {
 }
 
 # Creates the files, defining the session behaviour
-prepareSessionData <- function(size = 10, step = 5, ram = 512, cpu = 1000, io = 1000, stepFunc=mean) {
+prepareSessionData <- function(size = 50, step = 5, ram = 512, cpu = 1000, io = 1000, stepFunc=mean) {
   print("Generating AS server data")
   prepareSessionDataForType(type = "web", size=size, step=step, ram=ram, cpu=cpu, io=io, stepFunc=stepFunc)
   print("")
@@ -36,7 +36,7 @@ prepareSessionData <- function(size = 10, step = 5, ram = 512, cpu = 1000, io = 
 
 # Creates the file, defining the session behaviour for the db or web server, as
 # specified by the type parameter, which should be either "db" or "web"
-prepareSessionDataForType <- function(type, size = 10, step = 5, ram = 512, cpu = 1000, io = 1000, stepFunc=mean) {
+prepareSessionDataForType <- function(type, size = 50, step = 5, ram = 512, cpu = 1000, io = 1000, stepFunc=mean) {
   # Get the names of the files to use for baselining and performance characteristics
   perfFile <- ""
   baseLineFile <- ""
@@ -65,7 +65,7 @@ prepareSessionDataForType <- function(type, size = 10, step = 5, ram = 512, cpu 
   }
   perfFrame <- perfFrame[,(names(perfFrame) %in% columns)]
   perfFrame[,"%CPUUtil"] <- (perfFrame[,"%CPUUtil"] * cpu * step) / (100 * size)
-  perfFrame[,"%CPUUtil"] <- sapply(perfFrame[,"%CPUUtil"], function(x){if(x == 0) 1 else x})
+  perfFrame[,"%CPUUtil"] <- sapply(perfFrame[,"%CPUUtil"], function(x){if(x < 1) 1 else x})
   perfFrame[,"%SessionMem"] <- (perfFrame[,"%SessionMem"] * ram) / (100 * size)
   perfFrame[,"%ActiveMem"] <- (perfFrame[,"%ActiveMem"] * ram) / (100 * size)
   
@@ -77,7 +77,8 @@ prepareSessionDataForType <- function(type, size = 10, step = 5, ram = 512, cpu 
   
   if(type == "db") {
     perfFrame[,"%tps"] <- (perfFrame[,"%tps"] * io * step) / (100 * size)
-    perfFrame[,"%tps"] <- averageSteps(perfFrame[,"%tps"], step) 
+    perfFrame[,"%tps"] <- averageSteps(perfFrame[,"%tps"], step, stepFunc = stepFunc)
+    perfFrame[,"%tps"] <- sapply(perfFrame[,"%tps"], function(x){if(x < 1) 1 else x})
   }
   
   #Get only the data for the seconds(steps) we need

@@ -62,7 +62,7 @@ public class StatGenerator extends BaseStatGenerator<WebCloudlet> {
 	if(cpuLen == null || ram == null || ioLen == null || modifiesData == null) {
 	    return null;
 	} else {
-	    return new WebCloudlet(idealStartTime, cpuLen.longValue(), ioLen.longValue(), ram.intValue(), -1,
+	    return new WebCloudlet(idealStartTime, cpuLen.longValue(), ioLen.longValue(), ram, -1,
 		modifiesData, getData());
 	}
     }

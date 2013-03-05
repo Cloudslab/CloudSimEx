@@ -122,6 +122,10 @@ public class WebBroker extends DatacenterBroker {
     public double getStepPeriod() {
 	return stepPeriod;
     }
+    
+    public double getLifeLength() {
+        return lifeLength;
+    }
 
     /*
      * (non-Javadoc)
@@ -152,41 +156,53 @@ public class WebBroker extends DatacenterBroker {
      * @param webSessions
      *            - the new web sessions.
      */
-    public void submitSessions(final List<WebSession> webSessions, final long loadBalancerId) {
-	List<WebSession> copyWebSessions = new ArrayList<>(webSessions);
-	loadBalancers.get(loadBalancerId).assignToServers(
-		copyWebSessions.toArray(new WebSession[copyWebSessions.size()]));
+    public void submitSessions(final List<WebSession> webSessions,
+	    final long loadBalancerId) {
+	if (!CloudSim.running()) {
+	    submitSessionsAtTime(webSessions, loadBalancerId, 0);
+	} else {
+	    List<WebSession> copyWebSessions = new ArrayList<>(webSessions);
+	    loadBalancers.get(loadBalancerId).assignToServers(
+		    copyWebSessions.toArray(new WebSession[copyWebSessions
+			    .size()]));
 
-	for (ListIterator<WebSession> iter = copyWebSessions.listIterator(); iter.hasNext();) {
-	    WebSession session = iter.next();
-	    // If the load balancer could not assign it...
-	    if (session.getAppVmId() == null || session.getDbBalancer() == null) {
-		iter.remove();
-		canceledSessions.add(session);
-		CustomLog.printf(
-			"Session could not be served and is canceled. Session id:%d", session.getSessionId());
-	    } else {
-		// Let the session prepare the first cloudlets
-		if (session.areVirtualMachinesReady()) {
-		    session.notifyOfTime(CloudSim.clock());
+	    for (ListIterator<WebSession> iter = copyWebSessions.listIterator(); iter
+		    .hasNext();) {
+		WebSession session = iter.next();
+		// If the load balancer could not assign it...
+		if (session.getAppVmId() == null
+			|| session.getDbBalancer() == null) {
+		    iter.remove();
+		    canceledSessions.add(session);
+		    CustomLog
+			    .printf("Session could not be served and is canceled. Session id:%d",
+				    session.getSessionId());
 		} else {
-		    // If the VMs are not yet ready - start the session later
-		    // and extend its ideal end
-		    session.setIdealEnd(session.getIdealEnd() + stepPeriod);
-		    session.notifyOfTime(CloudSim.clock() + stepPeriod);
+		    // Let the session prepare the first cloudlets
+		    if (session.areVirtualMachinesReady()) {
+			session.notifyOfTime(CloudSim.clock());
+		    } else {
+			// If the VMs are not yet ready - start the session
+			// later
+			// and extend its ideal end
+			session.setIdealEnd(session.getIdealEnd() + stepPeriod);
+			session.notifyOfTime(CloudSim.clock() + stepPeriod);
+		    }
 		}
+		session.setUserId(getId());
 	    }
-	    session.setUserId(getId());
-	}
 
-	for (WebSession sess : copyWebSessions) {
-	    servedSessions.put(sess.getSessionId(), sess);
+	    for (WebSession sess : copyWebSessions) {
+		servedSessions.put(sess.getSessionId(), sess);
 
-	    // Start the session or schedule it if its VMs are not initiated.
-	    if (sess.areVirtualMachinesReady()) {
-		updateSessions(sess.getSessionId());
-	    } else {
-		send(getId(), stepPeriod, UPDATE_SESSION_TAG, sess.getSessionId());
+		// Start the session or schedule it if its VMs are not
+		// initiated.
+		if (sess.areVirtualMachinesReady()) {
+		    updateSessions(sess.getSessionId());
+		} else {
+		    send(getId(), stepPeriod, UPDATE_SESSION_TAG,
+			    sess.getSessionId());
+		}
 	    }
 	}
     }

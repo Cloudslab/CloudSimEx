@@ -33,19 +33,22 @@ public class PerformanceLoggingWebBroker extends WebBroker {
     private boolean logStarted = false;
     private double lastTimeCloudletReturned = 0;
     private double lastTimeCloudletSubmited = 0;
+    private double offset = 0;
 
     private final double logPeriod;
 
     public PerformanceLoggingWebBroker(final String name, final double refreshPeriod, final double lifeLength,
-	    final double logPeriod) throws Exception {
+	    final double logPeriod, final double offset) throws Exception {
 	super(name, refreshPeriod, lifeLength);
 	this.logPeriod = logPeriod;
+	this.offset = offset;
     }
 
     public PerformanceLoggingWebBroker(final String name, final double refreshPeriod,
-	    final double lifeLength, final double logPeriod, final List<Integer> dataCenterIds) throws Exception {
+	    final double lifeLength, final double logPeriod, final double offset, final List<Integer> dataCenterIds) throws Exception {
 	super(name, refreshPeriod, lifeLength, dataCenterIds);
 	this.logPeriod = logPeriod;
+	this.offset = offset;
     }
 
     @Override
@@ -64,13 +67,15 @@ public class PerformanceLoggingWebBroker extends WebBroker {
     protected void processOtherEvent(final SimEvent ev) {
 	switch (ev.getTag()) {
 	    case LOG_TAG:
-		logUtilisation();
-		send(getId(), logPeriod, LOG_TAG);
+		if (CloudSim.clock() < getLifeLength()) {
+		    logUtilisation();
+		    send(getId(), logPeriod, LOG_TAG);
+		}
 		break;
 	    case TIMER_TAG:
 		if (!logStarted) {
 		    logStarted = true;
-		    sendNow(getId(), LOG_TAG);
+		    send(getId(), offset, LOG_TAG);
 		}
 		break;
 	}
@@ -81,7 +86,7 @@ public class PerformanceLoggingWebBroker extends WebBroker {
 	// If no cloudlet has been submitted or finished - then there is nothing
 	// new to log
 	double currTime = CloudSim.clock();
-	if (currTime - lastTimeCloudletReturned < logPeriod + 1 && currTime - lastTimeCloudletSubmited < logPeriod + 1) {
+	if (currTime - lastTimeCloudletReturned < getStepPeriod() && currTime - lastTimeCloudletSubmited < getStepPeriod()) {
 	    for (ILoadBalancer balancer : getLoadBalancers().values()) {
 		for (HddVm vm : balancer.getAppServers()) {
 		    logUtilisation(vm);
@@ -120,7 +125,7 @@ public class PerformanceLoggingWebBroker extends WebBroker {
 	    sumExecCloudLets += cloudlet.getCloudletLength();
 	}
 	double vmMips = vm.getMips() * vm.getNumberOfPes();
-	return Math.min(100, sumExecCloudLets / vmMips);
+	return Math.min(1, sumExecCloudLets / vmMips);
     }
 
     private static double evaluateIOUtilization(final HddVm vm) {
@@ -129,7 +134,7 @@ public class PerformanceLoggingWebBroker extends WebBroker {
 	    sumExecCloudLets += cloudlet.getCloudlet().getCloudletIOLength();
 	}
 	double vmIOMips = vm.getIoMips();
-	return Math.min(100, sumExecCloudLets / vmIOMips);
+	return Math.min(1, sumExecCloudLets / vmIOMips);
     }
 
     private static double evaluateRAMUtilization(final HddVm vm) {
@@ -138,7 +143,7 @@ public class PerformanceLoggingWebBroker extends WebBroker {
 	    sumExecCloudLets += cloudlet.getCloudlet().getRam();
 	}
 	double vmRam = vm.getRam();
-	return Math.min(100, sumExecCloudLets / vmRam);
+	return Math.min(1, sumExecCloudLets / vmRam);
     }
 
 }

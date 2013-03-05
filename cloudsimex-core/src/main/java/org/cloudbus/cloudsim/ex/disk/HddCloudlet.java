@@ -17,7 +17,7 @@ public class HddCloudlet extends Cloudlet {
 
     private int numberOfHddPes = 1;
     protected long cloudletIOLength;
-    protected final int ram;
+    protected final double ram;
     protected final DataItem data;
     protected boolean dataModifying;
 
@@ -39,7 +39,7 @@ public class HddCloudlet extends Cloudlet {
 	    final long cloudletIOLength,
 	    final int pesNumber,
 	    final int numberOfHddPes,
-	    final int ram,
+	    final double ram,
 	    final int userId,
 	    final boolean dataModifying,
 	    final DataItem data,
@@ -69,7 +69,7 @@ public class HddCloudlet extends Cloudlet {
      */
     public HddCloudlet(final long cloudletLength,
 	    final long cloudletIOLength,
-	    final int ram,
+	    final double ram,
 	    final int userId,
 	    final boolean dataModifying,
 	    final DataItem data,
@@ -90,7 +90,7 @@ public class HddCloudlet extends Cloudlet {
      */
     public HddCloudlet(final long cloudletLength,
 	    final long cloudletIOLength,
-	    final int ram,
+	    final double ram,
 	    final int userId,
 	    final boolean dataModifying,
 	    final DataItem data) {
@@ -102,7 +102,7 @@ public class HddCloudlet extends Cloudlet {
      * 
      * @return the amount of ram memory used in megabytes.
      */
-    public int getRam() {
+    public double getRam() {
 	return ram;
     }
 
