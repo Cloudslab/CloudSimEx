@@ -56,7 +56,7 @@ public class WebSession {
     private int userId;
     private int cloudletsLeft;
 
-    private final double idealEnd;
+    private double idealEnd;
     private Double startTime;
 
     private final int sessionId;
@@ -244,6 +244,15 @@ public class WebSession {
 	double finishDB = currentDBServerCloudLets == null || !areAllCloudletsFinished(currentDBServerCloudLets) ? -1
 		: getLatestFinishTime(currentDBServerCloudLets);
 	return Math.max(0, Math.max(finishAS, finishDB));
+    }
+
+    /**
+     * Sets the ideal end of the session.
+     * 
+     * @param idealEnd
+     */
+    public void setIdealEnd(final double idealEnd) {
+	this.idealEnd = idealEnd;
     }
 
     /**

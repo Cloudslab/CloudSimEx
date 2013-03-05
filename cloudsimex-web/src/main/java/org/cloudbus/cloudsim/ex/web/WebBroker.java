@@ -32,9 +32,10 @@ public class WebBroker extends DatacenterBroker {
     // FIXME find a better way to get an unused tag instead of hardcoding 123456
     protected static final int TIMER_TAG = 123456;
     protected static final int SUBMIT_SESSION_TAG = TIMER_TAG + 1;
+    protected static final int UPDATE_SESSION_TAG = SUBMIT_SESSION_TAG + 1;
 
     private boolean isTimerRunning = false;
-    private final double refreshPeriod;
+    private final double stepPeriod;
     private final double lifeLength;
 
     private final Map<Long, ILoadBalancer> loadBalancers = new HashMap<>();
@@ -89,7 +90,7 @@ public class WebBroker extends DatacenterBroker {
     public WebBroker(final String name, final double refreshPeriod,
 	    final double lifeLength, final List<Integer> dataCenterIds) throws Exception {
 	super(name);
-	this.refreshPeriod = refreshPeriod;
+	this.stepPeriod = refreshPeriod;
 	this.lifeLength = lifeLength;
 	this.dataCenterIds = dataCenterIds;
     }
@@ -116,6 +117,10 @@ public class WebBroker extends DatacenterBroker {
 
     public Map<Long, ILoadBalancer> getLoadBalancers() {
 	return loadBalancers;
+    }
+
+    public double getStepPeriod() {
+	return stepPeriod;
     }
 
     /*
@@ -161,15 +166,28 @@ public class WebBroker extends DatacenterBroker {
 		CustomLog.printf(
 			"Session could not be served and is canceled. Session id:%d", session.getSessionId());
 	    } else {
-		session.notifyOfTime(session.areVirtualMachinesReady() ? CloudSim.clock() : CloudSim.clock()
-			+ refreshPeriod);
+		// Let the session prepare the first cloudlets
+		if (session.areVirtualMachinesReady()) {
+		    session.notifyOfTime(CloudSim.clock());
+		} else {
+		    // If the VMs are not yet ready - start the session later
+		    // and extend its ideal end
+		    session.setIdealEnd(session.getIdealEnd() + stepPeriod);
+		    session.notifyOfTime(CloudSim.clock() + stepPeriod);
+		}
 	    }
 	    session.setUserId(getId());
 	}
 
 	for (WebSession sess : copyWebSessions) {
 	    servedSessions.put(sess.getSessionId(), sess);
-	    updateSessions(sess.getSessionId());
+
+	    // Start the session or schedule it if its VMs are not initiated.
+	    if (sess.areVirtualMachinesReady()) {
+		updateSessions(sess.getSessionId());
+	    } else {
+		send(getId(), stepPeriod, UPDATE_SESSION_TAG, sess.getSessionId());
+	    }
 	}
     }
 
@@ -229,8 +247,7 @@ public class WebBroker extends DatacenterBroker {
 	switch (ev.getTag()) {
 	    case TIMER_TAG:
 		if (CloudSim.clock() < lifeLength) {
-		    send(getId(), refreshPeriod, TIMER_TAG);
-		    updateSessions();
+		    send(getId(), stepPeriod, TIMER_TAG);
 		    generateWorkload();
 		}
 		break;
@@ -238,6 +255,9 @@ public class WebBroker extends DatacenterBroker {
 		Object[] data = (Object[]) ev.getData();
 		submitSessions((List<WebSession>) data[0], (Long) data[1]);
 		break;
+	    case UPDATE_SESSION_TAG:
+		Integer sessId = (Integer) ev.getData();
+		updateSessions(sessId);
 	    default:
 		super.processOtherEvent(ev);
 	}
@@ -248,7 +268,7 @@ public class WebBroker extends DatacenterBroker {
 	for (Map.Entry<Long, List<IWorkloadGenerator>> balancersToWorkloadGens : loadBalancersToGenerators.entrySet()) {
 	    long balancerId = balancersToWorkloadGens.getKey();
 	    for (IWorkloadGenerator gen : balancersToWorkloadGens.getValue()) {
-		Map<Double, List<WebSession>> timeToSessions = gen.generateSessions(currTime, refreshPeriod);
+		Map<Double, List<WebSession>> timeToSessions = gen.generateSessions(currTime, stepPeriod);
 		for (Map.Entry<Double, List<WebSession>> sessEntry : timeToSessions.entrySet()) {
 		    if (currTime == sessEntry.getKey()) {
 			submitSessions(sessEntry.getValue(), balancerId);
@@ -280,7 +300,10 @@ public class WebBroker extends DatacenterBroker {
 		    getCloudletList().addAll(webCloudlets.dbCloudlets);
 		    submitCloudlets();
 
-		    sess.notifyOfTime(currTime + refreshPeriod);
+		    double nextIdealTime = currTime + stepPeriod;
+		    sess.notifyOfTime(nextIdealTime);
+
+		    send(getId(), stepPeriod, UPDATE_SESSION_TAG, sess.getSessionId());
 		}
 	    }
 	}

@@ -36,6 +36,7 @@ import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleDBBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleWebLoadBalancer;
 import org.cloudbus.cloudsim.ex.web.WebBroker;
+import org.cloudbus.cloudsim.ex.web.WebCloudlet;
 import org.cloudbus.cloudsim.ex.web.WebSession;
 import org.cloudbus.cloudsim.ex.web.workload.IWorkloadGenerator;
 import org.cloudbus.cloudsim.ex.web.workload.SimpleWorkloadGenerator;
@@ -94,7 +95,7 @@ public class SingleDatacentre {
 	    Datacenter dc1 = createDatacenter("WebDataCenter1");
 
 	    // Step 3: Create Brokers
-	    WebBroker brokerDC1 = new LoggingWebBroker("BrokerDC1", refreshTime, simulationLength,
+	    WebBroker brokerDC1 = new PerformanceLoggingWebBroker("BrokerDC1", refreshTime, simulationLength, 5,
 		    Arrays.asList(dc1.getId()));
 
 	    // Step 4: Create virtual machines
@@ -131,7 +132,9 @@ public class SingleDatacentre {
 	    CloudSim.stopSimulation();
 	    CustomLog.redirectToFile("results/stat/simulation_sessions_" + numOfSessions + ".csv");
 	    CustomLog.printResults(WebSession.class, resultDC1Sessions);
-	    // CustomLog.printResults(WebCloudlet.class, cloudlets);
+
+	    CustomLog.redirectToFile("results/stat/simulation_cloudlets_" + numOfSessions + ".csv");
+	    CustomLog.printResults(WebCloudlet.class, cloudlets);
 
 	    System.err.println();
 	    System.err.println(experimentName + ": Simulation is finished!");
@@ -143,17 +146,23 @@ public class SingleDatacentre {
 		+ " seconds");
     }
 
-    private List<SimpleWorkloadGenerator> generateWorkloadsDC1(final int userId) {
-
+    private List<? extends IWorkloadGenerator> generateWorkloadsDC1(final int userId) {
 	try (InputStream asIO = new FileInputStream("results/stat/web_cloudlets.txt");
 		InputStream dbIO = new FileInputStream("results/stat/db_cloudlets.txt")) {
 	    StatSessionGenerator sessionGenerator = new StatSessionGenerator(GeneratorsUtil.parseStream(asIO),
 		    GeneratorsUtil.parseStream(dbIO), userId, DATA, refreshTime);
+
+	    // return Arrays.asList(new
+	    // PeriodWorkloadGenerator(sessionGenerator, 0.05, numOfSessions));
+
 	    return Arrays.asList(new SimpleWorkloadGenerator(numOfSessions, sessionGenerator, null, null, 1));
+
+	    // return Arrays.asList(new SimpleWorkloadGenerator(numOfSessions /
+	    // 2, sessionGenerator, null, null, 2));
+
 	} catch (IOException e) {
 	    e.printStackTrace();
 	}
-
 	return null;
     }
 

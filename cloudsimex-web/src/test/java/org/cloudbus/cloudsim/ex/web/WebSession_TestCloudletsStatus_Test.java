@@ -112,42 +112,42 @@ public class WebSession_TestCloudletsStatus_Test {
 
 	IGenerator<WebCloudlet> generatorAS = new
 		IterableGenerator<>(Arrays.asList(asCl1, asCl2));
-		CompositeGenerator<WebCloudlet> generatorDB =
-			new CompositeGenerator<>(new IterableGenerator<>(Arrays.asList(dbCl1,
-				dbCl2)));
+	CompositeGenerator<WebCloudlet> generatorDB =
+		new CompositeGenerator<>(new IterableGenerator<>(Arrays.asList(dbCl1,
+			dbCl2)));
 
-			ILoadBalancer balancer = new SimpleWebLoadBalancer(Arrays.asList(vm1),
-				new SimpleDBBalancer(vm2));
-			broker.addLoadBalancer(balancer);
+	ILoadBalancer balancer = new SimpleWebLoadBalancer(Arrays.asList(vm1),
+		new SimpleDBBalancer(vm2));
+	broker.addLoadBalancer(balancer);
 
-			WebSession session = new WebSession(generatorAS, generatorDB,
-				broker.getId(), 2, -1);
-			// session.setAppVmId(vm1.getId());
-			// session.setDbBalancer(vm2.getId());
+	WebSession session = new WebSession(generatorAS, generatorDB,
+		broker.getId(), 2, -1);
+	// session.setAppVmId(vm1.getId());
+	// session.setDbBalancer(vm2.getId());
 
-			broker.submitSessions(Arrays.asList(session), balancer.getId());
+	broker.submitSessions(Arrays.asList(session), balancer.getId());
 
-			CloudSim.startSimulation();
-			List<HddCloudlet> resultList = broker.getCloudletReceivedList();
-			CloudSim.stopSimulation();
+	CloudSim.startSimulation();
+	List<HddCloudlet> resultList = broker.getCloudletReceivedList();
+	CloudSim.stopSimulation();
 
-			assertEquals(4, resultList.size());
+	assertEquals(4, resultList.size());
 
-			assertEquals(asCl1.getExecStartTime(), dbCl1.getExecStartTime(), DELTA);
-			assertEquals(asCl2.getExecStartTime(), dbCl2.getExecStartTime(), DELTA);
+	assertEquals(asCl1.getExecStartTime(), dbCl1.getExecStartTime(), DELTA);
+	assertEquals(asCl2.getExecStartTime(), dbCl2.getExecStartTime(), DELTA);
 
-			assertTrue(asCl1.isFinished());
-			assertTrue(asCl2.isFinished());
-			assertTrue(dbCl1.isFinished());
-			assertTrue(dbCl2.isFinished());
+	assertTrue(asCl1.isFinished());
+	assertTrue(asCl2.isFinished());
+	assertTrue(dbCl1.isFinished());
+	assertTrue(dbCl2.isFinished());
 
-			double asCl1Len = asCl1.getFinishTime() - asCl1.getExecStartTime();
-			double asCl2Len = asCl2.getFinishTime() - asCl2.getExecStartTime();
-			double dbCl1Len = dbCl1.getFinishTime() - dbCl1.getExecStartTime();
-			double dbCl2Len = dbCl2.getFinishTime() - dbCl2.getExecStartTime();
+	double asCl1Len = asCl1.getFinishTime() - asCl1.getExecStartTime();
+	double asCl2Len = asCl2.getFinishTime() - asCl2.getExecStartTime();
+	double dbCl1Len = dbCl1.getFinishTime() - dbCl1.getExecStartTime();
+	double dbCl2Len = dbCl2.getFinishTime() - dbCl2.getExecStartTime();
 
-			assertTrue(asCl1Len > dbCl1Len);
-			assertTrue(asCl2Len < dbCl2Len);
+	assertTrue(asCl1Len > dbCl1Len);
+	assertTrue(asCl2Len < dbCl2Len);
     }
 
     private HddDataCenter createDatacenterWithSingleHostAndSingleDisk(final String name) {
