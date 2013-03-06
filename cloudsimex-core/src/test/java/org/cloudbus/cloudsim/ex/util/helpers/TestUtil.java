@@ -22,7 +22,7 @@ public class TestUtil {
     public static Properties LOG_PROPS = new Properties();
     static {
 	// LOG_PROPS.put(CustomLog.LOG_LEVEL_PROP_KEY, Level.FINEST.getName());
-	// LOG_PROPS.put("ShutStandardLogger", "true");
+	LOG_PROPS.put("ShutStandardLogger", "true");
     }
 
     /**

@@ -133,8 +133,8 @@ public class SingleDatacentre {
 	    CustomLog.redirectToFile("results/stat/simulation_sessions_" + numOfSessions + ".csv");
 	    CustomLog.printResults(WebSession.class, resultDC1Sessions);
 
-//	    CustomLog.redirectToFile("results/stat/simulation_cloudlets_" + numOfSessions + ".csv");
-//	    CustomLog.printResults(WebCloudlet.class, cloudlets);
+	    CustomLog.redirectToFile("results/stat/simulation_cloudlets_" + numOfSessions + ".csv");
+	    CustomLog.printResults(WebCloudlet.class, cloudlets);
 
 	    System.err.println();
 	    System.err.println(experimentName + ": Simulation is finished!");
@@ -172,8 +172,8 @@ public class SingleDatacentre {
 
     private HddVm createVM(final int brokerId) {
 	// VM description
-	int mips = 1000;
-	int ioMips = 1000;
+	int mips = 10000;
+	int ioMips = 10000;
 	long size = 10000; // image size (MB)
 	int ram = 512; // vm memory (MB)
 	long bw = 1000;
@@ -192,8 +192,8 @@ public class SingleDatacentre {
 	List<Pe> peList = new ArrayList<>();
 	List<HddPe> hddList = new ArrayList<>();
 
-	int mips = 1000;
-	int iops = 1000;
+	int mips = 10000;
+	int iops = 10000;
 
 	for (int i = 0; i < 8; i++) {
 	    peList.add(new Pe(Id.pollId(Pe.class), new PeProvisionerSimple(mips)));

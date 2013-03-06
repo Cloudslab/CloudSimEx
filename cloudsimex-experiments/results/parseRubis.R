@@ -1,8 +1,6 @@
 source('parseSar.R')
 
 maxTPS <- 1000
-maxIOPS <- 1000
-ram <- 512
 
 subDir <- "stat"
 
@@ -26,7 +24,7 @@ printDelays <- function(baseSize) {
 }
 
 # Creates the files, defining the session behaviour
-prepareSessionData <- function(size = 50, step = 5, ram = 512, cpu = 1000, io = 1000, stepFunc=mean) {
+prepareSessionData <- function(size = 50, step = 5, ram = 512, cpu = 10000, io = 10000, stepFunc=meanOfMeanAndMed) {
   print("Generating AS server data")
   prepareSessionDataForType(type = "web", size=size, step=step, ram=ram, cpu=cpu, io=io, stepFunc=stepFunc)
   print("")
@@ -36,7 +34,7 @@ prepareSessionData <- function(size = 50, step = 5, ram = 512, cpu = 1000, io = 
 
 # Creates the file, defining the session behaviour for the db or web server, as
 # specified by the type parameter, which should be either "db" or "web"
-prepareSessionDataForType <- function(type, size = 50, step = 5, ram = 512, cpu = 1000, io = 1000, stepFunc=mean) {
+prepareSessionDataForType <- function(type, size = 50, step = 5, ram = 512, cpu = 10000, io = 10000, stepFunc=meanOfMeanAndMed) {
   # Get the names of the files to use for baselining and performance characteristics
   perfFile <- ""
   baseLineFile <- ""
