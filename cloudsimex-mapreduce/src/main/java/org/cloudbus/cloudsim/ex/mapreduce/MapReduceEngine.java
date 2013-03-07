@@ -115,15 +115,14 @@ public class MapReduceEngine extends DatacenterBroker {
 			e.printStackTrace();
 		}
 
-		List<VMType> provisioningVmList = runAlgorithm(policy, request);
-		request.provisionedVms = provisioningVmList;
-		// ////
+		runAlgorithm(policy, request);
+		//////
 
 		int requestedVms = 0;
 		for (int datacenterId : getDatacenterIdsList()) {
 			CloudDatacenter cloudDatacenter = cloud.getCloudDatacenterFromId(datacenterId);
-			for (Vm vm : provisioningVmList) {
-				if (cloudDatacenter.isVMInCloudDatacenter(vm.getId())) {
+			for (VmInstance vm : request.vmProvisionList) {
+				if (cloudDatacenter.isVMInCloudDatacenter(vm.VmTypeId)) {
 					Log.printLine(CloudSim.clock() + ": " + getName() + ": creating VM #" + vm.getId() + " in "
 							+ cloudDatacenter.getName());
 					sendNow(datacenterId, CloudSimTags.VM_CREATE_ACK, (Vm) vm);
@@ -138,32 +137,32 @@ public class MapReduceEngine extends DatacenterBroker {
 
 	}
 
-	private List<VMType> runAlgorithm(Policy policy, Request request) {
+	private List<VmInstance> runAlgorithm(Policy policy, Request request) {
 		// ToDo: increase the clock during the ALGORITHM search
 		Log.printLine(" =========== ALGORITHM: SEARCHING START FOR REQUEST: " + request.id + " ===========");
 		Log.printLine(getName() + " is searching for the optimal Resource Set...");
-		List<VMType> provisioningVmList = policy.runAlgorithm(cloud, request);
+		policy.runAlgorithm(cloud, request);
 		// Provision all types of virtual machines from Cloud
 		Log.printLine(" =========== ALGORITHM: FINISHED SEARCHING FOR REQUEST: " + request.id + " ===========");
 		Log.printLine(getName() + " SELECTED THE FOLLOWING VMs FOR REQUEST: " + request.id + " : ");
 		// 1- provisioning
-		submitVmList(provisioningVmList);
-		for (VMType vmType : provisioningVmList) {
-			Log.printLine("- " + vmType.name + " (ID: " + vmType.getId() + ")");
+		submitVmList(request.vmProvisionList);
+		for (VmInstance vmInstance : request.vmProvisionList) {
+			VmType vmType = cloud.getVMTypeFromId(vmInstance.VmTypeId);
+			Log.printLine("- " + vmInstance.name + " (ID: " + vmInstance.getId() + ") of Type: "+vmType.name);
 		}
 
 		// 2- scheduling
 		// Bind/Schedule Map and Reduce tasks to VMs based on the ResourceSet
-		Map<Integer, Integer> schedulingPlan = policy.getSchedulingPlan();
 		for (Cloudlet task : getCloudletList()) {
 			int taskId = task.getCloudletId();
-			if (schedulingPlan.containsKey(taskId)) {
-				int vmId = schedulingPlan.get(taskId);
+			if (request.schedulingPlan.containsKey(taskId)) {
+				int vmId = request.schedulingPlan.get(taskId);
 				bindCloudletToVm(taskId, vmId);
 			}
 		}
 
-		return provisioningVmList;
+		return request.vmProvisionList;
 	}
 
 	protected void processVmCreate(SimEvent ev) {
@@ -249,10 +248,10 @@ public class MapReduceEngine extends DatacenterBroker {
 		}
 	}
 
-	public List<VMType> getVMTypesFromIds(List<Integer> selectedVMIds) {
-		List<VMType> selectedVMTypes = new ArrayList<VMType>();
+	public List<VmType> getVMTypesFromIds(List<Integer> selectedVMIds) {
+		List<VmType> selectedVMTypes = new ArrayList<VmType>();
 		for (int vmId : selectedVMIds) {
-			VMType vmType = cloud.getVMTypeFromId(vmId);
+			VmType vmType = cloud.getVMTypeFromId(vmId);
 			if (!selectedVMTypes.contains(vmType))
 				selectedVMTypes.add(vmType);
 		}
@@ -284,7 +283,9 @@ public class MapReduceEngine extends DatacenterBroker {
 			if (task.getCloudletStatus() == Cloudlet.SUCCESS) {
 				Log.print(indent + "SUCCESS");
 
-				VMType vm = cloud.getVMTypeFromId(task.getVmId());
+				//VmType vm = cloud.getVMTypeFromId(task.getVmId());
+				VmType vm = requests.getVMInstanceFromId(task.getVmId());
+
 
 				double executionTime = task.getFinishTime() - task.getExecStartTime();
 				Log.printLine(indent + indent + dft.format(task.getSubmissionTime()) + indent
@@ -320,7 +321,7 @@ public class MapReduceEngine extends DatacenterBroker {
 			Log.printLine("= VMs: ");
 
 			double jobTotalCost = 0.0;
-			for (VMType vmType : request.provisionedVms) {
+			for (VmType vmType : request.vmProvisionList) {
 				Log.printLine("   - VM ID#" + vmType.getId() + ": " + vmType.name);
 				Log.printLine("     > Processing Time: " + vmType.ExecutionTime + " seconds");
 				double cost = Math.ceil(vmType.ExecutionTime / 3600.0) * vmType.cost;

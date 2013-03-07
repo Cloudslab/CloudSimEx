@@ -23,7 +23,10 @@ import org.cloudbus.cloudsim.VmSchedulerSpaceShared;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.ex.mapreduce.MapReduceEngine;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.MapTask;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.ReduceTask;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Requests;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
@@ -31,10 +34,10 @@ import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 
 public class CloudDatacenter extends Datacenter {
 	
-	public List<VMType> vmTypes;
+	public List<VmType> vmTypes;
 
 	
-	public CloudDatacenter (String name, int hosts, int memory_perhost, int cores_perhost, int mips_precore_perhost, List<VMType> vmtypes) throws Exception {
+	public CloudDatacenter (String name, int hosts, int memory_perhost, int cores_perhost, int mips_precore_perhost, List<VmType> vmtypes) throws Exception {
 		super(name,
 				createChars(hosts, cores_perhost, mips_precore_perhost, memory_perhost, 1000000),
 				new VmAllocationPolicySimple( getHostList(hosts, cores_perhost, mips_precore_perhost, memory_perhost, 1000000)),
@@ -111,6 +114,31 @@ public class CloudDatacenter extends Datacenter {
 
 				return;
 			}
+			
+			//Check: Reduce after map
+			if(cl instanceof ReduceTask)
+			{
+				Log.printLine(getName() + ": - Reduce Task #" + cl.getCloudletId());
+				
+				boolean isAllMapExecuted = true;
+				double delayTime = 0.0;
+				Requests requests = ((MapReduceEngine) CloudSim.getEntity("MapReduceEngine")).getRequests();
+				Request request = requests.getRequestFromTaskId(cl.getCloudletId());
+				
+				for (MapTask mapTask : request.job.mapTasks) {
+					if (mapTask.getCloudletStatus() != Cloudlet.SUCCESS)
+					{
+						isAllMapExecuted = false;
+						//delayTime = mapTask.
+						break;
+					}
+				}
+				
+				if(!isAllMapExecuted)
+					Log.printLine(getName() + ": - Reduce Task #" + cl.getCloudletId() + ": This Reduce Task can't start before all maps finishes");
+			}
+			else
+				Log.printLine(getName() + ": - Map Task #" + cl.getCloudletId());
 
 			// process this Cloudlet to this CloudResource
 			cl.setResourceParameter(getId(), getCharacteristics().getCostPerSecond(), getCharacteristics()
@@ -127,7 +155,7 @@ public class CloudDatacenter extends Datacenter {
 			CloudletScheduler scheduler = vm.getCloudletScheduler();
 			double estimatedFinishTime = scheduler.cloudletSubmit(cl, fileTransferTime);
 			estimatedFinishTime += cl.getExecStartTime();
-			Log.printLine(CloudSim.clock() + ": " + getName() + ": Estimated Finish Time for cloudlet: " + cl.getCloudletId() + " is: " + estimatedFinishTime);
+			Log.printLine(CloudSim.clock() + ": " + getName() + ": Estimated Finish/Execution Time for cloudlet: " + cl.getCloudletId() + " is: " + estimatedFinishTime);
 			
 			// if this cloudlet is in the exec queue
 			if (estimatedFinishTime > 0.0 && !Double.isInfinite(estimatedFinishTime)) {
@@ -176,7 +204,7 @@ public class CloudDatacenter extends Datacenter {
 	
 	public boolean isVMInCloudDatacenter(int vmTypeId)
 	{
-		for (VMType vmType : vmTypes) {
+		for (VmType vmType : vmTypes) {
 			if(vmType.getId() == vmTypeId)
 				return true;
 		}

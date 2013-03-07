@@ -16,10 +16,10 @@ public class Cloud {
 	
 	public static int brokerID = -1;
 
-	public List<VMType> getAllVMTypes()
+	public List<VmType> getAllVMTypes()
 	{
 		
-		List<VMType> vmlist = new ArrayList<VMType>();
+		List<VmType> vmlist = new ArrayList<VmType>();
 		for (PublicCloudDatacenter publicCloudDatacenter : publicCloudDatacenters) {
 			vmlist.addAll(publicCloudDatacenter.vmTypes);
 		}
@@ -31,17 +31,17 @@ public class Cloud {
 		return vmlist;
 	}
 	
-	public VMType getVMTypeFromId(int VMTypeId)
+	public VmType getVMTypeFromId(int VMTypeId)
 	{
 		for (PublicCloudDatacenter publicCloudDatacenter : publicCloudDatacenters) {
-			for (VMType vmType : publicCloudDatacenter.vmTypes) {
+			for (VmType vmType : publicCloudDatacenter.vmTypes) {
 				if(vmType.getId() == VMTypeId)
 					return vmType;
 			}
 		}
 		
 		for (PrivateCloudDatacenter privateCloudDatacenter : privateCloudDatacenters) {
-			for (VMType vmType : privateCloudDatacenter.vmTypes) {
+			for (VmType vmType : privateCloudDatacenter.vmTypes) {
 				if(vmType.getId() == VMTypeId)
 					return vmType;
 			}

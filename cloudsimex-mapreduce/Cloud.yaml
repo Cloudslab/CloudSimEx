@@ -6,24 +6,24 @@ publicCloudDatacenters:
     aws-us-east-1,
       [ 
         # VM Type info (You have multiples): [name, cost per hour, transferring.cost, mips, cores, ram, boot_time]
-        !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType
-        [large-aws-us-east-1, 1.15, 0.005, 50000, 1, 1024, 0],
-        !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType
-        [small-aws-us-east-1, 1.15, 0.005, 10000, 1, 1024, 0]
+        !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
+        [large-aws-us-east-1, 1.15, 0.005, 50000.0, 1, 1024, 0],
+        !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
+        [small-aws-us-east-1, 1.15, 0.005, 10000.0, 1, 1024, 0]
       ]
    ]
  - [
     azure-au,
       [
-        !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType
-        [win-standard, 0.9, 0.000, 10000, 1, 512, 0]
+        !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
+        [win-standard, 0.9, 0.000, 10000.0, 1, 512, 0]
       ]
    ]
  - [
     azure-au-new,
       [
-        !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType
-        [win-standard, 0.9, 0.000, 10000, 1, 512, 0]
+        !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
+        [win-standard, 0.9, 0.000, 10000.0, 1, 512, 0]
       ]
    ]
 
@@ -33,14 +33,14 @@ privateCloudDatacenters:
     openstack-unimelb, 15, 32768, 8, 99999,
       [
         # VM Type info (You have multiples): [name, cost per hour, transferring.cost, mips, cores, ram, boot_time]
-        !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType
-        [private-openstack-unimelb, 0.00, 0.000, 1000, 1, 512, 0]
+        !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
+        [private-openstack-unimelb, 0.00, 0.000, 1000.0, 1, 512, 0]
       ]
    ]
  - [
     openstack-unimelb-new, 15, 32768, 8, 99999,
       [
-        !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType
+        !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
         [private-openstack-unimelb, 0.00, 0.000, 1000, 1, 512, 0]
       ]
    ]

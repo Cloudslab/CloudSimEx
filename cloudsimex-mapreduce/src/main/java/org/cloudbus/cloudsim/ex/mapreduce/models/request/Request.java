@@ -5,10 +5,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.cloudbus.cloudsim.core.SimEvent;
-import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmInstance;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.yaml.snakeyaml.Yaml;
 
@@ -19,9 +22,11 @@ public class Request extends SimEvent {
 	public int deadline;
 	public Job job;
 	public UserClass userClass;
-	public List<VMType> provisionedVms;
 	public double firstSubmissionTime;
 	public double lastFinishTime;
+	
+	public List<VmInstance> vmProvisionList;
+	public Map<Integer, Integer> schedulingPlan; //<Task ID, VM ID>
 
 	public Request(double submissionTime, double budget, int deadline, String jobFile, UserClass userClass) {
 		id = Id.pollId(Request.class);
@@ -30,9 +35,11 @@ public class Request extends SimEvent {
 		this.deadline = deadline;
 		this.userClass = userClass;
 		job = readJobYAML(jobFile);
-		provisionedVms = new ArrayList<VMType>();
 		firstSubmissionTime = -1;
 		lastFinishTime = -1;
+		
+		vmProvisionList = new ArrayList<VmInstance>();
+		schedulingPlan = new HashMap<Integer, Integer>();
 
 		for (MapTask mapTask : job.mapTasks) {
 			mapTask.requestId = id;

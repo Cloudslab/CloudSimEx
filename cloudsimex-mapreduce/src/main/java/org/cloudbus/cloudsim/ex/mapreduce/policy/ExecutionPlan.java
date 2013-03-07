@@ -3,8 +3,10 @@ package org.cloudbus.cloudsim.ex.mapreduce.policy;
 import java.util.List;
 import java.util.Map;
 
+import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
-import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmInstance;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.MapTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
@@ -12,17 +14,17 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
 public class ExecutionPlan {
 	
 	public TaskSet taskSet;
-	public int vmTypeId;
+	//public int vmTypeId;
 	public double executionTime;
 	public double cost;
 	
-	private VMType vmType;
+	public VmInstance vm;
 	
 	public ExecutionPlan(TaskSet taskSet, int vmTypeId, Cloud cloud, Request request) {
 		this.taskSet = taskSet;
-		this.vmTypeId = vmTypeId;
+		//this.vmTypeId = vmTypeId;
 		
-		vmType = cloud.getVMTypeFromId(vmTypeId);
+		vm = cloud.getVMTypeFromId(vmTypeId).getVmInstance();
 		
 		//getExecutionTime must be called before getCost..
 		executionTime = getExecutionTime(request);
@@ -47,10 +49,10 @@ public class ExecutionPlan {
 			//1st) The time to transfere the data in:
 			double dataIn = 0.0;
 			if(task instanceof MapTask)
-				dataIn = ((MapTask)task).predictFileTransferTimeFromDataSource(vmType);
+				dataIn = ((MapTask)task).predictFileTransferTimeFromDataSource(vm);
 			
 			//2nd) The time to execute the task
-			double executionTime = (task.getCloudletTotalLength() * task.getCloudletFileSize()) / vmType.getMips();
+			double executionTime = (task.getCloudletTotalLength() * task.getCloudletFileSize()) / vm.getMips();
 			
 			//3rd) The time to send the data out
 			//SKIPPED: because we don't know where the reducers will execute
@@ -65,7 +67,7 @@ public class ExecutionPlan {
 	
 	private double getCost()
 	{
-		return Math.ceil(executionTime / 3600.0) * vmType.cost;
+		return Math.ceil(executionTime / 3600.0) * vm.cost;
 	}
 	
 	

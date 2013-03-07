@@ -11,84 +11,91 @@ import java.util.Map;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.ex.mapreduce.models.*;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
-import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmInstance;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.*;
 
-public class ListAndFirstFit extends Policy {
+public class ListAndFirstFit_DifferentVmTypes extends Policy {
 
 	@Override
-	public List<VMType> runAlgorithm(Cloud cloud, Request request) {
-		// SEARCHING ...
+	public Boolean runAlgorithm(Cloud cloud, Request request) {
+		try {
+			// SEARCHING ...
 
-		// Step1) Fill TaskSet
-		// Not all possibles yet, only one task for each datasource
-		List<TaskSet> taskSets = new ArrayList<TaskSet>();
+			// Step1) Fill TaskSet
+			// Not all possibles yet, only one task for each datasource
+			List<TaskSet> taskSets = new ArrayList<TaskSet>();
 
-		for (MapTask mapTask : request.job.mapTasks) {
-			for (String dataSourceName : mapTask.dataSources) {
+			for (MapTask mapTask : request.job.mapTasks) {
+				for (String dataSourceName : mapTask.dataSources) {
+					TaskSet taskSet = new TaskSet();
+					PairTaskDatasource pairTaskDatasource = new PairTaskDatasource();
+					pairTaskDatasource.taskId = mapTask.getCloudletId();
+					pairTaskDatasource.dataSourceName = dataSourceName;
+					taskSet.pairs.add(pairTaskDatasource);
+					taskSets.add(taskSet);
+				}
+			}
+
+			for (ReduceTask reduceTask : request.job.reduceTasks) {
 				TaskSet taskSet = new TaskSet();
 				PairTaskDatasource pairTaskDatasource = new PairTaskDatasource();
-				pairTaskDatasource.taskId = mapTask.getCloudletId();
-				pairTaskDatasource.dataSourceName = dataSourceName;
+				pairTaskDatasource.taskId = reduceTask.getCloudletId();
+				pairTaskDatasource.dataSourceName = null;
 				taskSet.pairs.add(pairTaskDatasource);
 				taskSets.add(taskSet);
 			}
-		}
 
-		for (ReduceTask reduceTask : request.job.reduceTasks) {
-			TaskSet taskSet = new TaskSet();
-			PairTaskDatasource pairTaskDatasource = new PairTaskDatasource();
-			pairTaskDatasource.taskId = reduceTask.getCloudletId();
-			pairTaskDatasource.dataSourceName = null;
-			taskSet.pairs.add(pairTaskDatasource);
-			taskSets.add(taskSet);
-		}
+			// Step2) Fill EPs
+			// One VM For each TaskSet
+			List<ExecutionPlan> executionPlans = new ArrayList<ExecutionPlan>();
 
-		// Step2) Fill EPs
-		List<ExecutionPlan> executionPlans = new ArrayList<ExecutionPlan>();
-
-		for (TaskSet taskSet : taskSets) {
-			for (VMType vmType : cloud.getAllVMTypes()) {
+			List<VmType> vmTypes = cloud.getAllVMTypes();
+			int i = 0;
+			for (TaskSet taskSet : taskSets) {
+				if(vmTypes.size() <= i)
+					i = 0;
 				ExecutionPlan executionPlan = new ExecutionPlan(taskSet,
-						vmType.getId(), cloud, request);
+						vmTypes.get(i).getId(), cloud, request);
 				executionPlans.add(executionPlan);
+				i++;
 			}
-		}
 
-		// Step3) Find RS
-		List<ExecutionPlan> resourceSet = new ArrayList<ExecutionPlan>();
+			// Step3) Find RS
+			List<ExecutionPlan> resourceSet = new ArrayList<ExecutionPlan>();
 
-		if (request.userClass == UserClass.GOLD) {
-			// Sort by time (fastest first)
-			resourceSet = listAndFirstFit_Time(executionPlans, request);
+			if (request.userClass == UserClass.GOLD) {
+				// Sort by time (fastest first)
+				resourceSet = listAndFirstFit_Time(executionPlans, request);
 
-		} else {
-			// Sort by cost (cheapest first)
-			resourceSet = listAndFirstFit_Cost(executionPlans, request);
-		}
-
-		// Finished searching, and those are the results where the engine will
-		// see
-		List<VMType> provisioningVmList = new ArrayList<>();
-
-		for (ExecutionPlan executionPlan : resourceSet) {
-			// 1- VM provisioning
-			VMType executionPlanVm = cloud
-					.getVMTypeFromId(executionPlan.vmTypeId);
-			if (!provisioningVmList.contains(executionPlanVm))
-				provisioningVmList.add(executionPlanVm);
-
-			// 2- Task scheduling
-			for (PairTaskDatasource pairs : executionPlan.taskSet.pairs) {
-				schedulingPlan.put(pairs.taskId, executionPlan.vmTypeId);
-
-				Task task = request.getTaskFromId(pairs.taskId);
-				if (task instanceof MapTask)
-					((MapTask) task).selectedDataSourceName = pairs.dataSourceName;
+			} else {
+				// Sort by cost (cheapest first)
+				resourceSet = listAndFirstFit_Cost(executionPlans, request);
 			}
+
+			// Finished searching, and those are the results where the engine will
+			// see
+			for (ExecutionPlan executionPlan : resourceSet) {
+				// 1- VM provisioning
+				VmInstance executionPlanVm = executionPlan.vm;
+				if (!request.vmProvisionList.contains(executionPlanVm))
+					request.vmProvisionList.add(executionPlanVm);
+
+				// 2- Task scheduling
+				for (PairTaskDatasource pairs : executionPlan.taskSet.pairs) {
+					request.schedulingPlan.put(pairs.taskId, executionPlan.vm.getId());
+
+					Task task = request.getTaskFromId(pairs.taskId);
+					if (task instanceof MapTask)
+						((MapTask) task).selectedDataSourceName = pairs.dataSourceName;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
 		}
 
-		return provisioningVmList;
+		return true;
 	}
 
 	private List<ExecutionPlan> listAndFirstFit(
@@ -100,17 +107,17 @@ public class ListAndFirstFit extends Policy {
 		for (ExecutionPlan executionPlan : executionPlans) {
 			// if non of the resourceSet's EPs has this task just add it.
 			for (MapTask mapTask : request.job.mapTasks) {
-				boolean isInThisResourceSet = isInThisResourceSet(resourceSet,
+				boolean isTaskInResourceSet = isTaskInResourceSet(resourceSet,
 						mapTask.getCloudletId());
 
-				if (!isInThisResourceSet) {
-					boolean isInThisExecutionPlan = isTaskInExecutionPlan(
+				if (!isTaskInResourceSet) {
+					boolean isTaskInExecutionPlan = isTaskInExecutionPlan(
 							executionPlan, mapTask.getCloudletId());
-					if (isInThisExecutionPlan) {
+					if (isTaskInExecutionPlan) {
 						for (PairTaskDatasource pair : executionPlan.taskSet.pairs)
 							Log.printLine("MapTask ID: " + pair.taskId
 									+ " + DataSource: " + pair.dataSourceName
-									+ " -> VM ID: " + executionPlan.vmTypeId);
+									+ " -> VM ID: " + executionPlan.vm.getId());
 						resourceSet.add(executionPlan);
 						break;
 					}
@@ -120,7 +127,7 @@ public class ListAndFirstFit extends Policy {
 			// if non of the resourceSet's EPs has this task just add it.
 			for (ReduceTask reduceTask : request.job.reduceTasks) {
 				// if non of the resourceSet's EPs has this task just add it.
-				boolean isInThisResourceSet = isInThisResourceSet(resourceSet,
+				boolean isInThisResourceSet = isTaskInResourceSet(resourceSet,
 						reduceTask.getCloudletId());
 				if (!isInThisResourceSet) {
 					boolean isInThisExecutionPlan = isTaskInExecutionPlan(
@@ -129,7 +136,7 @@ public class ListAndFirstFit extends Policy {
 						for (PairTaskDatasource pair : executionPlan.taskSet.pairs)
 							Log.printLine("ReduceTask ID: " + pair.taskId
 									+ " + DataSource: " + pair.dataSourceName
-									+ " -> VM ID: " + executionPlan.vmTypeId);
+									+ " -> VM ID: " + executionPlan.vm.getId());
 						resourceSet.add(executionPlan);
 					}
 				}
@@ -175,7 +182,7 @@ public class ListAndFirstFit extends Policy {
 		return false;
 	}
 
-	private boolean isInThisResourceSet(List<ExecutionPlan> resourceSet,
+	private boolean isTaskInResourceSet(List<ExecutionPlan> resourceSet,
 			int taskId) {
 		for (ExecutionPlan executionPlan : resourceSet) {
 			for (PairTaskDatasource pair : executionPlan.taskSet.pairs) {
