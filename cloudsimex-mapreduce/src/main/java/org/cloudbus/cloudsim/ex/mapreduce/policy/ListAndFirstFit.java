@@ -14,7 +14,7 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VMType;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.*;
 
-public class DefaultPolicy extends Policy {
+public class ListAndFirstFit extends Policy {
 
 	@Override
 	public List<VMType> runAlgorithm(Cloud cloud, Request request) {
@@ -49,17 +49,17 @@ public class DefaultPolicy extends Policy {
 
 		for (TaskSet taskSet : taskSets) {
 			for (VMType vmType : cloud.getAllVMTypes()) {
-				ExecutionPlan executionPlan = new ExecutionPlan(taskSet, vmType.getId(), cloud, request);
+				ExecutionPlan executionPlan = new ExecutionPlan(taskSet,
+						vmType.getId(), cloud, request);
 				executionPlans.add(executionPlan);
 			}
 		}
 
 		// Step3) Find RS
-
 		List<ExecutionPlan> resourceSet = new ArrayList<ExecutionPlan>();
 
 		if (request.userClass == UserClass.GOLD) {
-			// Sort by time (fastest last)
+			// Sort by time (fastest first)
 			resourceSet = listAndFirstFit_Time(executionPlans, request);
 
 		} else {
@@ -72,12 +72,13 @@ public class DefaultPolicy extends Policy {
 		List<VMType> provisioningVmList = new ArrayList<>();
 
 		for (ExecutionPlan executionPlan : resourceSet) {
-			// 1- provisioning
-			VMType executionPlanVm = cloud.getVMTypeFromId(executionPlan.vmTypeId);
+			// 1- VM provisioning
+			VMType executionPlanVm = cloud
+					.getVMTypeFromId(executionPlan.vmTypeId);
 			if (!provisioningVmList.contains(executionPlanVm))
 				provisioningVmList.add(executionPlanVm);
 
-			// 2- scheduling
+			// 2- Task scheduling
 			for (PairTaskDatasource pairs : executionPlan.taskSet.pairs) {
 				schedulingPlan.put(pairs.taskId, executionPlan.vmTypeId);
 
@@ -90,7 +91,8 @@ public class DefaultPolicy extends Policy {
 		return provisioningVmList;
 	}
 
-	private List<ExecutionPlan> listAndFirstFit(List<ExecutionPlan> executionPlans, Request request) {
+	private List<ExecutionPlan> listAndFirstFit(
+			List<ExecutionPlan> executionPlans, Request request) {
 
 		List<ExecutionPlan> resourceSet = new ArrayList<ExecutionPlan>();
 
@@ -98,13 +100,16 @@ public class DefaultPolicy extends Policy {
 		for (ExecutionPlan executionPlan : executionPlans) {
 			// if non of the resourceSet's EPs has this task just add it.
 			for (MapTask mapTask : request.job.mapTasks) {
-				boolean isInThisResourceSet = isInThisResourceSet(resourceSet, mapTask.getCloudletId());
+				boolean isInThisResourceSet = isInThisResourceSet(resourceSet,
+						mapTask.getCloudletId());
 
 				if (!isInThisResourceSet) {
-					boolean isInThisExecutionPlan = isInThisExecutionPlan(executionPlan, mapTask.getCloudletId());
+					boolean isInThisExecutionPlan = isTaskInExecutionPlan(
+							executionPlan, mapTask.getCloudletId());
 					if (isInThisExecutionPlan) {
 						for (PairTaskDatasource pair : executionPlan.taskSet.pairs)
-							Log.printLine("MapTask ID: " + pair.taskId + " + DataSource: " + pair.dataSourceName
+							Log.printLine("MapTask ID: " + pair.taskId
+									+ " + DataSource: " + pair.dataSourceName
 									+ " -> VM ID: " + executionPlan.vmTypeId);
 						resourceSet.add(executionPlan);
 						break;
@@ -115,12 +120,15 @@ public class DefaultPolicy extends Policy {
 			// if non of the resourceSet's EPs has this task just add it.
 			for (ReduceTask reduceTask : request.job.reduceTasks) {
 				// if non of the resourceSet's EPs has this task just add it.
-				boolean isInThisResourceSet = isInThisResourceSet(resourceSet, reduceTask.getCloudletId());
+				boolean isInThisResourceSet = isInThisResourceSet(resourceSet,
+						reduceTask.getCloudletId());
 				if (!isInThisResourceSet) {
-					boolean isInThisExecutionPlan = isInThisExecutionPlan(executionPlan, reduceTask.getCloudletId());
+					boolean isInThisExecutionPlan = isTaskInExecutionPlan(
+							executionPlan, reduceTask.getCloudletId());
 					if (isInThisExecutionPlan) {
 						for (PairTaskDatasource pair : executionPlan.taskSet.pairs)
-							Log.printLine("ReduceTask ID: " + pair.taskId + " + DataSource: " + pair.dataSourceName
+							Log.printLine("ReduceTask ID: " + pair.taskId
+									+ " + DataSource: " + pair.dataSourceName
 									+ " -> VM ID: " + executionPlan.vmTypeId);
 						resourceSet.add(executionPlan);
 					}
@@ -131,10 +139,12 @@ public class DefaultPolicy extends Policy {
 		return resourceSet;
 	}
 
-	private List<ExecutionPlan> listAndFirstFit_Cost(List<ExecutionPlan> executionPlans, Request request) {
+	private List<ExecutionPlan> listAndFirstFit_Cost(
+			List<ExecutionPlan> executionPlans, Request request) {
 
 		Collections.sort(executionPlans, new Comparator<ExecutionPlan>() {
-			public int compare(ExecutionPlan executionPlan1, ExecutionPlan executionPlan2) {
+			public int compare(ExecutionPlan executionPlan1,
+					ExecutionPlan executionPlan2) {
 				return Double.compare(executionPlan1.cost, executionPlan2.cost);
 			}
 		});
@@ -142,17 +152,21 @@ public class DefaultPolicy extends Policy {
 		return listAndFirstFit(executionPlans, request);
 	}
 
-	private List<ExecutionPlan> listAndFirstFit_Time(List<ExecutionPlan> executionPlans, Request request) {
+	private List<ExecutionPlan> listAndFirstFit_Time(
+			List<ExecutionPlan> executionPlans, Request request) {
 		Collections.sort(executionPlans, new Comparator<ExecutionPlan>() {
-			public int compare(ExecutionPlan executionPlan1, ExecutionPlan executionPlan2) {
-				return Double.compare(executionPlan1.executionTime, executionPlan2.executionTime);
+			public int compare(ExecutionPlan executionPlan1,
+					ExecutionPlan executionPlan2) {
+				return Double.compare(executionPlan1.executionTime,
+						executionPlan2.executionTime);
 			}
 		});
 
 		return listAndFirstFit(executionPlans, request);
 	}
 
-	private boolean isInThisExecutionPlan(ExecutionPlan executionPlan, int taskId) {
+	private boolean isTaskInExecutionPlan(ExecutionPlan executionPlan,
+			int taskId) {
 		for (PairTaskDatasource pair : executionPlan.taskSet.pairs) {
 			if (pair.taskId == taskId)
 				return true;
@@ -161,7 +175,8 @@ public class DefaultPolicy extends Policy {
 		return false;
 	}
 
-	private boolean isInThisResourceSet(List<ExecutionPlan> resourceSet, int taskId) {
+	private boolean isInThisResourceSet(List<ExecutionPlan> resourceSet,
+			int taskId) {
 		for (ExecutionPlan executionPlan : resourceSet) {
 			for (PairTaskDatasource pair : executionPlan.taskSet.pairs) {
 				if (pair.taskId == taskId)
