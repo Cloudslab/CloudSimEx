@@ -4,6 +4,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.cloudbus.cloudsim.ex.util.ExperimentsRunner;
+import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre100;
+import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre200;
+import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre250;
+import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre300;
+import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre400;
+import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre500;
+import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre600;
+import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre700;
 
 /**
  * Runs the experiments for the
@@ -25,9 +33,14 @@ public class Experiments {
 	// The main classes of the experiments
 	Class<?>[] experimens = new Class<?>[] {
 		SingleDataCentre100.class,
+		SingleDataCentre200.class,
 		SingleDataCentre250.class,
+		SingleDataCentre300.class,
+		SingleDataCentre400.class,
 		SingleDataCentre500.class,
-		SingleDataCentre1000.class
+		SingleDataCentre600.class,
+		SingleDataCentre700.class,
+		// SingleDataCentre1000.class
 	};
 
 	// Map the main experiment classes to the output files

@@ -95,7 +95,9 @@ public class SingleDatacentre {
 	    Datacenter dc1 = createDatacenter("WebDataCenter1");
 
 	    // Step 3: Create Brokers
-	    WebBroker brokerDC1 = new PerformanceLoggingWebBroker("BrokerDC1", refreshTime, simulationLength, 1, 0.01,
+	    WebBroker brokerDC1 = new PerformanceLoggingWebBroker("BrokerDC1", refreshTime, simulationLength, 0.5,
+		    0.01,
+		    5 * refreshTime,
 		    Arrays.asList(dc1.getId()));
 
 	    // Step 4: Create virtual machines
@@ -133,7 +135,8 @@ public class SingleDatacentre {
 	    CustomLog.redirectToFile("results/stat/simulation_sessions_" + numOfSessions + ".csv");
 	    CustomLog.printResults(WebSession.class, resultDC1Sessions);
 
-	    CustomLog.redirectToFile("results/stat/simulation_cloudlets_" + numOfSessions + ".csv");
+	    CustomLog.redirectToFile("results/stat/simulation_cloudlets_" +
+		    numOfSessions + ".csv");
 	    CustomLog.printResults(WebCloudlet.class, cloudlets);
 
 	    System.err.println();
@@ -153,9 +156,10 @@ public class SingleDatacentre {
 		    GeneratorsUtil.parseStream(dbIO), userId, DATA, refreshTime);
 
 	    // return Arrays.asList(new
-	    // PeriodWorkloadGenerator(sessionGenerator, 0.05, numOfSessions));
+	    // PeriodWorkloadGenerator(sessionGenerator, 0.1, numOfSessions));
 
-	    return Arrays.asList(new SimpleWorkloadGenerator(numOfSessions, sessionGenerator, null, null, 1));
+	    return Arrays.asList(new SimpleWorkloadGenerator(numOfSessions,
+		    sessionGenerator, null, null, 1));
 
 	    // return Arrays.asList(new SimpleWorkloadGenerator(numOfSessions /
 	    // 2, sessionGenerator, null, null, 2));

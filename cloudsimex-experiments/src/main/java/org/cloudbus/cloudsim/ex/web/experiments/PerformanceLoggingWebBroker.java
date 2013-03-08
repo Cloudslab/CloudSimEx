@@ -37,18 +37,24 @@ public class PerformanceLoggingWebBroker extends WebBroker {
 
     private final double logPeriod;
 
+    private final double idlePeriod;
+
     public PerformanceLoggingWebBroker(final String name, final double refreshPeriod, final double lifeLength,
-	    final double logPeriod, final double offset) throws Exception {
+	    final double logPeriod, final double offset, final double idlePeriod) throws Exception {
 	super(name, refreshPeriod, lifeLength);
 	this.logPeriod = logPeriod;
 	this.offset = offset;
+	this.idlePeriod = idlePeriod;
     }
 
     public PerformanceLoggingWebBroker(final String name, final double refreshPeriod,
-	    final double lifeLength, final double logPeriod, final double offset, final List<Integer> dataCenterIds) throws Exception {
+	    final double lifeLength, final double logPeriod, final double offset, final double idlePeriod,
+	    final List<Integer> dataCenterIds)
+	    throws Exception {
 	super(name, refreshPeriod, lifeLength, dataCenterIds);
 	this.logPeriod = logPeriod;
 	this.offset = offset;
+	this.idlePeriod = idlePeriod;
     }
 
     @Override
@@ -86,7 +92,8 @@ public class PerformanceLoggingWebBroker extends WebBroker {
 	// If no cloudlet has been submitted or finished - then there is nothing
 	// new to log
 	double currTime = CloudSim.clock();
-	if (currTime - lastTimeCloudletReturned < getStepPeriod() && currTime - lastTimeCloudletSubmited < getStepPeriod()) {
+	if (currTime - lastTimeCloudletReturned < getIdlePeriod()
+		&& currTime - lastTimeCloudletSubmited < getIdlePeriod()) {
 	    for (ILoadBalancer balancer : getLoadBalancers().values()) {
 		for (HddVm vm : balancer.getAppServers()) {
 		    logUtilisation(vm);
@@ -96,6 +103,10 @@ public class PerformanceLoggingWebBroker extends WebBroker {
 		}
 	    }
 	}
+    }
+
+    public double getIdlePeriod() {
+	return idlePeriod;
     }
 
     private void logUtilisation(final HddVm vm) {

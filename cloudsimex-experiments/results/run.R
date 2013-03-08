@@ -10,4 +10,4 @@ if(length(args) >= 1){
 source('parseRubis.R')
 source('parseSar.R')
 
-prepareSessionData()
+prepareSessionData(stepFunc=stepFuncDefault, size=100)

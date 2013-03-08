@@ -1,6 +1,7 @@
 source('parseSar.R')
 
 maxTPS <- 1000
+baseLineSize <- 1
 
 subDir <- "stat"
 
@@ -40,10 +41,10 @@ prepareSessionDataForType <- function(type, size = 50, step = 5, ram = 512, cpu 
   baseLineFile <- ""
   if(type == "web") {
     perfFile <- paste0(subDir, "/web_server_", size)
-    baseLineFile <- paste0(subDir, "/web_server_", 0)
+    baseLineFile <- paste0(subDir, "/web_server_", baseLineSize)
   } else {
     perfFile <- paste0(subDir, "/db_server_", size)
-    baseLineFile <- paste0(subDir, "/db_server_", 0)
+    baseLineFile <- paste0(subDir, "/db_server_", baseLineSize)
   }
   
   # Parse the files...
@@ -63,7 +64,7 @@ prepareSessionDataForType <- function(type, size = 50, step = 5, ram = 512, cpu 
   }
   perfFrame <- perfFrame[,(names(perfFrame) %in% columns)]
   perfFrame[,"%CPUUtil"] <- (perfFrame[,"%CPUUtil"] * cpu * step) / (100 * size)
-  perfFrame[,"%CPUUtil"] <- sapply(perfFrame[,"%CPUUtil"], function(x){if(x < 1) 1 else x})
+  perfFrame[,"%CPUUtil"] <- sapply(perfFrame[,"%CPUUtil"], function(x){if(x < 1) 1 else x })
   perfFrame[,"%SessionMem"] <- (perfFrame[,"%SessionMem"] * ram) / (100 * size)
   perfFrame[,"%ActiveMem"] <- (perfFrame[,"%ActiveMem"] * ram) / (100 * size)
   
@@ -118,7 +119,7 @@ plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend 
     benchFiles <-sapply(forWorkload, function(w) {paste0("stat/", type,"_server_",w)})
     sessionFiles <- sapply(forWorkload, function(w) {paste0("stat/", "sessions_", w, ".txt")})
   }
-  baseLineFile <- paste0(subDir, "/", type, "_server_0")
+  baseLineFile <- paste0(subDir, "/", type, "_server_", baseLineSize)
   
   colors= if(!useColors) {
     sapply(1:length(benchFiles), function(x){"black"})
@@ -167,7 +168,10 @@ plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend 
 prepareSarFrame <- function(df, baseLineFrame) {
   # Make the time start from 0
   df$Time = df$Time - min(df$Time)
-  df[,"%CPUUtil"] = 100 - as.numeric(df[,"%idle"])
+  
+  baseLineFrame[,"%CPUUtil"] = 100 - as.numeric(baseLineFrame[,"%idle"])
+  df[,"%CPUUtil"] = 100 - as.numeric(df[,"%idle"]) - mean(baseLineFrame[,"%CPUUtil"])
+  df[,"%CPUUtil"] = sapply(df[,"%CPUUtil"], function(x) {if (x < 0) 0 else x})
   
   df[,"KBMemory"] = as.numeric(df$kbmemused) + as.numeric(df$kbmemfree);
   df[,"UsedMem"] = as.numeric(df$kbmemused) - as.numeric(df$kbcached) - as.numeric(df$kbbuffers)
@@ -230,4 +234,18 @@ meanOfMeanAndMed <- function(lst) {
   med = median(lst)
   mn = mean(lst)
   mean(c(med, mn))
+}
+
+stepFuncDefault <- function(lst) {
+  result <- if(length(lst) >= 4){
+    maxEl <- max(lst)
+    minEl <- min(lst)
+    
+    middle <- lst[c(-(which(lst == maxEl)[1]), -(which(lst == minEl)[1]))]
+    mean(middle)
+  } else {
+    mean(lst) 
+  }
+  
+  result
 }

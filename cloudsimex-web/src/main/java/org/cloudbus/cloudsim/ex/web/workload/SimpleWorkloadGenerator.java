@@ -85,7 +85,7 @@ public class SimpleWorkloadGenerator implements IWorkloadGenerator {
 	if (generate) {
 	    this.count--;
 	    for (int i = 0; i < sessionsNumber; i++) {
-		double startAt = startTime; // + Math.random() * periodLen;
+		double startAt = startTime;// + Math.random() * periodLen;
 		if (!result.containsKey(startAt)) {
 		    result.put(startAt, new ArrayList<WebSession>());
 		}
