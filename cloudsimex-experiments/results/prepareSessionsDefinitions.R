@@ -7,6 +7,7 @@ if(length(args) >= 1){
   setwd(args[1])
 }
 
+source('util.R')
 source('parseRubis.R')
 source('parseSar.R')
 

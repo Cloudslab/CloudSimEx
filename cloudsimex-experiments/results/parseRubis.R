@@ -1,14 +1,10 @@
 source('parseSar.R')
+source('util.R')
 
-maxTPS <- 1000
-baseLineSize <- 1
-
-subDir <- "stat"
 
 # Prints the delays of all sessions form RUBIS
 printDelays <- function(baseSize) {
-  pattern <- "sessions_\\d+.txt$"
-  files <- getFiles(pattern)
+  files <- getFiles(sessionPattern)
   
   baseLineFile <- paste0(subDir, "/sessions_", baseSize, ".txt")
   
@@ -25,7 +21,7 @@ printDelays <- function(baseSize) {
 }
 
 # Creates the files, defining the session behaviour
-prepareSessionData <- function(size = 50, step = 5, ram = 512, cpu = 10000, io = 10000, stepFunc=meanOfMeanAndMed) {
+prepareSessionData <- function(size = 100, step = 5, ram = 512, cpu = 10000, io = 10000, stepFunc=meanOfMeanAndMed) {
   print("Generating AS server data")
   prepareSessionDataForType(type = "web", size=size, step=step, ram=ram, cpu=cpu, io=io, stepFunc=stepFunc)
   print("")
@@ -77,7 +73,7 @@ prepareSessionDataForType <- function(type, size = 50, step = 5, ram = 512, cpu 
   if(type == "db") {
     perfFrame[,"%tps"] <- (perfFrame[,"%tps"] * io * step) / (100 * size)
     perfFrame[,"%tps"] <- averageSteps(perfFrame[,"%tps"], step, stepFunc = stepFunc)
-    perfFrame[,"%tps"] <- sapply(perfFrame[,"%tps"], function(x){if(x < 1) 1 else x})
+    perfFrame[,"%tps"] <- sapply(perfFrame[,"%tps"], function(x){if(x < 1) round(x) else x})
   }
   
   #Get only the data for the seconds(steps) we need
@@ -102,7 +98,7 @@ prepareSessionDataForType <- function(type, size = 50, step = 5, ram = 512, cpu 
   }
   
   write.csv(perfFrame,
-              file=paste0("stat/", type, "_cloudlets.txt"),
+              file=paste0(subDir, "/", type, "_cloudlets.txt"),
               row.names = FALSE,
               quote=FALSE) 
 }
@@ -111,14 +107,13 @@ prepareSessionDataForType <- function(type, size = 50, step = 5, ram = 512, cpu 
 # Typical proerties - %memused, "%CPUUtil", UsedMem, tps
 plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend = T, forWorkload = "All", maxY = NA) {
   benchPattern <- paste0(type, "_server_\\d+$")
-  sessionPattern <- paste0("sessions_\\d+.txt$")
   if(forWorkload[1] == "All") {
-    benchFiles <- getFiles(benchPattern)
-    sessionFiles <- getFiles(sessionPattern)
-  } else {
-    benchFiles <-sapply(forWorkload, function(w) {paste0("stat/", type,"_server_",w)})
-    sessionFiles <- sapply(forWorkload, function(w) {paste0("stat/", "sessions_", w, ".txt")})
-  }
+    forWorkload <- sapply (getFiles(sessionPattern), getNumbersInNames )
+  } 
+  
+  benchFiles <-sapply(forWorkload, function(w) {paste0(subDir,"/", type,"_server_",w)})
+  sessionFiles <- sapply(forWorkload, function(w) {paste0(subDir, "/sessions_", w, ".txt")})
+  
   baseLineFile <- paste0(subDir, "/", type, "_server_", baseLineSize)
   
   colors= if(!useColors) {
@@ -162,58 +157,6 @@ plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend 
   }
 }
 
-# Based on the provided SAR frames - one from a baseline (sessions with 0 or so users)
-# and the other workload session (e.g. with 100 users) precomputes some utilisation 
-# properties/columns like: %CPUUtil, %UsedMem, %SessionMem, %ActiveMem and  %tps
-prepareSarFrame <- function(df, baseLineFrame) {
-  # Make the time start from 0
-  df$Time = df$Time - min(df$Time)
-  
-  baseLineFrame[,"%CPUUtil"] = 100 - as.numeric(baseLineFrame[,"%idle"])
-  df[,"%CPUUtil"] = 100 - as.numeric(df[,"%idle"]) - mean(baseLineFrame[,"%CPUUtil"])
-  df[,"%CPUUtil"] = sapply(df[,"%CPUUtil"], function(x) {if (x < 0) 0 else x})
-  
-  df[,"KBMemory"] = as.numeric(df$kbmemused) + as.numeric(df$kbmemfree);
-  df[,"UsedMem"] = as.numeric(df$kbmemused) - as.numeric(df$kbcached) - as.numeric(df$kbbuffers)
-  df[,"%UsedMem"] = 100 * df[,"UsedMem"] / df[,"KBMemory"]
-  
-  baseLineFrame[,"UsedMem"] = as.numeric(baseLineFrame$kbmemused) - as.numeric(baseLineFrame$kbcached) - as.numeric(baseLineFrame$kbbuffers)
-  df[,"SessionMem"] = abs((as.numeric(df$UsedMem) - as.numeric(baseLineFrame$UsedMem)))
-  df[,"%SessionMem"] = 100 * df[,"SessionMem"] / (df[,"KBMemory"] - as.numeric(baseLineFrame$UsedMem))
-  
-  df[,"ActiveMem"] = abs(as.numeric(df$kbactive) - as.numeric(baseLineFrame$kbactive))
-  df[,"%ActiveMem"] = 100 * df[,"ActiveMem"] / df[,"KBMemory"]
-  
-  df[,"%tps"] = 100 * as.numeric(df[,"tps"]) / maxTPS
-  
-  df
-}
-
-lambdaAverageSteps <- function(i, lst, step, stepFunc = median) {
-  #zero-based index
-  indx <- i-1
-  from <- (indx %/% step) * step + 1
-  end <- min((indx %/% step + 1) * step, length(lst))
-  
-  stepFunc(lst[from: end])
-}
-
-averageSteps <- function(lst, step, stepFunc = median) {
-  idx <- 1: length(lst)
-  sapply(idx, lambdaAverageSteps, lst, step, stepFunc=stepFunc)
-  #lst
-}
-
-getFiles <- function(pattern) {
-  files <-sort(list.files(subDir)[grep(pattern, list.files(subDir))])
-  files <- sapply(files, function(f){paste0(subDir, "/", f)})
-  
-  numbersInNames <- sapply(files, function(f) {as.numeric(gsub("[^0-9]", "", f))}) 
-  files <- files[order(numbersInNames)]
-  
-  files
-}
-
 getSessionLastTimeByWorkload <- function(size) {
   sessionsFile <- paste0(subDir, "/sessions_", size, ".txt")
   getSessionLastTime(sessionsFile)
@@ -228,24 +171,4 @@ getSessionLastTime <- function(sessionsFile) {
   } else {
     0
   }
-}
-
-meanOfMeanAndMed <- function(lst) {
-  med = median(lst)
-  mn = mean(lst)
-  mean(c(med, mn))
-}
-
-stepFuncDefault <- function(lst) {
-  result <- if(length(lst) >= 4){
-    maxEl <- max(lst)
-    minEl <- min(lst)
-    
-    middle <- lst[c(-(which(lst == maxEl)[1]), -(which(lst == minEl)[1]))]
-    mean(middle)
-  } else {
-    mean(lst) 
-  }
-  
-  result
 }

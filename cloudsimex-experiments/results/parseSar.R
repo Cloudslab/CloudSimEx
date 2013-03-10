@@ -1,3 +1,5 @@
+source('util.R')
+
 # Parses the output of SAR (System Activity Monitor)
 # Returns a data frame for analysis with all the data.
 parseSar <- function(fileName) {
@@ -92,10 +94,29 @@ isHeaderLine <- function(elementsList){
   TRUE
 }
 
-check.num <- function(N){
-  length(grep("^\\d+(\\.\\d+)?$", as.character(N))) != 0
-}
-
-check.date <- function(d){
-  length(grep("^\\d{2}:\\d{2}:\\d{2}$", as.character(d))) != 0
+# Based on the provided SAR frames - one from a baseline (sessions with 0 or so users)
+# and the other workload session (e.g. with 100 users) precomputes some utilisation 
+# properties/columns like: %CPUUtil, %UsedMem, %SessionMem, %ActiveMem and  %tps
+prepareSarFrame <- function(df, baseLineFrame) {
+  # Make the time start from 0
+  df$Time = df$Time - min(df$Time)
+  
+  baseLineFrame[,"%CPUUtil"] = 100 - as.numeric(baseLineFrame[,"%idle"])
+  df[,"%CPUUtil"] = 100 - as.numeric(df[,"%idle"]) - mean(baseLineFrame[,"%CPUUtil"])
+  df[,"%CPUUtil"] = sapply(df[,"%CPUUtil"], function(x) {if (x < 0) 0 else x})
+  
+  df[,"KBMemory"] = as.numeric(df$kbmemused) + as.numeric(df$kbmemfree);
+  df[,"UsedMem"] = as.numeric(df$kbmemused) - as.numeric(df$kbcached) - as.numeric(df$kbbuffers)
+  df[,"%UsedMem"] = 100 * df[,"UsedMem"] / df[,"KBMemory"]
+  
+  baseLineFrame[,"UsedMem"] = as.numeric(baseLineFrame$kbmemused) - as.numeric(baseLineFrame$kbcached) - as.numeric(baseLineFrame$kbbuffers)
+  df[,"SessionMem"] = abs((as.numeric(df$UsedMem) - as.numeric(baseLineFrame$UsedMem)))
+  df[,"%SessionMem"] = 100 * df[,"SessionMem"] / (df[,"KBMemory"] - as.numeric(baseLineFrame$UsedMem))
+  
+  df[,"ActiveMem"] = abs(as.numeric(df$kbactive) - as.numeric(baseLineFrame$kbactive))
+  df[,"%ActiveMem"] = 100 * df[,"ActiveMem"] / df[,"KBMemory"]
+  
+  df[,"%tps"] = 100 * as.numeric(df[,"tps"]) / maxTPS
+  
+  df
 }
