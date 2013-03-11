@@ -72,19 +72,36 @@ public class ListAndFirstFit_OneVmType extends Policy {
 			// Finished searching, and those are the results where the engine will
 			// see
 			for (ExecutionPlan executionPlan : resourceSet) {
-				// 1- VM provisioning
-				VmInstance executionPlanVm = executionPlan.vm;
-				if (!request.vmProvisionList.contains(executionPlanVm))
-					request.vmProvisionList.add(executionPlanVm);
-
+				
+				//This to check if this executionPlan has only reduce tasks
+				boolean isReduceOnly = true;
+				
 				// 2- Task scheduling
 				for (PairTaskDatasource pairs : executionPlan.taskSet.pairs) {
-					request.schedulingPlan.put(pairs.taskId, executionPlan.vm.getId());
-
+					
 					Task task = request.getTaskFromId(pairs.taskId);
 					if (task instanceof MapTask)
+					{
+						request.schedulingPlanForMap.put(pairs.taskId, executionPlan.vm.getId());
 						((MapTask) task).selectedDataSourceName = pairs.dataSourceName;
+						isReduceOnly = false;
+					}
+					else
+						request.schedulingPlanForReduce.put(pairs.taskId, executionPlan.vm.getId());
 				}
+				
+				// 1- VM provisioning
+				VmInstance executionPlanVm = executionPlan.vm;
+				// Does it have map (mapAndReduceVmProvisionList) or not (reduceOnlyVmProvisionList)?
+				if(isReduceOnly)
+				{
+					if (!request.reduceOnlyVmProvisionList.contains(executionPlanVm))
+						request.reduceOnlyVmProvisionList.add(executionPlanVm);
+				}
+				else
+					if (!request.mapAndReduceVmProvisionList.contains(executionPlanVm))
+						request.mapAndReduceVmProvisionList.add(executionPlanVm);
+
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

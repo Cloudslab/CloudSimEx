@@ -129,8 +129,8 @@ public class CloudDatacenter extends Datacenter {
 					if (mapTask.getCloudletStatus() != Cloudlet.SUCCESS)
 					{
 						isAllMapExecuted = false;
-						//delayTime = mapTask.
-						break;
+						delayTime = 1.0;
+						//break;
 					}
 				}
 				
@@ -183,6 +183,38 @@ public class CloudDatacenter extends Datacenter {
 
 		checkCloudletCompletion();
 	}
+	
+	protected void processVmCreate(SimEvent ev, boolean ack) {
+		Vm vm = (Vm) ev.getData();
+
+		boolean result = getVmAllocationPolicy().allocateHostForVm(vm);
+
+		if (ack) {
+			int[] data = new int[3];
+			data[0] = getId();
+			data[1] = vm.getId();
+
+			if (result) {
+				data[2] = CloudSimTags.TRUE;
+			} else {
+				data[2] = CloudSimTags.FALSE;
+			}
+			send(vm.getUserId(), 0.1, CloudSimTags.VM_CREATE_ACK, data);
+		}
+
+		if (result) {
+			getVmList().add(vm);
+
+			if (vm.isBeingInstantiated()) {
+				vm.setBeingInstantiated(false);
+			}
+
+			vm.updateVmProcessing(CloudSim.clock(), getVmAllocationPolicy().getHost(vm).getVmScheduler()
+					.getAllocatedMipsForVm(vm));
+		}
+
+	}
+
 	
 	/**
 	 * Predict file transfer time.

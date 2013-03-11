@@ -65,7 +65,12 @@ public class Requests {
 	
 	public VmInstance getVMInstanceFromId(int vmInstanceId) {
 		for (Request request : requests) {
-			for (VmInstance vmInstance : request.vmProvisionList) {
+			for (VmInstance vmInstance : request.mapAndReduceVmProvisionList) {
+				if(vmInstance.getId() == vmInstanceId)
+					return vmInstance;
+			}
+			
+			for (VmInstance vmInstance : request.reduceOnlyVmProvisionList) {
 				if(vmInstance.getId() == vmInstanceId)
 					return vmInstance;
 			}

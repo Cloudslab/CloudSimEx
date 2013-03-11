@@ -25,8 +25,11 @@ public class Request extends SimEvent {
 	public double firstSubmissionTime;
 	public double lastFinishTime;
 	
-	public List<VmInstance> vmProvisionList;
-	public Map<Integer, Integer> schedulingPlan; //<Task ID, VM ID>
+	public List<VmInstance> mapAndReduceVmProvisionList;
+	public List<VmInstance> reduceOnlyVmProvisionList;
+	
+	public Map<Integer, Integer> schedulingPlanForMap; //<MapTask ID, VM ID>
+	public Map<Integer, Integer> schedulingPlanForReduce; //<ReduceTask ID, VM ID>
 
 	public Request(double submissionTime, double budget, int deadline, String jobFile, UserClass userClass) {
 		id = Id.pollId(Request.class);
@@ -38,8 +41,11 @@ public class Request extends SimEvent {
 		firstSubmissionTime = -1;
 		lastFinishTime = -1;
 		
-		vmProvisionList = new ArrayList<VmInstance>();
-		schedulingPlan = new HashMap<Integer, Integer>();
+		mapAndReduceVmProvisionList = new ArrayList<VmInstance>();
+		reduceOnlyVmProvisionList = new ArrayList<VmInstance>();
+		
+		schedulingPlanForMap = new HashMap<Integer, Integer>();
+		schedulingPlanForReduce = new HashMap<Integer, Integer>();
 
 		for (MapTask mapTask : job.mapTasks) {
 			mapTask.requestId = id;
