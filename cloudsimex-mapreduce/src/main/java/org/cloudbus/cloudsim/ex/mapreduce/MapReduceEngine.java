@@ -122,15 +122,14 @@ public class MapReduceEngine extends DatacenterBroker {
 		Log.printLine(getName() + " SELECTED THE FOLLOWING VMs (Map and Reduce):-");
 		submitVmList(request.mapAndReduceVmProvisionList);
 		for (VmInstance vmInstance : request.mapAndReduceVmProvisionList) {
-			VmType vmType = cloud.getVMTypeFromId(vmInstance.VmTypeId);
-			Log.printLine("-M & R  VM: " + vmInstance.name + " (ID: " + vmInstance.getId() + ") of Type: "+vmType.name);
+			Log.printLine("-M & R  VM ID: " + vmInstance.getId() + " of Type: "+vmInstance.name);
 		}
 		
 		// Print VMs provisioning for reduce only tasks (just print)
 		Log.printLine(getName() + " SELECTED THE FOLLOWING VMs (Reduce Only) [NOT PROVISIONED YET]:-");
 		for (VmInstance vmInstance : request.reduceOnlyVmProvisionList) {
-			VmType vmType = cloud.getVMTypeFromId(vmInstance.VmTypeId);
-			Log.printLine("-R only VM: " + vmInstance.name + " (ID: " + vmInstance.getId() + ") of Type: "+vmType.name);
+			Log.printLine("-R only VM ID: " + vmInstance.getId() + " of Type: "+vmInstance.name);
+			
 		}
 
 		// 2- Map and Reduce Tasks scheduling

@@ -84,7 +84,10 @@ public class CloudDatacenter extends Datacenter {
 		try {
 			// gets the Cloudlet object
 			Cloudlet cl = (Cloudlet) ev.getData();
-			Log.printLine(CloudSim.clock() + ": " + getName() + ": Processing cloudlet: " + cl.getCloudletId());
+			if(cl instanceof ReduceTask)
+				Log.printLine(CloudSim.clock() + ": " + getName() + ": Processing Reduce Task: " + cl.getCloudletId());
+			else
+				Log.printLine(CloudSim.clock() + ": " + getName() + ": Processing Map Task: " + cl.getCloudletId());
 
 			// checks whether this Cloudlet has finished or not
 			if (cl.isFinished()) {
@@ -114,31 +117,6 @@ public class CloudDatacenter extends Datacenter {
 
 				return;
 			}
-			
-			//Check: Reduce after map
-			if(cl instanceof ReduceTask)
-			{
-				Log.printLine(getName() + ": - Reduce Task #" + cl.getCloudletId());
-				
-				boolean isAllMapExecuted = true;
-				double delayTime = 0.0;
-				Requests requests = ((MapReduceEngine) CloudSim.getEntity("MapReduceEngine")).getRequests();
-				Request request = requests.getRequestFromTaskId(cl.getCloudletId());
-				
-				for (MapTask mapTask : request.job.mapTasks) {
-					if (mapTask.getCloudletStatus() != Cloudlet.SUCCESS)
-					{
-						isAllMapExecuted = false;
-						delayTime = 1.0;
-						//break;
-					}
-				}
-				
-				if(!isAllMapExecuted)
-					Log.printLine(getName() + ": - Reduce Task #" + cl.getCloudletId() + ": This Reduce Task can't start before all maps finishes");
-			}
-			else
-				Log.printLine(getName() + ": - Map Task #" + cl.getCloudletId());
 
 			// process this Cloudlet to this CloudResource
 			cl.setResourceParameter(getId(), getCharacteristics().getCostPerSecond(), getCharacteristics()
@@ -155,7 +133,7 @@ public class CloudDatacenter extends Datacenter {
 			CloudletScheduler scheduler = vm.getCloudletScheduler();
 			double estimatedFinishTime = scheduler.cloudletSubmit(cl, fileTransferTime);
 			estimatedFinishTime += cl.getExecStartTime();
-			Log.printLine(CloudSim.clock() + ": " + getName() + ": Estimated Finish/Execution Time for cloudlet: " + cl.getCloudletId() + " is: " + estimatedFinishTime);
+			Log.printLine(CloudSim.clock() + ": " + getName() + ": Estimated Execution Time for task ID: " + cl.getCloudletId() + " is: " + estimatedFinishTime + " seconds");
 			
 			// if this cloudlet is in the exec queue
 			if (estimatedFinishTime > 0.0 && !Double.isInfinite(estimatedFinishTime)) {
@@ -227,8 +205,8 @@ public class CloudDatacenter extends Datacenter {
 		
 		if(cl instanceof MapTask)
 		{
-			time = ((MapTask) cl).predictFileTransferTimeFromDataSource();
-			time += ((MapTask) cl).predictFileTransferTimeToReduceVms();
+			time = ((MapTask) cl).predictFileTransferTimeFromDataSource(); //D-in
+			time += ((MapTask) cl).predictFileTransferTimeToReduceVms(); //D-out
 		}
 		
 		return time;

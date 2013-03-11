@@ -8,20 +8,20 @@ mapTasks:
       {
         # intermediate Data information: [Reduce Task ID, data size in mega byte]
         reduce0001: 3,
-        reduce0002: 7
+        reduce0002: 10
       }
   ]
 - [map0002, Forward the values of 2011 and 2012 keys to the right reducer, 1, 10,
       [gbr-sensors, S3-sensors],
       {
-        reduce0001: 10
+        reduce0001: 6
       }
   ]
 - [map0003, Forward the values of 2011 and 2012 keys to the right reducer, 1, 10,
       [S3-sensors],
       {
         reduce0001: 1,
-        reduce0002: 9
+        reduce0002: 10
       }
   ]
 

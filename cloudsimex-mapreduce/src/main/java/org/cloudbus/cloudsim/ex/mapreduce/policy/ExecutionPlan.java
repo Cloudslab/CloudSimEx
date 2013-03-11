@@ -49,7 +49,7 @@ public class ExecutionPlan {
 			//1st) The time to transfere the data in:
 			double dataIn = 0.0;
 			if(task instanceof MapTask)
-				dataIn = ((MapTask)task).predictFileTransferTimeFromDataSource(vm);
+				dataIn = ((MapTask)task).predictFileTransferTimeFromDataSource(vm, pairs.dataSourceName);
 			
 			//2nd) The time to execute the task
 			double executionTime = (task.getCloudletTotalLength() * task.getCloudletFileSize()) / vm.getMips();
