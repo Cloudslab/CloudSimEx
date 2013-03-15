@@ -95,7 +95,7 @@ public class SingleDatacentre {
 	    Datacenter dc1 = createDatacenter("WebDataCenter1");
 
 	    // Step 3: Create Brokers
-	    WebBroker brokerDC1 = new PerformanceLoggingWebBroker("BrokerDC1", refreshTime, simulationLength, 0.5,
+	    WebBroker brokerDC1 = new PerformanceLoggingWebBroker("BrokerDC1", refreshTime, simulationLength, 0.1,
 		    0.01,
 		    5 * refreshTime,
 		    Arrays.asList(dc1.getId()));

@@ -59,10 +59,10 @@ prepareSessionDataForType <- function(type, size = 50, step = 5, ram = 512, cpu 
     c("Time", "%CPUUtil", "%SessionMem", "%ActiveMem", "%tps")  
   }
   perfFrame <- perfFrame[,(names(perfFrame) %in% columns)]
-  perfFrame[,"%CPUUtil"] <- (perfFrame[,"%CPUUtil"] * cpu * step) / (100 * size)
+  perfFrame[,"%CPUUtil"] <- (perfFrame[,"%CPUUtil"] * cpu * step) / (100 * (size - baseLineSize))
   perfFrame[,"%CPUUtil"] <- sapply(perfFrame[,"%CPUUtil"], function(x){if(x < 1) 1 else x })
-  perfFrame[,"%SessionMem"] <- (perfFrame[,"%SessionMem"] * ram) / (100 * size)
-  perfFrame[,"%ActiveMem"] <- (perfFrame[,"%ActiveMem"] * ram) / (100 * size)
+  perfFrame[,"%SessionMem"] <- (perfFrame[,"%SessionMem"] * ram) / (100 * (size - baseLineSize))
+  perfFrame[,"%ActiveMem"] <- (perfFrame[,"%ActiveMem"] * ram) / (100 * (size - baseLineSize))
   
   perfFrame[,"%CPUUtil"] <- averageSteps(perfFrame[,"%CPUUtil"], step, stepFunc = stepFunc)
   perfFrame[,"%CPUUtil"] <- averageSteps(perfFrame[,"%CPUUtil"], step, stepFunc = stepFunc)
@@ -105,7 +105,9 @@ prepareSessionDataForType <- function(type, size = 50, step = 5, ram = 512, cpu 
 
 # Plots the utilisation of different properties
 # Typical proerties - %memused, "%CPUUtil", UsedMem, tps
-plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend = T, forWorkload = "All", maxY = NA) {
+plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend = T, forWorkload = "All", maxY = NA, file = NA) {
+  propertiesToNames <- c("%CPUUtil" = "%CPU utilisation", "%ActiveMem" = "%RAM utilisation", "%tps" = "%Disk utilisation")
+  
   benchPattern <- paste0(type, "_server_\\d+$")
   if(forWorkload[1] == "All") {
     forWorkload <- sapply (getFiles(sessionPattern), getNumbersInNames )
@@ -136,9 +138,13 @@ plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend 
     print(c(minProp, maxProp))
   }
   
-  plot(minProp, minTime, ylim=c(minProp, maxProp), xlim=c(minTime, maxTime), type = "n", main = property,
+  openGraphsDevice(file)
+  fullScreen(hasTitle=T)
+  
+  title <- paste(propertiesToNames[property], "for", paste(sort(forWorkload), collapse = ', '), "sessions")
+  plot(minProp, minTime, ylim=c(minProp, maxProp), xlim=c(minTime, maxTime), type = "n", main = title,
        xlab = "Time in seconds",
-       ylab = property)
+       ylab = propertiesToNames[property])
 
   linetype <- c(1:length(benchFiles))
   plotchar <- seq(18, 18 + length(benchFiles), 1)
@@ -153,8 +159,13 @@ plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend 
   }
   
   if (plotLegend) {
-    legend(0, maxProp, benchFiles, col = colors, lty = linetype, cex=0.7)
+    legend(0, maxProp, sapply(benchFiles, 
+           function(f) {paste(getNumbersInNames(f), if(getNumbersInNames(f) == 1) "session" else "sessions" )}),
+           col = colors, lty = linetype, cex=0.7)
   }
+  
+  resetMar()
+  closeDevice(file)
 }
 
 getSessionLastTimeByWorkload <- function(size) {

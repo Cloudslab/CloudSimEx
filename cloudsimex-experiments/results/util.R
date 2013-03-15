@@ -64,7 +64,7 @@ stepFuncDefault <- function(lst) {
     minEl <- min(lst)
     
     middle <- lst[c(-(which(lst == maxEl)[1]), -(which(lst == minEl)[1]))]
-    mean(middle)
+    meanOfMeanAndMed(middle)
   } else {
     mean(lst) 
   }
@@ -78,8 +78,7 @@ resetMar <- function() {
 
 fullScreen <- function(hasTitle = F) {
   top <- if (hasTitle) { initialMar[3] } else { 0 }
-  newMar <- c(initialMar[1] - 1, initialMar[2], top, initialMar[4] - 2)
-  #print(newMar)
+  newMar <- c(max(initialMar[1] - 1, 0), max(initialMar[2], 0), max(0, top), max(0, initialMar[4] - 2))
   par(mar=newMar)
 }
 

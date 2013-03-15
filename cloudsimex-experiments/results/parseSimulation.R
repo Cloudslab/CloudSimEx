@@ -50,7 +50,7 @@ plotDelayComparison <- function(forWorkload = "All", baseSize = 100, file = NA) 
   closeDevice(file)
 }
 
-compareUtilisation <- function(forWorkload = "All", property="percentCPU", type, vmId) {
+compareUtilisation <- function(forWorkload = "All", property="percentCPU", type, vmId, file=NA) {
   if(forWorkload[1] == "All") {
     forWorkload <- sapply (getFiles(sessionPattern), getNumbersInNames )
   } 
@@ -78,25 +78,62 @@ compareUtilisation <- function(forWorkload = "All", property="percentCPU", type,
     
     len <- min(nrow(sarFrame), nrow(simFrame))
     
-    print(paste("======================> Wilcox for ", w, " sessions <====================="))
-    vector1 <- sarFrame[,property][1:len]
-    vector2 <- simFrame[,property][1:len]
-    print(wilcox.test(vector1[1:len], vector2[1:len], paired=TRUE))
+    print(paste("======================> ", w, " sessions <====================="))
+    sink()
+    
+    sarVec <- sarFrame[,property][1:len]
+    simVec <- simFrame[,property][1:len]
+    diff <- simVec - sarVec
+    
+    print(paste("Ssamples length", len))
+    print("First 50 elements from execution:")
+    print(sarVec[1:50])
+    
+    print("First 50 elements from simulation:")
+    print(simVec[1:50])
+    
+    print("First 50 elements from the difference:")
+    print(diff[1:50])
+    
+    t <- wilcox.test(simVec[1:len], sarVec[1:len], paired=TRUE, conf.int=T) 
+    if (!is.na(file)) {
+      sink(file, append=T, split=FALSE)
+      s1 <- sprintf("%d sessions  95%s CI (%.2f, %.2f)", w, "%", t$conf.int[1], t$conf.int[2])
+      s2 <- sprintf("; %.2f  ", t$estimate)
+      resString <- sprintf("%-50s %-50s", s1, s2)
+      print(resString)
+      sink()
+    }
+    
+    print(t)
+    
     print("")
+    print("Testing with the diff - should be the same result...")
+    print(wilcox.test(diff, conf.int=T))
   }
   
 }
 
-plotComparisonSimExecPerfBulk <- function(forWorkload, type, vmId, property="percentCPU", step = 10, stepFunc = mean, filePattern, maxY=NA) {
+plotComparisonSimExecPerfBulk <- function(forWorkload, type, vmId, property="percentCPU", step = 10, stepFunc = mean, filePattern, maxY=NA, layoutMatrix=NA) {
+  concatNames <- paste(forWorkload, collapse = '-')
+  commonFile <- if (is.na(filePattern)) NA else paste0(subDir, "/", filePattern, "_", property, "_",  concatNames, ".pdf" )
+  if (!is.na(layoutMatrix)) {
+    openGraphsDevice(commonFile)
+    layout(layoutMatrix)
+  }
   
   for(w in forWorkload) {
-    fileName <- paste0(subDir, "/", filePattern, "_", property, "_",  w, ".pdf" )
-    plotComparisonSimExecPerf(w, type, vmId, property, step, stepFunc=stepFunc, file = fileName, maxY=maxY)
+    fileName <- if (!is.na(layoutMatrix) || is.na(filePattern)) NA else paste0(subDir, "/", filePattern, "_", property, "_",  w, ".pdf" )
+    plotComparisonSimExecPerf(w, type=type, vmId=vmId, property=property, step=step, stepFunc=stepFunc, file = fileName, maxY=maxY)
   }
   
+  if (!is.na(layoutMatrix)) {
+    closeDevice(commonFile)
+  }
 }
 
-plotComparisonSimExecPerf <- function(forWorkload, type, vmId, property="percentCPU", step = 5, stepFunc = stepFuncDefault, maxY = NA, preparePlot = T, file = NA){
+plotComparisonSimExecPerf <- function(forWorkload, type, vmId, property="percentCPU", step = 5, stepFunc = stepFuncDefault, maxY = NA, preparePlot = T,
+                                      file = NA, titleFlag=F, plotLegend=T){
   propertiesToNames <- c("percentCPU" = "CPU", "percentRAM" = "RAM", "percentIO" = "Disk IO")
   
   baseLineFile <- paste0(subDir, "/", type, "_server_", baseLineSize)
@@ -126,11 +163,11 @@ plotComparisonSimExecPerf <- function(forWorkload, type, vmId, property="percent
   maxProp <- if (is.na(maxY)) 100 else maxY
 
   openGraphsDevice(file)
-  fullScreen(hasTitle=T)
+  fullScreen(hasTitle=titleFlag)
   
   if (preparePlot) {
     yLable = paste0("% ", propertiesToNames[property], " utilisation")
-    title = paste0(yLable, " for ", forWorkload, " sessions") 
+    title = if(titleFlag) paste0(forWorkload, " sessions") else " "
     
     plot(minProp, minTime, ylim=c(minProp, maxProp), xlim=c(minTime, maxTime), type = "n", main = title,
        xlab = "Time in seconds",
@@ -139,6 +176,11 @@ plotComparisonSimExecPerf <- function(forWorkload, type, vmId, property="percent
   
   lines(simFrame[,property]~simFrame$time,  type="l", lwd=2, lty = 1, pch = 18, col="red")
   lines(sarFrame[,property]~sarFrame$time,  type="l", lty = 2, pch = 19, col="black")
+  
+  if (plotLegend) {
+    legend(0, 100, c("Simulation", "Execution"),
+           col = c("red", "black"), lty = c(1, 2), cex=0.7)
+  }
   
   resetMar()
   closeDevice(file)
@@ -154,16 +196,19 @@ parseSimulationPerformanceResults <- function(forWorkload, vmId, step = 5, stepF
   simDf <- read.csv(simFile, sep=";")
   
   simPerf <-simDf[simDf$vmId == vmId, ]
-
-  simPerf$percentCPU = averageSteps(simPerf$percentCPU, step, stepFunc)
-  simPerf$percentRAM = averageSteps(simPerf$percentRAM, step, stepFunc)
+  
+  msrStep <- simPerf$time[2] - simPerf$time[1]
+  actualStep <- step / msrStep
+  
+  simPerf$percentCPU = averageSteps(simPerf$percentCPU, actualStep, stepFunc)
+  simPerf$percentRAM = averageSteps(simPerf$percentRAM, actualStep, stepFunc)
   
   if("percentIO" %in% names(simPerf)) {
-    simPerf$percentIO = averageSteps(simPerf$percentIO, step, stepFunc)
+    simPerf$percentIO = averageSteps(simPerf$percentIO, actualStep, stepFunc)
   }
   
   #Get only the data for the seconds(steps) we need
-  simPerf <- simPerf[seq(1, nrow(simPerf), step),]
+  simPerf <- simPerf[seq(1, nrow(simPerf), actualStep),]
   simPerf <- simPerf[complete.cases(simPerf),]
   
   simPerf

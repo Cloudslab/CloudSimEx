@@ -15,35 +15,42 @@ source('parseSimulation.R')
 resetPar()
 
 plotDelayComparison(file = paste0(subDir, "/delays_boxplots.pdf") )
+plotComparison(type="db", forWorkload=c(100,1), plotLegend=T, useColors=F, file = paste0(subDir, "/1-100SessionsBaseline.pdf"))
+
 
 workloads <- seq(100, 700, 100)
 step <- 20
 namePattern <- "cmp"
+asPattern <- "as_cmp"
+dbPattern <- "db_cmp"
 
-plotComparisonSimExecPerfBulk(forWorkload=workloads, type = "db", vmId = 1, filePattern = namePattern, step = step)
-plotComparisonSimExecPerfBulk(forWorkload=workloads, type = "web", vmId = 2, filePattern = namePattern, step = step)
+plotComparisonSimExecPerfBulk(forWorkload=workloads, type = "db", vmId = 1, filePattern = dbPattern, step = step)
+plotComparisonSimExecPerfBulk(forWorkload=workloads, type = "web", vmId = 2, filePattern = asPattern, step = step)
 
-plotComparisonSimExecPerfBulk(forWorkload=workloads, type = "db", property="percentRAM", vmId = 1, filePattern = namePattern, step = 5, maxY = 25)
-plotComparisonSimExecPerfBulk(forWorkload=workloads, type = "web", property="percentRAM", vmId = 2, filePattern = namePattern, step = 5, maxY = 25)
+plotComparisonSimExecPerfBulk(forWorkload=c(200, 600), type="db", vmId=1, filePattern=dbPattern, step = 10, layoutMatrix=matrix(c(1, 2), 1, 2, byrow = TRUE))
+plotComparisonSimExecPerfBulk(forWorkload=c(200, 700), type="db", vmId=1, filePattern=dbPattern, step = 10, layoutMatrix=matrix(c(1, 2), 1, 2, byrow = TRUE))
 
-plotComparisonSimExecPerfBulk(forWorkload=workloads, type = "db", property="percentIO", vmId = 1, filePattern = namePattern, step = step, maxY = 10)
+plotComparisonSimExecPerfBulk(forWorkload=workloads, type = "db", property="percentRAM", vmId = 1, filePattern = dbPattern, step = 15, maxY = 100)
+plotComparisonSimExecPerfBulk(forWorkload=workloads, type = "web", property="percentRAM", vmId = 2, filePattern = asPattern, step = 15, maxY = 100)
+
+plotComparisonSimExecPerfBulk(forWorkload=workloads, type = "db", property="percentIO", vmId = 1, filePattern = dbPattern, step = step, maxY = 10)
 
 
-sink(paste0(subDir, "/CPU_DB_SRV.txt"), append=FALSE, split=FALSE)
-compareUtilisation(forWorkload=workloads, type = "db", vmId = 1)
+outFile <- paste0(subDir, "/CPU_DB_SRV.test.txt")
+compareUtilisation(forWorkload=workloads[-1], type = "db", vmId = 1, file = outFile)
 
-sink(paste0(subDir, "/CPU_AS_SRV.txt"), append=FALSE, split=FALSE)
-compareUtilisation(forWorkload=workloads, type = "web", vmId = 2)
+outFile <- paste0(subDir, "/CPU_AS_SRV.test.txt")
+compareUtilisation(forWorkload=workloads[-1], type = "web", vmId = 2, file = outFile)
 
-sink(paste0(subDir, "/RAM_DB_SRV.txt"), append=FALSE, split=FALSE)
-compareUtilisation(forWorkload=workloads, property="percentRAM", type = "db", vmId = 1)
+outFile <- paste0(subDir, "/RAM_DB_SRV.test.txt")
+compareUtilisation(forWorkload=workloads[-1], property="percentRAM", type = "db", vmId = 1, file = outFile)
 
-sink(paste0(subDir, "/RAM_AS_SRV.txt"), append=FALSE, split=FALSE)
-compareUtilisation(forWorkload=workloads, property="percentRAM", type = "web", vmId = 2)
+outFile <- paste0(subDir, "/RAM_AS_SRV.test.txt")
+compareUtilisation(forWorkload=workloads[-1], property="percentRAM", type = "web", vmId = 2, file = outFile)
 
-sink(paste0(subDir, "/IO_DB_SRV.txt"), append=FALSE, split=FALSE)
-compareUtilisation(forWorkload=workloads, property="percentIO", type = "db", vmId = 1)
+outFile <- paste0(subDir, "/IO_DB_SRV.test.txt")
+compareUtilisation(forWorkload=workloads[-1], property="percentIO", type = "db", vmId = 1, file = outFile)
 
 sink()
 
-print("Done")
+print("Diagrams and wilcox results have been generated")
