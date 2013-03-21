@@ -124,7 +124,9 @@ plotComparisonSimExecPerfBulk <- function(forWorkload, type, vmId, property="per
   
   for(w in forWorkload) {
     fileName <- if (!is.na(layoutMatrix) || is.na(filePattern)) NA else paste0(subDir, "/", filePattern, "_", property, "_",  w, ".pdf" )
-    plotComparisonSimExecPerf(w, type=type, vmId=vmId, property=property, step=step, stepFunc=stepFunc, file = fileName, maxY=maxY)
+    #if(is.na(fileName) || file.exists(fileName)) {
+      plotComparisonSimExecPerf(w, type=type, vmId=vmId, property=property, step=step, stepFunc=stepFunc, file = fileName, maxY=maxY)
+    #}
   }
   
   if (!is.na(layoutMatrix)) {
@@ -134,61 +136,65 @@ plotComparisonSimExecPerfBulk <- function(forWorkload, type, vmId, property="per
 
 plotComparisonSimExecPerf <- function(forWorkload, type, vmId, property="percentCPU", step = 5, stepFunc = stepFuncDefault, maxY = NA, preparePlot = T,
                                       file = NA, titleFlag=F, plotLegend=T){
-  propertiesToNames <- c("percentCPU" = "CPU", "percentRAM" = "RAM", "percentIO" = "Disk IO")
-  
-  baseLineFile <- paste0(subDir, "/", type, "_server_", baseLineSize)
-  baseLineFrame <- parseSar(baseLineFile)
-  
-  sarFile <- paste0(subDir, "/", type, "_server_", forWorkload)
-  sarFrame <- prepareSarFrame(parseSar(sarFile), baseLineFrame)
-  
-  sarFrame <- renameSarColToSim(sarFrame)
-  simFrame <- parseSimulationPerformanceResults(forWorkload, vmId, step, stepFunc)
-  
-  if(property == "percentRAM") {
-    baseLineFrame$prcActive <- 100 * as.numeric(baseLineFrame$kbactive) /
-      (as.numeric(baseLineFrame$kbmemused) + as.numeric(baseLineFrame$kbmemfree))
-    meanActive <- mean(baseLineFrame$prcActive) 
-    sarFrame[,property] <- sarFrame[,property] + meanActive
-    simFrame[,property] <- simFrame[,property] + meanActive
-  }
-  
-  minTime <- min(min(sarFrame$time),  min(simFrame$time))
-  maxTime <- min(getSessionLastTimeByWorkload(forWorkload),  max(simFrame$time))
-  
-  msrStep <- simFrame$time[2] - simFrame$time[1]
-  step <- step / msrStep
-  
-  minProp <- 0
-  maxProp <- if (is.na(maxY)) 100 else maxY
 
-  openGraphsDevice(file)
-  fullScreen(hasTitle=titleFlag)
+  sarFile <- paste0(subDir, "/", type, "_server_", forWorkload)
+  simFile = paste0(subDir, "/", "performance_sessions_", forWorkload, ".csv")
   
-  if (preparePlot) {
-    yLable = paste0("% ", propertiesToNames[property], " utilisation")
-    title = if(titleFlag) paste0(forWorkload, " sessions") else " "
+  if(file.exists(sarFile) && file.exists(simFile)){
+    propertiesToNames <- c("percentCPU" = "CPU", "percentRAM" = "RAM", "percentIO" = "Disk IO")
     
-    plot(minProp, minTime, ylim=c(minProp, maxProp), xlim=c(minTime, maxTime), type = "n", main = title,
-       xlab = "Time in seconds",
-       ylab = yLable)
+    baseLineFile <- paste0(subDir, "/", type, "_server_", baseLineSize)
+    baseLineFrame <- parseSar(baseLineFile)
+    
+    sarFrame <- prepareSarFrame(parseSar(sarFile), baseLineFrame)
+    sarFrame <- renameSarColToSim(sarFrame)
+    simFrame <- parseSimulationPerformanceResults(forWorkload, vmId, step, stepFunc)
+    
+    if(property == "percentRAM") {
+      baseLineFrame$prcActive <- 100 * as.numeric(baseLineFrame$kbactive) /
+        (as.numeric(baseLineFrame$kbmemused) + as.numeric(baseLineFrame$kbmemfree))
+      meanActive <- mean(baseLineFrame$prcActive) 
+      sarFrame[,property] <- sarFrame[,property] + meanActive
+      simFrame[,property] <- simFrame[,property] + meanActive
+    }
+    
+    minTime <- min(min(sarFrame$time),  min(simFrame$time))
+    maxTime <- min(getSessionLastTimeByWorkload(forWorkload),  max(simFrame$time))
+    
+    msrStep <- simFrame$time[2] - simFrame$time[1]
+    step <- step / msrStep
+    
+    minProp <- 0
+    maxProp <- if (is.na(maxY)) 100 else maxY
+  
+    openGraphsDevice(file)
+    fullScreen(hasTitle=titleFlag)
+    
+    if (preparePlot) {
+      yLable = paste0("% ", propertiesToNames[property], " utilisation")
+      title = if(titleFlag) paste0(forWorkload, " sessions") else " "
+      
+      plot(minProp, minTime, ylim=c(minProp, maxProp), xlim=c(minTime, maxTime), type = "n", main = title,
+         xlab = "Time in seconds",
+         ylab = yLable)
+    }
+    
+    lines(simFrame[,property]~simFrame$time,  type="l", lwd=2, lty = 1, pch = 18, col="red")
+    lines(sarFrame[,property]~sarFrame$time,  type="l", lty = 2, pch = 19, col="black")
+    
+    if (plotLegend) {
+      legend(0, 100, c("Simulation", "Execution"),
+             col = c("red", "black"), lty = c(1, 2), cex=0.7)
+    }
+    
+    resetMar()
+    closeDevice(file)
+    
+    print("Summary of simulation performances")
+    print(summary(simFrame[,property]))
+    print("Summary of execution performances")
+    print(summary(sarFrame[,property]))
   }
-  
-  lines(simFrame[,property]~simFrame$time,  type="l", lwd=2, lty = 1, pch = 18, col="red")
-  lines(sarFrame[,property]~sarFrame$time,  type="l", lty = 2, pch = 19, col="black")
-  
-  if (plotLegend) {
-    legend(0, 100, c("Simulation", "Execution"),
-           col = c("red", "black"), lty = c(1, 2), cex=0.7)
-  }
-  
-  resetMar()
-  closeDevice(file)
-  
-  print("Summary of simulation performances")
-  print(summary(simFrame[,property]))
-  print("Summary of execution performances")
-  print(summary(sarFrame[,property]))
 }
 
 parseSimulationPerformanceResults <- function(forWorkload, vmId, step = 5, stepFunc = stepFuncDefault) {

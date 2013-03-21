@@ -101,8 +101,11 @@ prepareSarFrame <- function(df, baseLineFrame) {
   # Make the time start from 0
   df$Time = df$Time - min(df$Time)
   
-  baseLineFrame[,"%CPUUtil"] = 100 - as.numeric(baseLineFrame[,"%idle"])
-  df[,"%CPUUtil"] = 100 - as.numeric(df[,"%idle"]) - mean(baseLineFrame[,"%CPUUtil"])
+  baseLineFrame[, "%realIdle"] = as.numeric(baseLineFrame[,"%idle"])  + as.numeric(baseLineFrame[,"%iowait"])
+  baseLineFrame[,"%CPUUtil"] = 100 - baseLineFrame[,"%realIdle"] 
+  
+  df[,"%realIdle"] = as.numeric(df[,"%idle"]) + as.numeric(df[,"%iowait"])
+  df[,"%CPUUtil"] = 100 - df[,"%realIdle"] - mean(baseLineFrame[,"%CPUUtil"])
   df[,"%CPUUtil"] = sapply(df[,"%CPUUtil"], function(x) {if (x < 0) 0 else x})
   
   df[,"KBMemory"] = as.numeric(df$kbmemused) + as.numeric(df$kbmemfree);

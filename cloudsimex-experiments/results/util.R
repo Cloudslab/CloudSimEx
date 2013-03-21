@@ -1,6 +1,6 @@
 # Common utility functions and constants used throughout teh statistical analysis
 
-subDir <- "stat"
+subDir <- "tmp"
 maxTPS <- 1000
 baseLineSize <- 1
 
@@ -66,11 +66,20 @@ stepFuncDefault <- function(lst) {
     middle <- lst[c(-(which(lst == maxEl)[1]), -(which(lst == minEl)[1]))]
     meanOfMeanAndMed(middle)
   } else {
-    mean(lst) 
+    meanOfMeanAndMed(lst) 
   }
   
   result
 }
+
+meanNoOutliers <- function(lst) {
+  mean(removeOutliers(lst))
+}
+
+removeOutliers <- function(x) {
+  x[!x %in% boxplot.stats(x)$out]
+}
+
 
 resetMar <- function() {
   par(mar = initialMar)
