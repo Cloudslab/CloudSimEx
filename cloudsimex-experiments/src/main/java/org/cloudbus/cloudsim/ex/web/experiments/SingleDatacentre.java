@@ -36,7 +36,6 @@ import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleDBBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleWebLoadBalancer;
 import org.cloudbus.cloudsim.ex.web.WebBroker;
-import org.cloudbus.cloudsim.ex.web.WebCloudlet;
 import org.cloudbus.cloudsim.ex.web.WebSession;
 import org.cloudbus.cloudsim.ex.web.workload.IWorkloadGenerator;
 import org.cloudbus.cloudsim.ex.web.workload.SimpleWorkloadGenerator;
@@ -53,9 +52,10 @@ import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
  */
 public class SingleDatacentre {
 
+    public static String RESULT_DIR = "results/tmp/";
     protected int numOfSessions = 500;
     protected int simulationLength = DAY;
-    protected int refreshTime = 5;
+    protected int step = 60;
     protected String experimentName;
 
     protected VmSchedulerMapVmsToPes<Pe> vmScheduler;
@@ -82,7 +82,7 @@ public class SingleDatacentre {
     public final void runExperimemt() throws SecurityException, IOException {
 	long simulationStart = System.currentTimeMillis();
 
-	CustomLog.redirectToFile("results/stat/performance_sessions_" + numOfSessions + ".csv");
+	CustomLog.redirectToFile(RESULT_DIR + "/performance_sessions_" + numOfSessions + ".csv");
 
 	try {
 	    // Step1: Initialize the CloudSim package. It should be called
@@ -95,9 +95,9 @@ public class SingleDatacentre {
 	    Datacenter dc1 = createDatacenter("WebDataCenter1");
 
 	    // Step 3: Create Brokers
-	    WebBroker brokerDC1 = new PerformanceLoggingWebBroker("BrokerDC1", refreshTime, simulationLength, 0.1,
+	    WebBroker brokerDC1 = new PerformanceLoggingWebBroker("BrokerDC1", step, simulationLength, 0.1,
 		    0.01,
-		    5 * refreshTime,
+		    5 * step,
 		    Arrays.asList(dc1.getId()));
 
 	    // Step 4: Create virtual machines
@@ -132,12 +132,12 @@ public class SingleDatacentre {
 
 	    // Step 10 : stop the simulation and print the results
 	    CloudSim.stopSimulation();
-	    CustomLog.redirectToFile("results/stat/simulation_sessions_" + numOfSessions + ".csv");
+	    CustomLog.redirectToFile(RESULT_DIR + "simulation_sessions_" + numOfSessions + ".csv");
 	    CustomLog.printResults(WebSession.class, resultDC1Sessions);
 
-	    CustomLog.redirectToFile("results/stat/simulation_cloudlets_" +
-		    numOfSessions + ".csv");
-	    CustomLog.printResults(WebCloudlet.class, cloudlets);
+	    // CustomLog.redirectToFile(dir + "simulation_cloudlets_" +
+	    // numOfSessions + ".csv");
+	    // CustomLog.printResults(WebCloudlet.class, cloudlets);
 
 	    System.err.println();
 	    System.err.println(experimentName + ": Simulation is finished!");
@@ -150,10 +150,10 @@ public class SingleDatacentre {
     }
 
     private List<? extends IWorkloadGenerator> generateWorkloadsDC1(final int userId) {
-	try (InputStream asIO = new FileInputStream("results/stat/web_cloudlets.txt");
-		InputStream dbIO = new FileInputStream("results/stat/db_cloudlets.txt")) {
+	try (InputStream asIO = new FileInputStream(RESULT_DIR + "web_cloudlets.txt");
+		InputStream dbIO = new FileInputStream(RESULT_DIR + "db_cloudlets.txt")) {
 	    StatSessionGenerator sessionGenerator = new StatSessionGenerator(GeneratorsUtil.parseStream(asIO),
-		    GeneratorsUtil.parseStream(dbIO), userId, DATA, refreshTime);
+		    GeneratorsUtil.parseStream(dbIO), userId, DATA, step);
 
 	    // return Arrays.asList(new
 	    // PeriodWorkloadGenerator(sessionGenerator, 0.1, numOfSessions));

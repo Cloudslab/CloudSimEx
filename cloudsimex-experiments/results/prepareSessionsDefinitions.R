@@ -13,4 +13,4 @@ source('util.R')
 source('parseRubis.R')
 source('parseSar.R')
 
-prepareSessionData(stepFunc=median, size=100, step=20)
+prepareSessionData(stepFunc=median, size=100, step=60)

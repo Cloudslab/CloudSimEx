@@ -15,12 +15,12 @@ source('parseSimulation.R')
 
 resetPar()
 
-plotDelayComparison(file = paste0(subDir, "/delays_boxplots.pdf"), baseSize=100 , maxY=40)
-plotComparison(type="db", forWorkload=c(100,1), plotLegend=T, useColors=F, file = paste0(subDir, "/1-100SessionsBaseline.pdf"))
+workloads <- c(50, 100, 200, 300, 400, 500, 600)
 
+plotDelayComparison(file = paste0(subDir, "/delays_boxplots.pdf"), baseSize=100, forWorkload=workloads)
+plotComparison(type="db", forWorkload=c(100,1), plotLegend=T, useColors=F, file = paste0(subDir, "/1-100SessionsBaseline.pdf"), maxY=30)
 
-workloads <- c(150, 200, 250, 300, 400, 500, 600)
-step <- 100
+step <- 50
 namePattern <- "cmp"
 asPattern <- "as_cmp"
 dbPattern <- "db_cmp"
@@ -38,19 +38,19 @@ plotComparisonSimExecPerfBulk(forWorkload=workloads, type = "db", property="perc
 
 
 outFile <- paste0(subDir, "/CPU_DB_SRV.test.txt")
-compareUtilisation(forWorkload=workloads[-1], type = "db", vmId = 1, file = outFile)
+compareUtilisation(forWorkload=workloads[-2], type = "db", vmId = 1, file = outFile)
 
 outFile <- paste0(subDir, "/CPU_AS_SRV.test.txt")
-compareUtilisation(forWorkload=workloads[-1], type = "web", vmId = 2, file = outFile)
+compareUtilisation(forWorkload=workloads[-2], type = "web", vmId = 2, file = outFile)
 
 outFile <- paste0(subDir, "/RAM_DB_SRV.test.txt")
-compareUtilisation(forWorkload=workloads[-1], property="percentRAM", type = "db", vmId = 1, file = outFile)
+compareUtilisation(forWorkload=workloads[-2], property="percentRAM", type = "db", vmId = 1, file = outFile)
 
 outFile <- paste0(subDir, "/RAM_AS_SRV.test.txt")
-compareUtilisation(forWorkload=workloads[-1], property="percentRAM", type = "web", vmId = 2, file = outFile)
+compareUtilisation(forWorkload=workloads[-2], property="percentRAM", type = "web", vmId = 2, file = outFile)
 
 outFile <- paste0(subDir, "/IO_DB_SRV.test.txt")
-compareUtilisation(forWorkload=workloads[-1], property="percentIO", type = "db", vmId = 1, file = outFile)
+compareUtilisation(forWorkload=workloads[-2], property="percentIO", type = "db", vmId = 1, file = outFile)
 
 sink()
 

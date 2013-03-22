@@ -5,10 +5,10 @@ import java.util.Map;
 
 import org.cloudbus.cloudsim.ex.util.ExperimentsRunner;
 import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre100;
-import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre200;
 import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre250;
 import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre300;
 import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre400;
+import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre50;
 import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre500;
 import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre600;
 import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre700;
@@ -32,8 +32,15 @@ public class Experiments {
     public static void main(final String[] args) throws Exception {
 	// The main classes of the experiments
 	Class<?>[] experimens = new Class<?>[] {
+		// SingleDataCentre10.class,
+		// SingleDataCentre25.class,
+		SingleDataCentre50.class,
+		// SingleDataCentre75.class,
 		SingleDataCentre100.class,
-		SingleDataCentre200.class,
+		// SingleDataCentre125.class,
+		// SingleDataCentre150.class,
+		// SingleDataCentre175.class,
+		// SingleDataCentre200.class,
 		SingleDataCentre250.class,
 		SingleDataCentre300.class,
 		SingleDataCentre400.class,
@@ -47,7 +54,7 @@ public class Experiments {
 	Map<Class<?>, String> experiments = new LinkedHashMap<>();
 	for (Class<?> clazz : experimens) {
 	    experiments.put(clazz,
-		    String.format("%s.log", clazz.getSimpleName()));
+		    SingleDatacentre.RESULT_DIR + String.format("%s.log", clazz.getSimpleName()));
 	}
 
 	// Run the experiments with custom_log.properties config of the loggers

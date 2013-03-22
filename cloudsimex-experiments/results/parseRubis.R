@@ -31,7 +31,7 @@ prepareSessionData <- function(size = 100, step = 5, ram = 512, cpu = 10000, io 
 
 # Creates the file, defining the session behaviour for the db or web server, as
 # specified by the type parameter, which should be either "db" or "web"
-prepareSessionDataForType <- function(type, size = 50, step = 5, ram = 512, cpu = 10000, io = 10000, stepFunc=meanOfMeanAndMed) {
+prepareSessionDataForType <- function(type, size = 50, step = 5, ram = 512, cpu = 10000, io = 10000, stepFunc=meanOfMeanAndMed, maxY=40) {
   # Get the names of the files to use for baselining and performance characteristics
   perfFile <- ""
   baseLineFile <- ""

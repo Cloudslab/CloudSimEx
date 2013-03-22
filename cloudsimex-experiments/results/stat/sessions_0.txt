@@ -1,1 +1,0 @@
-startTime, endTime, duration, transitionsDone, transitionsLeft, summary, sessionName
