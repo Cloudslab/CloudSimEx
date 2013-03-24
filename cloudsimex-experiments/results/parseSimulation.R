@@ -45,7 +45,7 @@ plotDelayComparison <- function(forWorkload = "All", baseSize = 100, file = NA) 
   openGraphsDevice(file)
   fullScreen()
   boxplot(data$delay ~ data$factor, ylab = "Session Delay in Seconds", xlab="Number of Sessions")
-  boxplot(data$simDelay ~ data$factor, border = "red", lwd = 1, add = TRUE, boxwex=0.9)
+  boxplot(data$simDelay ~ data$factor, border = "red", lwd = 1, add = TRUE, boxwex=0.9, boxlty=1, lty = 2)
   resetMar()
   closeDevice(file)
 }
@@ -179,8 +179,8 @@ plotComparisonSimExecPerf <- function(forWorkload, type, vmId, property="percent
          ylab = yLable)
     }
     
-    lines(simFrame[,property]~simFrame$time,  type="l", lwd=2, lty = 1, pch = 18, col="red")
-    lines(sarFrame[,property]~sarFrame$time,  type="l", lty = 2, pch = 19, col="black")
+    lines(simFrame[,property]~simFrame$time,  type="l", lwd=3, lty = 1, pch = 18, col="red")
+    lines(sarFrame[,property]~sarFrame$time,  type="l", lty = 3, pch = 19, col="black")
     
     if (plotLegend) {
       legend(0, 100, c("Simulation", "Execution"),
