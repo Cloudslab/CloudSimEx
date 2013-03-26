@@ -91,8 +91,8 @@ public class BaseExperiment {
 	    CloudSim.init(numBrokers, Calendar.getInstance(), trace_flag);
 
 	    // Step 2: Create Datacenters
-	    Datacenter dc1 = createDatacenter("WebDataCenter1");
-	    Datacenter dc2 = createDatacenter("WebDataCenter2");
+	    Datacenter dc1 = createDatacenter("DC1");
+	    Datacenter dc2 = createDatacenter("DC2");
 
 	    // Step 3: Create Brokers
 	    WebBroker brokerDC1 = new WebBroker("BrokerDC1", refreshTime, simulationLength,

@@ -12,6 +12,7 @@ import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre50;
 import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre500;
 import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre600;
 import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre700;
+import org.cloudbus.cloudsim.ex.web.experiments.cases.SingleDataCentre200;
 
 /**
  * Runs the experiments for the
@@ -40,7 +41,7 @@ public class Experiments {
 		// SingleDataCentre125.class,
 		// SingleDataCentre150.class,
 		// SingleDataCentre175.class,
-		// SingleDataCentre200.class,
+		SingleDataCentre200.class,
 		SingleDataCentre250.class,
 		SingleDataCentre300.class,
 		SingleDataCentre400.class,

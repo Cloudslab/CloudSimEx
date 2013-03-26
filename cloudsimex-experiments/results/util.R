@@ -1,6 +1,6 @@
 # Common utility functions and constants used throughout teh statistical analysis
 
-subDir <- "tmp"
+subDir <- "stat"
 maxTPS <- 1000
 baseLineSize <- 1
 

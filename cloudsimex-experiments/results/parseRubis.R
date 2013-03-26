@@ -105,7 +105,7 @@ prepareSessionDataForType <- function(type, size = 50, step = 5, ram = 512, cpu 
 
 # Plots the utilisation of different properties
 # Typical proerties - %memused, "%CPUUtil", UsedMem, tps
-plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend = T, forWorkload = "All", maxY = NA, file = NA, useLineTypes=NA) {
+plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend = T, forWorkload = "All", maxY = NA, file = NA) {
   propertiesToNames <- c("%CPUUtil" = "%CPU utilisation", "%ActiveMem" = "%RAM utilisation", "%tps" = "%Disk utilisation")
   
   benchPattern <- paste0(type, "_server_\\d+$")
@@ -146,7 +146,7 @@ plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend 
        xlab = "Time in seconds",
        ylab = propertiesToNames[property])
 
-  linetypes <- if(is.na(useLineTypes)) c(1:length(benchFiles)) else useLineTypes
+  linetype <- c(1:length(benchFiles))
   plotchar <- seq(18, 18 + length(benchFiles), 1)
   
   i <- 1
@@ -154,19 +154,32 @@ plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend 
     print(paste("Summary for :", property, "in", benchFiles[i]))
     print(summary(as.numeric(frame[,property])))
     
-    lines(frame[,property]~frame$Time,  type="l", col=colors[i], lty = linetypes[i], pch = plotchar[i])
+    lines(frame[,property]~frame$Time,  type="l", col=colors[i], lty = linetype[i], pch = plotchar[i])
     i<- i + 1
   }
   
   if (plotLegend) {
     legend(0, maxProp, sapply(benchFiles, 
            function(f) {paste(getNumbersInNames(f), if(getNumbersInNames(f) == 1) "session" else "sessions" )}),
-           col = colors, lty = linetypes, cex=0.7)
+           col = colors, lty = linetype, cex=0.7)
   }
   
   resetMar()
   closeDevice(file)
 }
+
+
+plotExp2 <- function(type = "db", property="%CPUUtil", mesFileSuffix) {
+  mesFile <- paste0(subDir,"/", type, mesFileSuffix);
+  mesFrame <- prepareSarFrame(parseSar(mesFile))
+  
+  plot(0, 0, ylim=c(0, 100), xlim=c(0, max(mesFrame$Time)),   type = "n", main = "Exec",
+       xlab = "Time in seconds",
+       ylab = property)
+  
+  lines(mesFrame[,property]~mesFrame$Time,  type="l", lty = 1)
+}
+
 
 getSessionLastTimeByWorkload <- function(size) {
   sessionsFile <- paste0(subDir, "/sessions_", size, ".txt")

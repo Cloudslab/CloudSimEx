@@ -123,3 +123,26 @@ prepareSarFrame <- function(df, baseLineFrame) {
   
   df
 }
+
+prepareSarFrame <- function(df) {
+  # Make the time start from 0
+  df$Time = df$Time - min(df$Time)
+  
+  df[,"%realIdle"] = as.numeric(df[,"%idle"]) + as.numeric(df[,"%iowait"])
+  df[,"%CPUUtil"] = 100 - df[,"%realIdle"]
+  df[,"%CPUUtil"] = sapply(df[,"%CPUUtil"], function(x) {if (x < 0) 0 else x})
+  
+  df[,"KBMemory"] = as.numeric(df$kbmemused) + as.numeric(df$kbmemfree);
+  df[,"UsedMem"] = as.numeric(df$kbmemused) - as.numeric(df$kbcached) - as.numeric(df$kbbuffers)
+  df[,"%UsedMem"] = 100 * df[,"UsedMem"] / df[,"KBMemory"]
+  
+  df[,"SessionMem"] = abs(as.numeric(df$UsedMem))
+  df[,"%SessionMem"] = 100 * df[,"SessionMem"] / (df[,"KBMemory"])
+  
+  df[,"ActiveMem"] = as.numeric(df$kbactive) 
+  df[,"%ActiveMem"] = 100 * df[,"ActiveMem"] / df[,"KBMemory"]
+  
+  df[,"%tps"] = 100 * as.numeric(df[,"tps"]) / maxTPS
+  
+  df
+}
