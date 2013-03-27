@@ -1,3 +1,2 @@
-1- Reduce tasks start after all map tasks
-2- Check resource availability in the algorithm 
+- Check resource availability in the algorithm 
 - D-out: predictFileTransferTimeFromDataSource funtion in MapTask class

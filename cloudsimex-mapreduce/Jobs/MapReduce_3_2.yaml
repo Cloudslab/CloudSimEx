@@ -4,7 +4,7 @@
 mapTasks:
 # Map task info: [name, description, data Size in mega byte, million instructions per byte, [dataSources], [intermediate Data]]
 - [map0001, Forward the values of 2011 and 2012 keys to the right reducer, 1, 10,
-      [gbr-sensors, EEE-sensors],
+      [gbr-sensors],
       {
         # intermediate Data information: [Reduce Task ID, data size in mega byte]
         reduce0001: 3,
@@ -12,7 +12,7 @@ mapTasks:
       }
   ]
 - [map0002, Forward the values of 2011 and 2012 keys to the right reducer, 1, 10,
-      [gbr-sensors, S3-sensors],
+      [EEE-sensors],
       {
         reduce0001: 6
       }

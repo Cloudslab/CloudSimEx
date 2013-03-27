@@ -25,10 +25,9 @@ public class MapReduceCloudletScheduler extends CloudletSchedulerSpaceShared {
 
 		// use the current capacity to estimate the extra amount of
 		// time to file transferring. It must be added to the cloudlet length
-		double extraSize = capacity * fileTransferTime;
-		long length = cloudlet.getCloudletLength();
-		length += extraSize;
-		cloudlet.setCloudletLength(length);
+		//double extraSize = capacity * fileTransferTime;
+		long executionTime = (long) Math.ceil(cloudlet.getCloudletLength() / (capacity*1000000.0));
+		cloudlet.setCloudletLength(executionTime);
 
 		// it can go to the exec list
 		if ((currentCpus - usedPes) >= cloudlet.getNumberOfPes()) {
@@ -46,6 +45,6 @@ public class MapReduceCloudletScheduler extends CloudletSchedulerSpaceShared {
 			return 0.0;
 		}
 
-		return cloudlet.getCloudletLength() / capacity;
+		return cloudlet.getCloudletLength() + fileTransferTime;
 	}
 }

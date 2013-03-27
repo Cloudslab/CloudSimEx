@@ -71,6 +71,7 @@ public class Simulation {
 			CloudSim.init(1,Calendar.getInstance(),false);
 					
 			// Create Broker
+			//WARNING: the engine name must be "MapReduceEngine"
 			MapReduceEngine engine = new MapReduceEngine("MapReduceEngine");
 			Cloud.brokerID = engine.getId();
 			

@@ -132,7 +132,7 @@ public class CloudDatacenter extends Datacenter {
 			Vm vm = host.getVm(vmId, userId);
 			CloudletScheduler scheduler = vm.getCloudletScheduler();
 			double estimatedFinishTime = scheduler.cloudletSubmit(cl, fileTransferTime);
-			estimatedFinishTime += cl.getExecStartTime();
+			//estimatedFinishTime += cl.getExecStartTime();
 			Log.printLine(CloudSim.clock() + ": " + getName() + ": Estimated Execution Time for task ID: " + cl.getCloudletId() + " is: " + estimatedFinishTime + " seconds");
 			
 			// if this cloudlet is in the exec queue

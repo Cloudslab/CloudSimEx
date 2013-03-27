@@ -3,6 +3,10 @@
 requests:
 # Requests info (You have multiples): [submission time in seconds, budget in $, deadline in seconds, jobFile, userClass]
 - !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-  [100000.0, 0.5, 4000, Jobs/MapReduce_3_2.yaml, GOLD]
+  [100000.0, 1.0, 20000, Jobs/MapReduce_3_2.yaml, GOLD]
 - !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-  [25000.0, 0.5, 4000, Jobs/MapReduce_3_2.yaml, GOLD]
+  [25000.0, 3.0, 10000, Jobs/MapReduce_3_2.yaml, SILVER]
+- !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+  [0.0, 4.0, 8000, Jobs/MapReduce_3_2.yaml, SILVER]
+- !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+  [150000.0, 8.0, 2000, Jobs/MapReduce_3_2.yaml, GOLD]
