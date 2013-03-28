@@ -20,7 +20,7 @@ public class PrivateCloudDatacenter extends CloudDatacenter {
 			int numberOfVmPes = firstVmType.getNumberOfPes();
 			int numberOfFreePes = host.getNumberOfFreePes();
 			
-			maxAvailableResource += Math.floor((double)numberOfVmPes / numberOfFreePes);
+			maxAvailableResource += Math.floor((double)numberOfFreePes / numberOfVmPes);
 		}
 		
 		return maxAvailableResource;

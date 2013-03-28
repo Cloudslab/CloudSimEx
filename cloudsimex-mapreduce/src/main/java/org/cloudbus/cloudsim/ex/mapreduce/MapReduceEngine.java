@@ -369,7 +369,7 @@ public class MapReduceEngine extends DatacenterBroker {
 				Log.print(indent + "SUCCESS");
 
 				//VmType vm = cloud.getVMTypeFromId(task.getVmId());
-				VmType vm = requests.getVMInstanceFromId(task.getVmId());
+				VmType vm = requests.getVmInstance(task.getVmId());
 
 
 				double executionTime = task.getFinishTime() - task.getExecStartTime();

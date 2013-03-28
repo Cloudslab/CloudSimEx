@@ -123,5 +123,34 @@ public class Request extends SimEvent {
 		else
 			return true;
 	}
+	
+	public VmInstance getProvisionedVmFromTaskId(int TaskId)
+	{
+		int vmInstanceId = -1;
+		if(schedulingPlanForMap.containsKey(TaskId))
+			vmInstanceId = schedulingPlanForMap.get(TaskId);
+		else
+			if(schedulingPlanForReduce.containsKey(TaskId))
+				vmInstanceId = schedulingPlanForReduce.get(TaskId);
+			else
+				return null;
+		
+		return getProvisionedVm(vmInstanceId);
+	}
+	
+	public VmInstance getProvisionedVm(int vmInstanceId)
+	{
+		for (VmInstance vmInstance : mapAndReduceVmProvisionList) {
+			if(vmInstance.getId() == vmInstanceId)
+				return vmInstance;
+		}
+		
+		for (VmInstance vmInstance : reduceOnlyVmProvisionList) {
+			if(vmInstance.getId() == vmInstanceId)
+				return vmInstance;
+		}
+		
+		return null;
+	}
 
 }

@@ -63,17 +63,11 @@ public class Requests {
 		
 	}
 	
-	public VmInstance getVMInstanceFromId(int vmInstanceId) {
+	public VmInstance getVmInstance(int vmInstanceId) {
 		for (Request request : requests) {
-			for (VmInstance vmInstance : request.mapAndReduceVmProvisionList) {
-				if(vmInstance.getId() == vmInstanceId)
-					return vmInstance;
-			}
-			
-			for (VmInstance vmInstance : request.reduceOnlyVmProvisionList) {
-				if(vmInstance.getId() == vmInstanceId)
-					return vmInstance;
-			}
+			VmInstance vmInstance = request.getProvisionedVm(vmInstanceId);
+			if(vmInstance != null)
+				return vmInstance;
 		}
 		return null;
 	}

@@ -16,7 +16,7 @@ publicCloudDatacenters:
     azure-au,
       [
         !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
-        [win-standard, 0.9, 0.000, 10000.0, 1, 512, 0]
+        [win-standard, 5.0, 0.000, 10000.0, 1, 512, 0]
       ]
    ]
  - [
@@ -38,10 +38,10 @@ privateCloudDatacenters:
       ]
    ]
  - [
-    openstack-unimelb-new, 15, 32768, 8, 99999,
+    openstack-unimelb-new, 100, 32768, 50, 100000,
       [
         !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
-        [private-openstack-unimelb-new, 0.00, 0.000, 1000.0, 1, 512, 0]
+        [private-openstack-unimelb-new, 0.00, 0.000, 100000.0, 1, 512, 0]
       ]
    ]
 
