@@ -14,6 +14,7 @@ public class Task extends Cloudlet {
 	public String description;
 	public String name;
 	public int requestId;
+	public boolean isFinished;
 	
 	public Task(String name, String description, int dSize, int mipb) {
 		//WARNING: pesNumber is 1, is that OK?
@@ -22,6 +23,7 @@ public class Task extends Cloudlet {
 		this.name = name;
 		this.description = description;
 		requestId = -1;
+		isFinished = false;
 		
 		this.setUserId(Cloud.brokerID);
 	}

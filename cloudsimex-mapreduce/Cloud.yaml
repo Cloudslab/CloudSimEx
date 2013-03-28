@@ -7,41 +7,27 @@ publicCloudDatacenters:
       [ 
         # VM Type info (You have multiples): [name, cost per hour, transferring.cost, mips, cores, ram, boot_time]
         !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
-        [large-aws-us-east-1, 1.15, 0.005, 50000.0, 1, 1024, 0],
+        [large-aws-us-east-1, 1.15, 0.005, 800.0, 1, 1024, 0],
         !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
-        [small-aws-us-east-1, 1.15, 0.005, 10000.0, 1, 1024, 0]
+        [small-aws-us-east-1, 1.15, 0.005, 500.0, 1, 1024, 0]
       ]
    ]
  - [
     azure-au,
       [
         !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
-        [win-standard, 5.0, 0.000, 10000.0, 1, 512, 0]
-      ]
-   ]
- - [
-    azure-au-new,
-      [
-        !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
-        [win-standard-new, 0.9, 0.000, 10000.0, 1, 512, 0]
+        [win-standard, 2.0, 0.000, 1000.0, 1, 512, 0]
       ]
    ]
 
 privateCloudDatacenters:
  - [
     # Private Cloud info: [name, hosts, memory_perhost, cores_perhost, mips_precore_perhost, [vmTypes]]
-    openstack-unimelb, 15, 32768, 8, 99999,
+    openstack-unimelb, 15, 32768, 8, 100,
       [
         # VM Type info (You have multiples): [name, cost per hour, transferring.cost, mips, cores, ram, boot_time]
         !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
-        [private-openstack-unimelb, 0.00, 0.000, 1000.0, 1, 512, 0]
-      ]
-   ]
- - [
-    openstack-unimelb-new, 100, 32768, 50, 100000,
-      [
-        !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
-        [private-openstack-unimelb-new, 0.00, 0.000, 100000.0, 1, 512, 0]
+        [private-openstack-unimelb, 0.00, 0.000, 100.0, 1, 512, 0]
       ]
    ]
 

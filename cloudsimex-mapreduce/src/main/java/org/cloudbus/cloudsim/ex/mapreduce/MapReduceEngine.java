@@ -114,7 +114,8 @@ public class MapReduceEngine extends DatacenterBroker {
 		// ToDo: increase the clock during the ALGORITHM search
 		Log.printLine(" =========== ALGORITHM: SEARCHING START FOR REQUEST: " + request.id + " ===========");
 		Log.printLine(getName() + " is searching for the optimal Resource Set...");
-		policy.runAlgorithm(cloud, request);
+		if(!policy.runAlgorithm(cloud, request))
+			Log.printLine(" =========== ERROR: THE ALGORITHM COULD NOT FIND VMs FOR REQUEST: " + request.id + " ===========");
 		// Provision all types of virtual machines from Cloud
 		Log.printLine(" =========== ALGORITHM: FINISHED SEARCHING FOR REQUEST: " + request.id + " ===========");
 		// 1- VMs provisioning for those has at least one map task
@@ -126,10 +127,15 @@ public class MapReduceEngine extends DatacenterBroker {
 		}
 		
 		// Print VMs provisioning for reduce only tasks (just print)
-		Log.printLine(getName() + " SELECTED THE FOLLOWING VMs (Reduce Only) [NOT PROVISIONED YET]:-");
-		for (VmInstance vmInstance : request.reduceOnlyVmProvisionList) {
-			Log.printLine("-R only VM ID: " + vmInstance.getId() + " of Type: "+vmInstance.name);
+		if(request.reduceOnlyVmProvisionList.size() == 0)
+			Log.printLine(getName() + " No VMs with reduce only");
+		else
+		{
+			Log.printLine(getName() + " SELECTED THE FOLLOWING VMs (Reduce Only) [NOT PROVISIONED YET]:-");
+			for (VmInstance vmInstance : request.reduceOnlyVmProvisionList) {
+				Log.printLine("-R only VM ID: " + vmInstance.getId() + " of Type: "+vmInstance.name);
 			
+			}
 		}
 
 		// 2- Map and Reduce Tasks scheduling
@@ -261,42 +267,51 @@ public class MapReduceEngine extends DatacenterBroker {
 	}
 	
 	private void startReducePhase(Request request) {
-		// 1- VMs provisioning for reduce only tasks
-		submitVmList(request.reduceOnlyVmProvisionList);
-		Log.printLine(getName() + " PROVISIONING NOW THE FOLLOWING VMs (Reduce Only) [Request ID: "+request.id+"]:-");
-		for (VmInstance vmInstance : request.reduceOnlyVmProvisionList) {
-			VmType vmType = cloud.getVMTypeFromId(vmInstance.VmTypeId);
-				Log.printLine("-Provisioning R only VM: " + vmInstance.name + " (ID: " + vmInstance.getId() + ") of Type: "+vmType.name);
-		}
+		Log.printLine(getName() + " REDUCE PHASE for Request ID: "+request.id + " is started");
 		
-		// 2- Map and Reduce Tasks scheduling
-		// Bind/Schedule Map and Reduce tasks to VMs based on the ResourceSet
-		// Already binded in runAlgorithm(Policy, Request)
+		// VM provisioning for reduce only tasks - reduce tasks will start after the provisioning
+		if(request.reduceOnlyVmProvisionList.size() != 0)
+		{
+			submitVmList(request.reduceOnlyVmProvisionList);
+			
+			Log.printLine(getName() + " PROVISIONING NOW THE FOLLOWING VMs (Reduce Only) [Request ID: "+request.id+"]:-");
 		
-		//3- Send VMs provisioning for those has at least one map task to datacentres
-		int requestedVms = 0;
-		for (int datacenterId : getDatacenterIdsList()) {
-			CloudDatacenter cloudDatacenter = cloud.getCloudDatacenterFromId(datacenterId);
-			for (VmInstance vm : request.reduceOnlyVmProvisionList) {
-				if (cloudDatacenter.isVMInCloudDatacenter(vm.VmTypeId)) {
-					Log.printLine(CloudSim.clock() + ": " + getName() + ": creating VM #" + vm.getId() + " in "
-							+ cloudDatacenter.getName());
-					sendNow(datacenterId, CloudSimTags.VM_CREATE_ACK, (Vm) vm);
-					requestedVms++;
-				}
+			for (VmInstance vmInstance : request.reduceOnlyVmProvisionList) {
+				VmType vmType = cloud.getVMTypeFromId(vmInstance.VmTypeId);
+					Log.printLine("-Provisioning R only VM: " + vmInstance.name + " (ID: " + vmInstance.getId() + ") of Type: "+vmType.name);
 			}
-			getDatacenterRequestedIdsList().add(datacenterId);
+			
+			//reduceOnlyVmProvisionList VM provisioning
+			int requestedVms = 0;
+			for (int datacenterId : getDatacenterIdsList()) {
+				CloudDatacenter cloudDatacenter = cloud.getCloudDatacenterFromId(datacenterId);
+				for (VmInstance vm : request.reduceOnlyVmProvisionList) {
+					if (cloudDatacenter.isVMInCloudDatacenter(vm.VmTypeId)) {
+						Log.printLine(CloudSim.clock() + ": " + getName() + ": creating VM #" + vm.getId() + " in "
+								+ cloudDatacenter.getName());
+						sendNow(datacenterId, CloudSimTags.VM_CREATE_ACK, (Vm) vm);
+						requestedVms++;
+					}
+				}
+				getDatacenterRequestedIdsList().add(datacenterId);
+			}
+			
+			setVmsRequested(requestedVms);
+			setVmsAcks(0);
 		}
-
-		setVmsRequested(requestedVms);
-		setVmsAcks(0);
+		else
+		{
+			//If all reduce tasks are running in the same map VMs, then just submit reduce tasks.
+			submitCloudlets();
+		}
 	}
 	
 	protected void processCloudletReturn(SimEvent ev) {
-		Cloudlet cloudlet = (Cloudlet) ev.getData();
+		Task cloudlet = (Task) ev.getData();
 		getCloudletReceivedList().add(cloudlet);
 		Log.printLine(CloudSim.clock() + ": " + getName() + ": Cloudlet " + cloudlet.getCloudletId()
 				+ " finished executing");
+		cloudlet.isFinished = true;
 		cloudletsSubmitted--;
 		
 		//NEW CODE
@@ -327,7 +342,7 @@ public class MapReduceEngine extends DatacenterBroker {
 	private boolean isAllMapTaskFinished(int cloudletId) {
 		Request request = requests.getRequestFromTaskId(cloudletId);
 		for (MapTask mapTask : request.job.mapTasks) {
-			if (mapTask.getCloudletStatus() != Cloudlet.SUCCESS)
+			if (!mapTask.isFinished)
 				return false;
 		}
 		return true;
