@@ -197,8 +197,68 @@ plotComparisonSimExecPerf <- function(forWorkload, type, vmId, property="percent
   }
 }
 
+
+plotExp2SimPerf <- function(simFile, vmIds, property="percentCPU", step = 120, stepFunc = mean, maxY = NA,
+                            file = NA, title="AS CPU utilisation in DC1 & DC2 at simulation time") {
+  propertiesToNames <- c("percentCPU" = "CPU", "percentRAM" = "RAM", "percentIO" = "Disk IO")
+
+  minTime <- 0
+  maxTime <- 24 * 60 * 60
+
+  minProp <- 0
+  maxProp <- if (is.na(maxY)) 100 else maxY
+  
+  yLable = paste0("% ", propertiesToNames[property], " utilisation")
+  
+  openGraphsDevice(file)
+  fullScreen(hasTitle=T)
+  
+  plot(minProp, minTime, ylim=c(minProp, maxProp), xlim=c(minTime, maxTime), type = "n", main = title,
+       xlab = "Time after simulation's start",
+       ylab = yLable,
+       xaxt='n',
+       cex.main=0.9)
+  xDelta <- 3600 * 3
+  xpos <- seq(0, maxTime, by=xDelta)
+  print(maxTime)
+  axis(side=1, at=xpos, labels=toDateString(xpos))
+  
+  ltys = c(1, 2)
+  colors = c("black", "red")
+  i = 1
+  for (vmId in vmIds) {
+    simFrame <- parseSimulationPerformanceResults0(simFile, vmId, step, stepFunc)
+    
+    if(property == "percentRAM") {
+      baseLineFrame$prcActive <- 100 * as.numeric(baseLineFrame$kbactive) /
+        (as.numeric(baseLineFrame$kbmemused) + as.numeric(baseLineFrame$kbmemfree))
+      meanActive <- mean(baseLineFrame$prcActive) 
+      simFrame[,property] <- simFrame[,property] + meanActive
+    }
+    
+    #msrStep <- simFrame$time[2] - simFrame$time[1]
+    #step <- step / msrStep
+    
+    lines(simFrame[,property]~simFrame$time,  type="l", lwd=1, lty = ltys[i], pch = 18, col=colors[i])
+    i <- i + 1
+  }
+  
+  legend(0, maxY, c("DC1", "DC2"),
+         col = colors, lty = ltys, cex=0.7)
+  
+  resetMar()
+  closeDevice(file)
+  
+  #print("Summary of simulation performances")
+  #print(summary(simFrame[,property]))
+}
+
 parseSimulationPerformanceResults <- function(forWorkload, vmId, step = 5, stepFunc = stepFuncDefault) {
   simFile = paste0(subDir, "/", "performance_sessions_", forWorkload, ".csv")
+  parseSimulationPerformanceResults0(simFile, vmId, step, stepFunc)
+}
+
+parseSimulationPerformanceResults0 <- function(simFile, vmId, step = 5, stepFunc = stepFuncDefault) {
   simDf <- read.csv(simFile, sep=";")
   
   simPerf <-simDf[simDf$vmId == vmId, ]

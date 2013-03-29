@@ -1,6 +1,8 @@
 package org.cloudbus.cloudsim.ex.web.experiments;
 
 import static org.cloudbus.cloudsim.ex.web.experiments.ExperimentsUtil.DAY;
+import static org.cloudbus.cloudsim.ex.web.experiments.ExperimentsUtil.HOUR;
+import static org.cloudbus.cloudsim.ex.web.experiments.ExperimentsUtil.HOURS;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -38,7 +40,10 @@ import org.cloudbus.cloudsim.ex.web.SimpleWebLoadBalancer;
 import org.cloudbus.cloudsim.ex.web.WebBroker;
 import org.cloudbus.cloudsim.ex.web.WebSession;
 import org.cloudbus.cloudsim.ex.web.workload.IWorkloadGenerator;
-import org.cloudbus.cloudsim.ex.web.workload.SimpleWorkloadGenerator;
+import org.cloudbus.cloudsim.ex.web.workload.StatWorkloadGenerator;
+import org.cloudbus.cloudsim.ex.web.workload.freq.CompositeValuedSet;
+import org.cloudbus.cloudsim.ex.web.workload.freq.FrequencyFunction;
+import org.cloudbus.cloudsim.ex.web.workload.freq.PeriodicStochasticFrequencyFunction;
 import org.cloudbus.cloudsim.ex.web.workload.sessions.GeneratorsUtil;
 import org.cloudbus.cloudsim.ex.web.workload.sessions.StatSessionGenerator;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
@@ -52,9 +57,8 @@ import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
  */
 public class TwoDatacentres {
 
-    public static String RESULT_DIR = "results/tmp/";
-    protected int numOfSessions = 500;
-    protected int simulationLength = DAY;
+    public static String RESULT_DIR = "results/stat/";
+    protected int simulationLength = DAY + HOUR / 2;
     protected int step = 60;
     protected String experimentName;
 
@@ -87,7 +91,7 @@ public class TwoDatacentres {
     public final void runExperimemt() throws SecurityException, IOException {
 	long simulationStart = System.currentTimeMillis();
 
-	CustomLog.redirectToFile(RESULT_DIR + "/performance_sessions_" + numOfSessions + ".csv");
+	CustomLog.redirectToFile(RESULT_DIR + "/performance_sessions_DC1_2.csv");
 
 	try {
 	    // Step1: Initialize the CloudSim package. It should be called
@@ -98,20 +102,32 @@ public class TwoDatacentres {
 
 	    // Step 2: Create Datacenters
 	    Datacenter dc1 = createDatacenter1("WebDataCenter1");
-	    Datacenter dc2 = createDatacenter2("WebDataCenter1");
+	    Datacenter dc2 = createDatacenter2("WebDataCenter2");
 
 	    // Step 3: Create Brokers
-	    WebBroker brokerDC1 = new PerformanceLoggingWebBroker("BrokerDC1", step, simulationLength, 0.1,
+	    WebBroker brokerDC1 = new PerformanceLoggingWebBroker("BrokerDC1", step, simulationLength, 10,
 		    0.01,
 		    5 * step,
 		    Arrays.asList(dc1.getId()));
 
+	    WebBroker brokerDC2 = new PerformanceLoggingWebBroker("BrokerDC2", step, simulationLength, 10,
+		    0.01,
+		    5 * step,
+		    Arrays.asList(dc2.getId()));
+
 	    // Step 4: Create virtual machines
-	    HddVm dbServerVMDC1 = createVM(brokerDC1.getId());
-	    List<HddVm> appServersVMDC1 = createApplicationServerVMS(brokerDC1);
+	    HddVm dbServerVMDC1 = createVM(brokerDC1.getId(), 10000, 10000, 512);
+	    List<HddVm> appServersVMDC1 = Arrays.asList(createVM(brokerDC1.getId(), 10000, 10000, 512));
 
 	    vmScheduler1.map(dbServerVMDC1.getId(), pe1.getId());
 	    vmScheduler1.map(appServersVMDC1.get(0).getId(), pe2.getId());
+
+	    HddVm dbServerVMDC2 = createVM(brokerDC2.getId(), (int) (10000 * (1.7 / 3.4)), 7500, 1740);
+	    List<HddVm> appServersVMDC2 =
+		    Arrays.asList(createVM(brokerDC2.getId(), (int) (10000 * (1.7 / 3.4)), 7500, 1740));
+
+	    vmScheduler2.map(dbServerVMDC2.getId(), pe3.getId());
+	    vmScheduler2.map(appServersVMDC2.get(0).getId(), pe4.getId());
 
 	    // Step 5: Create load balancers for the virtual machines in the 2
 	    // datacenters
@@ -119,27 +135,49 @@ public class TwoDatacentres {
 		    appServersVMDC1, new SimpleDBBalancer(dbServerVMDC1));
 	    brokerDC1.addLoadBalancer(balancerDC1);
 
+	    ILoadBalancer balancerDC2 = new SimpleWebLoadBalancer(
+		    appServersVMDC2, new SimpleDBBalancer(dbServerVMDC2));
+	    brokerDC2.addLoadBalancer(balancerDC2);
+
 	    // Step 6: Add the virtual machines for the data centers
 	    List<Vm> vmlistDC1 = new ArrayList<Vm>();
 	    vmlistDC1.addAll(balancerDC1.getAppServers());
 	    vmlistDC1.addAll(balancerDC1.getDbBalancer().getVMs());
 	    brokerDC1.submitVmList(vmlistDC1);
 
+	    List<Vm> vmlistDC2 = new ArrayList<Vm>();
+	    vmlistDC2.addAll(balancerDC2.getAppServers());
+	    vmlistDC2.addAll(balancerDC2.getDbBalancer().getVMs());
+	    brokerDC2.submitVmList(vmlistDC2);
+
 	    // Step 7: Define the workload and associate it with load balancers
-	    List<? extends IWorkloadGenerator> workloadDC1 = generateWorkloadsDC1(brokerDC1.getId());
+	    List<? extends IWorkloadGenerator> workloadDC1 = generateWorkloadsDC(brokerDC1.getId(), 0 * HOUR, DATA1);
 	    brokerDC1.addWorkloadGenerators(workloadDC1, balancerDC1.getId());
+
+	    List<? extends IWorkloadGenerator> workloadDC2 = generateWorkloadsDC(brokerDC2.getId(), 12 * HOUR, DATA2);
+	    brokerDC2.addWorkloadGenerators(workloadDC2, balancerDC2.getId());
 
 	    // Step 8: Starts the simulation
 	    CloudSim.startSimulation();
 
 	    // Step 9: get the results
 	    List<WebSession> resultDC1Sessions = brokerDC1.getServedSessions();
-	    List<Cloudlet> cloudlets = brokerDC1.getCloudletReceivedList();
+	    List<Cloudlet> cloudletsDC1 = brokerDC1.getCloudletReceivedList();
+
+	    List<WebSession> resultDC2Sessions = brokerDC2.getServedSessions();
+	    List<Cloudlet> cloudletsDC2 = brokerDC2.getCloudletReceivedList();
 
 	    // Step 10 : stop the simulation and print the results
 	    CloudSim.stopSimulation();
-	    CustomLog.redirectToFile(RESULT_DIR + "simulation_sessions_" + numOfSessions + ".csv");
+	    CustomLog.redirectToFile(RESULT_DIR + "simulation_sessions_DC1.csv");
 	    CustomLog.printResults(WebSession.class, resultDC1Sessions);
+
+	    // CustomLog.redirectToFile(dir + "simulation_cloudlets_" +
+	    // numOfSessions + ".csv");
+	    // CustomLog.printResults(WebCloudlet.class, cloudlets);
+
+	    CustomLog.redirectToFile(RESULT_DIR + "simulation_sessions_DC2.csv");
+	    CustomLog.printResults(WebSession.class, resultDC2Sessions);
 
 	    // CustomLog.redirectToFile(dir + "simulation_cloudlets_" +
 	    // numOfSessions + ".csv");
@@ -155,37 +193,45 @@ public class TwoDatacentres {
 		+ " seconds");
     }
 
-    private List<? extends IWorkloadGenerator> generateWorkloadsDC1(final int userId) {
+    protected List<? extends IWorkloadGenerator> generateWorkloadsDC(final int userId, final double nullPoint,
+	    final DataItem dataItem) {
+	String[] periods = new String[] {
+		String.format("[%d,%d] m=10  std=1", HOURS[0], HOURS[6]),
+		String.format("(%d,%d] m=30  std=2", HOURS[6], HOURS[7]),
+		String.format("(%d,%d] m=50  std=3", HOURS[7], HOURS[10]),
+		String.format("(%d,%d] m=100 std=4", HOURS[10], HOURS[14]),
+		String.format("(%d,%d] m=50  std=3", HOURS[14], HOURS[17]),
+		String.format("(%d,%d] m=30  std=2", HOURS[17], HOURS[18]),
+		String.format("(%d,%d] m=10  std=1", HOURS[18], HOURS[24]) };
+	return generateWorkload(userId, nullPoint, dataItem, periods);
+    }
+
+    protected List<? extends IWorkloadGenerator> generateWorkload(final int userId, final double nullPoint,
+	    final DataItem dataItem,
+	    final String[] periods) {
 	try (InputStream asIO = new FileInputStream(RESULT_DIR + "web_cloudlets.txt");
 		InputStream dbIO = new FileInputStream(RESULT_DIR + "db_cloudlets.txt")) {
-	    StatSessionGenerator sessionGenerator = new StatSessionGenerator(GeneratorsUtil.parseStream(asIO),
-		    GeneratorsUtil.parseStream(dbIO), userId, DATA1, step);
+	    StatSessionGenerator sessGen = new StatSessionGenerator(GeneratorsUtil.parseStream(asIO),
+		    GeneratorsUtil.parseStream(dbIO), userId, dataItem, step);
 
-	    // return Arrays.asList(new
-	    // PeriodWorkloadGenerator(sessionGenerator, 0.1, numOfSessions));
+	    double unit = HOUR;
+	    double periodLength = DAY;
 
-	    return Arrays.asList(new SimpleWorkloadGenerator(numOfSessions,
-		    sessionGenerator, null, null, 1));
-
-	    // return Arrays.asList(new SimpleWorkloadGenerator(numOfSessions /
-	    // 2, sessionGenerator, null, null, 2));
-
+	    FrequencyFunction freqFun = new PeriodicStochasticFrequencyFunction(unit, periodLength, nullPoint,
+		    CompositeValuedSet.createCompositeValuedSet(periods));
+	    return Arrays.asList(new StatWorkloadGenerator(freqFun, sessGen));
 	} catch (IOException e) {
 	    e.printStackTrace();
 	}
 	return null;
     }
 
-    private List<HddVm> createApplicationServerVMS(final WebBroker brokerDC1) {
-	return Arrays.asList(createVM(brokerDC1.getId()));
-    }
-
-    private HddVm createVM(final int brokerId) {
+    private HddVm createVM(final int brokerId, final int mips, final int ioMips, final int ram) {
 	// VM description
-	int mips = 10000;
-	int ioMips = 10000;
+	// int mips = 10000;
+	// int ioMips = 10000;
 	long size = 10000; // image size (MB)
-	int ram = 512; // vm memory (MB)
+	// int ram = 512; // vm memory (MB)
 	long bw = 1000;
 	int pesNumber = 1; // number of cpus
 	String vmm = "Xen"; // VMM name

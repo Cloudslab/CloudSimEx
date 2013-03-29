@@ -9,6 +9,28 @@ simSessionPattern <- "simulation_sessions_\\d+.csv$"
 
 initialMar<-par("mar")
 
+asciiChar<-function(n){
+  rawToChar(as.raw(n), multiple=FALSE)
+}
+
+toDateString<-function(sec, addDay=F) {
+  #Start the day from 1
+  days <- (sec %/% (24 * 3600)) + 1
+  hours <-(sec %/% 3600)
+  minutes <-sec %/% 60
+  rest <-sec %% 60
+  
+  # Now normalize the values
+  hours <- hours %% 24
+  minutes <- minutes %% 60
+  
+  if(addDay) {
+    return(sprintf("Day %d; %dh", days, hours))
+  } else {
+    return(sprintf("%dh", hours))
+  }
+}
+
 # Chrecks if the string represents a valid numerical
 check.num <- function(N){
   length(grep("^\\d+(\\.\\d+)?$", as.character(N))) != 0

@@ -25,7 +25,7 @@ parseSar <- function(fileName) {
       next
     }
     
-    elements <- unlist(strsplit(line, split="\\s+"))
+    elements <- parseLine(line)
     isHeader <- isHeaderLine(elements)
     lineTime <- as.POSIXlt(strptime(elements[1], "%H:%M:%S"))
         
@@ -77,9 +77,12 @@ parseSar <- function(fileName) {
   } 
   
   close(con)
-  
+  #print(result$Time)
   result$Time <- sapply(result$Time,
                         function(e){as.POSIXct(strptime(e, "%H:%M:%S"))} )
+  #
+  
+  result$Time[result$Time < result$Time[1]] = result$Time[result$Time < result$Time[1]] + 24 * 60 * 60
   
   return (result)
 }
@@ -93,6 +96,20 @@ isHeaderLine <- function(elementsList){
   }
   TRUE
 }
+
+parseLine <- function(line, firstTime=NA) {
+  elements <- unlist(strsplit(line, split="\\s+"))
+  if (elements[2] %in% c("AM", "PM")) {
+    h <- as.numeric(substr(elements[1], 1, 2))
+    if(elements[2] == "PM" & h < 12) {
+       h <- h + 12
+       elements[1] <- gsub("^\\d{2}", h, elements[1])
+    }
+    elements <- elements[-2]
+  }
+  elements
+}
+
 
 # Based on the provided SAR frames - one from a baseline (sessions with 0 or so users)
 # and the other workload session (e.g. with 100 users) precomputes some utilisation 
@@ -124,12 +141,13 @@ prepareSarFrame <- function(df, baseLineFrame) {
   df
 }
 
-prepareSarFrame <- function(df) {
+prepareSarFrame0 <- function(df) {
   # Make the time start from 0
   df$Time = df$Time - min(df$Time)
   
   df[,"%realIdle"] = as.numeric(df[,"%idle"]) + as.numeric(df[,"%iowait"])
   df[,"%CPUUtil"] = 100 - df[,"%realIdle"]
+  
   df[,"%CPUUtil"] = sapply(df[,"%CPUUtil"], function(x) {if (x < 0) 0 else x})
   
   df[,"KBMemory"] = as.numeric(df$kbmemused) + as.numeric(df$kbmemfree);

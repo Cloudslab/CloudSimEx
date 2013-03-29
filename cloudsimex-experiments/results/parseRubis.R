@@ -171,7 +171,7 @@ plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend 
 
 plotExp2 <- function(type = "db", property="%CPUUtil", mesFileSuffix) {
   mesFile <- paste0(subDir,"/", type, mesFileSuffix);
-  mesFrame <- prepareSarFrame(parseSar(mesFile))
+  mesFrame <- prepareSarFrame0(parseSar(mesFile))
   
   plot(0, 0, ylim=c(0, 100), xlim=c(0, max(mesFrame$Time)),   type = "n", main = "Exec",
        xlab = "Time in seconds",
