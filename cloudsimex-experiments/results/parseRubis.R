@@ -169,11 +169,12 @@ plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend 
 }
 
 
-plotExp2 <- function(type = "db", property="%CPUUtil", mesFileSuffix) {
+plotExp2 <- function(type = "db", property="%CPUUtil", mesFileSuffix, maxY=100, maxX=NA) {
   mesFile <- paste0(subDir,"/", type, mesFileSuffix);
   mesFrame <- prepareSarFrame0(parseSar(mesFile))
   
-  plot(0, 0, ylim=c(0, 100), xlim=c(0, max(mesFrame$Time)),   type = "n", main = "Exec",
+  maxTime <- if(is.na(maxX)) max(mesFrame$Time) else maxX 
+  plot(0, 0, ylim=c(0, maxY), xlim=c(0, maxTime),   type = "n", main = "Exec",
        xlab = "Time in seconds",
        ylab = property)
   
