@@ -78,11 +78,20 @@ parseSar <- function(fileName) {
   
   close(con)
   #print(result$Time)
+  result$OrigTime <- result$Time
   result$Time <- sapply(result$Time,
                         function(e){as.POSIXct(strptime(e, "%H:%M:%S"))} )
   #
   
-  result$Time[result$Time < result$Time[1]] = result$Time[result$Time < result$Time[1]] + 24 * 60 * 60
+  dayTime <- 24 * 60 * 60
+  
+  for(i in 1:nrow(result)) {
+    while(i > 1 && result$Time[i-1] > result$Time[i]) {
+      result[i, "Time"] = result[i, "Time"] + dayTime 
+    }
+  }
+  
+  result$ReadableTime = sapply(result$Time, function(t) {toDateString(t, mask=c(T, T, T, F))} ) 
   
   return (result)
 }
@@ -101,8 +110,9 @@ parseLine <- function(line, firstTime=NA) {
   elements <- unlist(strsplit(line, split="\\s+"))
   if (elements[2] %in% c("AM", "PM")) {
     h <- as.numeric(substr(elements[1], 1, 2))
-    if(elements[2] == "PM" & h < 12) {
-       h <- h + 12
+    if( (elements[2] == "PM" && h < 12) || (elements[2] == "AM" && h == 12) ) {
+       h <- (h + 12) %% 24
+       h <- if (h == 0) "00" else h
        elements[1] <- gsub("^\\d{2}", h, elements[1])
     }
     elements <- elements[-2]
@@ -114,7 +124,7 @@ parseLine <- function(line, firstTime=NA) {
 # Based on the provided SAR frames - one from a baseline (sessions with 0 or so users)
 # and the other workload session (e.g. with 100 users) precomputes some utilisation 
 # properties/columns like: %CPUUtil, %UsedMem, %SessionMem, %ActiveMem and  %tps
-prepareSarFrame <- function(df, baseLineFrame) {
+prepareSarFrame <- function(df, baseLineFrame, maxTPSOps=maxTPS) {
   # Make the time start from 0
   df$Time = df$Time - min(df$Time)
   
@@ -136,17 +146,24 @@ prepareSarFrame <- function(df, baseLineFrame) {
   df[,"ActiveMem"] = abs(as.numeric(df$kbactive) - as.numeric(baseLineFrame$kbactive))
   df[,"%ActiveMem"] = 100 * df[,"ActiveMem"] / df[,"KBMemory"]
   
-  df[,"%tps"] = 100 * as.numeric(df[,"tps"]) / maxTPS
+  df[,"%tps"] = 100 * as.numeric(df[,"tps"]) / maxTPSOps
   
   df
 }
 
-prepareSarFrame0 <- function(df) {
+prepareSarFrame0 <- function(df, maxTPSOps=maxTPS, type, activeMem=NA) {
+  baseLineFile <- paste0(subDir, "/", type, "_server_", baseLineSize)
+  baseLineFrame <- parseSar(baseLineFile)
+  baseMem <- mean(as.numeric(baseLineFrame$kbactive))
+  print(paste("Base Memory is ", baseMem))
+  
   # Make the time start from 0
   df$Time = df$Time - min(df$Time)
   
-  df[,"%realIdle"] = as.numeric(df[,"%idle"]) + as.numeric(df[,"%iowait"])
-  df[,"%CPUUtil"] = 100 - df[,"%realIdle"]
+  df[, "%realIdle"] = as.numeric(df[,"%idle"])  + as.numeric(df[,"%iowait"]) + as.numeric(df[,"%steal"])
+  df[, "%owned"] = 100 - as.numeric(df[,"%steal"])
+  df[,"%CPUUtil"] = 100 - df[,"%realIdle"] 
+  df[,"%CPUUtil"] = 100 * df[,"%CPUUtil"] / df[, "%owned"]
   
   df[,"%CPUUtil"] = sapply(df[,"%CPUUtil"], function(x) {if (x < 0) 0 else x})
   
@@ -157,10 +174,11 @@ prepareSarFrame0 <- function(df) {
   df[,"SessionMem"] = abs(as.numeric(df$UsedMem))
   df[,"%SessionMem"] = 100 * df[,"SessionMem"] / (df[,"KBMemory"])
   
-  df[,"ActiveMem"] = as.numeric(df$kbactive) 
+  df[,"ActiveMem"] = abs(as.numeric(df$kbactive) - baseMem) 
+  df[,"ActiveMem"] = if (is.na(activeMem)) df[,"ActiveMem"] else abs(activeMem[1:nrow(df)] - baseMem)
   df[,"%ActiveMem"] = 100 * df[,"ActiveMem"] / df[,"KBMemory"]
   
-  df[,"%tps"] = 100 * as.numeric(df[,"tps"]) / maxTPS
+  df[,"%tps"] = 100 * as.numeric(df[,"tps"]) / maxTPSOps
   
   df
 }

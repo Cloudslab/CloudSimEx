@@ -52,7 +52,7 @@ import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
  */
 public class SingleDatacentre {
 
-    public static String RESULT_DIR = "results/tmp/";
+    public static String RESULT_DIR = "results/stat/";
     protected int numOfSessions = 500;
     protected int simulationLength = DAY;
     protected int step = 60;

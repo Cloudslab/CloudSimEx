@@ -96,7 +96,7 @@ public class TwoDatacentres {
 	try {
 	    // Step1: Initialize the CloudSim package. It should be called
 	    // before creating any entities.
-	    int numBrokers = 1; // number of brokers we'll be using
+	    int numBrokers = 2; // number of brokers we'll be using
 	    boolean trace_flag = false; // mean trace events
 	    CloudSim.init(numBrokers, Calendar.getInstance(), trace_flag, 0.001);
 
@@ -105,12 +105,12 @@ public class TwoDatacentres {
 	    Datacenter dc2 = createDatacenter2("WebDataCenter2");
 
 	    // Step 3: Create Brokers
-	    WebBroker brokerDC1 = new PerformanceLoggingWebBroker("BrokerDC1", step, simulationLength, 10,
+	    WebBroker brokerDC1 = new PerformanceLoggingWebBroker("BrokerDC1", step, simulationLength, 1,
 		    0.01,
 		    5 * step,
 		    Arrays.asList(dc1.getId()));
 
-	    WebBroker brokerDC2 = new PerformanceLoggingWebBroker("BrokerDC2", step, simulationLength, 10,
+	    WebBroker brokerDC2 = new PerformanceLoggingWebBroker("BrokerDC2", step, simulationLength, 1,
 		    0.01,
 		    5 * step,
 		    Arrays.asList(dc2.getId()));
@@ -122,9 +122,9 @@ public class TwoDatacentres {
 	    vmScheduler1.map(dbServerVMDC1.getId(), pe1.getId());
 	    vmScheduler1.map(appServersVMDC1.get(0).getId(), pe2.getId());
 
-	    HddVm dbServerVMDC2 = createVM(brokerDC2.getId(), (int) (10000 * (1.7 / 3.4)), 7500, 1740);
+	    HddVm dbServerVMDC2 = createVM(brokerDC2.getId(), (int) (10000 * (2561 / 3400.0)), 7500, 1740);
 	    List<HddVm> appServersVMDC2 =
-		    Arrays.asList(createVM(brokerDC2.getId(), (int) (10000 * (1.7 / 3.4)), 7500, 1740));
+		    Arrays.asList(createVM(brokerDC2.getId(), (int) (10000 * (2263 / 3400.0)), 7500, 1740));
 
 	    vmScheduler2.map(dbServerVMDC2.getId(), pe3.getId());
 	    vmScheduler2.map(appServersVMDC2.get(0).getId(), pe4.getId());
@@ -312,7 +312,7 @@ public class TwoDatacentres {
 	List<Pe> peList = new ArrayList<>();
 	List<HddPe> hddList = new ArrayList<>();
 
-	int mips = (int) (10000 * (1.7 / 3.4));
+	int mips = (int) (10000 * (2.5 / 3.4));
 	int iops = 7500;
 
 	for (int i = 0; i < 8; i++) {

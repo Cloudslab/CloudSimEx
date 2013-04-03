@@ -2,6 +2,7 @@
 
 subDir <- "stat"
 maxTPS <- 1000
+maxTPSEC2 <- 750
 baseLineSize <- 1
 
 sessionPattern <- "sessions_\\d+.txt$"
@@ -13,7 +14,7 @@ asciiChar<-function(n){
   rawToChar(as.raw(n), multiple=FALSE)
 }
 
-toDateString<-function(sec, addDay=F) {
+toDateString<-function(sec, mask=c(F, T, F, F)) {
   #Start the day from 1
   days <- (sec %/% (24 * 3600)) + 1
   hours <-(sec %/% 3600)
@@ -24,11 +25,13 @@ toDateString<-function(sec, addDay=F) {
   hours <- hours %% 24
   minutes <- minutes %% 60
   
-  if(addDay) {
-    return(sprintf("Day %d; %dh", days, hours))
-  } else {
-    return(sprintf("%dh", hours))
-  }
+  result <- c(paste0("Day ", days),
+              paste0(hours, "h"),
+              paste0(minutes, "m"),
+              paste0(rest, "s"))
+  result <- result[mask]
+  
+  paste(result, collapse = ' ')
 }
 
 # Chrecks if the string represents a valid numerical

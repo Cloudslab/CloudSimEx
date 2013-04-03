@@ -211,14 +211,16 @@ public class CustomLog {
      * Prints the objects' details with a header in a CSV - like format.
      * 
      * @param klass
-     *            - the class to be used for the header,
+     *            - the class to be used for the header. If null no header is printed.
      * @param list
      *            - list of objects. All objects, must be of type klass.
      */
     public static void printResults(final Class<?> klass, final List<?>... lines) {
-	// Print header line
-	printHeader(klass);
-
+	if(klass != null) {
+	    // Print header line
+	    printHeader(klass);
+	}
+	
 	// Print details for each cloudlet
 	for (List<?> list : lines) {
 	    for (Object o : list) {
@@ -231,16 +233,18 @@ public class CustomLog {
      * Prints the objects' details with a header in a CSV - like format.
      * 
      * @param klass
-     *            - the class to be used for the header,
+     *            - the class to be used for the header. If null no header is printed.
      * @param delim
      *            - the delimeter to use.
      * @param list
      *            - list of objects. All objects, must be of type klass.
      */
     public static void printResults(final Class<?> klass, final String delim, final List<?>... lines) {
-	// Print header line
-	printHeader(klass, delim);
-
+	if (klass != null) {
+	    // Print header line
+	    printHeader(klass, delim);
+	}
+	
 	// Print details for each cloudlet
 	for (List<?> list : lines) {
 	    for (Object o : list) {

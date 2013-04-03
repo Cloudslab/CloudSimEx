@@ -50,6 +50,43 @@ plotDelayComparison <- function(forWorkload = "All", baseSize = 100, file = NA) 
   closeDevice(file)
 }
 
+compareExp2 <- function(sarFile, simFile, vmId, maxTPSOperations, file=NA, property="percentCPU", type, activeMem=NA) {
+  sarFrame <- prepareSarFrame0(parseSar(paste0(subDir, "/", sarFile)), maxTPSOps=maxTPSOperations, type=type, activeMem=activeMem)
+  sarFrame <- renameSarColToSim(sarFrame)
+  simFrame <- parseSimulationPerformanceResults0(paste0(subDir, "/", simFile), vmId, 60, mean)
+  
+  len <- min(nrow(sarFrame), nrow(simFrame))
+  
+  print(paste("======================> ", sarFile, simFile, property, vmId, "  <====================="))
+  
+  sarVec <- sarFrame[,property][1:len]
+  simVec <- simFrame[,property][1:len]
+  diff <- simVec - sarVec
+  
+  print(paste("Ssamples length", len))
+  print("First 50 elements from execution:")
+  print(sarVec[1:50])
+  
+  print("First 50 elements from simulation:")
+  print(simVec[1:50])
+  
+  print("First 50 elements from the difference:")
+  print(diff[1:50])
+  
+  t <- wilcox.test(simVec[1:len], sarVec[1:len], paired=TRUE, conf.int=T) 
+  if (!is.na(file)) {
+    sink(file, append=T, split=FALSE)
+    s1 <- sprintf("%s 95%s CI (%.2f, %.2f)", property, "%", t$conf.int[1], t$conf.int[2])
+    s2 <- sprintf("; %.2f  ", t$estimate)
+    resString <- sprintf("%-50s %-50s", s1, s2)
+    print(resString)
+    sink()
+  }
+  
+  print(t)
+  
+}
+
 compareUtilisation <- function(forWorkload = "All", property="percentCPU", type, vmId, file=NA) {
   if(forWorkload[1] == "All") {
     forWorkload <- sapply (getFiles(sessionPattern), getNumbersInNames )
@@ -198,7 +235,7 @@ plotComparisonSimExecPerf <- function(forWorkload, type, vmId, property="percent
 }
 
 
-plotExp2SimPerf <- function(simFile, vmIds, property="percentCPU", step = 120, stepFunc = mean, maxY = NA,
+plotExp2SimPerf <- function(simFile, vmIds, property="percentCPU", step = 1, stepFunc = mean, maxY = NA,
                             file = NA, title="AS CPU utilisation in DC1 & DC2 at simulation time") {
   propertiesToNames <- c("percentCPU" = "CPU", "percentRAM" = "RAM", "percentIO" = "Disk IO")
 
@@ -211,9 +248,9 @@ plotExp2SimPerf <- function(simFile, vmIds, property="percentCPU", step = 120, s
   yLable = paste0("% ", propertiesToNames[property], " utilisation")
   
   openGraphsDevice(file)
-  fullScreen(hasTitle=T)
+  fullScreen(hasTitle=F)
   
-  plot(minProp, minTime, ylim=c(minProp, maxProp), xlim=c(minTime, maxTime), type = "n", main = title,
+  plot(minProp, minTime, ylim=c(minProp, maxProp), xlim=c(minTime, maxTime), type = "n", main = "",
        xlab = "Time after simulation's start",
        ylab = yLable,
        xaxt='n',
@@ -221,7 +258,7 @@ plotExp2SimPerf <- function(simFile, vmIds, property="percentCPU", step = 120, s
   xDelta <- 3600 * 3
   xpos <- seq(0, maxTime, by=xDelta)
   print(maxTime)
-  axis(side=1, at=xpos, labels=toDateString(xpos))
+  axis(side=1, at=xpos, labels= sapply(xpos, function(x){toDateString(x)}))
   
   ltys = c(1, 2)
   colors = c("black", "red")
