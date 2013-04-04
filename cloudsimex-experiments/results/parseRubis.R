@@ -105,7 +105,7 @@ prepareSessionDataForType <- function(type, size = 50, step = 5, ram = 512, cpu 
 
 # Plots the utilisation of different properties
 # Typical proerties - %memused, "%CPUUtil", UsedMem, tps
-plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend = T, forWorkload = "All", maxY = NA, file = NA) {
+plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend = T, forWorkload = "All", maxY = NA, file = NA, hasTitle=T, useLineTypes=NA, maxX=NA) {
   propertiesToNames <- c("%CPUUtil" = "%CPU utilisation", "%ActiveMem" = "%RAM utilisation", "%tps" = "%Disk utilisation")
   
   benchPattern <- paste0(type, "_server_\\d+$")
@@ -128,7 +128,7 @@ plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend 
   
   frames <- lapply(benchFiles, function(f){prepareSarFrame(parseSar(f), baseLineFrame)})
   minTime <- min(sapply(frames, function(fr) {min(fr$Time)} ) )
-  maxTime <- max(sapply(sessionFiles, function(f) {getSessionLastTime(f)} ) )
+  maxTime <- if(is.na(maxX)) max(sapply(sessionFiles, function(f) {getSessionLastTime(f)} ) ) else maxX
   
   minProp <- 0
   maxProp <- if (is.na(maxY)) 100 else maxY
@@ -139,14 +139,14 @@ plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend 
   }
   
   openGraphsDevice(file)
-  fullScreen(hasTitle=T)
+  fullScreen(hasTitle=hasTitle)
   
-  title <- paste(propertiesToNames[property], "for", paste(sort(forWorkload), collapse = ', '), "sessions")
+  title <- if(hasTitle) paste(propertiesToNames[property], "for", paste(sort(forWorkload), collapse = ', '), "sessions") else ""
   plot(minProp, minTime, ylim=c(minProp, maxProp), xlim=c(minTime, maxTime), type = "n", main = title,
        xlab = "Time in seconds",
        ylab = propertiesToNames[property])
 
-  linetype <- c(1:length(benchFiles))
+  linetype <- if (is.na(useLineTypes)) c(1:length(benchFiles)) else useLineTypes
   plotchar <- seq(18, 18 + length(benchFiles), 1)
   
   i <- 1

@@ -18,7 +18,7 @@ resetPar()
 workloads <- c(50, 100, 200, 300, 400, 500, 600)
 
 plotDelayComparison(file = paste0(subDir, "/delays_boxplots.pdf"), baseSize=100, forWorkload=workloads)
-plotComparison(type="db", forWorkload=c(100,1), plotLegend=T, useColors=F, file = paste0(subDir, "/1-100SessionsBaseline.pdf"), maxY=30, useLineTypes=c(3, 1))
+plotComparison(type="db", forWorkload=c(100,1), plotLegend=T, useColors=F, file = paste0(subDir, "/1-100SessionsBaseline.pdf"), maxY=30, hasTitle=F, useLineTypes=c(3, 1))
 
 step <- 50
 namePattern <- "cmp"
