@@ -111,28 +111,13 @@ public class Hwang_and_Kim_2012_LFFPerf extends Policy {
 				{
 					//FDeallocate all VMs
 					request.mapAndReduceVmProvisionList = new ArrayList<VmInstance>();
-					request.schedulingPlanForMap = new HashMap<Integer, Integer>();
-					request.schedulingPlanForReduce = new HashMap<Integer, Integer>();
+					request.schedulingPlan = new HashMap<Integer, Integer>();
 				}
 				if(isJobAlloc == false)
 					VPList.remove(0);
 			}
 		}
 		return isJobAlloc;
-	}
-
-	/*
-	 * Allocate all reduce tasks
-	 */
-	private void ReduceTasksAlloc(Request request, List<VmInstance> VPList)
-	{
-		for (int i=0; i < request.job.reduceTasks.size(); i++)
-		{
-			// Scheduling (Provisioning already done in MapTasksAlloc)
-			VmInstance vm = VPList.get(i);
-			ReduceTask reduceTask = request.job.reduceTasks.get(i);
-			request.schedulingPlanForReduce.put(reduceTask.getCloudletId(), vm.getId());
-		}
 	}
 
 	/*
@@ -148,12 +133,12 @@ public class Hwang_and_Kim_2012_LFFPerf extends Policy {
 				request.mapAndReduceVmProvisionList.add(vm);
 				//2- Scheduling
 				MapTask mapTask = request.job.mapTasks.get(i);
-				request.schedulingPlanForMap.put(mapTask.getCloudletId(), vm.getId());
+				request.schedulingPlan.put(mapTask.getCloudletId(), vm.getId());
 			} catch (Exception e) {
 				e.printStackTrace();
 				//For any error, deallocate all VMs
 				request.mapAndReduceVmProvisionList = new ArrayList<VmInstance>();
-				request.schedulingPlanForMap = new HashMap<Integer, Integer>();
+				request.schedulingPlan = new HashMap<Integer, Integer>();
 				return false;
 			}
 		}
@@ -161,38 +146,16 @@ public class Hwang_and_Kim_2012_LFFPerf extends Policy {
 	}
 	
 	/*
-
-	private double getMapExecutionTime(MapTask mapTask, Request request, Cloud cloud)
+	 * Allocate all reduce tasks
+	 */
+	private void ReduceTasksAlloc(Request request, List<VmInstance> VPList)
 	{
-		VmInstance vm = request.getProvisionedVmFromTaskId(mapTask.getCloudletId());
-			
-		//1st) The time to transfere the data in
-		String dataSourceName = mapTask.selectedDataSourceName;
-		double dataIn = mapTask.predictDataTransferTimeFromADataSource(vm, dataSourceName);
-			
-		//2nd) The time to execute the task
-		double executionTime = (mapTask.getCloudletTotalLength() * mapTask.getCloudletFileSize()) / (vm.getMips()*1000000.0);
-					
-			
-		return dataIn + executionTime;
-	}
-	
-	
-
-	private double getReduceExecutionTime(ReduceTask reduceTask, Request request, Cloud cloud, double mapFT)
-	{
-		VmInstance vm = request.getProvisionedVmFromTaskId(reduceTask.getCloudletId());
-		double allMapsDataInAndET = 0.0;
-		for (MapTask mapTask : request.job.mapTasks) {
-			double dataInFromOneMap = mapTask.predictDataTransferTimeToOneReduce(reduceTask, request, cloud);
-			double executionTimeForOneMapData = (reduceTask.getCloudletTotalLength() * reduceTask.getCloudletFileSize()) / vm.getMips();
-			
-			allMapsDataInAndET+= dataInFromOneMap + executionTimeForOneMapData;
+		for (int i=0; i < request.job.reduceTasks.size(); i++)
+		{
+			// Scheduling (Provisioning already done in MapTasksAlloc)
+			VmInstance vm = VPList.get(i);
+			ReduceTask reduceTask = request.job.reduceTasks.get(i);
+			request.schedulingPlan.put(reduceTask.getCloudletId(), vm.getId());
 		}
-		
-					
-			
-		return mapFT + allMapsDataInAndET;
 	}
-	*/
 }

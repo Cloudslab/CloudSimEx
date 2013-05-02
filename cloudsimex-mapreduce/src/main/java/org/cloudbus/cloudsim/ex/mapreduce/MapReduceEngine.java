@@ -150,15 +150,10 @@ public class MapReduceEngine extends DatacenterBroker {
 		// Bind/Schedule Map and Reduce tasks to VMs based on the ResourceSet
 		for (Cloudlet task : getCloudletList()) {
 			int taskId = task.getCloudletId();
-			if (request.schedulingPlanForMap.containsKey(taskId)) {
-				int vmId = request.schedulingPlanForMap.get(taskId);
+			if (request.schedulingPlan.containsKey(taskId)) {
+				int vmId = request.schedulingPlan.get(taskId);
 				bindCloudletToVm(taskId, vmId);
 			}
-			else
-				if (request.schedulingPlanForReduce.containsKey(taskId)) {
-					int vmId = request.schedulingPlanForReduce.get(taskId);
-					bindCloudletToVm(taskId, vmId);
-				}
 		}
 
 

@@ -28,8 +28,7 @@ public class Request extends SimEvent {
 	public List<VmInstance> mapAndReduceVmProvisionList;
 	public List<VmInstance> reduceOnlyVmProvisionList;
 	
-	public Map<Integer, Integer> schedulingPlanForMap; //<MapTask ID, VM ID>
-	public Map<Integer, Integer> schedulingPlanForReduce; //<ReduceTask ID, VM ID>
+	public Map<Integer, Integer> schedulingPlan; //<Task ID, VM ID>
 	public double totalCost;
 	
 	public String policy;
@@ -48,8 +47,7 @@ public class Request extends SimEvent {
 		mapAndReduceVmProvisionList = new ArrayList<VmInstance>();
 		reduceOnlyVmProvisionList = new ArrayList<VmInstance>();
 		
-		schedulingPlanForMap = new HashMap<Integer, Integer>();
-		schedulingPlanForReduce = new HashMap<Integer, Integer>();
+		schedulingPlan = new HashMap<Integer, Integer>();
 		
 		this.policy = policy;
 
@@ -109,13 +107,10 @@ public class Request extends SimEvent {
 	public VmInstance getProvisionedVmFromTaskId(int TaskId)
 	{
 		int vmInstanceId = -1;
-		if(schedulingPlanForMap.containsKey(TaskId))
-			vmInstanceId = schedulingPlanForMap.get(TaskId);
+		if(schedulingPlan.containsKey(TaskId))
+			vmInstanceId = schedulingPlan.get(TaskId);
 		else
-			if(schedulingPlanForReduce.containsKey(TaskId))
-				vmInstanceId = schedulingPlanForReduce.get(TaskId);
-			else
-				return null;
+			return null;
 		
 		return getProvisionedVm(vmInstanceId);
 	}

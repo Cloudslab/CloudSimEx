@@ -81,7 +81,6 @@ public class Hwang_and_Kim_2012_LFFCost extends Policy {
 				//Calculate the execution time for each map task
 				List<Double> mapET = new ArrayList<Double>();
 				for (int i=0; i < request.job.mapTasks.size(); i++)
-					//mapET.add(getMapExecutionTime(request.job.mapTasks.get(i), request, cloud));
 					mapET.add(request.job.mapTasks.get(i).getTotalTime());
 				
 				//Map Finish time = The max of mapETs
@@ -93,7 +92,6 @@ public class Hwang_and_Kim_2012_LFFCost extends Policy {
 				//Calculate the execution time for each reduce task
 				List<Double> reduceET = new ArrayList<Double>();
 				for (int i=0; i < request.job.reduceTasks.size(); i++)
-					//reduceET.add(getReduceExecutionTime(request.job.reduceTasks.get(i), request, cloud, mapFT));
 					reduceET.add(mapFT + request.job.reduceTasks.get(i).getTotalTime());
 				
 				//Map Finish time = The max of mapETs
@@ -111,28 +109,13 @@ public class Hwang_and_Kim_2012_LFFCost extends Policy {
 				{
 					//FDeallocate all VMs
 					request.mapAndReduceVmProvisionList = new ArrayList<VmInstance>();
-					request.schedulingPlanForMap = new HashMap<Integer, Integer>();
-					request.schedulingPlanForReduce = new HashMap<Integer, Integer>();
+					request.schedulingPlan = new HashMap<Integer, Integer>();
 				}
 				if(isJobAlloc == false)
 					VPList.remove(0);
 			}
 		}
 		return isJobAlloc;
-	}
-
-	/*
-	 * Allocate all reduce tasks
-	 */
-	private void ReduceTasksAlloc(Request request, List<VmInstance> VPList)
-	{
-		for (int i=0; i < request.job.reduceTasks.size(); i++)
-		{
-			// Scheduling (Provisioning already done in MapTasksAlloc)
-			VmInstance vm = VPList.get(i);
-			ReduceTask reduceTask = request.job.reduceTasks.get(i);
-			request.schedulingPlanForReduce.put(reduceTask.getCloudletId(), vm.getId());
-		}
 	}
 
 	/*
@@ -148,15 +131,29 @@ public class Hwang_and_Kim_2012_LFFCost extends Policy {
 				request.mapAndReduceVmProvisionList.add(vm);
 				//2- Scheduling
 				MapTask mapTask = request.job.mapTasks.get(i);
-				request.schedulingPlanForMap.put(mapTask.getCloudletId(), vm.getId());
+				request.schedulingPlan.put(mapTask.getCloudletId(), vm.getId());
 			} catch (Exception e) {
 				e.printStackTrace();
 				//For any error, deallocate all VMs
 				request.mapAndReduceVmProvisionList = new ArrayList<VmInstance>();
-				request.schedulingPlanForMap = new HashMap<Integer, Integer>();
+				request.schedulingPlan = new HashMap<Integer, Integer>();
 				return false;
 			}
 		}
 		return true;
+	}
+	
+	/*
+	 * Allocate all reduce tasks
+	 */
+	private void ReduceTasksAlloc(Request request, List<VmInstance> VPList)
+	{
+		for (int i=0; i < request.job.reduceTasks.size(); i++)
+		{
+			// Scheduling (Provisioning already done in MapTasksAlloc)
+			VmInstance vm = VPList.get(i);
+			ReduceTask reduceTask = request.job.reduceTasks.get(i);
+			request.schedulingPlan.put(reduceTask.getCloudletId(), vm.getId());
+		}
 	}
 }
