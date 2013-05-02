@@ -45,6 +45,6 @@ public class MapReduceCloudletScheduler extends CloudletSchedulerSpaceShared {
 			return 0.0;
 		}
 
-		return ((Task) cloudlet).getTotalTime();
+		return ((Task) cloudlet).getTaskExecutionTimeInSeconds();
 	}
 }

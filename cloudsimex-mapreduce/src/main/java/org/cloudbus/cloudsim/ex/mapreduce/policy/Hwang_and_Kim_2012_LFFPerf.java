@@ -82,7 +82,7 @@ public class Hwang_and_Kim_2012_LFFPerf extends Policy {
 				List<Double> mapET = new ArrayList<Double>();
 				for (int i=0; i < request.job.mapTasks.size(); i++)
 					//mapET.add(getMapExecutionTime(request.job.mapTasks.get(i), request, cloud));
-					mapET.add(request.job.mapTasks.get(i).getTotalTime());
+					mapET.add(request.job.mapTasks.get(i).getTaskExecutionTimeInSeconds());
 				
 				//Map Finish time = The max of mapETs
 				double mapFT = 0.0;
@@ -94,7 +94,7 @@ public class Hwang_and_Kim_2012_LFFPerf extends Policy {
 				List<Double> reduceET = new ArrayList<Double>();
 				for (int i=0; i < request.job.reduceTasks.size(); i++)
 					//reduceET.add(getReduceExecutionTime(request.job.reduceTasks.get(i), request, cloud, mapFT));
-					reduceET.add(mapFT + request.job.reduceTasks.get(i).getTotalTime());
+					reduceET.add(mapFT + request.job.reduceTasks.get(i).getTaskExecutionTimeInSeconds());
 				
 				//Map Finish time = The max of mapETs
 				double reduceFT = 0.0;

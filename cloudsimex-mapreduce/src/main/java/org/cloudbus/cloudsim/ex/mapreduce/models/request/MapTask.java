@@ -26,37 +26,30 @@ public class MapTask extends Task
 		super(name, dSize, mi);
 		this.intermediateData = intermediateData;
 	}
-
-	/**
-	 * Calculate the Data-in time
-	 * 
-	 * @return The real data transfer time
-	 */
-	public double realDataTransferTimeFromTheDataSource()
+	
+	public double getTaskExecutionTimeInSeconds()
 	{
-		return predictDataTransferTimeFromADataSource(getCurrentVmInstance(), dataSourceName);
+		return dataTransferTimeFromTheDataSource() + super.getTaskExecutionTimeInSeconds() + dataTransferTimeToAllReducers();
+	}
+	
+	public double getTaskExecutionTimeIgnoringDataTransferTimeInSeconds()
+	{
+		return super.getTaskExecutionTimeInSeconds();
 	}
 
-	/**
-	 * Predict the transfer time from a datasource while this task running on a vm
-	 * 
-	 * @param vmTypeId
-	 * @param dataSourceName
-	 * @return the transfer time
-	 */
-	public double predictDataTransferTimeFromADataSource(VmType vmType, String dataSourceName)
+	public double dataTransferTimeFromTheDataSource()
 	{
 		Cloud cloud = getCloud();
 
-		String currentVmTypeName = vmType.name;
+		String currentVmTypeName = getCurrentVmInstance().name;
 
-		for (List<Object> throughputs_vm_ds : cloud.throughputs_vm_ds)
+		for (List<Object> throughputs_vm_ds : cloud.throughputs_ds_vm)
 		{
-			String source_vm = (String) throughputs_vm_ds.get(0);
-			String destination_dataSource = (String) throughputs_vm_ds.get(1);
+			String source_dataSource = (String) throughputs_vm_ds.get(0);
+			String destination_vm = (String) throughputs_vm_ds.get(1);
 			double throughputInMegaBit = (double) throughputs_vm_ds.get(2);
 
-			if (source_vm.equals(currentVmTypeName) && destination_dataSource.equals(dataSourceName))
+			if (destination_vm.equals(currentVmTypeName) && source_dataSource.equals(dataSourceName))
 				return dSize / (throughputInMegaBit / 8.0);
 		}
 
@@ -72,57 +65,13 @@ public class MapTask extends Task
 		return 0.0;
 	}
 	
-	/**
-	 * Calculate the Data-in cost
-	 * 
-	 * @return The real data transfer cost
-	 */
-	public double realDataTransferCostFromTheDataSource()
-	{
-		return predictDataTransferCostFromADataSource(dataSourceName);
-	}
-
-	/**
-	 * Predict the transfer cost from a datasource
-	 * 
-	 * @param dataSourceName
-	 * @return the transfer cost
-	 */
-	public double predictDataTransferCostFromADataSource(String dataSourceName)
-	{
-		Cloud cloud = getCloud();
-		
-		DataSource selectedDataSource = null;
-		for (DataSource dataSource : cloud.dataSources)
-		{
-			if(dataSource.getName().equals(dataSourceName))
-			{
-				selectedDataSource = dataSource;
-				break;
-			}
-		}
-		if(selectedDataSource == null)
-			try
-			{
-				throw new Exception("Could not find "+selectedDataSource+" in the cloud");
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-				return 0.0;
-			}
-		
-		//We devide by 1000000 because the cost per terabyte
-		return selectedDataSource.cost * (dSize/1000000.0);
-
-	}
 
 	/**
 	 * Calculate the data-out time
 	 * 
 	 * @return The real data transfer time
 	 */
-	public double realDataTransferTimeToReduceVms()
+	public double dataTransferTimeToAllReducers()
 	{
 		double transferTime = 0.0;
 
@@ -131,19 +80,19 @@ public class MapTask extends Task
 		// For each reduce get the transfer Time
 		for (ReduceTask reduceTask : currentRequest.job.reduceTasks)
 		{
-			transferTime += predictDataTransferTimeToOneReduce(reduceTask);
+			transferTime += dataTransferTimeToOneReducer(reduceTask);
 		}
 
 		return transferTime;
 	}
-
+	
 	/**
 	 * Predict the transfer time to one reduce task
 	 * 
 	 * @param reduceTask
 	 * @return the transfer time
 	 */
-	public double predictDataTransferTimeToOneReduce(ReduceTask reduceTask)
+	private double dataTransferTimeToOneReducer(ReduceTask reduceTask)
 	{
 		Cloud cloud = getCloud();
 
@@ -185,12 +134,41 @@ public class MapTask extends Task
 		return 0;
 	}
 	
+	public double dataTransferCostFromTheDataSource()
+	{
+		Cloud cloud = getCloud();
+		
+		DataSource selectedDataSource = null;
+		for (DataSource dataSource : cloud.dataSources)
+		{
+			if(dataSource.getName().equals(dataSourceName))
+			{
+				selectedDataSource = dataSource;
+				break;
+			}
+		}
+		if(selectedDataSource == null)
+			try
+			{
+				throw new Exception("Could not find "+selectedDataSource+" in the cloud");
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				return 0.0;
+			}
+		
+		//We divide by 1,000,000 because the cost per terabyte
+		return selectedDataSource.cost * (dSize/1000000.0);
+
+	}
+	
 	/**
 	 * Calculate the data-out cost
 	 * 
 	 * @return The real data transfer cost
 	 */
-	public double realDataTransferCostToReduceVms()
+	public double dataTransferCostToAllReducers()
 	{
 		int totalIntermediateDataSize = 0;
 		for (Integer intermediateDataSize : intermediateData.values())
@@ -198,23 +176,6 @@ public class MapTask extends Task
 			totalIntermediateDataSize += intermediateDataSize;
 		}
 
-		return predictDataTransferCostToReduceVms(totalIntermediateDataSize);
-	}
-	
-	/**
-	 * Predict the cost of transferring the data out based on the intermediate data size
-	 * @param totalIntermediateDataSize
-	 * @return
-	 */
-	public double predictDataTransferCostToReduceVms(int totalIntermediateDataSize)
-	{
 		return getCurrentVmInstance().transferringCost * (double)totalIntermediateDataSize;
 	}
-
-	
-	public double getTotalTime()
-	{
-		return realDataTransferTimeFromTheDataSource() + getRealVmExecutionTime() + realDataTransferTimeToReduceVms();
-	}
-
 }

@@ -68,46 +68,23 @@ public class Task extends Cloudlet {
 	}
 	
 	/**
-	 * Calculate the real ET for this task
-	 * @param cloud
-	 * @return ET
-	 */
-	public double getRealVmExecutionTime()
-	{
-		return getPredictedVmExecutionTime(getCurrentVmInstance());
-	}
-
-	/**
-	 * Calculate the predicted ET for this task on a VM form a data source
-	 * @param currentVmTypeId
-	 * @return
-	 */
-	public double getPredictedVmExecutionTime(VmType vmType)
-	{
-		return mi / vmType.getMips();
-	}
-	
-	/**
-	 * For reduce .. The map task has to override it
-	 * @return
-	 */
-	public double getTotalTime()
-	{
-		return getRealVmExecutionTime();
-	}
-	
-	/**
 	 * To tell the vm how long it will run, we need to convert the time to MI (Million Instructions)
 	 * @return
 	 */
-	public double getTotalTimeInMillionInstructions()
+	public double getTaskExecutionTimeInMillionInstructions()
 	{
-		return getTotalTime()*getCurrentVmInstance().getMips();
+		return mi;
+	}
+	
+	public double getTaskExecutionTimeInSeconds()
+	{
+		VmInstance vm = getCurrentVmInstance();
+		return mi / vm.getMips();
 	}
 	
 	
 	public void updateCloudletLength()
 	{
-		setCloudletLength((long) getTotalTimeInMillionInstructions());
+		setCloudletLength((long) getTaskExecutionTimeInMillionInstructions());
 	}
 }

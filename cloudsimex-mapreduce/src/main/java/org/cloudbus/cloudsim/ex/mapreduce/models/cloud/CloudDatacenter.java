@@ -134,10 +134,10 @@ public class CloudDatacenter extends Datacenter {
 			if(cl instanceof MapTask)
 			{
 				MapTask mapTask = (MapTask) cl;
-				Log.printLine(CloudSim.clock() + ": " + getName() + ": Estimated Total Execution Time for MAP task ID: " + cl.getCloudletId() + " is: " + mapTask.realDataTransferTimeFromTheDataSource() + "(D-in) + " + mapTask.getRealVmExecutionTime() + "(ET) + " + mapTask.realDataTransferTimeToReduceVms() + "(D-out) = " + estimatedFinishTime + " seconds");
+				Log.printLine(CloudSim.clock() + ": " + getName() + ": Estimated Total Execution Time for MAP task ID: " + cl.getCloudletId() + " is: " + mapTask.dataTransferTimeFromTheDataSource() + "(D-in) + " + mapTask.getTaskExecutionTimeIgnoringDataTransferTimeInSeconds() + "(ET) + " + mapTask.dataTransferTimeToAllReducers() + "(D-out) = " + estimatedFinishTime + " seconds");
 			}
 			else
-				Log.printLine(CloudSim.clock() + ": " + getName() + ": Estimated Total Execution Time for REDUCE task ID: " + cl.getCloudletId() + " is: " + cl.getRealVmExecutionTime() + "(ET) = " + estimatedFinishTime + " seconds");
+				Log.printLine(CloudSim.clock() + ": " + getName() + ": Estimated Total Execution Time for REDUCE task ID: " + cl.getCloudletId() + " is: " + cl.getTaskExecutionTimeInSeconds() + "(ET) = " + estimatedFinishTime + " seconds");
 			
 			// if this cloudlet is in the exec queue
 			if (estimatedFinishTime > 0.0 && !Double.isInfinite(estimatedFinishTime)) {
@@ -209,11 +209,11 @@ public class CloudDatacenter extends Datacenter {
 		if(cl instanceof MapTask)
 		{
 			MapTask mapTask = (MapTask) cl;
-			time = mapTask.realDataTransferTimeFromTheDataSource(); //D-in
-			time += mapTask.realDataTransferTimeToReduceVms(); //D-out
+			time = mapTask.dataTransferTimeFromTheDataSource(); //D-in
+			time += mapTask.dataTransferTimeToAllReducers(); //D-out
 			
-			mapTask.getCurrentRequest().totalCost += mapTask.realDataTransferCostFromTheDataSource(); //D-in cost
-			mapTask.getCurrentRequest().totalCost += mapTask.realDataTransferCostToReduceVms(); //D-out cost
+			mapTask.getCurrentRequest().totalCost += mapTask.dataTransferCostFromTheDataSource(); //D-in cost
+			mapTask.getCurrentRequest().totalCost += mapTask.dataTransferCostToAllReducers(); //D-out cost
 			
 		}
 		

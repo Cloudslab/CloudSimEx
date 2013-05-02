@@ -170,8 +170,8 @@ public class Request extends SimEvent {
 			if(task instanceof MapTask)
 			{
 				MapTask mapTask = (MapTask) task;
-				dataTransferCostFromTheDataSource += mapTask.realDataTransferCostFromTheDataSource();
-				dataTransferCostToReduceVms += mapTask.realDataTransferCostToReduceVms();
+				dataTransferCostFromTheDataSource += mapTask.dataTransferCostFromTheDataSource();
+				dataTransferCostToReduceVms += mapTask.dataTransferCostToAllReducers();
 			}
 		}
 		
@@ -188,7 +188,7 @@ public class Request extends SimEvent {
 		for (Task task : tasks)
 		{
 			if(task instanceof ReduceTask)
-				totalReducePhaseExecutionTime += task.getTotalTime();
+				totalReducePhaseExecutionTime += task.getTaskExecutionTimeInSeconds();
 		}
 		
 		return mapPhaseFinishTime+totalReducePhaseExecutionTime;
@@ -200,7 +200,7 @@ public class Request extends SimEvent {
 		for (Task task : tasks)
 		{
 			if(task instanceof MapTask)
-				totalExecutionTime += task.getTotalTime();
+				totalExecutionTime += task.getTaskExecutionTimeInSeconds();
 		}
 		return totalExecutionTime;
 	}
