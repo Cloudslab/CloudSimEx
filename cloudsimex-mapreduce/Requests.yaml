@@ -3,6 +3,6 @@
 requests:
 # Requests info (You have multiples): [submission time in seconds, budget in $, deadline in seconds, jobFile, userClass]
 - !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-  [0.0, 4.0, 999999999, Jobs/MapReduce_3_2.yaml, org.cloudbus.cloudsim.ex.mapreduce.policy.Hwang_and_Kim_2012_LFFCost, SILVER]
+  [0.0, 4.0, 999999999, Jobs/MapReduce_3_2.yaml, org.cloudbus.cloudsim.ex.mapreduce.policy.Hwang_and_Kim_2012_LFFPerf, SILVER]
 - !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-  [2.0, 4.0, 999999999, Jobs/MapReduce_3_2.yaml, org.cloudbus.cloudsim.ex.mapreduce.policy.Hwang_and_Kim_2012_LFFCost, SILVER]
+  [2.0, 4.0, 999999999, Jobs/MapReduce_3_2.yaml, org.cloudbus.cloudsim.ex.mapreduce.policy.Hwang_and_Kim_2012_LFFPerf, SILVER]

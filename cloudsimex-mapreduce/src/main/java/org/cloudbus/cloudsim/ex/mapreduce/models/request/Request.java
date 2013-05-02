@@ -56,6 +56,7 @@ public class Request extends SimEvent {
 		
 		for (MapTask mapTask : job.mapTasks) {
 			mapTask.requestId = id;
+			mapTask.dataSourceName = job.dataSourceName;
 		}
 
 		for (ReduceTask reduceTask : job.reduceTasks) {

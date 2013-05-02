@@ -13,24 +13,17 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.DataSource;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmInstance;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType;
-import org.cloudbus.cloudsim.ex.mapreduce.models.request.*;
-import org.cloudbus.cloudsim.ex.mapreduce.policy.PairTaskDatasource;
 import org.cloudbus.cloudsim.ex.util.Id;
 
 public class MapTask extends Task
 {
-
-	public List<String> dataSources;
-	public String selectedDataSourceName;
+	public String dataSourceName;
 	// <Reduce Task ID, IDSize>
 	public Map<String, Integer> intermediateData;
 
-	public MapTask(String name, String description, int dSize, int mipb, List<String> dataSources,
-			Map<String, Integer> intermediateData)
+	public MapTask(String name, int dSize, int mi, Map<String, Integer> intermediateData)
 	{
-		super(name, description, dSize, mipb);
-
-		this.dataSources = dataSources;
+		super(name, dSize, mi);
 		this.intermediateData = intermediateData;
 	}
 
@@ -41,7 +34,7 @@ public class MapTask extends Task
 	 */
 	public double realDataTransferTimeFromTheDataSource()
 	{
-		return predictDataTransferTimeFromADataSource(getCurrentVmInstance(), selectedDataSourceName);
+		return predictDataTransferTimeFromADataSource(getCurrentVmInstance(), dataSourceName);
 	}
 
 	/**
@@ -86,7 +79,7 @@ public class MapTask extends Task
 	 */
 	public double realDataTransferCostFromTheDataSource()
 	{
-		return predictDataTransferCostFromADataSource(selectedDataSourceName);
+		return predictDataTransferCostFromADataSource(dataSourceName);
 	}
 
 	/**
@@ -102,7 +95,7 @@ public class MapTask extends Task
 		DataSource selectedDataSource = null;
 		for (DataSource dataSource : cloud.dataSources)
 		{
-			if(dataSource.getName().equals(selectedDataSourceName))
+			if(dataSource.getName().equals(dataSourceName))
 			{
 				selectedDataSource = dataSource;
 				break;

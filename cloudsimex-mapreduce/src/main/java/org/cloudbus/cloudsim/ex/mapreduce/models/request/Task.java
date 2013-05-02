@@ -9,28 +9,25 @@ import org.cloudbus.cloudsim.ex.mapreduce.MapReduceEngine;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmInstance;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType;
-import org.cloudbus.cloudsim.ex.mapreduce.policy.PairTaskDatasource;
 import org.cloudbus.cloudsim.ex.util.Id;
 
 public class Task extends Cloudlet {
 
-	public String description;
 	public String name;
 	public int requestId;
 	public boolean isFinished;
-	public int mipb;
+	public int mi;
 	public int dSize;
 	
-	public Task(String name, String description, int dSize, int mipb) {
+	public Task(String name, int dSize, int mi) {
 		//Cloudlet lengh is 0, it will be updated after we run the algorithm
 		//File size is 0, we will use the new dSize
 		super(Id.pollId(Task.class), 0, 1, 0, 0, new UtilizationModelFull(), new UtilizationModelFull(), new UtilizationModelFull());
 		
 		this.name = name;
-		this.description = description;
 		requestId = -1;
 		isFinished = false;
-		this.mipb = mipb;
+		this.mi = mi;
 		this.dSize = dSize;
 		
 		this.setUserId(Cloud.brokerID);
@@ -87,7 +84,7 @@ public class Task extends Cloudlet {
 	 */
 	public double getPredictedVmExecutionTime(VmType vmType)
 	{
-		return (mipb * dSize)  / vmType.getMips();
+		return mi / vmType.getMips();
 	}
 	
 	/**
