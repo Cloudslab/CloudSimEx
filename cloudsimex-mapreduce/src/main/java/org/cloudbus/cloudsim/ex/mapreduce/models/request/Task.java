@@ -105,23 +105,6 @@ public class Task extends Cloudlet {
 		return getTotalTime()*getCurrentVmInstance().getMips();
 	}
 	
-	/**
-	 * Cost per hour
-	 * @return
-	 */
-	public double getVmCost()
-	{
-		return Math.ceil(getTotalTime() / 3600.0) * getCurrentVmInstance().cost;
-	}
-	
-	/**
-	 * For reduce .. The map task has to override it
-	 * @return
-	 */
-	public double getTotalCost()
-	{
-		return getVmCost();
-	}
 	
 	public void updateCloudletLength()
 	{

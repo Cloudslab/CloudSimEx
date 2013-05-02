@@ -33,10 +33,6 @@ public class Simulation {
 	//From Requests.yaml
 	private static Requests requests;
 	
-	
-	public Simulation(){
-		
-	}
 
 	/**
 	 * Prints input parameters and execute the simulation a number of times,
@@ -44,7 +40,7 @@ public class Simulation {
 	 * 
 	 */
 	public static void main(String[] args) {
-		new Simulation();
+		
 		Log.printLine("========== Simulation configuration ==========");
 		for (Properties property: Properties.values()){
 			Log.printLine("= "+property+": "+property.getProperty());

@@ -70,8 +70,12 @@ public class BruteForce extends Policy {
 		}
 
 		// Get all Execution Times and Costs for each SchedulingPlan
+		
 		for (ExecutionPlan executionPlan : executionPlans) {
-			request.schedulingPlan = executionPlan.one_nPrSchedulingPlan;
+			//request.schedulingPlan = executionPlan.one_nPrSchedulingPlan;
+			//Map<Integer, Integer> schedulingPlanToCalculateExecutionTime = executionPlan.one_nPrSchedulingPlan;
+			
+			/*
 			for (int i = 0; i < request.job.mapTasks.size(); i++)
 				executionPlan.ExecutionTime += request.job.mapTasks.get(i)
 						.getTotalTime();
@@ -85,6 +89,49 @@ public class BruteForce extends Policy {
 			for (int i = 0; i < request.job.reduceTasks.size(); i++)
 				executionPlan.Cost += request.job.reduceTasks.get(i)
 						.getTotalCost();
+			*/
+			request.schedulingPlan = executionPlan.one_nPrSchedulingPlan;
+			ArrayList<ArrayList<VmInstance>> provisioningPlans = request.getProvisioningPlan(executionPlan.one_nPrSchedulingPlan, nVMs);
+			
+			
+			
+			//Get the mapPhaseFinishTime
+			double mapPhaseFinishTime = 0;
+			for (ArrayList<VmInstance> BothMapAndReduceAndReduceOnlyVms : provisioningPlans) {
+				for (VmInstance mapAndReduceVm : BothMapAndReduceAndReduceOnlyVms) {
+					ArrayList<Task> tasks = new ArrayList<Task>();
+					for (Entry<Integer, Integer>  schedulingPlan : executionPlan.one_nPrSchedulingPlan.entrySet()) {
+						if(schedulingPlan.getValue() == mapAndReduceVm.getId())
+							tasks.add(request.getTaskFromId(schedulingPlan.getKey()));
+					}
+					
+					double totalExecutionTimeInVmForMapOnly = request.getTotalExecutionTimeForMapsOnly(tasks, mapAndReduceVm);
+					if(totalExecutionTimeInVmForMapOnly > mapPhaseFinishTime)
+						mapPhaseFinishTime = totalExecutionTimeInVmForMapOnly;
+				}
+			}
+			
+			//Now get the totalCost and maxExecutionTime
+			double totalCost = 0;
+			double maxExecutionTime = 0;
+			for (ArrayList<VmInstance> BothMapAndReduceAndReduceOnlyVms : provisioningPlans) {
+				for (VmInstance mapAndReduceVm : BothMapAndReduceAndReduceOnlyVms) {
+					ArrayList<Task> tasks = new ArrayList<Task>();
+					for (Entry<Integer, Integer>  schedulingPlan : executionPlan.one_nPrSchedulingPlan.entrySet()) {
+						if(schedulingPlan.getValue() == mapAndReduceVm.getId())
+							tasks.add(request.getTaskFromId(schedulingPlan.getKey()));
+					}
+					
+					double totalExecutionTimeInVm = request.getTotalExecutionTime(tasks, mapAndReduceVm,mapPhaseFinishTime);
+					if(totalExecutionTimeInVm > maxExecutionTime)
+						maxExecutionTime = totalExecutionTimeInVm;
+					totalCost =+ request.getTotalCost(tasks, mapAndReduceVm,mapPhaseFinishTime);
+				}
+			}
+			
+			executionPlan.ExecutionTime = maxExecutionTime;
+			executionPlan.Cost = totalCost;
+			
 		}
 
 		// Select the fastest
@@ -111,36 +158,14 @@ public class BruteForce extends Policy {
 		Map<Integer, Integer> selectedSchedulingPlan = cheapestFastestExecutionPlan.one_nPrSchedulingPlan;
 
 		// 1- Provisioning
-		request.mapAndReduceVmProvisionList = new ArrayList<VmInstance>(); //To remove the temporary VMs
-		
-		for (Map.Entry<Integer, Integer> entry : selectedSchedulingPlan.entrySet()) {
-			Task task = request.job.getTask(entry.getKey());
-			if(task instanceof MapTask)
-				for (VmInstance vm : nVMs) {
-					if (entry.getValue() == vm.getId())
-						if (!request.mapAndReduceVmProvisionList.contains(vm) && !request.reduceOnlyVmProvisionList.contains(vm))
-							request.mapAndReduceVmProvisionList.add(vm);
-				}
-			else
-				for (VmInstance vm : nVMs) {
-					if (entry.getValue() == vm.getId())
-						if (!request.mapAndReduceVmProvisionList.contains(vm) && !request.reduceOnlyVmProvisionList.contains(vm))
-							request.reduceOnlyVmProvisionList.add(vm);
-				}
-		}
+		ArrayList<ArrayList<VmInstance>> provisioningPlans = request.getProvisioningPlan(selectedSchedulingPlan, nVMs);
+		request.mapAndReduceVmProvisionList = provisioningPlans.get(0);
+		request.reduceOnlyVmProvisionList = provisioningPlans.get(1);
 
 		// 2- Scheduling
 		request.schedulingPlan = selectedSchedulingPlan;
 
 		return true;
-	}
-
-	static ArrayList<Integer> indexOfAll(double obj, List<Double> list) {
-		ArrayList<Integer> indexList = new ArrayList<Integer>();
-		for (int i = 0; i < list.size(); i++)
-			if (obj == list.get(i))
-				indexList.add(i);
-		return indexList;
 	}
 
 	private List<Integer[]> getPermutations(int n, int r) {

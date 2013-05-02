@@ -386,8 +386,7 @@ public class MapReduceEngine extends DatacenterBroker {
 			if (task.getCloudletStatus() == Cloudlet.SUCCESS) {
 				Log.print(indent + "SUCCESS");
 
-				//VmType vm = cloud.getVMTypeFromId(task.getVmId());
-				VmType vm = requests.getVmInstance(task.getVmId());
+				VmInstance vm = requests.getVmInstance(task.getVmId());
 
 
 				double executionTime = task.getFinishTime() - task.getExecStartTime();
@@ -454,5 +453,50 @@ public class MapReduceEngine extends DatacenterBroker {
 		}
 		Log.printLine("========== END OF SUMMARY =========");
 		Log.printLine();
+	}
+	
+	// Output information supplied at the end of the simulation
+	public List<Double[]> getExecutionTimeAndCost() {
+		for (Cloudlet cloudlet : getCloudletReceivedList()) {
+			Task task = (Task) cloudlet;
+			if (task.getCloudletStatus() == Cloudlet.SUCCESS) {
+				VmInstance vm = requests.getVmInstance(task.getVmId());
+				double executionTime = task.getFinishTime() - task.getExecStartTime();
+				vm.ExecutionTime += executionTime;
+
+				// set the first Submission Time and last execution time on the request
+				Request request = requests.getRequestFromId(task.requestId);
+
+				if (task.getSubmissionTime() == -1)
+					request.firstSubmissionTime = task.getSubmissionTime();
+				else if (task.getSubmissionTime() < request.firstSubmissionTime)
+					request.firstSubmissionTime = task.getSubmissionTime();
+
+				if (request.firstSubmissionTime == -1)
+					request.firstSubmissionTime = task.getFinishTime();
+				else if (task.getFinishTime() > request.lastFinishTime)
+					request.lastFinishTime = task.getFinishTime();
+			}
+		}
+
+		List<Double[]> ExecutionTimesAndCosts = new ArrayList<Double[]>();
+		
+		for (Request request : requests.requests) {
+			for (VmType vmType : request.mapAndReduceVmProvisionList) {
+				double cost = Math.ceil(vmType.ExecutionTime / 3600.0) * vmType.cost;
+				request.totalCost += cost;
+			}
+			
+			for (VmType vmType : request.reduceOnlyVmProvisionList) {
+				double cost = Math.ceil(vmType.ExecutionTime / 3600.0) * vmType.cost;
+				request.totalCost += cost;
+			}
+
+			double jobExecutionTime = request.lastFinishTime - request.firstSubmissionTime;
+			
+			ExecutionTimesAndCosts.add(new Double[]{jobExecutionTime,request.totalCost});
+		}
+		
+		return ExecutionTimesAndCosts;
 	}
 }

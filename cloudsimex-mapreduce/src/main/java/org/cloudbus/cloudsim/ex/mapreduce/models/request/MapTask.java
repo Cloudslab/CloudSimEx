@@ -217,9 +217,4 @@ public class MapTask extends Task
 		return realDataTransferTimeFromTheDataSource() + getRealVmExecutionTime() + realDataTransferTimeToReduceVms();
 	}
 
-	public double getTotalCost()
-	{
-		return realDataTransferCostFromTheDataSource() + getVmCost() + realDataTransferCostToReduceVms();
-	}
-
 }

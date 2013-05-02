@@ -17,14 +17,14 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-    	<groupId>org.yaml</groupId>
-    	<artifactId>snakeyaml</artifactId>
-    	<version>1.11</version>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>1.11</version>
 </dependency>
 <dependency>
-			<groupId>org.cloudbus</groupId>
-			<artifactId>cloudsimex-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+                        <groupId>org.cloudbus</groupId>
+                        <artifactId>cloudsimex-core</artifactId>
+                        <version>${project.version}</version>
+                </dependency>
   </dependencies>
 </project>

@@ -129,5 +129,81 @@ public class Request extends SimEvent {
 		
 		return null;
 	}
+	
+	/***
+	 * Get VM provisioning plan from a scheduling plan
+	 */
+	public ArrayList<ArrayList<VmInstance>> getProvisioningPlan(Map<Integer, Integer> schedulingPlan, List<VmInstance> nVMs)
+	{
+		ArrayList<ArrayList<VmInstance>> provisioningPlans = new ArrayList<ArrayList<VmInstance>>(2); //To remove the temporary VMs
+		//Index 0 for: mapAndReduceVmProvisionList
+		provisioningPlans.add(new ArrayList<VmInstance>());
+		//Index 1 for: reduceOnlyVmProvisionList
+		provisioningPlans.add(new ArrayList<VmInstance>());
+		
+		for (Map.Entry<Integer, Integer> entry : schedulingPlan.entrySet()) {
+			Task task = job.getTask(entry.getKey());
+			if(task instanceof MapTask)
+				for (VmInstance vm : nVMs) {
+					if (entry.getValue() == vm.getId())
+						if (!provisioningPlans.get(0).contains(vm) && !provisioningPlans.get(1).contains(vm))
+							provisioningPlans.get(0).add(vm);
+				}
+			else
+				for (VmInstance vm : nVMs) {
+					if (entry.getValue() == vm.getId())
+						if (!provisioningPlans.get(0).contains(vm) && !provisioningPlans.get(1).contains(vm))
+							provisioningPlans.get(1).add(vm);
+				}
+		}
+		
+		return provisioningPlans;
+	}
+	
+	public double getTotalCost(ArrayList<Task> tasks, VmInstance vm, double mapPhaseFinishTime)
+	{
+		double dataTransferCostFromTheDataSource = 0;//DC-in
+		double vmCost = 0;//VMC
+		double dataTransferCostToReduceVms = 0;//DC-out
+		
+		for (Task task : tasks) {
+			if(task instanceof MapTask)
+			{
+				MapTask mapTask = (MapTask) task;
+				dataTransferCostFromTheDataSource += mapTask.realDataTransferCostFromTheDataSource();
+				dataTransferCostToReduceVms += mapTask.realDataTransferCostToReduceVms();
+			}
+		}
+		
+		
+		vmCost = Math.ceil(getTotalExecutionTime(tasks,vm,mapPhaseFinishTime) / 3600.0) * vm.cost;
+		
+		return dataTransferCostFromTheDataSource + vmCost + dataTransferCostToReduceVms;
+	}
+	
+	public double getTotalExecutionTime(ArrayList<Task> tasks, VmInstance vm, double mapPhaseFinishTime)
+	{
+		double totalReducePhaseExecutionTime = 0;
+		
+		for (Task task : tasks)
+		{
+			if(task instanceof ReduceTask)
+				totalReducePhaseExecutionTime += task.getTotalTime();
+		}
+		
+		return mapPhaseFinishTime+totalReducePhaseExecutionTime;
+	}
+	
+	public double getTotalExecutionTimeForMapsOnly(ArrayList<Task> tasks, VmInstance vm)
+	{
+		double totalExecutionTime = 0;		
+		for (Task task : tasks)
+		{
+			if(task instanceof MapTask)
+				totalExecutionTime += task.getTotalTime();
+		}
+		return totalExecutionTime;
+	}
+
 
 }
