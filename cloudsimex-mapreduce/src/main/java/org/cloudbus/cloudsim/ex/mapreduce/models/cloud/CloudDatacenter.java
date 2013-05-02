@@ -24,10 +24,12 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.ex.mapreduce.MapReduceEngine;
+import org.cloudbus.cloudsim.ex.mapreduce.VmSchedulerSpaceSharedMapReduce;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.MapTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.ReduceTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Requests;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
@@ -72,7 +74,7 @@ public class CloudDatacenter extends Datacenter {
 			for(int j=0;j<cores_perhost;j++) peList.add(new Pe(j, new PeProvisionerSimple(mips_precore_perhost)));
 			
 			hostList.add(new Host(i,new RamProvisionerSimple(memory_perhost),new BwProvisionerSimple(1000000),
-					  storage,peList,new VmSchedulerSpaceShared(peList)));
+					  storage,peList,new VmSchedulerSpaceSharedMapReduce(peList)));
 		}
 		
 		return hostList;
@@ -83,7 +85,7 @@ public class CloudDatacenter extends Datacenter {
 
 		try {
 			// gets the Cloudlet object
-			Cloudlet cl = (Cloudlet) ev.getData();
+			Task cl = (Task) ev.getData();
 			if(cl instanceof ReduceTask)
 				Log.printLine(CloudSim.clock() + ": " + getName() + ": Processing Reduce Task: " + cl.getCloudletId());
 			else
@@ -125,19 +127,20 @@ public class CloudDatacenter extends Datacenter {
 			int userId = cl.getUserId();
 			int vmId = cl.getVmId();
 
-			// time to transfer the files
-			double fileTransferTime = predictFileTransferTime(cl);
-
 			Host host = getVmAllocationPolicy().getHost(vmId, userId);
 			Vm vm = host.getVm(vmId, userId);
 			CloudletScheduler scheduler = vm.getCloudletScheduler();
-			double estimatedFinishTime = scheduler.cloudletSubmit(cl, fileTransferTime);
-			//estimatedFinishTime += cl.getExecStartTime();
-			Log.printLine(CloudSim.clock() + ": " + getName() + ": Estimated Execution Time for task ID: " + cl.getCloudletId() + " is: " + estimatedFinishTime + " seconds");
+			double estimatedFinishTime = scheduler.cloudletSubmit(cl);
+			if(cl instanceof MapTask)
+			{
+				MapTask mapTask = (MapTask) cl;
+				Log.printLine(CloudSim.clock() + ": " + getName() + ": Estimated Total Execution Time for MAP task ID: " + cl.getCloudletId() + " is: " + mapTask.realDataTransferTimeFromTheDataSource() + "(D-in) + " + mapTask.getRealVmExecutionTime() + "(ET) + " + mapTask.realDataTransferTimeToReduceVms() + "(D-out) = " + estimatedFinishTime + " seconds");
+			}
+			else
+				Log.printLine(CloudSim.clock() + ": " + getName() + ": Estimated Total Execution Time for REDUCE task ID: " + cl.getCloudletId() + " is: " + cl.getRealVmExecutionTime() + "(ET) = " + estimatedFinishTime + " seconds");
 			
 			// if this cloudlet is in the exec queue
 			if (estimatedFinishTime > 0.0 && !Double.isInfinite(estimatedFinishTime)) {
-				estimatedFinishTime += fileTransferTime;
 				send(getId(), estimatedFinishTime, CloudSimTags.VM_DATACENTER_EVENT);
 			}
 
@@ -200,13 +203,18 @@ public class CloudDatacenter extends Datacenter {
 	 * @param cl the required files
 	 * @return the double
 	 */
-	protected double predictFileTransferTime(Cloudlet cl) {
+	protected double predictFileTransferTime(Task cl) {
 		double time = 0.0;
 		
 		if(cl instanceof MapTask)
 		{
-			time = ((MapTask) cl).predictFileTransferTimeFromDataSource(); //D-in
-			time += ((MapTask) cl).predictFileTransferTimeToReduceVms(); //D-out
+			MapTask mapTask = (MapTask) cl;
+			time = mapTask.realDataTransferTimeFromTheDataSource(); //D-in
+			time += mapTask.realDataTransferTimeToReduceVms(); //D-out
+			
+			mapTask.getCurrentRequest().totalCost += mapTask.realDataTransferCostFromTheDataSource(); //D-in cost
+			mapTask.getCurrentRequest().totalCost += mapTask.realDataTransferCostToReduceVms(); //D-out cost
+			
 		}
 		
 		return time;
@@ -243,4 +251,42 @@ public class CloudDatacenter extends Datacenter {
 		
 		Log.printLine("========== END OF SUMMARY =========");
 	}
+	
+	
+	/**
+	 * Updates processing of each cloudlet running in this PowerDatacenter. It is necessary because
+	 * Hosts and VirtualMachines are simple objects, not entities. So, they don't receive events and
+	 * updating cloudlets inside them must be called from the outside.
+	 * 
+	 * @pre $none
+	 * @post $none
+	 */
+	protected void updateCloudletProcessing() {
+		// if some time passed since last processing
+		// R: for term is to allow loop at simulation start. Otherwise, one initial
+		// simulation step is skipped and schedulers are not properly initialized
+		if (CloudSim.clock() < 0.111 || CloudSim.clock() > getLastProcessTime() + 0.1) {
+			List<? extends Host> list = getVmAllocationPolicy().getHostList();
+			double smallerTime = Double.MAX_VALUE;
+			// for each host...
+			for (int i = 0; i < list.size(); i++) {
+				Host host = list.get(i);
+				// inform VMs to update processing
+				double time = host.updateVmsProcessing(CloudSim.clock());
+				// what time do we expect that the next cloudlet will finish?
+				if (time < smallerTime) {
+					smallerTime = time;
+				}
+			}
+			// gurantees a minimal interval before scheduling the event
+			if (smallerTime < CloudSim.clock() + 0.11) {
+				smallerTime = CloudSim.clock() + 0.11;
+			}
+			if (smallerTime != Double.MAX_VALUE) {
+				schedule(getId(), (smallerTime - CloudSim.clock()), CloudSimTags.VM_DATACENTER_EVENT);
+			}
+			setLastProcessTime(CloudSim.clock());
+		}
+	}
+
 }

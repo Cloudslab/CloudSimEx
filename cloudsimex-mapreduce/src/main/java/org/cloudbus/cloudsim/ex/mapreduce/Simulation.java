@@ -72,7 +72,7 @@ public class Simulation {
 					
 			// Create Broker
 			//WARNING: the engine name must be "MapReduceEngine"
-			MapReduceEngine engine = new MapReduceEngine("MapReduceEngine");
+			MapReduceEngine engine = new MapReduceEngine();
 			Cloud.brokerID = engine.getId();
 			
 			// Create datacentres and cloudlets

@@ -30,8 +30,11 @@ public class Request extends SimEvent {
 	
 	public Map<Integer, Integer> schedulingPlanForMap; //<MapTask ID, VM ID>
 	public Map<Integer, Integer> schedulingPlanForReduce; //<ReduceTask ID, VM ID>
+	public double totalCost;
+	
+	public String policy;
 
-	public Request(double submissionTime, double budget, int deadline, String jobFile, UserClass userClass) {
+	public Request(double submissionTime, double budget, int deadline, String jobFile, String policy, UserClass userClass) {
 		id = Id.pollId(Request.class);
 		this.submissionTime = submissionTime;
 		this.budget = budget;
@@ -40,29 +43,26 @@ public class Request extends SimEvent {
 		job = readJobYAML(jobFile);
 		firstSubmissionTime = -1;
 		lastFinishTime = -1;
+		totalCost = 0.0;
 		
 		mapAndReduceVmProvisionList = new ArrayList<VmInstance>();
 		reduceOnlyVmProvisionList = new ArrayList<VmInstance>();
 		
 		schedulingPlanForMap = new HashMap<Integer, Integer>();
 		schedulingPlanForReduce = new HashMap<Integer, Integer>();
+		
+		this.policy = policy;
 
+		
 		for (MapTask mapTask : job.mapTasks) {
 			mapTask.requestId = id;
-
-			mapTask.setExecStartTime(submissionTime);
-
-			// Set map task execution time
-			mapTask.setCloudletLength(getMapMillionInstructions(mapTask));
 		}
 
 		for (ReduceTask reduceTask : job.reduceTasks) {
 			reduceTask.requestId = id;
-
-			reduceTask.setExecStartTime(submissionTime);
-
-			// Set the reduce task execution time
-			reduceTask.setCloudletLength(getReduceMillionInstructions(reduceTask));
+			
+			//set the dSize for reduce tasks
+			reduceTask.updateDSize(this);
 		}
 	}
 
@@ -78,25 +78,6 @@ public class Request extends SimEvent {
 		}
 
 		return null;
-	}
-
-	private long getReduceMillionInstructions(ReduceTask reduceTask) {
-		// Set the reduce task execution time
-		long totalIntermediateDataSizeInMegaByte = 0;
-
-		for (MapTask mapTask : job.mapTasks)
-			if (mapTask.intermediateData.containsValue(reduceTask.name))
-				totalIntermediateDataSizeInMegaByte += mapTask.intermediateData.get(reduceTask.name);
-
-		long reduceTaskLengthInMillionInstructionsPerByte = totalIntermediateDataSizeInMegaByte * 1000000 * reduceTask.getCloudletLength();
-
-		return reduceTaskLengthInMillionInstructionsPerByte;
-	}
-
-	private long getMapMillionInstructions(MapTask mapTask) {
-		long dataSizeInMegaByte = mapTask.getCloudletFileSize();
-		long mapTaskLengthInMillionInstructionsPerByte = dataSizeInMegaByte * 1000000 * mapTask.getCloudletLength();
-		return mapTaskLengthInMillionInstructionsPerByte;
 	}
 
 	private Job readJobYAML(String jobFile) {

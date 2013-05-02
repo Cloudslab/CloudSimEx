@@ -5,6 +5,7 @@ import java.util.List;
 import org.cloudbus.cloudsim.*;
 
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
+import org.cloudbus.cloudsim.ex.mapreduce.VmSchedulerSpaceSharedMapReduce;
 
 public class PrivateCloudDatacenter extends CloudDatacenter {
 	
@@ -13,12 +14,14 @@ public class PrivateCloudDatacenter extends CloudDatacenter {
 	}
 
 	public int getMaxAvailableResource(VmType firstVmType) {
-		DatacenterCharacteristics datacenterCharacteristics = getCharacteristics();
-		List<Host> hostList = datacenterCharacteristics.getHostList();
+		VmAllocationPolicy vmAllocationPolicy = getVmAllocationPolicy();
+		List<Host> hostList = vmAllocationPolicy.getHostList();
 		int maxAvailableResource = 0;
 		for (Host host : hostList) {
 			int numberOfVmPes = firstVmType.getNumberOfPes();
-			int numberOfFreePes = host.getNumberOfFreePes();
+			
+			VmSchedulerSpaceSharedMapReduce vmScheduler = (VmSchedulerSpaceSharedMapReduce) host.getVmScheduler();
+			int numberOfFreePes = vmScheduler.getFreePes().size();
 			
 			maxAvailableResource += Math.floor((double)numberOfFreePes / numberOfVmPes);
 		}

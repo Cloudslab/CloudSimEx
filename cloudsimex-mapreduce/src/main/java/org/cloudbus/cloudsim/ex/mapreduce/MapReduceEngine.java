@@ -20,9 +20,8 @@ import org.cloudbus.cloudsim.lists.VmList;
 
 public class MapReduceEngine extends DatacenterBroker {
 
-	public MapReduceEngine(String name) throws Exception {
-		super(name);
-		// TODO Auto-generated constructor stub
+	public MapReduceEngine() throws Exception {
+		super("MapReduceEngine");
 	}
 
 	private Cloud cloud;
@@ -100,7 +99,7 @@ public class MapReduceEngine extends DatacenterBroker {
 
 	protected void vmProvisioning_taskScheduling(Request request) {
 
-		String policyName = Properties.POLICY.getProperty();
+		String policyName = request.policy;
 		Policy policy = null;
 		try {
 			Class<?> policyClass = Class.forName(policyName, false, Policy.class.getClassLoader());
@@ -112,10 +111,19 @@ public class MapReduceEngine extends DatacenterBroker {
 		}
 
 		// ToDo: increase the clock during the ALGORITHM search
-		Log.printLine(" =========== ALGORITHM: SEARCHING START FOR REQUEST: " + request.id + " ===========");
+		Log.printLine(" =========== "+policyName+" ALGORITHM: SEARCHING START FOR REQUEST: " + request.id + " ===========");
 		Log.printLine(getName() + " is searching for the optimal Resource Set...");
 		if(!policy.runAlgorithm(cloud, request))
 			Log.printLine(" =========== ERROR: THE ALGORITHM COULD NOT FIND VMs FOR REQUEST: " + request.id + " ===========");
+		else
+		{
+			//Update all tasks with the new length. Because of the data transfer.
+			for (MapTask mapTask : request.job.mapTasks)
+				mapTask.updateCloudletLength();
+			for (ReduceTask reduceTask : request.job.reduceTasks)
+				reduceTask.updateCloudletLength();
+			
+		}
 		// Provision all types of virtual machines from Cloud
 		Log.printLine(" =========== ALGORITHM: FINISHED SEARCHING FOR REQUEST: " + request.id + " ===========");
 		// 1- VMs provisioning for those has at least one map task
@@ -418,15 +426,15 @@ public class MapReduceEngine extends DatacenterBroker {
 		Log.printLine();
 		for (Request request : requests.requests) {
 			Log.printLine(" ======== Request ID: " + request.id + " - USER CLASS: [" + request.userClass + "]");
+			Log.printLine(" Policy: "+request.policy);
 			Log.printLine("= VMs: ");
 
-			double jobTotalCost = 0.0;
 			for (VmType vmType : request.mapAndReduceVmProvisionList) {
 				Log.printLine("   - VM ID#" + vmType.getId() + ": " + vmType.name);
 				Log.printLine("     > Processing Time: " + vmType.ExecutionTime + " seconds");
 				double cost = Math.ceil(vmType.ExecutionTime / 3600.0) * vmType.cost;
 				Log.printLine("     > Cost: $" + cost);
-				jobTotalCost += cost;
+				request.totalCost += cost;
 			}
 			
 			for (VmType vmType : request.reduceOnlyVmProvisionList) {
@@ -434,7 +442,7 @@ public class MapReduceEngine extends DatacenterBroker {
 				Log.printLine("     > Processing Time: " + vmType.ExecutionTime + " seconds");
 				double cost = Math.ceil(vmType.ExecutionTime / 3600.0) * vmType.cost;
 				Log.printLine("     > Cost: $" + cost);
-				jobTotalCost += cost;
+				request.totalCost += cost;
 			}
 
 			Log.printLine("= Deadline: " + request.deadline + " seconds");
@@ -444,8 +452,8 @@ public class MapReduceEngine extends DatacenterBroker {
 			Log.printLine("= Deadline Violation: " + TimeViolation);
 
 			Log.printLine("= Budget: $" + request.budget);
-			Log.printLine("= Cost: $" + jobTotalCost);
-			boolean costViolation = (jobTotalCost > request.budget);
+			Log.printLine("= Cost: $" + request.totalCost);
+			boolean costViolation = (request.totalCost > request.budget);
 			Log.printLine("= Budget Violation: " + costViolation);
 			Log.printLine();
 		}
