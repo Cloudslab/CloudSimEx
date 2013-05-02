@@ -1,0 +1,83 @@
+!!org.cloudbus.cloudsim.ex.mapreduce.models.request.Job
+# This job is to calculate the average temperature of one of the Great Barrier Reef (GBR) temperature sensor in 2011 and 2012
+
+mapTasks:
+# Map task info: [name, description, data Size in mega byte, million instructions per byte, [dataSources], [intermediate Data]]
+- [map0001, Forward the values of 2011 and 2012 keys to the right reducer, 64, 2100,
+      [gbr-sensors],
+      {
+        # intermediate Data information: [Reduce Task ID, intermediate data size in mega byte]
+        reduce0001: 10,
+        reduce0002: 5
+      }
+  ]
+- [map0002, Forward the values of 2011 and 2012 keys to the right reducer, 64, 2000,
+      [EEE-sensors],
+      {
+        reduce0001: 15
+      }
+  ]
+- [map0003, Forward the values of 2011 and 2012 keys to the right reducer, 33, 1800,
+      [S3-sensors],
+      {
+        reduce0001: 5,
+        reduce0002: 1
+      }
+  ]
+- [map0004, Forward the values of 2011 and 2012 keys to the right reducer, 33, 1800,
+      [S3-sensors],
+      {
+        reduce0001: 5,
+        reduce0002: 1
+      }
+  ]
+- [map0005, Forward the values of 2011 and 2012 keys to the right reducer, 33, 1800,
+      [S3-sensors],
+      {
+        reduce0001: 5,
+        reduce0002: 1
+      }
+  ]
+- [map0006, Forward the values of 2011 and 2012 keys to the right reducer, 33, 1800,
+      [S3-sensors],
+      {
+        reduce0001: 5,
+        reduce0002: 1
+      }
+  ]
+- [map0007, Forward the values of 2011 and 2012 keys to the right reducer, 33, 1800,
+      [S3-sensors],
+      {
+        reduce0001: 5,
+        reduce0002: 1
+      }
+  ]
+- [map0008, Forward the values of 2011 and 2012 keys to the right reducer, 33, 1800,
+      [S3-sensors],
+      {
+        reduce0001: 5,
+        reduce0002: 1
+      }
+  ]
+- [map0009, Forward the values of 2011 and 2012 keys to the right reducer, 33, 1800,
+      [S3-sensors],
+      {
+        reduce0001: 5,
+        reduce0002: 1
+      }
+  ]
+- [map0010, Forward the values of 2011 and 2012 keys to the right reducer, 33, 1800,
+      [S3-sensors],
+      {
+        reduce0001: 5,
+        reduce0002: 1
+      }
+  ]
+
+reduceTasks:
+# Reduce task info:[name, description, intermediate data size in mega byte, million instructions per byte]
+- [reduce0001, This is the 2011 key reducer - to average the 2011 values, 3000]
+- [reduce0002, This is the 2012 key reducer - to average the 2012 values, 4800]
+- [reduce0003, This is the 2012 key reducer - to average the 2012 values, 2300]
+- [reduce0004, This is the 2012 key reducer - to average the 2012 values, 5000]
+- [reduce0005, This is the 2012 key reducer - to average the 2012 values, 4000]
