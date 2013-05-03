@@ -72,66 +72,11 @@ public class BruteForce extends Policy {
 		// Get all Execution Times and Costs for each SchedulingPlan
 		
 		for (ExecutionPlan executionPlan : executionPlans) {
-			//request.schedulingPlan = executionPlan.one_nPrSchedulingPlan;
-			//Map<Integer, Integer> schedulingPlanToCalculateExecutionTime = executionPlan.one_nPrSchedulingPlan;
 			
-			/*
-			for (int i = 0; i < request.job.mapTasks.size(); i++)
-				executionPlan.ExecutionTime += request.job.mapTasks.get(i)
-						.getTotalTime();
-			for (int i = 0; i < request.job.reduceTasks.size(); i++)
-				executionPlan.ExecutionTime += request.job.reduceTasks.get(i)
-						.getTotalTime();
-
-			for (int i = 0; i < request.job.mapTasks.size(); i++)
-				executionPlan.Cost += request.job.mapTasks.get(i)
-						.getTotalCost();
-			for (int i = 0; i < request.job.reduceTasks.size(); i++)
-				executionPlan.Cost += request.job.reduceTasks.get(i)
-						.getTotalCost();
-			*/
-			request.schedulingPlan = executionPlan.one_nPrSchedulingPlan;
-			ArrayList<ArrayList<VmInstance>> provisioningPlans = request.getProvisioningPlan(executionPlan.one_nPrSchedulingPlan, nVMs);
+			double[] predictedExecutionTimeAndCost = request.predictExecutionTimeAndCostFromScheduleingPlan(executionPlan.one_nPrSchedulingPlan, nVMs);
 			
-			
-			
-			//Get the mapPhaseFinishTime
-			double mapPhaseFinishTime = 0;
-			for (ArrayList<VmInstance> BothMapAndReduceAndReduceOnlyVms : provisioningPlans) {
-				for (VmInstance mapAndReduceVm : BothMapAndReduceAndReduceOnlyVms) {
-					ArrayList<Task> tasks = new ArrayList<Task>();
-					for (Entry<Integer, Integer>  schedulingPlan : executionPlan.one_nPrSchedulingPlan.entrySet()) {
-						if(schedulingPlan.getValue() == mapAndReduceVm.getId())
-							tasks.add(request.getTaskFromId(schedulingPlan.getKey()));
-					}
-					
-					double totalExecutionTimeInVmForMapOnly = request.getTotalExecutionTimeForMapsOnly(tasks, mapAndReduceVm);
-					if(totalExecutionTimeInVmForMapOnly > mapPhaseFinishTime)
-						mapPhaseFinishTime = totalExecutionTimeInVmForMapOnly;
-				}
-			}
-			
-			//Now get the totalCost and maxExecutionTime
-			double totalCost = 0;
-			double maxExecutionTime = 0;
-			for (ArrayList<VmInstance> BothMapAndReduceAndReduceOnlyVms : provisioningPlans) {
-				for (VmInstance mapAndReduceVm : BothMapAndReduceAndReduceOnlyVms) {
-					ArrayList<Task> tasks = new ArrayList<Task>();
-					for (Entry<Integer, Integer>  schedulingPlan : executionPlan.one_nPrSchedulingPlan.entrySet()) {
-						if(schedulingPlan.getValue() == mapAndReduceVm.getId())
-							tasks.add(request.getTaskFromId(schedulingPlan.getKey()));
-					}
-					
-					double totalExecutionTimeInVm = request.getTotalExecutionTime(tasks, mapAndReduceVm,mapPhaseFinishTime);
-					if(totalExecutionTimeInVm > maxExecutionTime)
-						maxExecutionTime = totalExecutionTimeInVm;
-					totalCost =+ request.getTotalCost(tasks, mapAndReduceVm,mapPhaseFinishTime);
-				}
-			}
-			
-			executionPlan.ExecutionTime = maxExecutionTime;
-			executionPlan.Cost = totalCost;
-			
+			executionPlan.ExecutionTime = predictedExecutionTimeAndCost[0];
+			executionPlan.Cost = predictedExecutionTimeAndCost[1];
 		}
 
 		// Select the fastest

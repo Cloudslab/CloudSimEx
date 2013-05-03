@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmInstance;
@@ -205,5 +206,48 @@ public class Request extends SimEvent {
 		return totalExecutionTime;
 	}
 
+	public double[] predictExecutionTimeAndCostFromScheduleingPlan(Map<Integer, Integer> schedulingPlanInput, List<VmInstance> nVMs)
+	{
+		schedulingPlan = schedulingPlanInput;
+		
+		ArrayList<ArrayList<VmInstance>> provisioningPlans = getProvisioningPlan(schedulingPlanInput, nVMs);
+		
+		//Get the mapPhaseFinishTime
+		double mapPhaseFinishTime = 0;
+		for (ArrayList<VmInstance> BothMapAndReduceAndReduceOnlyVms : provisioningPlans) {
+			for (VmInstance mapAndReduceVm : BothMapAndReduceAndReduceOnlyVms) {
+				ArrayList<Task> tasks = new ArrayList<Task>();
+				for (Entry<Integer, Integer>  schedulingPlan : schedulingPlanInput.entrySet()) {
+					if(schedulingPlan.getValue() == mapAndReduceVm.getId())
+						tasks.add(getTaskFromId(schedulingPlan.getKey()));
+				}
+				
+				double totalExecutionTimeInVmForMapOnly = getTotalExecutionTimeForMapsOnly(tasks, mapAndReduceVm);
+				if(totalExecutionTimeInVmForMapOnly > mapPhaseFinishTime)
+					mapPhaseFinishTime = totalExecutionTimeInVmForMapOnly;
+			}
+		}
+		
+		//Now get the totalCost and maxExecutionTime
+		double maxExecutionTime = 0;
+		double totalCost = 0;
+		
+		for (ArrayList<VmInstance> BothMapAndReduceAndReduceOnlyVms : provisioningPlans) {
+			for (VmInstance mapAndReduceVm : BothMapAndReduceAndReduceOnlyVms) {
+				ArrayList<Task> tasks = new ArrayList<Task>();
+				for (Entry<Integer, Integer>  schedulingPlan : schedulingPlanInput.entrySet()) {
+					if(schedulingPlan.getValue() == mapAndReduceVm.getId())
+						tasks.add(getTaskFromId(schedulingPlan.getKey()));
+				}
+				
+				double totalExecutionTimeInVm = getTotalExecutionTime(tasks, mapAndReduceVm,mapPhaseFinishTime);
+				if(totalExecutionTimeInVm > maxExecutionTime)
+					maxExecutionTime = totalExecutionTimeInVm;
+				totalCost =+ getTotalCost(tasks, mapAndReduceVm,mapPhaseFinishTime);
+			}
+		}
+		
+		return new double[]{maxExecutionTime,totalCost};
+	}
 
 }
