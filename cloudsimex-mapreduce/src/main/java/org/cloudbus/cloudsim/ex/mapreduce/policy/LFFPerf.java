@@ -36,7 +36,7 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.request.*;
  * 	- One type of VM in private cloud - by me.
  *  - Number of reduces smaller than the number of maps - by Hwang and Kim.
  */
-public class Hwang_and_Kim_2012_LFFPerf extends Policy {
+public class LFFPerf extends Policy {
 
 	@Override
 	public Boolean runAlgorithm(Cloud cloud, Request request) {

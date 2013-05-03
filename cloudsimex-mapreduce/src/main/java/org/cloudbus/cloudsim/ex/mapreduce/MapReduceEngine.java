@@ -438,17 +438,17 @@ public class MapReduceEngine extends DatacenterBroker {
 				Log.printLine("     > Cost: $" + cost);
 				request.totalCost += cost;
 			}
-
-			Log.printLine("= Deadline: " + request.deadline + " seconds");
 			double jobExecutionTime = request.lastFinishTime - request.firstSubmissionTime;
-			Log.printLine("= Execution Time: " + jobExecutionTime + " seconds");
 			boolean TimeViolation = (jobExecutionTime > request.deadline);
-			Log.printLine("= Deadline Violation: " + TimeViolation);
-
-			Log.printLine("= Budget: $" + request.budget);
-			Log.printLine("= Cost: $" + request.totalCost);
 			boolean costViolation = (request.totalCost > request.budget);
+			
+			
+			Log.printLine("= QoS: Deadline: " + request.deadline + " seconds");
+			Log.printLine("= QoS: Budget: $" + request.budget);
+			Log.printLine("= Deadline Violation: " + TimeViolation);
 			Log.printLine("= Budget Violation: " + costViolation);
+			Log.printLine("= Execution Time: " + jobExecutionTime + " seconds");
+			Log.printLine("= Cost: $" + request.totalCost);
 			Log.printLine();
 		}
 		Log.printLine("========== END OF SUMMARY =========");

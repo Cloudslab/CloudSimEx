@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PrivateCloudDatacenter;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PublicCloudDatacenter;
@@ -18,12 +19,14 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.request.ReduceTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
 
-public class BruteForce extends Policy {
+public class BruteForceCost extends Policy {
 
+	private List<VmInstance> nVMs = new ArrayList<VmInstance>();
+	private List<Task> rTasks = new ArrayList<Task>();
 	@Override
 	public Boolean runAlgorithm(Cloud cloud, Request request) {
+		
 		// Fill nVMs
-		List<VmInstance> nVMs = new ArrayList<VmInstance>();
 		int numTasks = request.job.mapTasks.size()
 				+ request.job.reduceTasks.size();
 		for (PublicCloudDatacenter publicCloudDatacenter : cloud.publicCloudDatacenters) {
@@ -45,7 +48,6 @@ public class BruteForce extends Policy {
 		request.mapAndReduceVmProvisionList = nVMs;
 
 		// Fill rTasks
-		List<Task> rTasks = new ArrayList<Task>();
 		for (MapTask mapTask : request.job.mapTasks)
 			rTasks.add(mapTask);
 		for (ReduceTask reduceTask : request.job.reduceTasks)
@@ -60,12 +62,7 @@ public class BruteForce extends Policy {
 		// Fill all schedulingPlans
 		for (Integer[] one_nPr : nPr) {
 			ExecutionPlan one_ExecutionPlan = new ExecutionPlan();
-			for (int i = 0; i < one_nPr.length; i++)
-			{
-				int TaskId = rTasks.get(i).getCloudletId();
-				int VmId = nVMs.get(one_nPr[i]-1).getId();
-				one_ExecutionPlan.one_nPrSchedulingPlan.put(TaskId, VmId);
-			}
+			one_ExecutionPlan.one_nPrSchedulingPlan = vectorToScheduleingPlan(one_nPr);
 			executionPlans.add(one_ExecutionPlan);
 		}
 
@@ -79,28 +76,28 @@ public class BruteForce extends Policy {
 			executionPlan.Cost = predictedExecutionTimeAndCost[1];
 		}
 
-		// Select the fastest
-		double fastest = executionPlans.get(0).ExecutionTime;
+		// Select the cheapest
+		double cheapest =  executionPlans.get(0).Cost;
 		for (ExecutionPlan executionPlan : executionPlans)
-			if (executionPlan.ExecutionTime < fastest)
-				fastest = executionPlan.ExecutionTime;
+			if (executionPlan.Cost < cheapest)
+				cheapest = executionPlan.Cost;
 
-		// Collect the candidate ExecutionPlans, where they are fastest
+		// Collect the candidate ExecutionPlans, where they are close to the cheapest value
 		double margin = 0.0;
 		List<ExecutionPlan> candidateExecutionPlans = new ArrayList<ExecutionPlan>();
 		for (ExecutionPlan executionPlan : executionPlans)
-			if (executionPlan.ExecutionTime - margin <= fastest)
+			if (executionPlan.Cost - margin <= cheapest)
 				candidateExecutionPlans.add(executionPlan);
 
-		// Select the cheapest from the fastest
-		ExecutionPlan cheapestFastestExecutionPlan = candidateExecutionPlans
+		// Select the fastest from the cheapest
+		ExecutionPlan fastestCheapestExecutionPlan = candidateExecutionPlans
 				.get(0);
 		for (ExecutionPlan executionPlan : candidateExecutionPlans)
-			if (executionPlan.Cost < cheapestFastestExecutionPlan.Cost)
-				cheapestFastestExecutionPlan = executionPlan;
+			if (executionPlan.ExecutionTime < fastestCheapestExecutionPlan.ExecutionTime)
+				fastestCheapestExecutionPlan = executionPlan;
 
 		// Selected SchedulingPlan
-		Map<Integer, Integer> selectedSchedulingPlan = cheapestFastestExecutionPlan.one_nPrSchedulingPlan;
+		Map<Integer, Integer> selectedSchedulingPlan = fastestCheapestExecutionPlan.one_nPrSchedulingPlan;
 
 		// 1- Provisioning
 		ArrayList<ArrayList<VmInstance>> provisioningPlans = request.getProvisioningPlan(selectedSchedulingPlan, nVMs);
@@ -109,7 +106,7 @@ public class BruteForce extends Policy {
 
 		// 2- Scheduling
 		request.schedulingPlan = selectedSchedulingPlan;
-
+		
 		return true;
 	}
 
@@ -128,6 +125,7 @@ public class BruteForce extends Policy {
 				resObj[i] = res[i];
 			}
 			permutations.add(resObj);
+			//Log.printLine(Arrays.toString(resObj));
 			done = getNext(res, n, r);
 		}
 
@@ -161,6 +159,20 @@ public class BruteForce extends Policy {
 			}
 		}
 		return false;
+	}
+	
+	private Map<Integer, Integer> vectorToScheduleingPlan(Integer[] res)
+	{
+		Map<Integer, Integer> scheduleingPlan = new HashMap<Integer, Integer>();
+		
+		for (int i = 0; i < res.length; i++)
+		{
+			int TaskId = rTasks.get(i).getCloudletId();
+			int VmId = nVMs.get(res[i]-1).getId();
+			scheduleingPlan.put(TaskId, VmId);
+		}
+		
+		return scheduleingPlan;
 	}
 
 }

@@ -206,6 +206,12 @@ public class Request extends SimEvent {
 		return totalExecutionTime;
 	}
 
+	/***
+	 * 
+	 * @param schedulingPlanInput
+	 * @param nVMs
+	 * @return [Execution Time, Cost]
+	 */
 	public double[] predictExecutionTimeAndCostFromScheduleingPlan(Map<Integer, Integer> schedulingPlanInput, List<VmInstance> nVMs)
 	{
 		schedulingPlan = schedulingPlanInput;
@@ -243,7 +249,7 @@ public class Request extends SimEvent {
 				double totalExecutionTimeInVm = getTotalExecutionTime(tasks, mapAndReduceVm,mapPhaseFinishTime);
 				if(totalExecutionTimeInVm > maxExecutionTime)
 					maxExecutionTime = totalExecutionTimeInVm;
-				totalCost =+ getTotalCost(tasks, mapAndReduceVm,mapPhaseFinishTime);
+				totalCost += getTotalCost(tasks, mapAndReduceVm,mapPhaseFinishTime);
 			}
 		}
 		
