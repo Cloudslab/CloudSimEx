@@ -177,7 +177,7 @@ public class HddCloudlet extends Cloudlet {
 
     @Override
     public String toString() {
-	return TextUtil.getTxtLine(this, "\t", true);
+	return TextUtil.getTxtLine(this, "\t", null,  true);
     }
 
 }

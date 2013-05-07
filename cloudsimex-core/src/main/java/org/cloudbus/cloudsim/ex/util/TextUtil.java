@@ -2,6 +2,7 @@ package org.cloudbus.cloudsim.ex.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -49,30 +50,6 @@ public class TextUtil {
     private static final String BOOLGET_REGEX = "is.+";
     private static final Map<Class<?>, List<Method>> GET_METHODS = new HashMap<Class<?>, List<Method>>();
 
-    /**
-     * Converts the specified object to a single line of text. Convenient to
-     * converting an object to a line in a log or a line in a CSV file. For the
-     * purpose all get methods of the object are consequently called and the
-     * results are appended with appropriate formatting. Users, can control
-     * which get methods are being called by using the {@link Textualize}
-     * annotation and specifying the properties (the parts of the get methods
-     * after "get" or "is") and the order they need.
-     * 
-     * <br/>
-     * 
-     * Note that if the class is annotated with {@link Textualize} the order
-     * specified in the annotation is used. If not - the order of the methods is
-     * defined by the class they appear in (this classe's props first, then its
-     * superclass and so on). Properties defined within the same class are
-     * sorted alphabetically.
-     * 
-     * @param obj
-     *            - the object to extract text from. Must not be null.
-     * @return formated line of text, as described above.
-     */
-    public static String getTxtLine(final Object obj) {
-	return getTxtLine(obj, DEFAULT_DELIM, false);
-    }
 
     /**
      * Converts the specified class to a single line of text. Convenient for
@@ -158,6 +135,31 @@ public class TextUtil {
      * 
      * <br/>
      * 
+     * Note that if the class is annotated with {@link Textualize} the order
+     * specified in the annotation is used. If not - the order of the methods is
+     * defined by the class they appear in (this classe's props first, then its
+     * superclass and so on). Properties defined within the same class are
+     * sorted alphabetically.
+     * 
+     * @param obj
+     *            - the object to extract text from. Must not be null.
+     * @return formated line of text, as described above.
+     */
+    public static String getTxtLine(final Object obj) {
+	return getTxtLine(obj, DEFAULT_DELIM);
+    }
+    
+    /**
+     * Converts the specified object to a single line of text. Convenient to
+     * converting an object to a line in a log or a line in a CSV file. For the
+     * purpose all get methods of the object are consequently called and the
+     * results are appended with appropriate formatting. Users, can control
+     * which get methods are being called by using the {@link Textualize}
+     * annotation and specifying the properties (the parts of the get methods
+     * after "get" or "is") and the order they need.
+     * 
+     * <br/>
+     * 
      * The flag includeFieldNames is used to specify if the names of the
      * properties should be included in the result. If it is true, the result
      * will consist of entries like: "propA=valueA"
@@ -175,14 +177,115 @@ public class TextUtil {
      * @param delimeter
      *            - the delimeter to put between the entries in the line. Must
      *            not be null.
+     * @return formated line of text, as described above.
+     */
+    public static String getTxtLine(final Object obj, final String delimeter) {
+	return getTxtLine(obj, delimeter, null, false);
+    }
+    
+    
+    /**
+     * Converts the specified object to a single line of text. Convenient to
+     * converting an object to a line in a log or a line in a CSV file. For the
+     * purpose all get methods of the object are consequently called and the
+     * results are appended with appropriate formatting. Users, can control
+     * which get methods are called by directly specifying the properties 
+     * of interest (with the "properties" parameter).
+     * 
+     * <br/>
+     * 
+     * The flag includeFieldNames is used to specify if the names of the
+     * properties should be included in the result. If it is true, the result
+     * will consist of entries like: "propA=valueA"
+     * 
+     * <br/>
+     * 
+     * @param obj
+     *            - the object to extract text from. Must not be null.
+     * @param properties 
+     * 		  - the properties to include in the line. 
+     * @return formated line of text, as described above.
+     */
+    public static String getTxtLine(final Object obj, final String[] properties) {
+	return getTxtLine(obj, DEFAULT_DELIM, properties, false);
+    }
+    
+    /**
+     * Converts the specified object to a single line of text. Convenient to
+     * converting an object to a line in a log or a line in a CSV file. For the
+     * purpose all get methods of the object are consequently called and the
+     * results are appended with appropriate formatting. Users, can control
+     * which get methods are called either by directly specifying the properties 
+     * of interest (with the "properties" parameter) or by using the {@link Textualize}
+     * annotation and specifying the properties (the parts of the get methods
+     * after "get" or "is") and the order they need.
+     * 
+     * <br/>
+     * 
+     * The flag includeFieldNames is used to specify if the names of the
+     * properties should be included in the result. If it is true, the result
+     * will consist of entries like: "propA=valueA"
+     * 
+     * <br/>
+     * 
+     * @param obj
+     *            - the object to extract text from. Must not be null.
+     * @param delimeter
+     *            - the delimeter to put between the entries in the line. Must
+     *            not be null.
+     * @param properties 
+     * 		  - the properties to include in the line. If null all properties
+     * 		  specified in a {@link Textualize} annotation are used. If null and 
+     * 		  no {@link Textualize} is defined for the class - then all properties
+     * 		  are used. 
+     * @return formated line of text, as described above.
+     */
+    public static String getTxtLine(final Object obj, final String delimeter, final String[] properties) {
+	return getTxtLine(obj, delimeter, properties, false);
+    }
+    
+    /**
+     * Converts the specified object to a single line of text. Convenient to
+     * converting an object to a line in a log or a line in a CSV file. For the
+     * purpose all get methods of the object are consequently called and the
+     * results are appended with appropriate formatting. Users, can control
+     * which get methods are called either by directly specifying the properties 
+     * of interest (with the "properties" parameter) or by using the {@link Textualize}
+     * annotation and specifying the properties (the parts of the get methods
+     * after "get" or "is") and the order they need.
+     * 
+     * <br/>
+     * 
+     * The flag includeFieldNames is used to specify if the names of the
+     * properties should be included in the result. If it is true, the result
+     * will consist of entries like: "propA=valueA"
+     * 
+     * <br/>
+     * 
+     * Note that if the class is annotated with {@link Textualize} the order
+     * specified in the annotation is used. If not - the order of the methods is
+     * defined by the class they appear in (this classe's props first, then its
+     * superclass and so on). Properties defined within the same class are
+     * sorted alphabetically.
+     * 
+     * @param obj
+     *            - the object to extract text from. Must not be null.
+     * @param delimeter
+     *            - the delimeter to put between the entries in the line. Must
+     *            not be null.
+     * @param properties 
+     * 		  - the properties to include in the line. If null all properties
+     * 		  specified in a {@link Textualize} annotation are used. If null and 
+     * 		  no {@link Textualize} is defined for the class - then all properties
+     * 		  are used. 
      * @param includeFieldNames
      *            - a flag whether to include the names of the properties in the
      *            line as well.
      * @return formated line of text, as described above.
      */
-    public static String getTxtLine(final Object obj, final String delimeter, final boolean includeFieldNames) {
+    public static String getTxtLine(final Object obj, final String delimeter, final String[] properties, final boolean includeFieldNames) {
 	StringBuffer result = new StringBuffer();
-	List<Method> methods = extractGetMethodsForClass(obj.getClass());
+	List<Method> methods = extractGetMethodsForClass(obj.getClass(), properties);
 	int i = 0;
 	for (Method m : methods) {
 	    Object methodRes = null;
@@ -261,8 +364,78 @@ public class TextUtil {
      * @return formated line of text, as described above.
      */
     public static String getCaptionLine(final Class<?> clazz, final String delimeter) {
+	return getCaptionLine(clazz, delimeter, null);
+    }
+
+    /**
+     * Converts the specified class to a single line of text. Convenient for
+     * generating a header line in a log or a CSV file. For the purpose the
+     * names of all properties (the parts of the get methods after "get"
+     * orString.valueOf(obj) "is") are concatenated with appropriate padding.
+     * The specified delimeter is placed between the entries in the line. Users, can control
+     * properties are used either by directly specifying the properties 
+     * of interest (with the "properties" parameter) or by using the {@link Textualize}
+     * annotation and specifying the properties (the parts of the get methods
+     * after "get" or "is") and the order they need.
+     * 
+     * <br/>
+     * 
+     * Note that if the class is annotated with {@link Textualize} the order
+     * specified in the annotation is used. If not - the order of the methods is
+     * defined by the class they appear in (this classe's props first, then its
+     * superclass and so on). Properties defined within the same class are
+     * sorted alphabetically.
+     * 
+     * 
+     * @param clazz
+     *            - the class to use to create the line. Must not be null.
+     * @param properties 
+     * 		  - the properties to include in the line. If null all properties
+     * 		  specified in a {@link Textualize} annotation are used. If null and 
+     * 		  no {@link Textualize} is defined for the class - then all properties
+     * 		  are used. 
+     * @return formated line of text, as described above.
+     */
+    public static String getCaptionLine(final Class<?> clazz, final String[] properties) {
+	return getCaptionLine(clazz, DEFAULT_DELIM, properties);
+    }
+    
+    
+    /**
+     * Converts the specified class to a single line of text. Convenient for
+     * generating a header line in a log or a CSV file. For the purpose the
+     * names of all properties (the parts of the get methods after "get"
+     * orString.valueOf(obj) "is") are concatenated with appropriate padding.
+     * The specified delimeter is placed between the entries in the line. Users, can control
+     * properties are used either by directly specifying the properties 
+     * of interest (with the "properties" parameter) or by using the {@link Textualize}
+     * annotation and specifying the properties (the parts of the get methods
+     * after "get" or "is") and the order they need.
+     * 
+     * <br/>
+     * 
+     * Note that if the class is annotated with {@link Textualize} the order
+     * specified in the annotation is used. If not - the order of the methods is
+     * defined by the class they appear in (this classe's props first, then its
+     * superclass and so on). Properties defined within the same class are
+     * sorted alphabetically.
+     * 
+     * 
+     * @param clazz
+     *            - the class to use to create the line. Must not be null.
+     * @param delimeter
+     *            - the delimeter to put between the entries in the line. Must
+     *            not be null.
+     * @param properties 
+     * 		  - the properties to include in the line. If null all properties
+     * 		  specified in a {@link Textualize} annotation are used. If null and 
+     * 		  no {@link Textualize} is defined for the class - then all properties
+     * 		  are used. 
+     * @return formated line of text, as described above.
+     */
+    public static String getCaptionLine(final Class<?> clazz, final String delimeter, final String[] properties) {
 	StringBuffer result = new StringBuffer();
-	List<Method> methods = extractGetMethodsForClass(clazz);
+	List<Method> methods = extractGetMethodsForClass(clazz, properties);
 	int i = 0;
 	for (Method m : methods) {
 	    String propEntry = getPropName(m);
@@ -288,9 +461,14 @@ public class TextUtil {
 	return header;
     }
 
-    private static List<Method> extractGetMethodsForClass(final Class<?> clazz1) {
+    private static List<Method> extractGetMethodsForClass(final Class<?> clazz1, final String[] properties) {
 	List<Method> methods = null;
 	Class<?> clazz = clazz1;
+	
+	Textualize classAnnotation = clazz1.getAnnotation(Textualize.class);
+	String[] allowedProps = properties != null? properties :
+	    classAnnotation != null? classAnnotation.properties() : null;
+
 	if (!GET_METHODS.containsKey(clazz)) {
 	    methods = new ArrayList<>();
 	    do {
@@ -313,13 +491,12 @@ public class TextUtil {
 		clazz = clazz.getSuperclass();
 	    } while (clazz != null);
 
-	    Textualize classAnnotation = clazz1.getAnnotation(Textualize.class);
-
+	    
 	    // Filter methods that are not getters and are not in the annotation
 	    // (if annotation is specified)
 	    for (ListIterator<Method> iter = methods.listIterator(); iter.hasNext();) {
 		Method m = iter.next();
-		if (classAnnotation != null && !isAllowedGetter(m, classAnnotation)) {
+		if (allowedProps != null && !isAllowedGetter(m, allowedProps)) {
 		    iter.remove();
 		} else if (classAnnotation == null && !isGetter(m)) {
 		    iter.remove();
@@ -327,9 +504,8 @@ public class TextUtil {
 	    }
 
 	    // Sort by the order defined in the annotation
-	    if (classAnnotation != null) {
-		final List<String> props = Arrays.asList(classAnnotation.properties());
-		Collections.sort(methods, new MethodsLitIndexComparator(props));
+	    if (allowedProps != null) {
+		Collections.sort(methods, new MethodsListIndexComparator(Arrays.asList(allowedProps)));
 	    }
 
 	    methods = Collections.unmodifiableList(methods);
@@ -343,8 +519,8 @@ public class TextUtil {
 		isGetter(getter) ? getter.getName().substring(3) : getter.getName();
     }
 
-    private static boolean isAllowedGetter(final Method m, final Textualize annotation) {
-	HashSet<String> allowedProperties = new HashSet<>(Arrays.asList(annotation.properties()));
+    private static boolean isAllowedGetter(final Method m, final String[] allowedProps) {
+	HashSet<String> allowedProperties = new HashSet<>(Arrays.asList(allowedProps));
 	return isGetter(m) && allowedProperties.contains(getPropName(m));
     }
 
@@ -353,13 +529,17 @@ public class TextUtil {
     }
 
     private static boolean isStandardGetter(final Method m) {
-	return m.getParameterTypes().length == 0 && m.getName().matches(STANDARD_GET_REGEX)
-		&& !Primitives.wrap(m.getReturnType()).equals(Boolean.class);
+	return Modifier.isPublic(m.getModifiers()) &&
+		m.getParameterTypes().length == 0 &&
+		m.getName().matches(STANDARD_GET_REGEX) &&
+		!Primitives.wrap(m.getReturnType()).equals(Boolean.class);
     }
 
     private static boolean isBoolGetter(final Method m) {
-	return m.getParameterTypes().length == 0 && m.getName().matches(BOOLGET_REGEX)
-		&& Primitives.wrap(m.getReturnType()).equals(Boolean.class);
+	return Modifier.isPublic(m.getModifiers()) &&
+		m.getParameterTypes().length == 0 &&
+		m.getName().matches(BOOLGET_REGEX) &&
+		Primitives.wrap(m.getReturnType()).equals(Boolean.class);
     }
 
     /**
@@ -416,10 +596,10 @@ public class TextUtil {
 	}
     }
 
-    private static class MethodsLitIndexComparator implements Comparator<Method> {
+    private static class MethodsListIndexComparator implements Comparator<Method> {
 	private List<String> properties = null;
 
-	public MethodsLitIndexComparator(final List<String> properties) {
+	public MethodsListIndexComparator(final List<String> properties) {
 	    super();
 	    this.properties = properties;
 	}

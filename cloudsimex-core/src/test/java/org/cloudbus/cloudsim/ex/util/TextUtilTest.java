@@ -18,23 +18,32 @@ public class TextUtilTest {
 
     @Test
     public void testGetTxtLine() {
-	String line = TextUtil.getTxtLine(new X(), ";", true);
+	String line = TextUtil.getTxtLine(new X(), ";", null, true);
 	assertEquals(clean("LstInts=[...];LstStr=[...];X=      5;Y=6;Class=X"), clean(line));
 
-	line = TextUtil.getTxtLine(new X(), ";", false);
+	line = TextUtil.getTxtLine(new X(), ";", null, false);
 	assertEquals(clean("  [...]; [...];      5;6;    X"), clean(line));
 
-	line = TextUtil.getTxtLine(new ExtendsXNoAnno(), "|", true);
+	line = TextUtil.getTxtLine(new ExtendsXNoAnno(), "|", null, true);
 	assertEquals(clean("Prop=true|LstInts=[...]|LstStr=[...]|X=      5|Y=6|Class=ExtendsXNoAnno"), clean(line));
 
-	line = TextUtil.getTxtLine(new ExtendsXNoAnno(), ";", false);
+	line = TextUtil.getTxtLine(new ExtendsXNoAnno(), ";", null, false);
 	assertEquals(clean("true;  [...]; [...];      5;6;ExtendsXNoAnno"), clean(line));
 
-	line = TextUtil.getTxtLine(new ExtendsXAnno(), "|", true);
+	line = TextUtil.getTxtLine(new ExtendsXAnno(), "|", null, true);
 	assertEquals(clean("Prop=true|Y=6"), clean(line));
 
-	line = TextUtil.getTxtLine(new ExtendsXAnno(), ";", false);
+	line = TextUtil.getTxtLine(new ExtendsXAnno(), ";", null, false);
 	assertEquals(clean("true;6"), clean(line));
+	
+	line = TextUtil.getTxtLine(new ExtendsXAnno(), ";", new String[]{"X", "Y"}, false);
+	assertEquals(clean("5;6"), clean(line));
+
+	line = TextUtil.getTxtLine(new ExtendsXAnno(), ";", new String[]{"Y", "X"}, false);
+	assertEquals(clean("6;5"), clean(line));
+	
+	line = TextUtil.getTxtLine(new ExtendsXNoAnno(), ";", new String[]{"X"}, false);
+	assertEquals(clean("5"), clean(line));
     }
     
     @Test
@@ -47,6 +56,12 @@ public class TextUtilTest {
 	
 	line = TextUtil.getCaptionLine(ExtendsXAnno.class, "|");
 	assertEquals(clean("Prop|Y"), clean(line));
+	
+	line = TextUtil.getCaptionLine(ExtendsXNoAnno.class, "|", new String[]{"X", "Prop"});
+	assertEquals(clean("X|Prop"), clean(line));
+	
+	line = TextUtil.getCaptionLine(ExtendsXAnno.class, "|", new String[]{"X", "LstStr"});
+	assertEquals(clean("X|LstStr"), clean(line));
     }
 
     private static String clean(final String line) {
@@ -76,6 +91,16 @@ public class TextUtilTest {
 
 	@SuppressWarnings("unused")
 	public String[] getLstStr() {
+	    return lstStr;
+	}
+	
+	@SuppressWarnings("unused")
+	private String[] getPrivateStr() {
+	    return lstStr;
+	}
+	
+	@SuppressWarnings("unused")
+	private String[] getProtectedStr() {
 	    return lstStr;
 	}
     }
