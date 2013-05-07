@@ -1,0 +1,55 @@
+!!org.cloudbus.cloudsim.ex.mapreduce.models.request.Job
+
+dataSourceName: S3-sensors
+
+mapTasks:
+# Map task info: [number of tasks, data Size in megabyte, million instructions per byte, [dataSources], [intermediate Data]]
+- [30, 64, 10000,
+      {
+        # intermediate Data information: [Reduce Task ID, intermediate data size in megabyte]
+        reduce-a-f: 200,
+        reduce-g-l: 30,
+        reduce-m-z: 50
+      }
+  ]
+- [10, 64, 10000,
+      {
+        reduce-a-f: 60,
+        reduce-g-l: 70,
+        reduce-m-z: 10
+      }
+  ]
+- [5, 64, 10000,
+      {
+        reduce-a-f: 400,
+        reduce-g-l: 10,
+        reduce-m-z: 10
+      }
+  ]
+- [20, 64, 10000,
+      {
+        reduce-a-f: 50,
+        reduce-g-l: 80,
+        reduce-m-z: 10
+      }
+  ]
+- [5, 64, 10000,
+      {
+        reduce-a-f: 10,
+        reduce-g-l: 90,
+        reduce-m-z: 100
+      }
+  ]
+- [30, 10, 2000,
+      {
+        reduce-a-f: 20,
+        reduce-g-l: 110,
+        reduce-m-z: 5
+      }
+  ]
+
+reduceTasks:
+# Reduce task info:[name, intermediate data size in mega byte, million instructions per byte]
+- [reduce-a-f, 5000]
+- [reduce-g-l, 1000]
+- [reduce-m-z, 1000]

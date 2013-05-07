@@ -14,25 +14,11 @@ public class YamlFile extends Yaml {
 	static Yaml yaml = new Yaml();
 
 	public static Cloud getCloudFromYaml(String fileName) {
-		try {
-			if (Cloud.brokerID == -1)
-				throw new Exception("brokerID is not set");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
 		return (Cloud) getObjectFromYaml(fileName);
 	}
 
-	public static Requests getRequestsFromYaml(String fileName) {
-		try {
-			if (Cloud.brokerID == -1)
-				throw new Exception("brokerID is not set");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return (Requests) getObjectFromYaml(fileName);
+	public static Experiments getRequestsFromYaml(String fileName) {
+		return (Experiments) getObjectFromYaml(fileName);
 	}
 
 	private static Object getObjectFromYaml(String fileName) {

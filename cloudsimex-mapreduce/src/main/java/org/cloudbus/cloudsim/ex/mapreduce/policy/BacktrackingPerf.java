@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.cloudbus.cloudsim.Log;
+import org.cloudbus.cloudsim.ex.mapreduce.PredictionEngine;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PrivateCloudDatacenter;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PublicCloudDatacenter;
@@ -57,7 +58,7 @@ public class BacktrackingPerf extends Policy {
 		});
 		
 		//Temporary Add all VMs to the request
-		request.mapAndReduceVmProvisionList = nVMs;
+		//request.mapAndReduceVmProvisionList = nVMs;
 
 		
 		// Fill rTasks
@@ -73,7 +74,7 @@ public class BacktrackingPerf extends Policy {
 			return false;
 		
 		// 1- Provisioning
-		ArrayList<ArrayList<VmInstance>> provisioningPlans = request.getProvisioningPlan(selectedSchedulingPlan, nVMs);
+		ArrayList<ArrayList<VmInstance>> provisioningPlans = Request.getProvisioningPlan(selectedSchedulingPlan, nVMs,request.job);
 		request.mapAndReduceVmProvisionList = provisioningPlans.get(0);
 		request.reduceOnlyVmProvisionList = provisioningPlans.get(1);
 
@@ -98,8 +99,8 @@ public class BacktrackingPerf extends Policy {
 				resObj[i] = res[i];
 			}
 			Map<Integer, Integer> schedulingPlan = vectorToScheduleingPlan(resObj);
-			double[] executionTimeAndCost = request.predictExecutionTimeAndCostFromScheduleingPlan(schedulingPlan, nVMs);
-			Log.printLine(Arrays.toString(resObj) + " : "+Arrays.toString(executionTimeAndCost));
+			double[] executionTimeAndCost = PredictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(schedulingPlan, nVMs,request.job);
+			//Log.printLine(Arrays.toString(resObj) + " : "+Arrays.toString(executionTimeAndCost));
 			if(executionTimeAndCost[0] <= request.deadline && executionTimeAndCost[1] <= request.budget)
 				return schedulingPlan;
 			done = getNext(res, n, r);

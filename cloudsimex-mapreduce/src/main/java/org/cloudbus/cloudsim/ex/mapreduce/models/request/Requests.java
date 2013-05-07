@@ -9,6 +9,11 @@ public class Requests {
 	
 	public List<Request> requests;
 	
+	public Requests(List<Request> requests)
+	{
+		this.requests = requests;
+	}
+	
 	public Request getRequestFromTaskId(int taskId)
 	{
 		for (Request request : requests) {
@@ -29,7 +34,7 @@ public class Requests {
 	{
 		Task task = null;
 		for (Request request : requests) {
-			task = request.getTaskFromId(taskId);
+			task = Request.getTaskFromId(taskId, request.job);
 			if(task != null)
 				return task;
 		}

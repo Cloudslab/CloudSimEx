@@ -20,11 +20,16 @@ public class MapTask extends Task
 	public String dataSourceName;
 	// <Reduce Task ID, IDSize>
 	public Map<String, Integer> intermediateData;
+	public int extraTasks = 0;
 
-	public MapTask(String name, int dSize, int mi, Map<String, Integer> intermediateData)
+	public MapTask(int totalMapTasks, int dSize, int mi, Map<String, Integer> intermediateData)
 	{
-		super(name, dSize, mi);
+		super("map", dSize, mi);
 		this.intermediateData = intermediateData;
+		
+		name = "map-" + getCloudletId();
+		
+		extraTasks = totalMapTasks-1;
 	}
 	
 	public double getTaskExecutionTimeInSeconds()
@@ -36,12 +41,17 @@ public class MapTask extends Task
 	{
 		return super.getTaskExecutionTimeInSeconds();
 	}
-
+	
 	public double dataTransferTimeFromTheDataSource()
+	{
+		return dataTransferTimeFromTheDataSource(getCurrentVmInstance());
+	}
+
+	public double dataTransferTimeFromTheDataSource(VmInstance vm)
 	{
 		Cloud cloud = getCloud();
 
-		String currentVmTypeName = getCurrentVmInstance().name;
+		String currentVmTypeName = vm.name;
 
 		for (List<Object> throughputs_vm_ds : cloud.throughputs_ds_vm)
 		{
@@ -86,18 +96,22 @@ public class MapTask extends Task
 		return transferTime;
 	}
 	
+	private double dataTransferTimeToOneReducer(ReduceTask reduceTask)
+	{
+		return dataTransferTimeToOneReducer(reduceTask, getCurrentVmInstance());
+	}
+	
 	/**
 	 * Predict the transfer time to one reduce task
 	 * 
 	 * @param reduceTask
 	 * @return the transfer time
 	 */
-	private double dataTransferTimeToOneReducer(ReduceTask reduceTask)
+	private double dataTransferTimeToOneReducer(ReduceTask reduceTask, VmInstance vm)
 	{
 		Cloud cloud = getCloud();
 
-		VmInstance currentVm = getCurrentVmInstance();
-		String currentVmTypeName = currentVm.name;
+		String currentVmTypeName = vm.name;
 
 		if (intermediateData.containsKey(reduceTask.name))
 		{
@@ -134,7 +148,7 @@ public class MapTask extends Task
 		return 0;
 	}
 	
-	public double dataTransferCostFromTheDataSource()
+	private DataSource getDataSource()
 	{
 		Cloud cloud = getCloud();
 		
@@ -147,6 +161,13 @@ public class MapTask extends Task
 				break;
 			}
 		}
+		return selectedDataSource;
+	}
+	
+	public double dataTransferCostFromTheDataSource()
+	{
+		
+		DataSource selectedDataSource =getDataSource();
 		if(selectedDataSource == null)
 			try
 			{
@@ -163,12 +184,17 @@ public class MapTask extends Task
 
 	}
 	
+	public double dataTransferCostToAllReducers()
+	{
+		return dataTransferCostToAllReducers(getCurrentVmInstance());
+	}
+	
 	/**
 	 * Calculate the data-out cost
 	 * 
 	 * @return The real data transfer cost
 	 */
-	public double dataTransferCostToAllReducers()
+	public double dataTransferCostToAllReducers(VmInstance vm)
 	{
 		int totalIntermediateDataSize = 0;
 		for (Integer intermediateDataSize : intermediateData.values())
@@ -176,6 +202,6 @@ public class MapTask extends Task
 			totalIntermediateDataSize += intermediateDataSize;
 		}
 
-		return getCurrentVmInstance().transferringCost * (double)totalIntermediateDataSize;
+		return vm.transferringCost * (double)totalIntermediateDataSize;
 	}
 }

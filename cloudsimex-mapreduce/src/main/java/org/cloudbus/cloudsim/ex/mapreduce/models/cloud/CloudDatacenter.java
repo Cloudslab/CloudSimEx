@@ -134,7 +134,8 @@ public class CloudDatacenter extends Datacenter {
 			if(cl instanceof MapTask)
 			{
 				MapTask mapTask = (MapTask) cl;
-				Log.printLine(CloudSim.clock() + ": " + getName() + ": Estimated Total Execution Time for MAP task ID: " + cl.getCloudletId() + " is: " + mapTask.dataTransferTimeFromTheDataSource() + "(D-in) + " + mapTask.getTaskExecutionTimeIgnoringDataTransferTimeInSeconds() + "(ET) + " + mapTask.dataTransferTimeToAllReducers() + "(D-out) = " + estimatedFinishTime + " seconds");
+				double total = mapTask.dataTransferTimeFromTheDataSource() + mapTask.getTaskExecutionTimeIgnoringDataTransferTimeInSeconds() + mapTask.dataTransferTimeToAllReducers();
+				Log.printLine(CloudSim.clock() + ": " + getName() + ": Estimated Total Execution Time for MAP task ID: " + cl.getCloudletId() + " is: " + mapTask.dataTransferTimeFromTheDataSource() + "(D-in) + " + mapTask.getTaskExecutionTimeIgnoringDataTransferTimeInSeconds() + "(ET) + " + mapTask.dataTransferTimeToAllReducers() + "(D-out) = " +total + " seconds | estimatedFinishTime (0.0 means in waiting queue): "+ estimatedFinishTime);
 			}
 			else
 				Log.printLine(CloudSim.clock() + ": " + getName() + ": Estimated Total Execution Time for REDUCE task ID: " + cl.getCloudletId() + " is: " + cl.getTaskExecutionTimeInSeconds() + "(ET) = " + estimatedFinishTime + " seconds");
@@ -227,29 +228,6 @@ public class CloudDatacenter extends Datacenter {
 				return true;
 		}
 		return false;
-	}
-	
-	//Simulation output
-	public void printSummary(){
-		
-		DecimalFormat df = new DecimalFormat("#.##");
-		double cost = 0.0;
-			
-		Log.printLine();
-		Log.printLine("======== "+ getName() +" DATACENTER SUMMARY ========");
-		Log.printLine("= Cost: "+df.format(cost));
-		
-		Log.printLine("User id\t\tDebt");
-
-		Set<Integer> keys = getDebts().keySet();
-		Iterator<Integer> iter = keys.iterator();
-		while (iter.hasNext()) {
-			int key = iter.next();
-			double value = getDebts().get(key);
-			Log.printLine(key + "\t\t" + df.format(value));
-		}
-		
-		Log.printLine("========== END OF SUMMARY =========");
 	}
 	
 	

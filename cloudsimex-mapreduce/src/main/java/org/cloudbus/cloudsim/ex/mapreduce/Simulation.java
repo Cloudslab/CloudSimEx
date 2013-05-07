@@ -11,6 +11,7 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PrivateCloudDatacenter;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PublicCloudDatacenter;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Requests;
 import org.yaml.snakeyaml.Yaml;
 
@@ -33,13 +34,16 @@ public class Simulation {
 	//From Requests.yaml
 	private static Requests requests;
 	
+	private static MapReduceEngine engine;
+	
 
 	/**
 	 * Prints input parameters and execute the simulation a number of times,
 	 * as defined in the configuration.
+	 * @throws Exception 
 	 * 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		
 		Log.printLine("========== Simulation configuration ==========");
 		for (Properties property: Properties.values()){
@@ -47,9 +51,10 @@ public class Simulation {
 		}
 		Log.printLine("==============================================");
 		Log.printLine("");
-				
-		int rounds = Integer.parseInt(Properties.EXPERIMENT_ROUNDS.getProperty());
-		for (int round=1; round<=rounds; round++) {
+		
+		
+		Experiments Experiments = YamlFile.getRequestsFromYaml(Properties.REQUESTS.getProperty());
+		for (int round=0; round<Experiments.experiments.size(); round++) {
 			runSimulationRound(round);
 		}
 	}
@@ -59,22 +64,34 @@ public class Simulation {
 	 * is printed to the log.
 	 * 
 	 */
-	private static void runSimulationRound(int round) {
-		Log.printLine("Starting simulation round "+round+".");
+	private static void runSimulationRound(int experimentNumber) {
+		Log.printLine("Starting simulation for experiment number: "+experimentNumber);
 
 		try {
+			
 			// Initialize the CloudSim library
 			CloudSim.init(1,Calendar.getInstance(),false);
-					
-			// Create Broker
-			//WARNING: the engine name must be "MapReduceEngine"
-			MapReduceEngine engine = new MapReduceEngine();
-			Cloud.brokerID = engine.getId();
 			
+			// Create Broker
+			engine = new MapReduceEngine();
+			Cloud.brokerID = engine.getId();
+						
 			// Create datacentres and cloudlets
 			cloud = YamlFile.getCloudFromYaml(Properties.CLOUD.getProperty());
-			requests = YamlFile.getRequestsFromYaml(Properties.REQUESTS.getProperty());
 			engine.setCloud(cloud);
+			Experiments Experiments = YamlFile.getRequestsFromYaml(Properties.REQUESTS.getProperty());
+			
+			requests = Experiments.experiments.get(experimentNumber).requests;
+			
+			int preExperimentIndex = experimentNumber-1;
+			while(requests.requests.size() == 0 && preExperimentIndex>=0)
+			{
+				requests = Experiments.experiments.get(preExperimentIndex).requests;
+				for (Request request : requests.requests)
+					request.policy = Experiments.experiments.get(experimentNumber).policy;
+				preExperimentIndex--;
+			}
+				
 			engine.setRequests(requests);
 			
 			//START

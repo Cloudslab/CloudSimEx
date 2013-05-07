@@ -13,10 +13,10 @@ publicCloudDatacenters:
       ]
    ]
  - [
-    azure-au,
+    azure,
       [
         !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
-        [win-standard, 2.0, 0.000, 1000.0, 1, 512, 0]
+        [azure-standard, 2.0, 0.000, 1000.0, 1, 512, 0]
       ]
    ]
 
@@ -27,7 +27,7 @@ privateCloudDatacenters:
       [
         # VM Type info (You have multiples): [name, cost per hour, transferring.cost, mips, cores, ram, boot_time]
         !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
-        [private-openstack-unimelb, 0.00, 0.000, 100.0, 1, 512, 0]
+        [openstack-micro, 0.00, 0.000, 100.0, 1, 512, 0]
       ]
    ]
 
@@ -35,37 +35,37 @@ dataSources:
    # Data Sources info (You have multiples): [name, cost]
  - [gbr-sensors, 0.000]
  - [EEE-sensors, 0.001]
- - [S3-sensors, 0.1]
+ - [S3-sensors, 0.05]
 
 
 throughputs_vm_vm:
 # Throughputs info between VM Types (You have multiples): [source, destination, throughput]
 - [large-aws-us-east-1, small-aws-us-east-1, 800.0]
-- [large-aws-us-east-1, private-openstack-unimelb, 100.0]
-- [large-aws-us-east-1, win-standard, 200.0]
+- [large-aws-us-east-1, openstack-micro, 100.0]
+- [large-aws-us-east-1, azure-standard, 200.0]
 - [small-aws-us-east-1, large-aws-us-east-1, 800.0]
-- [small-aws-us-east-1, private-openstack-unimelb, 100.0]
-- [small-aws-us-east-1, win-standard, 200.0]
-- [private-openstack-unimelb, large-aws-us-east-1, 50.0]
-- [private-openstack-unimelb, small-aws-us-east-1, 50.0]
-- [private-openstack-unimelb, win-standard, 50.0]
-- [win-standard, large-aws-us-east-1, 200.0]
-- [win-standard, small-aws-us-east-1, 200.0]
-- [win-standard, private-openstack-unimelb, 100.0]
+- [small-aws-us-east-1, openstack-micro, 100.0]
+- [small-aws-us-east-1, azure-standard, 200.0]
+- [openstack-micro, large-aws-us-east-1, 50.0]
+- [openstack-micro, small-aws-us-east-1, 50.0]
+- [openstack-micro, azure-standard, 50.0]
+- [azure-standard, large-aws-us-east-1, 200.0]
+- [azure-standard, small-aws-us-east-1, 200.0]
+- [azure-standard, openstack-micro, 100.0]
 
 throughputs_ds_vm:
 # Throughputs info between a VM Type and a Data Source (You have multiples): [source, destination, throughput]
 - [gbr-sensors, large-aws-us-east-1, 100.0]
 - [gbr-sensors, small-aws-us-east-1, 90.0]
-- [gbr-sensors, private-openstack-unimelb, 80.0]
-- [gbr-sensors, win-standard, 100.0]
+- [gbr-sensors, openstack-micro, 80.0]
+- [gbr-sensors, azure-standard, 100.0]
 
 - [EEE-sensors, large-aws-us-east-1, 100.0]
 - [EEE-sensors, small-aws-us-east-1, 90.0]
-- [EEE-sensors, private-openstack-unimelb, 80.0]
-- [EEE-sensors, win-standard, 100.0]
+- [EEE-sensors, openstack-micro, 80.0]
+- [EEE-sensors, azure-standard, 100.0]
 
 - [S3-sensors, large-aws-us-east-1, 100.0]
 - [S3-sensors, small-aws-us-east-1, 90.0]
-- [S3-sensors, private-openstack-unimelb, 80.0]
-- [S3-sensors, win-standard, 100.0]
+- [S3-sensors, openstack-micro, 80.0]
+- [S3-sensors, azure-standard, 100.0]

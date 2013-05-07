@@ -57,34 +57,18 @@ public class Task extends Cloudlet {
 			return getCurrentRequest().getProvisionedVmFromTaskId(getCloudletId());
 	}
 	
-	protected VmType getCurrentVmType()
-	{
-		return getCloud().getVMTypeFromId(getCurrentVmInstance().VmTypeId);
-	}
-	
 	private MapReduceEngine getMapReduceEngine()
 	{
 		return (MapReduceEngine) CloudSim.getEntity("MapReduceEngine");
 	}
-	
-	/**
-	 * To tell the vm how long it will run, we need to convert the time to MI (Million Instructions)
-	 * @return
-	 */
-	public double getTaskExecutionTimeInMillionInstructions()
-	{
-		return mi;
-	}
-	
+		
 	public double getTaskExecutionTimeInSeconds()
 	{
-		VmInstance vm = getCurrentVmInstance();
-		return mi / vm.getMips();
+		return mi / getCurrentVmInstance().getMips();
 	}
-	
 	
 	public void updateCloudletLength()
 	{
-		setCloudletLength((long) getTaskExecutionTimeInMillionInstructions());
+		setCloudletLength((long) mi);
 	}
 }

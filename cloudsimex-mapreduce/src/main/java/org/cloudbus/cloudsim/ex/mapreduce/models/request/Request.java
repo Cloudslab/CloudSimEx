@@ -33,51 +33,39 @@ public class Request extends SimEvent {
 	public double totalCost;
 	
 	public String policy;
+	public String jobFile;
 
-	public Request(double submissionTime, double budget, int deadline, String jobFile, String policy, UserClass userClass) {
+	public Request(double submissionTime, int deadline, double budget, String jobFile, UserClass userClass) {
 		id = Id.pollId(Request.class);
 		this.submissionTime = submissionTime;
 		this.budget = budget;
 		this.deadline = deadline;
+		this.jobFile = jobFile;
 		this.userClass = userClass;
-		job = readJobYAML(jobFile);
 		firstSubmissionTime = -1;
 		lastFinishTime = -1;
 		totalCost = 0.0;
-		
 		mapAndReduceVmProvisionList = new ArrayList<VmInstance>();
 		reduceOnlyVmProvisionList = new ArrayList<VmInstance>();
-		
 		schedulingPlan = new HashMap<Integer, Integer>();
-		
-		this.policy = policy;
 
-		
+		job = readJobYAML(jobFile);
+		//Add Extra Map Tasks
+		List<MapTask> copyOfMapTasks = new ArrayList<MapTask>(job.mapTasks);
+		for (MapTask mapTask : copyOfMapTasks) {
+			for(int i=mapTask.extraTasks; i > 0; i--)
+				job.mapTasks.add(new MapTask(1,mapTask.dSize,mapTask.mi,mapTask.intermediateData));
+		}
+		//Set Request Id and data source name in all Map Tasks
 		for (MapTask mapTask : job.mapTasks) {
 			mapTask.requestId = id;
 			mapTask.dataSourceName = job.dataSourceName;
 		}
-
+		//Set Request Id and data size in all Reduce Tasks
 		for (ReduceTask reduceTask : job.reduceTasks) {
 			reduceTask.requestId = id;
-			
-			//set the dSize for reduce tasks
 			reduceTask.updateDSize(this);
 		}
-	}
-
-	public Task getTaskFromId(int taskId) {
-		for (MapTask mapTask : job.mapTasks) {
-			if (mapTask.getCloudletId() == taskId)
-				return mapTask;
-		}
-
-		for (ReduceTask reduceTask : job.reduceTasks) {
-			if (reduceTask.getCloudletId() == taskId)
-				return reduceTask;
-		}
-
-		return null;
 	}
 
 	private Job readJobYAML(String jobFile) {
@@ -98,7 +86,7 @@ public class Request extends SimEvent {
 	}
 
 	public boolean isTaskInThisRequest(int cloudletId) {
-		Task task = getTaskFromId(cloudletId);
+		Task task = getTaskFromId(cloudletId, job);
 		if(task == null)
 			return false;
 		else
@@ -131,10 +119,27 @@ public class Request extends SimEvent {
 		return null;
 	}
 	
+	
+	///// STATIC METHODS ////
+	
+	public static Task getTaskFromId(int taskId, Job job) {
+		for (MapTask mapTask : job.mapTasks) {
+			if (mapTask.getCloudletId() == taskId)
+				return mapTask;
+		}
+
+		for (ReduceTask reduceTask : job.reduceTasks) {
+			if (reduceTask.getCloudletId() == taskId)
+				return reduceTask;
+		}
+
+		return null;
+	}
+	
 	/***
 	 * Get VM provisioning plan from a scheduling plan
 	 */
-	public ArrayList<ArrayList<VmInstance>> getProvisioningPlan(Map<Integer, Integer> schedulingPlan, List<VmInstance> nVMs)
+	public static ArrayList<ArrayList<VmInstance>> getProvisioningPlan(Map<Integer, Integer> schedulingPlan, List<VmInstance> nVMs, Job job)
 	{
 		ArrayList<ArrayList<VmInstance>> provisioningPlans = new ArrayList<ArrayList<VmInstance>>(2); //To remove the temporary VMs
 		//Index 0 for: mapAndReduceVmProvisionList
@@ -159,101 +164,6 @@ public class Request extends SimEvent {
 		}
 		
 		return provisioningPlans;
-	}
-	
-	public double getTotalCost(ArrayList<Task> tasks, VmInstance vm, double mapPhaseFinishTime)
-	{
-		double dataTransferCostFromTheDataSource = 0;//DC-in
-		double vmCost = 0;//VMC
-		double dataTransferCostToReduceVms = 0;//DC-out
-		
-		for (Task task : tasks) {
-			if(task instanceof MapTask)
-			{
-				MapTask mapTask = (MapTask) task;
-				dataTransferCostFromTheDataSource += mapTask.dataTransferCostFromTheDataSource();
-				dataTransferCostToReduceVms += mapTask.dataTransferCostToAllReducers();
-			}
-		}
-		
-		
-		vmCost = Math.ceil(getTotalExecutionTime(tasks,vm,mapPhaseFinishTime) / 3600.0) * vm.cost;
-		
-		return dataTransferCostFromTheDataSource + vmCost + dataTransferCostToReduceVms;
-	}
-	
-	public double getTotalExecutionTime(ArrayList<Task> tasks, VmInstance vm, double mapPhaseFinishTime)
-	{
-		double totalReducePhaseExecutionTime = 0;
-		
-		for (Task task : tasks)
-		{
-			if(task instanceof ReduceTask)
-				totalReducePhaseExecutionTime += task.getTaskExecutionTimeInSeconds();
-		}
-		
-		return mapPhaseFinishTime+totalReducePhaseExecutionTime;
-	}
-	
-	public double getTotalExecutionTimeForMapsOnly(ArrayList<Task> tasks, VmInstance vm)
-	{
-		double totalExecutionTime = 0;		
-		for (Task task : tasks)
-		{
-			if(task instanceof MapTask)
-				totalExecutionTime += task.getTaskExecutionTimeInSeconds();
-		}
-		return totalExecutionTime;
-	}
-
-	/***
-	 * 
-	 * @param schedulingPlanInput
-	 * @param nVMs
-	 * @return [Execution Time, Cost]
-	 */
-	public double[] predictExecutionTimeAndCostFromScheduleingPlan(Map<Integer, Integer> schedulingPlanInput, List<VmInstance> nVMs)
-	{
-		schedulingPlan = schedulingPlanInput;
-		
-		ArrayList<ArrayList<VmInstance>> provisioningPlans = getProvisioningPlan(schedulingPlanInput, nVMs);
-		
-		//Get the mapPhaseFinishTime
-		double mapPhaseFinishTime = 0;
-		for (ArrayList<VmInstance> BothMapAndReduceAndReduceOnlyVms : provisioningPlans) {
-			for (VmInstance mapAndReduceVm : BothMapAndReduceAndReduceOnlyVms) {
-				ArrayList<Task> tasks = new ArrayList<Task>();
-				for (Entry<Integer, Integer>  schedulingPlan : schedulingPlanInput.entrySet()) {
-					if(schedulingPlan.getValue() == mapAndReduceVm.getId())
-						tasks.add(getTaskFromId(schedulingPlan.getKey()));
-				}
-				
-				double totalExecutionTimeInVmForMapOnly = getTotalExecutionTimeForMapsOnly(tasks, mapAndReduceVm);
-				if(totalExecutionTimeInVmForMapOnly > mapPhaseFinishTime)
-					mapPhaseFinishTime = totalExecutionTimeInVmForMapOnly;
-			}
-		}
-		
-		//Now get the totalCost and maxExecutionTime
-		double maxExecutionTime = 0;
-		double totalCost = 0;
-		
-		for (ArrayList<VmInstance> BothMapAndReduceAndReduceOnlyVms : provisioningPlans) {
-			for (VmInstance mapAndReduceVm : BothMapAndReduceAndReduceOnlyVms) {
-				ArrayList<Task> tasks = new ArrayList<Task>();
-				for (Entry<Integer, Integer>  schedulingPlan : schedulingPlanInput.entrySet()) {
-					if(schedulingPlan.getValue() == mapAndReduceVm.getId())
-						tasks.add(getTaskFromId(schedulingPlan.getKey()));
-				}
-				
-				double totalExecutionTimeInVm = getTotalExecutionTime(tasks, mapAndReduceVm,mapPhaseFinishTime);
-				if(totalExecutionTimeInVm > maxExecutionTime)
-					maxExecutionTime = totalExecutionTimeInVm;
-				totalCost += getTotalCost(tasks, mapAndReduceVm,mapPhaseFinishTime);
-			}
-		}
-		
-		return new double[]{maxExecutionTime,totalCost};
 	}
 
 }

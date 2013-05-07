@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.cloudbus.cloudsim.Log;
+import org.cloudbus.cloudsim.ex.mapreduce.PredictionEngine;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PrivateCloudDatacenter;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PublicCloudDatacenter;
@@ -45,7 +46,7 @@ public class BruteForceCost extends Policy {
 
 		}
 		//Temporary Add all VMs to the request
-		request.mapAndReduceVmProvisionList = nVMs;
+		//request.mapAndReduceVmProvisionList = nVMs;
 
 		// Fill rTasks
 		for (MapTask mapTask : request.job.mapTasks)
@@ -55,39 +56,30 @@ public class BruteForceCost extends Policy {
 
 		// Get permutations
 		List<Integer[]> nPr = getPermutations(nVMs.size(), rTasks.size());
-
-		// Fill ExecutionPlans
-		List<ExecutionPlan> executionPlans = new ArrayList<ExecutionPlan>();
-
-		// Fill all schedulingPlans
-		for (Integer[] one_nPr : nPr) {
-			ExecutionPlan one_ExecutionPlan = new ExecutionPlan();
-			one_ExecutionPlan.one_nPrSchedulingPlan = vectorToScheduleingPlan(one_nPr);
-			executionPlans.add(one_ExecutionPlan);
-		}
-
-		// Get all Execution Times and Costs for each SchedulingPlan
 		
-		for (ExecutionPlan executionPlan : executionPlans) {
-			
-			double[] predictedExecutionTimeAndCost = request.predictExecutionTimeAndCostFromScheduleingPlan(executionPlan.one_nPrSchedulingPlan, nVMs);
-			
-			executionPlan.ExecutionTime = predictedExecutionTimeAndCost[0];
-			executionPlan.Cost = predictedExecutionTimeAndCost[1];
+		// Select the fastest
+		double chapest = -1;
+		for (Integer[] one_nPr : nPr)
+		{
+			Map<Integer, Integer> schedulingPlan = vectorToScheduleingPlan(one_nPr);
+			ExecutionPlan executionPlan = new ExecutionPlan(schedulingPlan,nVMs, request.job);
+			if(chapest == -1)
+				chapest = executionPlan.Cost;
+			else
+				if (executionPlan.Cost < chapest)
+					chapest = executionPlan.Cost;
 		}
-
-		// Select the cheapest
-		double cheapest =  executionPlans.get(0).Cost;
-		for (ExecutionPlan executionPlan : executionPlans)
-			if (executionPlan.Cost < cheapest)
-				cheapest = executionPlan.Cost;
-
-		// Collect the candidate ExecutionPlans, where they are close to the cheapest value
+		
+		// Collect the candidate ExecutionPlans, where they are close to the fastest value
 		double margin = 0.0;
 		List<ExecutionPlan> candidateExecutionPlans = new ArrayList<ExecutionPlan>();
-		for (ExecutionPlan executionPlan : executionPlans)
-			if (executionPlan.Cost - margin <= cheapest)
+		for (Integer[] one_nPr : nPr)
+		{
+			Map<Integer, Integer> schedulingPlan = vectorToScheduleingPlan(one_nPr);
+			ExecutionPlan executionPlan = new ExecutionPlan(schedulingPlan, nVMs, request.job);
+			if (executionPlan.Cost - margin <= chapest)
 				candidateExecutionPlans.add(executionPlan);
+		}
 
 		// Select the fastest from the cheapest
 		ExecutionPlan fastestCheapestExecutionPlan = candidateExecutionPlans
@@ -97,10 +89,10 @@ public class BruteForceCost extends Policy {
 				fastestCheapestExecutionPlan = executionPlan;
 
 		// Selected SchedulingPlan
-		Map<Integer, Integer> selectedSchedulingPlan = fastestCheapestExecutionPlan.one_nPrSchedulingPlan;
+		Map<Integer, Integer> selectedSchedulingPlan = fastestCheapestExecutionPlan.schedulingPlan;
 
 		// 1- Provisioning
-		ArrayList<ArrayList<VmInstance>> provisioningPlans = request.getProvisioningPlan(selectedSchedulingPlan, nVMs);
+		ArrayList<ArrayList<VmInstance>> provisioningPlans = Request.getProvisioningPlan(selectedSchedulingPlan, nVMs, request.job);
 		request.mapAndReduceVmProvisionList = provisioningPlans.get(0);
 		request.reduceOnlyVmProvisionList = provisioningPlans.get(1);
 
