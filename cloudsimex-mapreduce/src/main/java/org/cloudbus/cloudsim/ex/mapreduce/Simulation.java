@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Calendar;
 
 import org.cloudbus.cloudsim.Log;
@@ -13,6 +15,7 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PrivateCloudDatacenter;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PublicCloudDatacenter;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Requests;
+import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -44,6 +47,12 @@ public class Simulation {
 	 * 
 	 */
 	public static void main(String[] args) throws Exception {
+		
+		java.util.Properties props = new java.util.Properties();
+		try (InputStream is = Files.newInputStream(Paths.get("custom_log.properties"))) {
+		    props.load(is);
+		}
+		CustomLog.configLogger(props);
 		
 		Log.printLine("========== Simulation configuration ==========");
 		for (Properties property: Properties.values()){

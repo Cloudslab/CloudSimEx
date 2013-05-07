@@ -5,7 +5,9 @@ import java.util.List;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.ex.util.Id;
+import org.cloudbus.cloudsim.ex.util.Textualize;
 
+@Textualize(properties = { "CloudletId", "CloudletLength",  "FinishTime", "FinalExecTime" })
 public class ReduceTask extends Task {
 	
 	public ReduceTask(String name, int mi) {

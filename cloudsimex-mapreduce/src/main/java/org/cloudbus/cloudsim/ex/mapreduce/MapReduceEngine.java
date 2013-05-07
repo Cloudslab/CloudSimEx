@@ -1,9 +1,13 @@
 package org.cloudbus.cloudsim.ex.mapreduce;
 
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.DatacenterBroker;
@@ -16,6 +20,8 @@ import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.ex.mapreduce.policy.*;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.*;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.*;
+import org.cloudbus.cloudsim.ex.util.CustomLog;
+import org.cloudbus.cloudsim.ex.util.TextUtil;
 import org.cloudbus.cloudsim.lists.VmList;
 
 public class MapReduceEngine extends DatacenterBroker {
@@ -372,6 +378,12 @@ public class MapReduceEngine extends DatacenterBroker {
 				+ "Submission Time" + indent + "Start Time" + indent + "Execution Time (s)" + indent + "Finish Time"
 				+ indent + "VM ID" + indent + "VM Type");
 
+		CustomLog.print(TextUtil.getCaptionLine(Task.class,","));
+		for (Cloudlet cloudlet : getCloudletReceivedList()) {
+			CustomLog.print(TextUtil.getTxtLine(cloudlet,",", false));
+		}
+		
+		////......
 		for (Cloudlet cloudlet : getCloudletReceivedList()) {
 			Task task = (Task) cloudlet;
 			Log.print(" = " + task.requestId + indent + indent + task.getCloudletId() + indent);
@@ -418,6 +430,8 @@ public class MapReduceEngine extends DatacenterBroker {
 		}
 
 		Log.printLine();
+
+		
 		for (Request request : requests.requests) {
 			Log.printLine(" ======== Request ID: " + request.id + " - USER CLASS: [" + request.userClass + "]");
 			Log.printLine(" Policy: "+request.policy);

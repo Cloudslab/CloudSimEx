@@ -14,7 +14,9 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.DataSource;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmInstance;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType;
 import org.cloudbus.cloudsim.ex.util.Id;
+import org.cloudbus.cloudsim.ex.util.Textualize;
 
+@Textualize(properties = { "CloudletId", "CloudletLength",  "FinishTime", "FinalExecTime" })
 public class MapTask extends Task
 {
 	public String dataSourceName;
@@ -148,7 +150,7 @@ public class MapTask extends Task
 		return 0;
 	}
 	
-	private DataSource getDataSource()
+	public DataSource getDataSource()
 	{
 		Cloud cloud = getCloud();
 		

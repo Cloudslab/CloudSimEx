@@ -10,7 +10,9 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmInstance;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType;
 import org.cloudbus.cloudsim.ex.util.Id;
+import org.cloudbus.cloudsim.ex.util.Textualize;
 
+@Textualize(properties = { "CloudletId", "CloudletLength",  "FinishTime", "FinalExecTime" })
 public class Task extends Cloudlet {
 
 	public String name;
@@ -33,12 +35,12 @@ public class Task extends Cloudlet {
 		this.setUserId(Cloud.brokerID);
 	}
 	
-	protected Cloud getCloud()
+	public Cloud getCloud()
 	{
 		return getMapReduceEngine().getCloud();
 	}
 	
-	protected Requests getRequests()
+	public Requests getRequests()
 	{
 		return getMapReduceEngine().getRequests();
 	}
@@ -48,7 +50,7 @@ public class Task extends Cloudlet {
 		return getRequests().getRequestFromId(requestId);
 	}
 	
-	protected VmInstance getCurrentVmInstance()
+	public VmInstance getCurrentVmInstance()
 	{
 		//Check if it has been binded
 		if(getVmId() != -1)
@@ -57,7 +59,7 @@ public class Task extends Cloudlet {
 			return getCurrentRequest().getProvisionedVmFromTaskId(getCloudletId());
 	}
 	
-	private MapReduceEngine getMapReduceEngine()
+	public MapReduceEngine getMapReduceEngine()
 	{
 		return (MapReduceEngine) CloudSim.getEntity("MapReduceEngine");
 	}
@@ -70,5 +72,49 @@ public class Task extends Cloudlet {
 	public void updateCloudletLength()
 	{
 		setCloudletLength((long) mi);
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getRequestId() {
+		return requestId;
+	}
+
+	public void setRequestId(int requestId) {
+		this.requestId = requestId;
+	}
+
+	public boolean isFinished() {
+		return isFinished;
+	}
+
+	public void setFinished(boolean isFinished) {
+		this.isFinished = isFinished;
+	}
+
+	public int getMi() {
+		return mi;
+	}
+
+	public void setMi(int mi) {
+		this.mi = mi;
+	}
+
+	public int getdSize() {
+		return dSize;
+	}
+
+	public void setdSize(int dSize) {
+		this.dSize = dSize;
+	}
+	
+	public double getFinalExecTime() {
+		return getFinishTime() - getExecStartTime();
 	}
 }
