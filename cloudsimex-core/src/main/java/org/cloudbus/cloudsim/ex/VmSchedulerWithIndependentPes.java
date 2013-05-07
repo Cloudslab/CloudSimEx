@@ -24,17 +24,19 @@ import org.cloudbus.cloudsim.VmScheduler;
  * @author nikolay.grozev
  * 
  */
-public abstract class VmSchedulerWithIndependentPes<P extends Pe, V extends Vm> {
+public abstract class VmSchedulerWithIndependentPes<P extends Pe> extends VmScheduler {
 
     private final LinkedHashMap<P, VmScheduler> peIdsToSchedulers = new LinkedHashMap<>();
 
     public VmSchedulerWithIndependentPes(final List<P> pelist) {
+	super(pelist);
 	for (P pe : pelist) {
 	    peIdsToSchedulers.put(pe, createSchedulerFroPe(pe));
 	}
     }
 
-    public List<Double> getAllocatedMipsForVm(final V vm) {
+    @Override
+    public List<Double> getAllocatedMipsForVm(final Vm vm) {
 	List<Double> result = new ArrayList<>();
 	for (Map.Entry<P, VmScheduler> entry : peIdsToSchedulers.entrySet()) {
 	    P pe = entry.getKey();
@@ -50,7 +52,8 @@ public abstract class VmSchedulerWithIndependentPes<P extends Pe, V extends Vm> 
 	return result;
     }
 
-    public boolean allocatePesForVm(final V vm, final List<Double> mipsShare) {
+    @Override
+    public boolean allocatePesForVm(final Vm vm, final List<Double> mipsShare) {
 	boolean result = true;
 	int i = 0;
 	for (Map.Entry<P, VmScheduler> entry : peIdsToSchedulers.entrySet()) {
@@ -66,13 +69,22 @@ public abstract class VmSchedulerWithIndependentPes<P extends Pe, V extends Vm> 
 	return result;
     }
 
-    public void deallocatePesForVm(final V vm) {
+    @Override
+    public void deallocatePesForVm(final Vm vm) {
 	for (Map.Entry<P, VmScheduler> entry : peIdsToSchedulers.entrySet()) {
 	    P pe = entry.getKey();
 	    VmScheduler scheduler = entry.getValue();
 	    if (doesVmUse(vm, pe)) {
 		scheduler.deallocatePesForVm(vm);
 	    }
+	}
+    }
+
+    @Override
+    public void deallocatePesForAllVms() {
+	for (Map.Entry<P, VmScheduler> entry : peIdsToSchedulers.entrySet()) {
+	    VmScheduler scheduler = entry.getValue();
+	    scheduler.deallocatePesForAllVms();
 	}
     }
 
@@ -94,6 +106,6 @@ public abstract class VmSchedulerWithIndependentPes<P extends Pe, V extends Vm> 
      *            - the pe to check for.
      * @return - if the vm uses the Pe.
      */
-    protected abstract boolean doesVmUse(final V vm, final Pe pe);
+    protected abstract boolean doesVmUse(final Vm vm, final Pe pe);
 
 }

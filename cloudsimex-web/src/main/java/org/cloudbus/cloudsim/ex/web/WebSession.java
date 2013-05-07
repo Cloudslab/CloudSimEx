@@ -40,7 +40,8 @@ import org.cloudbus.cloudsim.ex.util.Textualize;
  * @author nikolay.grozev
  * 
  */
-@Textualize(properties = { "ReadableStartTime", "StartTime", "SessionId", "AppVmId", "DbVmId", "Delay", "Complete" })
+@Textualize(properties = { "SessionId", "AppVmId", "DbVmId", "ReadableStartTime", "StartTime", "FinishTime",
+	"IdealEnd", "Delay", "Complete" })
 public class WebSession {
 
     private final IGenerator<? extends WebCloudlet> appServerCloudLets;
@@ -55,7 +56,7 @@ public class WebSession {
     private int userId;
     private int cloudletsLeft;
 
-    private final double idealEnd;
+    private double idealEnd;
     private Double startTime;
 
     private final int sessionId;
@@ -70,7 +71,7 @@ public class WebSession {
      *            - a generator for cloudlets for the db server. Must not be
      *            null.
      * @param userId
-     *            - the use id. Not a valid user id must be sed either through a
+     *            - the use id. A valid user id must be set either through a
      *            constructor or the set method, before this instance is used.
      */
     public WebSession(final IGenerator<? extends WebCloudlet> appServerCloudLets,
@@ -227,11 +228,40 @@ public class WebSession {
      *         cloudlet running -1 is returned.
      */
     public double getDelay() {
-	double delayAS = currentAppServerCloudLet == null || !currentAppServerCloudLet.isFinished() ? -1
-		: currentAppServerCloudLet.getFinishTime() - idealEnd;
-	double delayDB = currentDBServerCloudLets == null || !areAllCloudletsFinished(currentDBServerCloudLets) ? -1
-		: getLatestFinishTime(currentDBServerCloudLets) - idealEnd;
-	return Math.max(0, Math.max(delayAS, delayDB));
+	return Math.max(0, getFinishTime() - idealEnd);
+    }
+
+    /**
+     * Returns the finish of this session. If the session has a cloudlet running
+     * -1 is returned.
+     * 
+     * @return the finish time of this session. If the session has a cloudlet
+     *         running -1 is returned.
+     */
+    public double getFinishTime() {
+	double finishAS = currentAppServerCloudLet == null || !currentAppServerCloudLet.isFinished() ? -1
+		: currentAppServerCloudLet.getFinishTime();
+	double finishDB = currentDBServerCloudLets == null || !areAllCloudletsFinished(currentDBServerCloudLets) ? -1
+		: getLatestFinishTime(currentDBServerCloudLets);
+	return Math.max(0, Math.max(finishAS, finishDB));
+    }
+
+    /**
+     * Sets the ideal end of the session.
+     * 
+     * @param idealEnd
+     */
+    public void setIdealEnd(final double idealEnd) {
+	this.idealEnd = idealEnd;
+    }
+
+    /**
+     * Returns the ideal end time of this session.
+     * 
+     * @return the ideal end time of this session.
+     */
+    public double getIdealEnd() {
+	return idealEnd;
     }
 
     /**

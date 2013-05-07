@@ -34,7 +34,7 @@ target/
 
 # Logs and databases #
 ######################
-#*.log
+*.log
 *.sql
 *.sqlite
 
@@ -59,4 +59,13 @@ Thumbs.db
 *.snm
 *.vrb
 
+# Backup and lock files #
+##################
+*~
+*.lck
+
+# R's hidden files - .RData .Rhistory #
+####################
+.RData
+.Rhistory
 

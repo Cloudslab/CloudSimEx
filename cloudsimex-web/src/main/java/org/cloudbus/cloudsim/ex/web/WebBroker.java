@@ -3,6 +3,7 @@ package org.cloudbus.cloudsim.ex.web;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -15,7 +16,7 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
-import org.cloudbus.cloudsim.ex.web.workload.WorkloadGenerator;
+import org.cloudbus.cloudsim.ex.web.workload.IWorkloadGenerator;
 
 /**
  * A broker that takes care of the submission of web sessions to the data
@@ -29,17 +30,18 @@ import org.cloudbus.cloudsim.ex.web.workload.WorkloadGenerator;
 public class WebBroker extends DatacenterBroker {
 
     // FIXME find a better way to get an unused tag instead of hardcoding 123456
-    private static final int TIMER_TAG = 123456;
-    private static final int SUBMIT_SESSION_TAG = TIMER_TAG + 1;
+    protected static final int TIMER_TAG = 123456;
+    protected static final int SUBMIT_SESSION_TAG = TIMER_TAG + 1;
+    protected static final int UPDATE_SESSION_TAG = SUBMIT_SESSION_TAG + 1;
 
     private boolean isTimerRunning = false;
-    private final double refreshPeriod;
+    private final double stepPeriod;
     private final double lifeLength;
 
     private final Map<Long, ILoadBalancer> loadBalancers = new HashMap<>();
-    private final Map<Long, List<WorkloadGenerator>> loadBalancersToGenerators = new HashMap<>();
+    private final Map<Long, List<IWorkloadGenerator>> loadBalancersToGenerators = new HashMap<>();
 
-    private final List<WebSession> servedSessions = new ArrayList<>();
+    private final LinkedHashMap<Integer, WebSession> servedSessions = new LinkedHashMap<>();
     private final List<WebSession> canceledSessions = new ArrayList<>();
 
     private final List<PresetEvent> presetEvents = new ArrayList<>();
@@ -88,7 +90,7 @@ public class WebBroker extends DatacenterBroker {
     public WebBroker(final String name, final double refreshPeriod,
 	    final double lifeLength, final List<Integer> dataCenterIds) throws Exception {
 	super(name);
-	this.refreshPeriod = refreshPeriod;
+	this.stepPeriod = refreshPeriod;
 	this.lifeLength = lifeLength;
 	this.dataCenterIds = dataCenterIds;
     }
@@ -110,7 +112,19 @@ public class WebBroker extends DatacenterBroker {
      * @return the sessions that were sucessfully served.
      */
     public List<WebSession> getServedSessions() {
-	return servedSessions;
+	return new ArrayList<>(servedSessions.values());
+    }
+
+    public Map<Long, ILoadBalancer> getLoadBalancers() {
+	return loadBalancers;
+    }
+
+    public double getStepPeriod() {
+	return stepPeriod;
+    }
+    
+    public double getLifeLength() {
+        return lifeLength;
     }
 
     /*
@@ -142,24 +156,55 @@ public class WebBroker extends DatacenterBroker {
      * @param webSessions
      *            - the new web sessions.
      */
-    public void submitSessions(final List<WebSession> webSessions, final long loadBalancerId) {
-	List<WebSession> copyWebSessions = new ArrayList<>(webSessions);
-	loadBalancers.get(loadBalancerId).assignToServers(
-		copyWebSessions.toArray(new WebSession[copyWebSessions.size()]));
+    public void submitSessions(final List<WebSession> webSessions,
+	    final long loadBalancerId) {
+	if (!CloudSim.running()) {
+	    submitSessionsAtTime(webSessions, loadBalancerId, 0);
+	} else {
+	    List<WebSession> copyWebSessions = new ArrayList<>(webSessions);
+	    loadBalancers.get(loadBalancerId).assignToServers(
+		    copyWebSessions.toArray(new WebSession[copyWebSessions
+			    .size()]));
 
-	for (ListIterator<WebSession> iter = copyWebSessions.listIterator(); iter.hasNext();) {
-	    WebSession session = iter.next();
-	    // If the load balancer could not assign it...
-	    if (session.getAppVmId() == null || session.getDbBalancer() == null) {
-		iter.remove();
-		canceledSessions.add(session);
-		CustomLog.printf(
-			"Session could not be served and is canceled. Session id:%d", session.getSessionId());
+	    for (ListIterator<WebSession> iter = copyWebSessions.listIterator(); iter
+		    .hasNext();) {
+		WebSession session = iter.next();
+		// If the load balancer could not assign it...
+		if (session.getAppVmId() == null
+			|| session.getDbBalancer() == null) {
+		    iter.remove();
+		    canceledSessions.add(session);
+		    CustomLog
+			    .printf("Session could not be served and is canceled. Session id:%d",
+				    session.getSessionId());
+		} else {
+		    // Let the session prepare the first cloudlets
+		    if (session.areVirtualMachinesReady()) {
+			session.notifyOfTime(CloudSim.clock());
+		    } else {
+			// If the VMs are not yet ready - start the session
+			// later
+			// and extend its ideal end
+			session.setIdealEnd(session.getIdealEnd() + stepPeriod);
+			session.notifyOfTime(CloudSim.clock() + stepPeriod);
+		    }
+		}
+		session.setUserId(getId());
 	    }
-	    session.setUserId(getId());
-	}
 
-	servedSessions.addAll(copyWebSessions);
+	    for (WebSession sess : copyWebSessions) {
+		servedSessions.put(sess.getSessionId(), sess);
+
+		// Start the session or schedule it if its VMs are not
+		// initiated.
+		if (sess.areVirtualMachinesReady()) {
+		    updateSessions(sess.getSessionId());
+		} else {
+		    send(getId(), stepPeriod, UPDATE_SESSION_TAG,
+			    sess.getSessionId());
+		}
+	    }
+	}
     }
 
     /**
@@ -189,7 +234,7 @@ public class WebBroker extends DatacenterBroker {
      */
     public void addLoadBalancer(final ILoadBalancer balancer) {
 	loadBalancers.put(balancer.getId(), balancer);
-	loadBalancersToGenerators.put(balancer.getId(), new ArrayList<WorkloadGenerator>());
+	loadBalancersToGenerators.put(balancer.getId(), new ArrayList<IWorkloadGenerator>());
     }
 
     /**
@@ -201,7 +246,7 @@ public class WebBroker extends DatacenterBroker {
      *            - the id of the load balancer. There must such a load balancer
      *            registered before this method is called.
      */
-    public void addWorkloadGenerators(final List<WorkloadGenerator> workloads, final long loadBalancerId) {
+    public void addWorkloadGenerators(final List<? extends IWorkloadGenerator> workloads, final long loadBalancerId) {
 	loadBalancersToGenerators.get(loadBalancerId).addAll(workloads);
     }
 
@@ -218,8 +263,7 @@ public class WebBroker extends DatacenterBroker {
 	switch (ev.getTag()) {
 	    case TIMER_TAG:
 		if (CloudSim.clock() < lifeLength) {
-		    send(getId(), refreshPeriod, TIMER_TAG);
-		    updateSessions();
+		    send(getId(), stepPeriod, TIMER_TAG);
 		    generateWorkload();
 		}
 		break;
@@ -227,6 +271,9 @@ public class WebBroker extends DatacenterBroker {
 		Object[] data = (Object[]) ev.getData();
 		submitSessions((List<WebSession>) data[0], (Long) data[1]);
 		break;
+	    case UPDATE_SESSION_TAG:
+		Integer sessId = (Integer) ev.getData();
+		updateSessions(sessId);
 	    default:
 		super.processOtherEvent(ev);
 	}
@@ -234,15 +281,15 @@ public class WebBroker extends DatacenterBroker {
 
     private void generateWorkload() {
 	double currTime = CloudSim.clock();
-	for (Map.Entry<Long, List<WorkloadGenerator>> balancersToWorkloadGens : loadBalancersToGenerators.entrySet()) {
+	for (Map.Entry<Long, List<IWorkloadGenerator>> balancersToWorkloadGens : loadBalancersToGenerators.entrySet()) {
 	    long balancerId = balancersToWorkloadGens.getKey();
-	    for (WorkloadGenerator gen : balancersToWorkloadGens.getValue()) {
-		Map<Double, WebSession> timeToSessions = gen.generateSessions(currTime, refreshPeriod);
-		for (Map.Entry<Double, WebSession> sessEntry : timeToSessions.entrySet()) {
+	    for (IWorkloadGenerator gen : balancersToWorkloadGens.getValue()) {
+		Map<Double, List<WebSession>> timeToSessions = gen.generateSessions(currTime, stepPeriod);
+		for (Map.Entry<Double, List<WebSession>> sessEntry : timeToSessions.entrySet()) {
 		    if (currTime == sessEntry.getKey()) {
-			submitSessions(Arrays.asList(sessEntry.getValue()), balancerId);
+			submitSessions(sessEntry.getValue(), balancerId);
 		    } else {
-			submitSessionsAtTime(Arrays.asList(sessEntry.getValue()), balancerId,
+			submitSessionsAtTime(sessEntry.getValue(), balancerId,
 				sessEntry.getKey() - currTime);
 		    }
 		}
@@ -250,8 +297,10 @@ public class WebBroker extends DatacenterBroker {
 	}
     }
 
-    private void updateSessions() {
-	for (WebSession sess : servedSessions) {
+    private void updateSessions(final Integer... sessionIds) {
+
+	for (Integer id : sessionIds.length == 0 ? servedSessions.keySet() : Arrays.asList(sessionIds)) {
+	    WebSession sess = servedSessions.get(id);
 
 	    // Check if all VMs for the sessions are set. In the simulation
 	    // start, this may not be so, as the refreshing action of the broker
@@ -259,13 +308,18 @@ public class WebBroker extends DatacenterBroker {
 	    if (sess.areVirtualMachinesReady()) {
 		double currTime = CloudSim.clock();
 
-		sess.notifyOfTime(currTime);
+		// sess.notifyOfTime(currTime);
 		WebSession.StepCloudlets webCloudlets = sess.pollCloudlets(currTime);
 
 		if (webCloudlets != null) {
 		    getCloudletList().add(webCloudlets.asCloudlet);
 		    getCloudletList().addAll(webCloudlets.dbCloudlets);
 		    submitCloudlets();
+
+		    double nextIdealTime = currTime + stepPeriod;
+		    sess.notifyOfTime(nextIdealTime);
+
+		    send(getId(), stepPeriod, UPDATE_SESSION_TAG, sess.getSessionId());
 		}
 	    }
 	}
@@ -287,6 +341,9 @@ public class WebBroker extends DatacenterBroker {
 	} else {
 	    getCloudletReceivedList().add(cloudlet);
 	    cloudletsSubmitted--;
+	    if (cloudlet instanceof WebCloudlet) {
+		updateSessions(((WebCloudlet) cloudlet).getSessionId());
+	    }
 	}
     }
 

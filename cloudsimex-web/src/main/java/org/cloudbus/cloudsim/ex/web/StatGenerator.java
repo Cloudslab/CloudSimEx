@@ -54,13 +54,17 @@ public class StatGenerator extends BaseStatGenerator<WebCloudlet> {
      */
     @Override
     protected WebCloudlet create(final double idealStartTime) {
-	long cpuLen = generateNumericValue(CLOUDLET_LENGTH).longValue();
-	int ram = generateNumericValue(CLOUDLET_RAM).intValue();
-	int ioLen = generateNumericValue(CLOUDLET_IO).intValue();
-	boolean modifiesData = generateBooleanValue(CLOUDLET_MODIFIES_DATA);
+	Double cpuLen = generateNumericValue(CLOUDLET_LENGTH);
+	Double ram = generateNumericValue(CLOUDLET_RAM);
+	Double ioLen = generateNumericValue(CLOUDLET_IO);
+	Boolean modifiesData = generateBooleanValue(CLOUDLET_MODIFIES_DATA);
 
-	return new WebCloudlet(idealStartTime, cpuLen, ioLen, ram, -1,
+	if(cpuLen == null || ram == null || ioLen == null || modifiesData == null) {
+	    return null;
+	} else {
+	    return new WebCloudlet(idealStartTime, cpuLen.longValue(), ioLen.longValue(), ram, -1,
 		modifiesData, getData());
+	}
     }
 
 }

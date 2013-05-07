@@ -41,9 +41,11 @@ public class TextUtil {
     /** The new line symbol of this system. */
     public static final String NEW_LINE = System.getProperty("line.separator");
 
+    /** The default delimeter for lines. */
+    public static final String DEFAULT_DELIM = ";";
+
     private static final String STANDARD_GET_REGEX = "get.+";
     private static final String BOOLGET_REGEX = "is.+";
-    private static final String DEFAULT_DELIM = ";";
     private static final Map<Class<?>, List<Method>> GET_METHODS = new HashMap<Class<?>, List<Method>>();
 
     /**
@@ -69,6 +71,79 @@ public class TextUtil {
      */
     public static String getTxtLine(final Object obj) {
 	return getTxtLine(obj, DEFAULT_DELIM, false);
+    }
+
+    /**
+     * Converts the specified class to a single line of text. Convenient for
+     * generating a header line in a log or a CSV file.
+     * 
+     * @param headers
+     *            - the names of the headers.
+     * @param headerClasses
+     *            - the types of the headers. May be null or empty if the types
+     *            are unknown.
+     * @param delim
+     *            - the delimter.
+     * @return a line for the headers.
+     */
+    public static String getCaptionLine(final List<String> headers, final List<? extends Class<?>> headerClasses,
+	    final String delim) {
+	StringBuffer buffer = new StringBuffer();
+	int i = 0;
+	for (String h : headers) {
+	    buffer.append(headerClasses == null || headerClasses.isEmpty() ? h : formatHeader(h, headerClasses.get(i)));
+	    if (i < headers.size() - 1) {
+		buffer.append(delim);
+	    }
+	    i++;
+	}
+	return buffer.toString();
+    }
+
+    /**
+     * Converts the specified list of objects to a single line of text.
+     * Convenient to converting to a line in a log or a line in a CSV file. The
+     * line is formatted in a way so that if put under a line with the headers
+     * it will be aligned. If the headers list is empty or null it is ignored.
+     * 
+     * <br/>
+     * 
+     * The flag includeFieldNames is used to specify if the names of the
+     * properties should be included in the result. If it is true, the result
+     * will consist of entries like: "propA=valueA"
+     * 
+     * @param objects
+     *            - the list of objects to print in the line.
+     * @param headers
+     *            - the headers. Must be of the same size as objects or null or
+     *            empty.
+     * @param delimeter
+     *            - the delimeter to use.
+     * @param includeFieldNames
+     *            - a flag whether to include the names of the properties in the
+     *            line as well.
+     * @return
+     */
+    public static String getTxtLine(final List<?> objects, final List<String> headers, final String delimeter,
+	    final boolean includeFieldNames) {
+	StringBuffer result = new StringBuffer();
+
+	for (int i = 0; i < objects.size(); i++) {
+	    String txt = toString(objects.get(i));
+	    String propName = headers.get(i);
+	    if (includeFieldNames) {
+		result.append(propName + "=" + txt);
+	    } else {
+		if (propName.length() > txt.length()) {
+		    txt = String.format("%" + propName.length() + "s", txt);
+		}
+		result.append(txt);
+	    }
+
+	    result.append(i < objects.size() - 1 ? delimeter : "");
+	}
+
+	return result.toString();
     }
 
     /**
@@ -192,12 +267,7 @@ public class TextUtil {
 	    String propEntry = getPropName(m);
 	    Class<?> returnType = Primitives.wrap(m.getReturnType());
 
-	    if (Double.class.equals(returnType) || Float.class.equals(returnType)
-		    && propEntry.length() < SIZE_OF_DBL_STRINGS) {
-		propEntry = String.format("%" + SIZE_OF_DBL_STRINGS + "s", propEntry);
-	    } else if (Number.class.isAssignableFrom(returnType) && propEntry.length() < SIZE_OF_INT_STRINGS) {
-		propEntry = String.format("%" + SIZE_OF_INT_STRINGS + "s", propEntry);
-	    }
+	    propEntry = formatHeader(propEntry, returnType);
 
 	    result.append(propEntry);
 	    result.append(i < methods.size() - 1 ? delimeter : "");
@@ -207,7 +277,17 @@ public class TextUtil {
 	return result.toString();
     }
 
-    private static List<Method> extractGetMethodsForClass(Class<?> clazz1) {
+    private static String formatHeader(String header, final Class<?> entryType) {
+	if (Double.class.equals(entryType) || Float.class.equals(entryType)
+		&& header.length() < SIZE_OF_DBL_STRINGS) {
+	    header = String.format("%" + SIZE_OF_DBL_STRINGS + "s", header);
+	} else if (Number.class.isAssignableFrom(entryType) && header.length() < SIZE_OF_INT_STRINGS) {
+	    header = String.format("%" + SIZE_OF_INT_STRINGS + "s", header);
+	}
+	return header;
+    }
+
+    private static List<Method> extractGetMethodsForClass(final Class<?> clazz1) {
 	List<Method> methods = null;
 	Class<?> clazz = clazz1;
 	if (!GET_METHODS.containsKey(clazz)) {
@@ -248,7 +328,7 @@ public class TextUtil {
 	return GET_METHODS.get(clazz);
     }
 
-    private static String getPropName(Method getter) {
+    private static String getPropName(final Method getter) {
 	return isBoolGetter(getter) ? getter.getName().substring(2) :
 		isGetter(getter) ? getter.getName().substring(3) : getter.getName();
     }
@@ -319,7 +399,7 @@ public class TextUtil {
 	};
 
 	@Override
-	public int compare(Method o1, Method o2) {
+	public int compare(final Method o1, final Method o2) {
 	    String prop1 = getPropName(o1);
 	    String prop2 = getPropName(o2);
 	    return prop1.compareTo(prop2);
@@ -329,13 +409,13 @@ public class TextUtil {
     private static class MethodsLitIndexComparator implements Comparator<Method> {
 	private List<String> properties = null;
 
-	public MethodsLitIndexComparator(List<String> properties) {
+	public MethodsLitIndexComparator(final List<String> properties) {
 	    super();
 	    this.properties = properties;
 	}
 
 	@Override
-	public int compare(Method o1, Method o2) {
+	public int compare(final Method o1, final Method o2) {
 	    String prop1 = getPropName(o1);
 	    String prop2 = getPropName(o2);
 	    return Integer.valueOf(properties.indexOf(prop1)).compareTo(properties.indexOf(prop2));

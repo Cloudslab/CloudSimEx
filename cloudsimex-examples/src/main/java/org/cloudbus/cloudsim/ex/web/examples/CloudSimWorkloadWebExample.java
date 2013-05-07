@@ -44,7 +44,7 @@ import org.cloudbus.cloudsim.ex.web.SimpleDBBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleWebLoadBalancer;
 import org.cloudbus.cloudsim.ex.web.WebBroker;
 import org.cloudbus.cloudsim.ex.web.WebCloudlet;
-import org.cloudbus.cloudsim.ex.web.workload.WorkloadGenerator;
+import org.cloudbus.cloudsim.ex.web.workload.StatWorkloadGenerator;
 import org.cloudbus.cloudsim.ex.web.workload.freq.CompositeValuedSet;
 import org.cloudbus.cloudsim.ex.web.workload.freq.FrequencyFunction;
 import org.cloudbus.cloudsim.ex.web.workload.freq.PeriodicStochasticFrequencyFunction;
@@ -123,7 +123,7 @@ public class CloudSimWorkloadWebExample {
 	    // submit vm list to the broker
 	    broker.submitVmList(vmlist);
 
-	    List<WorkloadGenerator> workloads = generateWorkloads();
+	    List<StatWorkloadGenerator> workloads = generateWorkloads();
 	    broker.addWorkloadGenerators(workloads, balancer.getId());
 
 	    // Sixth step: Starts the simulation
@@ -149,8 +149,8 @@ public class CloudSimWorkloadWebExample {
 	System.out.println("Finished in " + (end - start) / 1000 + "seconds");
     }
 
-    private static List<WorkloadGenerator> generateWorkloads() {
-	List<WorkloadGenerator> workloads = new ArrayList<>();
+    private static List<StatWorkloadGenerator> generateWorkloads() {
+	List<StatWorkloadGenerator> workloads = new ArrayList<>();
 
 	int asCloudletLength = 200;
 	int asRam = 1;
@@ -184,7 +184,7 @@ public class CloudSimWorkloadWebExample {
 
 	FrequencyFunction freqFun = new PeriodicStochasticFrequencyFunction(unit, periodLength, nullPoint,
 		CompositeValuedSet.createCompositeValuedSet(periods));
-	workloads.add(new WorkloadGenerator(freqFun, sessGen));
+	workloads.add(new StatWorkloadGenerator(freqFun, sessGen));
 	return workloads;
     }
 

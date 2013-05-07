@@ -23,23 +23,38 @@ public class Experiments {
      */
     public static void main(final String[] args) throws Exception {
 	// The main classes of the experiments
-	Class<?>[] experimens = new Class<?>[] {
-		// BaseExperiment.class,
-		ExperimentWithHeavierAS.class,
-		ExperimentWithHeavierDB.class,
-		ExperimentWithHeavierASAndMoreAS.class,
-		ExperimentWithHeavierDBAndMoreDB.class,
-	};
+	// Class<?>[] experimens = new Class<?>[] {
+	// // SingleDataCentre10.class,
+	// // SingleDataCentre25.class,
+	// SingleDataCentre50.class,
+	// // SingleDataCentre75.class,
+	// SingleDataCentre100.class,
+	// // SingleDataCentre125.class,
+	// // SingleDataCentre150.class,
+	// // SingleDataCentre175.class,
+	// SingleDataCentre200.class,
+	// SingleDataCentre250.class,
+	// SingleDataCentre300.class,
+	// SingleDataCentre400.class,
+	// SingleDataCentre500.class,
+	// SingleDataCentre600.class,
+	// SingleDataCentre700.class,
+	// // SingleDataCentre1000.class
+	// };
+
+	Class<?>[] experimens = new Class<?>[] { TwoDatacentres.class };
 
 	// Map the main experiment classes to the output files
 	Map<Class<?>, String> experiments = new LinkedHashMap<>();
 	for (Class<?> clazz : experimens) {
-	    experiments.put(clazz, String.format("results/%s.log", clazz.getSimpleName()));
+	    experiments.put(clazz,
+		    SingleDatacentre.RESULT_DIR + String.format("%s.log", clazz.getSimpleName()));
 	}
 
 	// Run the experiments with custom_log.properties config of the loggers
 	// and leave 1 CPU free at all times.
-	ExperimentsRunner.runExperiments(experiments, "../custom_log.properties", 1);
+	ExperimentsRunner.runExperiments(experiments,
+		"../custom_log.properties", 1);
     }
 
 }

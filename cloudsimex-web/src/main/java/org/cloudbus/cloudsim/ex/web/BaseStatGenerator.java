@@ -21,7 +21,7 @@ import org.uncommons.maths.number.NumberGenerator;
  *            - the actual type of the generated CloudLets.
  */
 public abstract class BaseStatGenerator<T extends Cloudlet> implements
-IGenerator<T> {
+	IGenerator<T> {
 
     /** A key for the statistical generator of CPU length of the cloudlet. */
     public static final String CLOUDLET_LENGTH = "CLOUDLET_MIPS";
@@ -29,7 +29,8 @@ IGenerator<T> {
     public static final String CLOUDLET_RAM = "CLOUDLET_RAM";
     /** A key for the statistical generator of IO length of the cloudlet. */
     public static final String CLOUDLET_IO = "CLOUDLET_IO";
-    /** A key for the statistical generator of boolean values, specifying if a
+    /**
+     * A key for the statistical generator of boolean values, specifying if a
      * cloudlets modfies its data. Boolean values are represented as integers -
      * 0 is considered False, and other values are considered as True.
      * */
@@ -56,7 +57,7 @@ IGenerator<T> {
      */
     public BaseStatGenerator(
 	    final Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators,
-		    final DataItem data) {
+	    final DataItem data) {
 	this(seqGenerators, -1, -1, data);
     }
 
@@ -80,14 +81,14 @@ IGenerator<T> {
      */
     public BaseStatGenerator(
 	    final Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators,
-		    final double startTime, final double endTime, final DataItem data) {
+	    final double startTime, final double endTime, final DataItem data) {
 	this.seqGenerators = seqGenerators;
 	this.startTime = startTime;
 	this.endTime = endTime;
 	this.data = data;
 
 	if (data == null && seqGenerators.containsKey(CLOUDLET_IO)) {
-	    String errMsg = "IO opeartions should not be provided without data is missing";
+	    String errMsg = "IO opeartions should not be provided without data";
 	    CustomLog.print(Level.SEVERE, errMsg);
 	    throw new IllegalArgumentException(errMsg);
 	}
@@ -197,8 +198,12 @@ IGenerator<T> {
      *         for the key.
      */
     protected Double generateNumericValue(final String key) {
-	return !seqGenerators.containsKey(key) ? 0 : Math.max(0, seqGenerators
-		.get(key).nextValue().doubleValue());
+	Number genValue = !seqGenerators.containsKey(key) ? 0: seqGenerators.get(key).nextValue();
+	if (genValue == null) {
+	    return null;
+	} else {
+	    return Math.max(0, genValue.doubleValue());
+	}
     }
 
     /**
@@ -207,12 +212,18 @@ IGenerator<T> {
      * @param key
      *            - the key. Tytpically one of the constants of the class.
      * @return a plausible (with the correspondent statistical properties) value
-     *         for the key. 0 values are considered as False and other values are
-     *         considered as True. If no value is present for the key - False is returned.
+     *         for the key. 0 values are considered as False and other values
+     *         are considered as True. If no value is present for the key -
+     *         False is returned.
      */
     protected Boolean generateBooleanValue(final String key) {
-	int result = !seqGenerators.containsKey(key) ? 0 : Math.max(0, seqGenerators
-		.get(key).nextValue().intValue());
-	return result != 1;
+	Number genValue = !seqGenerators.containsKey(key) ? 0 : seqGenerators.get(key).nextValue();
+	if(genValue == null) {
+	    return null;
+	} else {
+	    int result = Math.max(0, genValue.intValue());
+	    return result != 1;
+	}
     }
+
 }

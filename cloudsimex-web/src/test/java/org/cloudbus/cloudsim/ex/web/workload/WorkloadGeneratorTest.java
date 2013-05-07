@@ -3,6 +3,7 @@ package org.cloudbus.cloudsim.ex.web.workload;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -34,7 +35,7 @@ public class WorkloadGeneratorTest {
     private static final int DB_RAM = 25;
     private static final int DB_CLOUDLET_IO_LENGTH = 27;
 
-    private WorkloadGenerator workloadGenerator;
+    private StatWorkloadGenerator workloadGenerator;
     private FrequencyFunction freqFunction;
     private ISessionGenerator sessionGenerator;
 
@@ -46,7 +47,7 @@ public class WorkloadGeneratorTest {
 	sessionGenerator = new ConstSessionGenerator(AS_CLOUDLET_LENGTH, AS_RAM, DB_CLOUDLET_LENGTH, DB_RAM,
 		DB_CLOUDLET_IO_LENGTH, false, data);
 
-	workloadGenerator = new WorkloadGenerator(TestUtil.SEED_ARRAY, freqFunction, sessionGenerator);
+	workloadGenerator = new StatWorkloadGenerator(TestUtil.SEED_ARRAY, freqFunction, sessionGenerator);
 
 	// Test with different ratios of the lengths
 	testWebSessionGeneration(0.11);
@@ -68,10 +69,10 @@ public class WorkloadGeneratorTest {
 
 	DescriptiveStatistics countStat = new DescriptiveStatistics();
 	for (int i = 0; i < REPEAT_STAT; i++) {
-	    Map<Double, WebSession> result = workloadGenerator.generateSessions(startTime, periodLen);
+	    Map<Double, List<WebSession>> result = workloadGenerator.generateSessions(startTime, periodLen);
 	    countStat.addValue(result.size());
 
-	    for (Map.Entry<Double, WebSession> entry : result.entrySet()) {
+	    for (Map.Entry<Double, List<WebSession>> entry : result.entrySet()) {
 		assertTrue(entry.getKey() > startTime - DELTA);
 		assertTrue(entry.getKey() < startTime + periodLen + DELTA);
 	    }

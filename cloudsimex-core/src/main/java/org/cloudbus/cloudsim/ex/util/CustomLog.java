@@ -3,10 +3,12 @@ package org.cloudbus.cloudsim.ex.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -158,6 +160,100 @@ public class CustomLog {
     }
 
     /**
+     * Prints a header for the specified class. The format is as per the
+     * specification in {@link TextUtil}
+     * 
+     * @param klass
+     *            - the class. Must not be null.
+     * @param delim
+     *            - the delimeter. Must not be null.
+     */
+    public static void printHeader(final Class<?> klass, final String delim) {
+	CustomLog.printLine(TextUtil.getCaptionLine(klass, delim));
+    }
+
+    /**
+     * Prints a header for the specified class. The format is as per the
+     * specification in {@link TextUtil}
+     * 
+     * @param klass
+     *            - the class. Must not be null.
+     */
+    public static void printHeader(final Class<?> klass) {
+	CustomLog.printLine(TextUtil.getCaptionLine(klass));
+    }
+
+    /**
+     * Prints a line for the object. The format is as per the specification in
+     * {@link TextUtil}
+     * 
+     * @param o
+     *            - the object. Must not be null.
+     * @param delim
+     *            - the delimeter. Must not be null.
+     */
+    public static void printLineForObject(final Object o, final String delim) {
+	CustomLog.print(TextUtil.getTxtLine(o, delim, false));
+    }
+
+    /**
+     * Prints a line for the object. The format is as per the specification in
+     * {@link TextUtil}
+     * 
+     * @param o
+     *            - the object. Must not be null.
+     */
+    public static void printLineForObject(final Object o) {
+	CustomLog.print(TextUtil.getTxtLine(o));
+    }
+
+    /**
+     * Prints the objects' details with a header in a CSV - like format.
+     * 
+     * @param klass
+     *            - the class to be used for the header. If null no header is printed.
+     * @param list
+     *            - list of objects. All objects, must be of type klass.
+     */
+    public static void printResults(final Class<?> klass, final List<?>... lines) {
+	if(klass != null) {
+	    // Print header line
+	    printHeader(klass);
+	}
+	
+	// Print details for each cloudlet
+	for (List<?> list : lines) {
+	    for (Object o : list) {
+		printLineForObject(o);
+	    }
+	}
+    }
+
+    /**
+     * Prints the objects' details with a header in a CSV - like format.
+     * 
+     * @param klass
+     *            - the class to be used for the header. If null no header is printed.
+     * @param delim
+     *            - the delimeter to use.
+     * @param list
+     *            - list of objects. All objects, must be of type klass.
+     */
+    public static void printResults(final Class<?> klass, final String delim, final List<?>... lines) {
+	if (klass != null) {
+	    // Print header line
+	    printHeader(klass, delim);
+	}
+	
+	// Print details for each cloudlet
+	for (List<?> list : lines) {
+	    for (Object o : list) {
+		printLineForObject(o, delim);
+	    }
+	}
+    }
+
+    /**
      * Logs the stacktrace of the exception.
      * 
      * @param level
@@ -227,8 +323,7 @@ public class CustomLog {
      */
     public static void configLogger(final Properties props)
 	    throws SecurityException, IOException {
-	final boolean logInFile = props.containsKey(FILE_PATH_PROP_KEY);
-	final String fileName = logInFile ? props.getProperty(
+	final String fileName = props.containsKey(FILE_PATH_PROP_KEY) ? props.getProperty(
 		FILE_PATH_PROP_KEY).toString() : null;
 	final String format = props.getProperty(LOG_FORMAT_PROP_KEY,
 		"getLevel;getMessage").toString();
@@ -246,19 +341,39 @@ public class CustomLog {
 	}
 
 	LOGGER.setUseParentHandlers(false);
-
 	formatter = new CustomFormatter(prefixCloudSimClock, format);
 
-	if (logInFile) {
+	redirectToFile(fileName);
+    }
+
+    /**
+     * Redirects this logger to a file.
+     * 
+     * @param fileName
+     *            - the name of the new log file. If null the log is redirected
+     *            to the standard output.
+     */
+    public static void redirectToFile(final String fileName) {
+	for (Handler h : LOGGER.getHandlers()) {
+	    LOGGER.removeHandler(h);
+	}
+
+	if (fileName != null) {
 	    System.err.println("Rediricting output to " + new File(fileName).getAbsolutePath());
 	}
 
-	final StreamHandler handler = logInFile ? new FileHandler(fileName, false)
-		: new ConsoleHandler();
-	handler.setLevel(granularityLevel);
-	handler.setFormatter(formatter);
-	LOGGER.addHandler(handler);
-	LOGGER.setLevel(granularityLevel);
+	StreamHandler handler;
+	try {
+	    handler = fileName != null ? new FileHandler(fileName, false)
+		    : new ConsoleHandler();
+	    handler.setLevel(granularityLevel);
+	    handler.setFormatter(formatter);
+	    LOGGER.addHandler(handler);
+	    LOGGER.setLevel(granularityLevel);
+
+	} catch (SecurityException | IOException e) {
+	    e.printStackTrace();
+	}
     }
 
     private static class CustomFormatter extends Formatter {
