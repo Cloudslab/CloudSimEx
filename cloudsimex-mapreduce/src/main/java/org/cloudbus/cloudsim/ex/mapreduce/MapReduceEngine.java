@@ -26,6 +26,8 @@ import org.cloudbus.cloudsim.ex.util.TextUtil;
 import org.cloudbus.cloudsim.lists.VmList;
 
 public class MapReduceEngine extends DatacenterBroker {
+	
+	public int currentExperimentRoundNumber;
 
 	public MapReduceEngine() throws Exception {
 		super("MapReduceEngine");
@@ -377,6 +379,10 @@ public class MapReduceEngine extends DatacenterBroker {
 
 	// Output information supplied at the end of the simulation
 	public void printExecutionSummary() {
+		CustomLog.redirectToFile("results/tasks-"+currentExperimentRoundNumber+".csv");
+		CustomLog.printResults(Task.class, ",",  getCloudletReceivedList());
+
+		
 		DecimalFormat dft = new DecimalFormat("000000.00");
 		String indent = "\t";
 
@@ -385,8 +391,6 @@ public class MapReduceEngine extends DatacenterBroker {
 				+ "Submission Time" + indent + "Start Time" + indent + "Execution Time (s)" + indent + "Finish Time"
 				+ indent + "VM ID" + indent + "VM Type");
 
-		CustomLog.redirectToFile("results/tasks.csv");
-		CustomLog.printResults(Task.class, ",",  getCloudletReceivedList());
 		
 		////......
 		for (Cloudlet cloudlet : getCloudletReceivedList()) {
@@ -433,9 +437,10 @@ public class MapReduceEngine extends DatacenterBroker {
 				Log.printLine("CANCELLED");
 			}
 		}
-
 		Log.printLine();
-
+		
+		//log vm schudling ..
+		//log expirment result ..
 		
 		for (Request request : requests.requests) {
 			Log.printLine(" ======== Request ID: " + request.id + " - USER CLASS: [" + request.userClass + "]");

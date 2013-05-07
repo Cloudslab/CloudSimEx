@@ -83,6 +83,7 @@ public class Simulation {
 			
 			// Create Broker
 			engine = new MapReduceEngine();
+			engine.currentExperimentRoundNumber = experimentNumber+1;
 			Cloud.brokerID = engine.getId();
 						
 			// Create datacentres and cloudlets
