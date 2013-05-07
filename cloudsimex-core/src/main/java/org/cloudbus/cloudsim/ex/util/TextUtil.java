@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -294,7 +295,16 @@ public class TextUtil {
 	    methods = new ArrayList<>();
 	    do {
 		// Defined in the class methods (not inherited)
-		List<Method> clazzMethods = Arrays.asList(clazz.getDeclaredMethods());
+		List<Method> clazzMethods = new LinkedList<Method> (Arrays.asList(clazz.getDeclaredMethods()));
+		
+		//Remove duplicated methods with super classes
+		List<Method> copyofMethods = new ArrayList<>(methods);
+		for(Method method : copyofMethods)
+			for (Method clazzMethod : clazzMethods) {
+				if(clazzMethod.getName() == method.getName())
+					methods.remove(method);
+			}
+		
 		// Sort them by name... since getDeclaredMethods does not
 		// guarantee order
 		Collections.sort(clazzMethods, MethodsAlphaComparator.METHOD_CMP);

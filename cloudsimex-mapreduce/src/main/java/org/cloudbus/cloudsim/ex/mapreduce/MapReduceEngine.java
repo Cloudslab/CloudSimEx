@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -52,6 +53,12 @@ public class MapReduceEngine extends DatacenterBroker {
 		for (Request request : requests.requests) {
 			submitCloudletList(request.job.mapTasks);
 			submitCloudletList(request.job.reduceTasks);
+			
+			//Set the MapReduce Engine referance to all tasks.
+			for (Task task : request.job.mapTasks)
+				task.mapReduceEngine = this;
+			for (Task task : request.job.reduceTasks)
+				task.mapReduceEngine = this;
 		}
 	}
 
@@ -378,10 +385,8 @@ public class MapReduceEngine extends DatacenterBroker {
 				+ "Submission Time" + indent + "Start Time" + indent + "Execution Time (s)" + indent + "Finish Time"
 				+ indent + "VM ID" + indent + "VM Type");
 
-		CustomLog.print(TextUtil.getCaptionLine(Task.class,","));
-		for (Cloudlet cloudlet : getCloudletReceivedList()) {
-			CustomLog.print(TextUtil.getTxtLine(cloudlet,",", false));
-		}
+		CustomLog.redirectToFile("results/tasks.csv");
+		CustomLog.printResults(Task.class, ",",  getCloudletReceivedList());
 		
 		////......
 		for (Cloudlet cloudlet : getCloudletReceivedList()) {

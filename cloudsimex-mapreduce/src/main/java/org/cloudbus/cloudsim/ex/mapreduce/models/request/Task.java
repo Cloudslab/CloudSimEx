@@ -12,7 +12,7 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.Textualize;
 
-@Textualize(properties = { "CloudletId", "CloudletLength",  "FinishTime", "FinalExecTime" })
+@Textualize(properties = {"RequestId", "CloudletId", "TaskType", "CloudletLength", "CloudletStatus", "SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime", "InstanceVmId", "VmType"})
 public class Task extends Cloudlet {
 
 	public String name;
@@ -20,6 +20,7 @@ public class Task extends Cloudlet {
 	public boolean isFinished;
 	public int mi;
 	public int dSize;
+	public MapReduceEngine mapReduceEngine;
 	
 	public Task(String name, int dSize, int mi) {
 		//Cloudlet lengh is 0, it will be updated after we run the algorithm
@@ -37,12 +38,12 @@ public class Task extends Cloudlet {
 	
 	public Cloud getCloud()
 	{
-		return getMapReduceEngine().getCloud();
+		return mapReduceEngine.getCloud();
 	}
 	
 	public Requests getRequests()
 	{
-		return getMapReduceEngine().getRequests();
+		return mapReduceEngine.getRequests();
 	}
 	
 	public Request getCurrentRequest()
@@ -116,5 +117,21 @@ public class Task extends Cloudlet {
 	
 	public double getFinalExecTime() {
 		return getFinishTime() - getExecStartTime();
+	}
+	
+	public String getTaskType()
+	{
+		//MUST OVERRIDE IT
+		return "Something is wrong .. you should get Map or Reduce";
+	}
+	
+	public int getInstanceVmId()
+	{
+		return getVmId();
+	}
+	
+	public String getVmType()
+	{
+		return getRequests().getVmInstance(getVmId()).name;
 	}
 }

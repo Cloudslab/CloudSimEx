@@ -85,6 +85,9 @@ public class TextUtilTest {
 	public boolean isProp() {
 	    return true;
 	}
+	public int getX() {
+	    return x;
+	}
     }
 
     @Textualize(properties = { "Prop", "Y" })
