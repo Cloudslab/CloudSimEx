@@ -212,10 +212,6 @@ public class CloudDatacenter extends Datacenter {
 			MapTask mapTask = (MapTask) cl;
 			time = mapTask.dataTransferTimeFromTheDataSource(); //D-in
 			time += mapTask.dataTransferTimeToAllReducers(); //D-out
-			
-			mapTask.getCurrentRequest().totalCost += mapTask.dataTransferCostFromTheDataSource(); //D-in cost
-			mapTask.getCurrentRequest().totalCost += mapTask.dataTransferCostToAllReducers(); //D-out cost
-			
 		}
 		
 		return time;

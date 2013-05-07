@@ -7,7 +7,6 @@ import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.Textualize;
 
-@Textualize(properties = {"RequestId", "CloudletId", "TaskType", "CloudletLength", "CloudletStatus", "SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime", "InstanceVmId", "VmType"})
 public class ReduceTask extends Task {
 	
 	public ReduceTask(String name, int mi) {

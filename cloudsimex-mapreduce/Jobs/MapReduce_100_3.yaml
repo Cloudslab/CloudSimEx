@@ -49,7 +49,7 @@ mapTasks:
   ]
 
 reduceTasks:
-# Reduce task info:[name, intermediate data size in mega byte, million instructions per byte]
+# Reduce task info:[name, million instructions]
 - [reduce-a-f, 5000]
 - [reduce-g-l, 1000]
 - [reduce-m-z, 1000]

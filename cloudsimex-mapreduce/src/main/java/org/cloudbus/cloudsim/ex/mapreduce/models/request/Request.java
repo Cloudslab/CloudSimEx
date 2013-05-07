@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmInstance;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType;
@@ -23,14 +24,11 @@ public class Request extends SimEvent {
 	public int deadline;
 	public Job job;
 	public UserClass userClass;
-	public double firstSubmissionTime;
-	public double lastFinishTime;
 	
 	public List<VmInstance> mapAndReduceVmProvisionList;
 	public List<VmInstance> reduceOnlyVmProvisionList;
 	
 	public Map<Integer, Integer> schedulingPlan; //<Task ID, VM ID>
-	public double totalCost;
 	
 	public String policy;
 	public String jobFile;
@@ -42,9 +40,6 @@ public class Request extends SimEvent {
 		this.deadline = deadline;
 		this.jobFile = jobFile;
 		this.userClass = userClass;
-		firstSubmissionTime = -1;
-		lastFinishTime = -1;
-		totalCost = 0.0;
 		mapAndReduceVmProvisionList = new ArrayList<VmInstance>();
 		reduceOnlyVmProvisionList = new ArrayList<VmInstance>();
 		schedulingPlan = new HashMap<Integer, Integer>();
@@ -66,6 +61,150 @@ public class Request extends SimEvent {
 			reduceTask.requestId = id;
 			reduceTask.updateDSize(this);
 		}
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public double getSubmissionTime() {
+		return submissionTime;
+	}
+
+	public void setSubmissionTime(double submissionTime) {
+		this.submissionTime = submissionTime;
+	}
+
+	public double getBudget() {
+		return budget;
+	}
+
+	public void setBudget(double budget) {
+		this.budget = budget;
+	}
+
+	public int getDeadline() {
+		return deadline;
+	}
+
+	public void setDeadline(int deadline) {
+		this.deadline = deadline;
+	}
+
+	public Job getJob() {
+		return job;
+	}
+
+	public void setJob(Job job) {
+		this.job = job;
+	}
+
+	public UserClass getUserClass() {
+		return userClass;
+	}
+
+	public void setUserClass(UserClass userClass) {
+		this.userClass = userClass;
+	}
+
+	public List<VmInstance> getMapAndReduceVmProvisionList() {
+		return mapAndReduceVmProvisionList;
+	}
+
+	public void setMapAndReduceVmProvisionList(
+			List<VmInstance> mapAndReduceVmProvisionList) {
+		this.mapAndReduceVmProvisionList = mapAndReduceVmProvisionList;
+	}
+
+	public List<VmInstance> getReduceOnlyVmProvisionList() {
+		return reduceOnlyVmProvisionList;
+	}
+
+	public void setReduceOnlyVmProvisionList(
+			List<VmInstance> reduceOnlyVmProvisionList) {
+		this.reduceOnlyVmProvisionList = reduceOnlyVmProvisionList;
+	}
+
+	public Map<Integer, Integer> getSchedulingPlan() {
+		return schedulingPlan;
+	}
+
+	public void setSchedulingPlan(Map<Integer, Integer> schedulingPlan) {
+		this.schedulingPlan = schedulingPlan;
+	}
+
+	public String getPolicy() {
+		return policy;
+	}
+
+	public void setPolicy(String policy) {
+		this.policy = policy;
+	}
+
+	public String getJobFile() {
+		return jobFile;
+	}
+
+	public void setJobFile(String jobFile) {
+		this.jobFile = jobFile;
+	}
+	
+	public double getExecutionTime()
+	{
+		double firstSubmissionTime = -1;
+		double lastFinishTime = -1;
+		
+		for (MapTask mapTask : job.mapTasks)
+		{
+			if(firstSubmissionTime == -1 || firstSubmissionTime > mapTask.getSubmissionTime())
+				firstSubmissionTime = mapTask.getSubmissionTime();
+			if(lastFinishTime == -1 || lastFinishTime < mapTask.getFinishTime())
+				lastFinishTime = mapTask.getFinishTime();
+		}
+		
+		for (ReduceTask reduceTask : job.reduceTasks)
+		{
+			if(firstSubmissionTime == -1 || firstSubmissionTime > reduceTask.getSubmissionTime())
+				firstSubmissionTime = reduceTask.getSubmissionTime();
+			if(lastFinishTime == -1 || lastFinishTime < reduceTask.getFinishTime())
+				lastFinishTime = reduceTask.getFinishTime();
+		}
+		
+		return lastFinishTime - firstSubmissionTime;
+	}
+	
+	public double getCost()
+	{
+		double totalCost = 0.0;
+		for (VmInstance vm : mapAndReduceVmProvisionList) 
+			totalCost += vm.getExecutionCost();
+		for (VmInstance vm : reduceOnlyVmProvisionList) 
+			totalCost += vm.getExecutionCost();
+		
+		return totalCost;
+	}
+	
+	public String getIsDeadlineViolated()
+	{
+		if(deadline >= getExecutionTime())
+			return "No ("+(deadline-getExecutionTime())+" seconds) earlier";
+		return "YES! ("+(getExecutionTime()-deadline)+" seconds) over deadline";
+	}
+	
+	public String getIsBudgetViolated()
+	{
+		if(budget >= getCost())
+			return "No ($"+(budget - getCost())+") savings";
+		return "YES! ($"+(getCost()-budget)+") over budget";
+	}
+	
+	public String getJ()
+	{
+		return "J={"+job.mapTasks.size()+"-"+job.reduceTasks.size()+"}";
 	}
 
 	private Job readJobYAML(String jobFile) {

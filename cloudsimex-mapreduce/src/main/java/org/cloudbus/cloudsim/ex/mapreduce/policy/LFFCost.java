@@ -48,7 +48,7 @@ public class LFFCost extends Policy {
 		for (PublicCloudDatacenter publicCloudDatacenter : cloud.publicCloudDatacenters) {
 			for (VmType vmType : publicCloudDatacenter.vmTypes)
 				for (int i = 0; i < numTasks; i++)
-					VPList.add(new VmInstance(vmType));
+					VPList.add(new VmInstance(vmType, request));
 
 		}
 		for (PrivateCloudDatacenter privateCloudDatacenter : cloud.privateCloudDatacenters) {
@@ -57,14 +57,14 @@ public class LFFCost extends Policy {
 					.getMaxAvailableResource(firstVmType);
 
 			for (int i = 0; i < Math.min(numTasks, maxAvailableResource); i++)
-				VPList.add(new VmInstance(firstVmType));
+				VPList.add(new VmInstance(firstVmType, request));
 
 		}
 
 		// Sort VPList by cost
 		Collections.sort(VPList, new Comparator<VmType>() {
 			public int compare(VmType vmType1, VmType vmType2) {
-				return Double.compare(vmType1.cost, vmType2.cost);
+				return Double.compare(vmType1.vmCostPerHour, vmType2.vmCostPerHour);
 			}
 		});
 		

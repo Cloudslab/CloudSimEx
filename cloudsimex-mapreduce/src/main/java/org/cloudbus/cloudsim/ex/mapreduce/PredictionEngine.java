@@ -97,7 +97,7 @@ public class PredictionEngine
 		}
 		
 		
-		vmCost = Math.ceil(getTotalExecutionTimeOnVm(tasks,vm,mapPhaseFinishTime) / 3600.0) * vm.cost;
+		vmCost = Math.ceil(getTotalExecutionTimeOnVm(tasks,vm,mapPhaseFinishTime) / 3600.0) * vm.vmCostPerHour;
 		
 		return dataTransferCostFromTheDataSource + vmCost + dataTransferCostToReduceVms;
 	}

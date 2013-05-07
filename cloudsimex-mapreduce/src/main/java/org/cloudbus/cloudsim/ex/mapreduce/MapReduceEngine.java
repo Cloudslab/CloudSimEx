@@ -114,7 +114,7 @@ public class MapReduceEngine extends DatacenterBroker {
 
 	protected void vmProvisioning_taskScheduling(Request request) {
 
-		String policyName = request.policy;
+		String policyName = "org.cloudbus.cloudsim.ex.mapreduce.policy."+request.policy;
 		Policy policy = null;
 		try {
 			Class<?> policyClass = Class.forName(policyName, false, Policy.class.getClassLoader());
@@ -126,7 +126,7 @@ public class MapReduceEngine extends DatacenterBroker {
 		}
 
 		// ToDo: increase the clock during the ALGORITHM search
-		Log.printLine(" =========== SEARCHING START USING ALGORITHM:"+ policyName +" FOR REQUEST: " + request.id + " : ["+ request.submissionTime + ","+ request.budget +","+request.deadline +","+ request.jobFile+","+request.userClass +"]===========");
+		Log.printLine(" =========== SEARCHING START USING ALGORITHM:"+ policyName +" FOR REQUEST: " + request.id + " : ["+ request.submissionTime + ","+ request.deadline +","+request.budget +","+ request.jobFile+","+request.userClass +"]===========");
 		Log.printLine(getName() + " is searching for the optimal Resource Set...");
 		if(!policy.runAlgorithm(cloud, request))
 			Log.printLine(" =========== ERROR: THE ALGORITHM COULD NOT FIND VMs FOR REQUEST: " + request.id + " ===========");
@@ -177,7 +177,7 @@ public class MapReduceEngine extends DatacenterBroker {
 		for (int datacenterId : getDatacenterIdsList()) {
 			CloudDatacenter cloudDatacenter = cloud.getCloudDatacenterFromId(datacenterId);
 			for (VmInstance vm : request.mapAndReduceVmProvisionList) {
-				if (cloudDatacenter.isVMInCloudDatacenter(vm.VmTypeId)) {
+				if (cloudDatacenter.isVMInCloudDatacenter(vm.vmTypeId)) {
 					Log.printLine(CloudSim.clock() + ": " + getName() + ": creating VM #" + vm.getId() + " in "
 							+ cloudDatacenter.getName());
 					sendNow(datacenterId, CloudSimTags.VM_CREATE_ACK, (Vm) vm);
@@ -295,7 +295,7 @@ public class MapReduceEngine extends DatacenterBroker {
 			Log.printLine(getName() + " PROVISIONING NOW THE FOLLOWING VMs (Reduce Only) [Request ID: "+request.id+"]:-");
 		
 			for (VmInstance vmInstance : request.reduceOnlyVmProvisionList) {
-				VmType vmType = cloud.getVMTypeFromId(vmInstance.VmTypeId);
+				VmType vmType = cloud.getVMTypeFromId(vmInstance.vmTypeId);
 					Log.printLine("-Provisioning R only VM: " + vmInstance.name + " (ID: " + vmInstance.getId() + ") of Type: "+vmType.name);
 			}
 			
@@ -304,7 +304,7 @@ public class MapReduceEngine extends DatacenterBroker {
 			for (int datacenterId : getDatacenterIdsList()) {
 				CloudDatacenter cloudDatacenter = cloud.getCloudDatacenterFromId(datacenterId);
 				for (VmInstance vm : request.reduceOnlyVmProvisionList) {
-					if (cloudDatacenter.isVMInCloudDatacenter(vm.VmTypeId)) {
+					if (cloudDatacenter.isVMInCloudDatacenter(vm.vmTypeId)) {
 						Log.printLine(CloudSim.clock() + ": " + getName() + ": creating VM #" + vm.getId() + " in "
 								+ cloudDatacenter.getName());
 						sendNow(datacenterId, CloudSimTags.VM_CREATE_ACK, (Vm) vm);
@@ -379,58 +379,43 @@ public class MapReduceEngine extends DatacenterBroker {
 
 	// Output information supplied at the end of the simulation
 	public void printExecutionSummary() {
+		//TASKS
 		CustomLog.redirectToFile("results/tasks-"+currentExperimentRoundNumber+".csv");
-		CustomLog.printResults(Task.class, ",",  getCloudletReceivedList());
-
+		CustomLog.printResults(Task.class, ",", new String[]{"RequestId", "CloudletId", "TaskType", "CloudletLength", "CloudletStatus", "SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime", "InstanceVmId", "VmType"},  getCloudletReceivedList());
+		//VMs
+		CustomLog.redirectToFile("results/vms-"+currentExperimentRoundNumber+".csv");
+		CustomLog.printHeader(VmInstance.class, ",", new String[]{"RequestId", "J", "Policy", "Id", "Name", "ExecutionTime", "ExecutionCost","TasksIdAsString"});
+		for (Request request : requests.requests) {
+			CustomLog.printResultsWithoutHeader(VmInstance.class, ",", new String[]{"RequestId", "J", "Policy", "Id", "Name", "ExecutionTime", "ExecutionCost","TasksIdAsString"}, request.mapAndReduceVmProvisionList);
+			CustomLog.printResultsWithoutHeader(VmInstance.class, ",", new String[]{"RequestId", "J", "Policy", "Id", "Name", "ExecutionTime", "ExecutionCost","TasksIdAsString"}, request.reduceOnlyVmProvisionList);
+		}
+		//REQUETS
+		CustomLog.redirectToFile("results/requests-"+currentExperimentRoundNumber+".csv");
+		CustomLog.printResults(Request.class, ",", new String[]{"Id", "J", "UserClass", "Policy", "Deadline", "Budget", "ExecutionTime", "Cost", "IsDeadlineViolated", "IsBudgetViolated"},  requests.requests);
 		
+		//Java Log Output, which sould be disabled from custom_log.properties
 		DecimalFormat dft = new DecimalFormat("000000.00");
 		String indent = "\t";
-
 		Log.printLine("========== MAPREDUCE EXECUTION SUMMARY ==========");
 		Log.printLine("= Request " + indent + "Task " + indent + "Type" + indent + "Status" + indent + indent
 				+ "Submission Time" + indent + "Start Time" + indent + "Execution Time (s)" + indent + "Finish Time"
 				+ indent + "VM ID" + indent + "VM Type");
-
-		
-		////......
 		for (Cloudlet cloudlet : getCloudletReceivedList()) {
 			Task task = (Task) cloudlet;
 			Log.print(" = " + task.requestId + indent + indent + task.getCloudletId() + indent);
-
 			if (task instanceof MapTask)
 				Log.print("Map");
 			else if (task instanceof ReduceTask)
 				Log.print("Reduce");
 			else
 				Log.print("OTHER!!!! WTF");
-
 			if (task.getCloudletStatus() == Cloudlet.SUCCESS) {
 				Log.print(indent + "SUCCESS");
-
 				VmInstance vm = requests.getVmInstance(task.getVmId());
-
-
 				double executionTime = task.getFinishTime() - task.getExecStartTime();
 				Log.printLine(indent + indent + dft.format(task.getSubmissionTime()) + indent
 						+ dft.format(task.getExecStartTime()) + indent + dft.format(executionTime) + indent + indent
 						+ dft.format(task.getFinishTime()) + indent + vm.getId() + indent + vm.name);
-
-				// Set the executionTime in the vm
-				vm.ExecutionTime += executionTime;
-
-				// set the first Submission Time and last execution time on
-				// request
-				Request request = requests.getRequestFromId(task.requestId);
-
-				if (task.getSubmissionTime() == -1)
-					request.firstSubmissionTime = task.getSubmissionTime();
-				else if (task.getSubmissionTime() < request.firstSubmissionTime)
-					request.firstSubmissionTime = task.getSubmissionTime();
-
-				if (request.firstSubmissionTime == -1)
-					request.firstSubmissionTime = task.getFinishTime();
-				else if (task.getFinishTime() > request.lastFinishTime)
-					request.lastFinishTime = task.getFinishTime();
 			} else if (task.getCloudletStatus() == Cloudlet.FAILED) {
 				Log.printLine("FAILED");
 			} else if (task.getCloudletStatus() == Cloudlet.CANCELED) {
@@ -439,88 +424,32 @@ public class MapReduceEngine extends DatacenterBroker {
 		}
 		Log.printLine();
 		
-		//log vm schudling ..
-		//log expirment result ..
-		
 		for (Request request : requests.requests) {
 			Log.printLine(" ======== Request ID: " + request.id + " - USER CLASS: [" + request.userClass + "]");
 			Log.printLine(" Policy: "+request.policy);
 			Log.printLine("= VMs: ");
-
-			for (VmType vmType : request.mapAndReduceVmProvisionList) {
-				Log.printLine("   - VM ID#" + vmType.getId() + ": " + vmType.name);
-				Log.printLine("     > Processing Time: " + vmType.ExecutionTime + " seconds");
-				double cost = Math.ceil(vmType.ExecutionTime / 3600.0) * vmType.cost;
-				Log.printLine("     > Cost: $" + cost);
-				request.totalCost += cost;
+			for (VmInstance vm : request.mapAndReduceVmProvisionList) {
+				Log.printLine("   - VM ID#" + vm.getId() + ": " + vm.name);
+				Log.printLine("     > Processing Time: " + vm.getExecutionTime() + " seconds");
+				Log.printLine("     > Cost: $" + vm.getExecutionCost());
 			}
-			
-			for (VmType vmType : request.reduceOnlyVmProvisionList) {
-				Log.printLine("   - VM ID#" + vmType.getId() + ": " + vmType.name);
-				Log.printLine("     > Processing Time: " + vmType.ExecutionTime + " seconds");
-				double cost = Math.ceil(vmType.ExecutionTime / 3600.0) * vmType.cost;
-				Log.printLine("     > Cost: $" + cost);
-				request.totalCost += cost;
+			for (VmInstance vm : request.reduceOnlyVmProvisionList) {
+				Log.printLine("   - VM ID#" + vm.getId() + ": " + vm.name);
+				Log.printLine("     > Processing Time: " + vm.getExecutionTime() + " seconds");
+				Log.printLine("     > Cost: $" + vm.getExecutionCost());
 			}
-			double jobExecutionTime = request.lastFinishTime - request.firstSubmissionTime;
-			boolean TimeViolation = (jobExecutionTime > request.deadline);
-			boolean costViolation = (request.totalCost > request.budget);
-			
-			
+			boolean TimeViolation = (request.getExecutionTime() > request.deadline);
+			boolean costViolation = (request.getCost() > request.budget);
 			Log.printLine("= QoS: Deadline: " + request.deadline + " seconds");
 			Log.printLine("= QoS: Budget: $" + request.budget);
 			Log.printLine("= Deadline Violation: " + TimeViolation);
 			Log.printLine("= Budget Violation: " + costViolation);
-			Log.printLine("= Execution Time: " + jobExecutionTime + " seconds");
-			Log.printLine("= Cost: $" + request.totalCost);
+			Log.printLine("= Execution Time: " + request.getExecutionTime() + " seconds");
+			Log.printLine("= Cost: $" + request.getCost());
 			Log.printLine();
 		}
 		Log.printLine("========== END OF SUMMARY =========");
 		Log.printLine();
 	}
 	
-	// Output information supplied at the end of the simulation
-	public List<Double[]> getExecutionTimeAndCost() {
-		for (Cloudlet cloudlet : getCloudletReceivedList()) {
-			Task task = (Task) cloudlet;
-			if (task.getCloudletStatus() == Cloudlet.SUCCESS) {
-				VmInstance vm = requests.getVmInstance(task.getVmId());
-				double executionTime = task.getFinishTime() - task.getExecStartTime();
-				vm.ExecutionTime += executionTime;
-
-				// set the first Submission Time and last execution time on the request
-				Request request = requests.getRequestFromId(task.requestId);
-
-				if (task.getSubmissionTime() == -1)
-					request.firstSubmissionTime = task.getSubmissionTime();
-				else if (task.getSubmissionTime() < request.firstSubmissionTime)
-					request.firstSubmissionTime = task.getSubmissionTime();
-
-				if (request.firstSubmissionTime == -1)
-					request.firstSubmissionTime = task.getFinishTime();
-				else if (task.getFinishTime() > request.lastFinishTime)
-					request.lastFinishTime = task.getFinishTime();
-			}
-		}
-
-		List<Double[]> ExecutionTimesAndCosts = new ArrayList<Double[]>();
-		
-		for (Request request : requests.requests) {
-			for (VmType vmType : request.mapAndReduceVmProvisionList) {
-				double cost = Math.ceil(vmType.ExecutionTime / 3600.0) * vmType.cost;
-				request.totalCost += cost;
-			}
-			
-			for (VmType vmType : request.reduceOnlyVmProvisionList) {
-				double cost = Math.ceil(vmType.ExecutionTime / 3600.0) * vmType.cost;
-				request.totalCost += cost;
-			}
-
-			double jobExecutionTime = request.lastFinishTime - request.firstSubmissionTime;
-			
-			ExecutionTimesAndCosts.add(new Double[]{jobExecutionTime,request.totalCost});
-		}
-		
-		return ExecutionTimesAndCosts;
-	}
 }

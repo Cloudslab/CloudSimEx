@@ -297,6 +297,15 @@ public class CustomLog {
 	    }
 	}
     }
+    
+    public static void printResultsWithoutHeader(final Class<?> klass, final String delim, final String[] properties, final List<?>... lines) {
+    	// Print details for each cloudlet
+    	for (List<?> list : lines) {
+    	    for (Object o : list) {
+    		printLineForObject(o, delim, properties);
+    	    }
+    	}
+        }
 
     /**
      * Logs the stacktrace of the exception.

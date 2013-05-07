@@ -3,27 +3,33 @@
 experiments:
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
-    org.cloudbus.cloudsim.ex.mapreduce.policy.LFFPerf,
+    LFFPerf,
     [
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [0.0, 80, 4.0, Jobs/MapReduce_9_2.yaml, SILVER],
+     [0.0, 200, 100.0, Jobs/MapReduce_50_1.yaml, SILVER],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [10.0, 70, 4.0, Jobs/MapReduce_9_2.yaml, SILVER],
+     [10.0, 70, 17.0, Jobs/MapReduce_9_2.yaml, SILVER],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [11.0, 60, 7.0, Jobs/MapReduce_9_2.yaml, SILVER],
+     [11.0, 100, 90.0, Jobs/MapReduce_50_1.yaml, SILVER],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [50.0, 1000, 10.0, Jobs/MapReduce_100_3.yaml, SILVER],
+     [50.0, 1000, 190.0, Jobs/MapReduce_100_3.yaml, SILVER],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [200.0, 100, 7.0, Jobs/MapReduce_9_2.yaml, SILVER],
+     [200.0, 100, 17.0, Jobs/MapReduce_9_2.yaml, SILVER],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [210.0, 800, 20.0, Jobs/MapReduce_100_3.yaml, SILVER],
+     [210.0, 800, 180.0, Jobs/MapReduce_100_3.yaml, SILVER],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [211.0, 60, 10.0, Jobs/MapReduce_9_2.yaml, SILVER]
+     [211.0, 60, 17.0, Jobs/MapReduce_9_2.yaml, SILVER]
     ]
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
-    org.cloudbus.cloudsim.ex.mapreduce.policy.LFFCost,
+    LFFCost,
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    BacktrackingPerf,
     [
     ]
    ]

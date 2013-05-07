@@ -12,7 +12,6 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.Textualize;
 
-@Textualize(properties = {"RequestId", "CloudletId", "TaskType", "CloudletLength", "CloudletStatus", "SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime", "InstanceVmId", "VmType"})
 public class Task extends Cloudlet {
 
 	public String name;

@@ -48,7 +48,7 @@ public class LFFPerf extends Policy {
 		for (PublicCloudDatacenter publicCloudDatacenter : cloud.publicCloudDatacenters) {
 			for (VmType vmType : publicCloudDatacenter.vmTypes)
 				for (int i = 0; i < numTasks; i++)
-					VPList.add(new VmInstance(vmType));
+					VPList.add(new VmInstance(vmType, request));
 
 		}
 		for (PrivateCloudDatacenter privateCloudDatacenter : cloud.privateCloudDatacenters) {
@@ -57,7 +57,7 @@ public class LFFPerf extends Policy {
 					.getMaxAvailableResource(firstVmType);
 
 			for (int i = 0; i < Math.min(numTasks, maxAvailableResource); i++)
-				VPList.add(new VmInstance(firstVmType));
+				VPList.add(new VmInstance(firstVmType, request));
 
 		}
 

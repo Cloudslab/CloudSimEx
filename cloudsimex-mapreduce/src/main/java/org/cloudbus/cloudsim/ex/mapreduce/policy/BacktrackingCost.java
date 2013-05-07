@@ -37,7 +37,7 @@ public class BacktrackingCost extends Policy {
 		for (PublicCloudDatacenter publicCloudDatacenter : cloud.publicCloudDatacenters) {
 			for (VmType vmType : publicCloudDatacenter.vmTypes)
 				for (int i = 0; i < numTasks; i++)
-					nVMs.add(new VmInstance(vmType));
+					nVMs.add(new VmInstance(vmType, request));
 
 		}
 		for (PrivateCloudDatacenter privateCloudDatacenter : cloud.privateCloudDatacenters) {
@@ -46,14 +46,14 @@ public class BacktrackingCost extends Policy {
 					.getMaxAvailableResource(firstVmType);
 
 			for (int i = 0; i < Math.min(numTasks, maxAvailableResource); i++)
-				nVMs.add(new VmInstance(firstVmType));
+				nVMs.add(new VmInstance(firstVmType, request));
 
 		}
 		
 		// Sort nVMs by cost
 		Collections.sort(nVMs, new Comparator<VmInstance>() {
 			public int compare(VmInstance VmInstance1, VmInstance VmInstance2) {
-				return Double.compare(VmInstance1.cost, VmInstance2.cost);
+				return Double.compare(VmInstance1.vmCostPerHour, VmInstance2.vmCostPerHour);
 			}
 		});
 		
