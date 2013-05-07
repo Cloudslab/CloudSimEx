@@ -1,0 +1,23 @@
+!!org.cloudbus.cloudsim.ex.mapreduce.Experiments
+
+experiments:
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    org.cloudbus.cloudsim.ex.mapreduce.policy.LFFPerf,
+    [
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [0.0, 80, 4.0, Jobs/MapReduce_9_2.yaml, SILVER],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [10.0, 70, 4.0, Jobs/MapReduce_9_2.yaml, SILVER],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [11.0, 60, 7.0, Jobs/MapReduce_9_2.yaml, SILVER],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [50.0, 1000, 10.0, Jobs/MapReduce_100_3.yaml, SILVER],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [200.0, 100, 7.0, Jobs/MapReduce_9_2.yaml, SILVER],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [210.0, 800, 20.0, Jobs/MapReduce_100_3.yaml, SILVER],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [211.0, 60, 10.0, Jobs/MapReduce_9_2.yaml, SILVER]
+    ]
+   ]

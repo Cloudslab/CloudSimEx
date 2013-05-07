@@ -1,0 +1,2 @@
+- Check resource availability in the algorithm 
+- D-out: predictFileTransferTimeFromDataSource funtion in MapTask class
