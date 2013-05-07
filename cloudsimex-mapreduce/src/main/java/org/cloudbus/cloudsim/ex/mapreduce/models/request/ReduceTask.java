@@ -7,7 +7,7 @@ import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.Textualize;
 
-@Textualize(properties = { "CloudletId", "CloudletLength",  "FinishTime", "FinalExecTime" })
+@Textualize(properties = {"RequestId", "CloudletId", "TaskType", "CloudletLength", "CloudletStatus", "SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime", "InstanceVmId", "VmType"})
 public class ReduceTask extends Task {
 	
 	public ReduceTask(String name, int mi) {
@@ -21,5 +21,9 @@ public class ReduceTask extends Task {
 			if (mapTask.intermediateData.containsKey(name))
 				dSize += mapTask.intermediateData.get(name);
 	}
-
+	
+	public String getTaskType()
+	{
+		return "Reduce";
+	}
 }

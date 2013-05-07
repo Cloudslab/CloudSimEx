@@ -100,7 +100,6 @@ public class Simulation {
 					request.policy = Experiments.experiments.get(experimentNumber).policy;
 				preExperimentIndex--;
 			}
-				
 			engine.setRequests(requests);
 			
 			//START

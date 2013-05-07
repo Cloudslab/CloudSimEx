@@ -21,3 +21,9 @@ experiments:
      [211.0, 60, 10.0, Jobs/MapReduce_9_2.yaml, SILVER]
     ]
    ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    org.cloudbus.cloudsim.ex.mapreduce.policy.LFFCost,
+    [
+    ]
+   ]
