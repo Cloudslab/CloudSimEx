@@ -57,16 +57,11 @@ public class BacktrackingPerf extends Policy {
 			}
 		});
 		
-		//Temporary Add all VMs to the request
-		//request.mapAndReduceVmProvisionList = nVMs;
-
-		
 		// Fill rTasks
 		for (MapTask mapTask : request.job.mapTasks)
 			rTasks.add(mapTask);
 		for (ReduceTask reduceTask : request.job.reduceTasks)
 			rTasks.add(reduceTask);
-
 
 		// Selected SchedulingPlan from backtracking
 		Map<Integer, Integer> selectedSchedulingPlan = getFirstSolutionOfBackTracking(nVMs.size(), rTasks.size());

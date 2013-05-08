@@ -258,6 +258,16 @@ public class Request extends SimEvent {
 		return null;
 	}
 	
+	public List<Task> getAllTasks()
+	{
+		List<Task> allTasks = new ArrayList<Task>();
+		for (Task task : job.mapTasks)
+			allTasks.add(task);
+		for (Task task : job.reduceTasks)
+			allTasks.add(task);
+		return allTasks;
+	}
+	
 	
 	///// STATIC METHODS ////
 	
@@ -294,7 +304,11 @@ public class Request extends SimEvent {
 						if (!provisioningPlans.get(0).contains(vm) && !provisioningPlans.get(1).contains(vm))
 							provisioningPlans.get(0).add(vm);
 				}
-			else
+		}
+		
+		for (Map.Entry<Integer, Integer> entry : schedulingPlan.entrySet()) {
+			Task task = job.getTask(entry.getKey());
+			if(task instanceof ReduceTask)
 				for (VmInstance vm : nVMs) {
 					if (entry.getValue() == vm.getId())
 						if (!provisioningPlans.get(0).contains(vm) && !provisioningPlans.get(1).contains(vm))

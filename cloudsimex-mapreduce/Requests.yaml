@@ -27,9 +27,3 @@ experiments:
     [
     ]
    ]
- - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
-   [
-    BacktrackingPerf,
-    [
-    ]
-   ]

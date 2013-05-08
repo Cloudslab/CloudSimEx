@@ -381,7 +381,7 @@ public class MapReduceEngine extends DatacenterBroker {
 	public void printExecutionSummary() {
 		//TASKS
 		CustomLog.redirectToFile("results/tasks-"+currentExperimentRoundNumber+".csv");
-		CustomLog.printResults(Task.class, ",", new String[]{"RequestId", "CloudletId", "TaskType", "CloudletLength", "CloudletStatus", "SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime", "InstanceVmId", "VmType"},  getCloudletReceivedList());
+		CustomLog.printResults(Task.class, ",", new String[]{"RequestId", "CloudletId", "TaskType", "CloudletLength", "CloudletStatusString", "SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime", "InstanceVmId", "VmType"},  requests.getAllTasks());
 		//VMs
 		CustomLog.redirectToFile("results/vms-"+currentExperimentRoundNumber+".csv");
 		CustomLog.printHeader(VmInstance.class, ",", new String[]{"RequestId", "J", "Policy", "Id", "Name", "ExecutionTime", "ExecutionCost","TasksIdAsString"});
@@ -400,27 +400,20 @@ public class MapReduceEngine extends DatacenterBroker {
 		Log.printLine("= Request " + indent + "Task " + indent + "Type" + indent + "Status" + indent + indent
 				+ "Submission Time" + indent + "Start Time" + indent + "Execution Time (s)" + indent + "Finish Time"
 				+ indent + "VM ID" + indent + "VM Type");
-		for (Cloudlet cloudlet : getCloudletReceivedList()) {
-			Task task = (Task) cloudlet;
+		for (Task task : requests.getAllTasks()) {
 			Log.print(" = " + task.requestId + indent + indent + task.getCloudletId() + indent);
 			if (task instanceof MapTask)
 				Log.print("Map");
 			else if (task instanceof ReduceTask)
 				Log.print("Reduce");
 			else
-				Log.print("OTHER!!!! WTF");
-			if (task.getCloudletStatus() == Cloudlet.SUCCESS) {
-				Log.print(indent + "SUCCESS");
+				Log.print("Task!");
+			Log.print(indent + task.getCloudletStatusString());
 				VmInstance vm = requests.getVmInstance(task.getVmId());
 				double executionTime = task.getFinishTime() - task.getExecStartTime();
 				Log.printLine(indent + indent + dft.format(task.getSubmissionTime()) + indent
 						+ dft.format(task.getExecStartTime()) + indent + dft.format(executionTime) + indent + indent
 						+ dft.format(task.getFinishTime()) + indent + vm.getId() + indent + vm.name);
-			} else if (task.getCloudletStatus() == Cloudlet.FAILED) {
-				Log.printLine("FAILED");
-			} else if (task.getCloudletStatus() == Cloudlet.CANCELED) {
-				Log.printLine("CANCELLED");
-			}
 		}
 		Log.printLine();
 		

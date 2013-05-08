@@ -1,5 +1,6 @@
 package org.cloudbus.cloudsim.ex.mapreduce.models.request;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmInstance;
@@ -75,6 +76,15 @@ public class Requests {
 				return vmInstance;
 		}
 		return null;
+	}
+	
+	public List<Task> getAllTasks()
+	{
+		List<Task> allTasks = new ArrayList<Task>();
+		for (Request request : requests) {
+			allTasks.addAll(request.getAllTasks());
+		}
+		return allTasks;
 	}
 
 }

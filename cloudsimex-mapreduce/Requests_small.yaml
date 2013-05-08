@@ -1,0 +1,53 @@
+!!org.cloudbus.cloudsim.ex.mapreduce.Experiments
+
+experiments:
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    LFFPerf,
+    [
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [0.0, 200, 100.0, Jobs/MapReduce_2_1.yaml, SILVER],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [10.0, 70, 17.0, Jobs/MapReduce_2_1.yaml, SILVER],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [11.0, 100, 90.0, Jobs/MapReduce_2_1.yaml, SILVER],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [50.0, 1000, 190.0, Jobs/MapReduce_2_1.yaml, SILVER],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [200.0, 100, 17.0, Jobs/MapReduce_2_1.yaml, SILVER],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [210.0, 800, 180.0, Jobs/MapReduce_2_1.yaml, SILVER],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [211.0, 60, 17.0, Jobs/MapReduce_2_1.yaml, SILVER]
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    LFFCost,
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    BacktrackingPerf,
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    BacktrackingCost,
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    BruteForcePerf,
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    BruteForceCost,
+    [
+    ]
+   ]
