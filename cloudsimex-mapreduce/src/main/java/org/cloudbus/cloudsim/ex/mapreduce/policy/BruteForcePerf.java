@@ -42,7 +42,7 @@ public class BruteForcePerf extends Policy
 		for (PrivateCloudDatacenter privateCloudDatacenter : cloud.privateCloudDatacenters)
 		{
 			VmType firstVmType = privateCloudDatacenter.vmTypes.get(0);
-			int maxAvailableResource = privateCloudDatacenter.getMaxAvailableResource(firstVmType);
+			int maxAvailableResource = privateCloudDatacenter.getMaxAvailableResource(firstVmType,request.getUserClass());
 
 			for (int i = 0; i < Math.min(numTasks, maxAvailableResource); i++)
 				nVMs.add(new VmInstance(firstVmType, request));

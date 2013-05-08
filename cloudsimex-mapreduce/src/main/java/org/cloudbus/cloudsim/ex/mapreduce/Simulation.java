@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Calendar;
+import java.util.Map;
 
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
@@ -15,6 +16,7 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PrivateCloudDatacenter;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PublicCloudDatacenter;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Requests;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.UserClass;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.yaml.snakeyaml.Yaml;
 
@@ -64,7 +66,7 @@ public class Simulation {
 		
 		Experiments Experiments = YamlFile.getRequestsFromYaml(Properties.REQUESTS.getProperty());
 		for (int round=0; round<Experiments.experiments.size(); round++) {
-			runSimulationRound(round);
+			runSimulationRound(round, Experiments.experiments.get(round).userClassesReservationPercentage);
 		}
 	}
 				
@@ -73,7 +75,7 @@ public class Simulation {
 	 * is printed to the log.
 	 * 
 	 */
-	private static void runSimulationRound(int experimentNumber) {
+	private static void runSimulationRound(int experimentNumber, Map<UserClass, Double> userClassesReservationPercentage) {
 		Log.printLine("Starting simulation for experiment number: "+experimentNumber);
 
 		try {
@@ -88,6 +90,7 @@ public class Simulation {
 						
 			// Create datacentres and cloudlets
 			cloud = YamlFile.getCloudFromYaml(Properties.CLOUD.getProperty());
+			cloud.setUserClassesReservationPercentage(userClassesReservationPercentage);
 			engine.setCloud(cloud);
 			Experiments Experiments = YamlFile.getRequestsFromYaml(Properties.REQUESTS.getProperty());
 			

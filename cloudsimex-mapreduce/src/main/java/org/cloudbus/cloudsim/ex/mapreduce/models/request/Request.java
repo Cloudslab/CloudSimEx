@@ -43,7 +43,7 @@ public class Request extends SimEvent {
 		mapAndReduceVmProvisionList = new ArrayList<VmInstance>();
 		reduceOnlyVmProvisionList = new ArrayList<VmInstance>();
 		schedulingPlan = new HashMap<Integer, Integer>();
-
+		
 		job = readJobYAML(jobFile);
 		//Add Extra Map Tasks
 		List<MapTask> copyOfMapTasks = new ArrayList<MapTask>(job.mapTasks);
@@ -268,6 +268,10 @@ public class Request extends SimEvent {
 		return allTasks;
 	}
 	
+	public int getNumberOfVMs()
+	{
+		return mapAndReduceVmProvisionList.size() + reduceOnlyVmProvisionList.size();
+	}
 	
 	///// STATIC METHODS ////
 	

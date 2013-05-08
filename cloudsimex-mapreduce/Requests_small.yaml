@@ -4,50 +4,80 @@ experiments:
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
     LFFPerf,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
     [
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [0.0, 200, 100.0, Jobs/MapReduce_2_1.yaml, SILVER],
+     [0.0, 200, 100.0, Jobs/MapReduce_2_1.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [10.0, 70, 17.0, Jobs/MapReduce_2_1.yaml, SILVER],
+     [1.0, 70, 17.0, Jobs/MapReduce_2_1.yaml, SILVER],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [11.0, 100, 90.0, Jobs/MapReduce_2_1.yaml, SILVER],
+     [1.5, 100, 90.0, Jobs/MapReduce_2_1.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [50.0, 1000, 190.0, Jobs/MapReduce_2_1.yaml, SILVER],
+     [2.0, 1000, 190.0, Jobs/MapReduce_2_1.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [200.0, 100, 17.0, Jobs/MapReduce_2_1.yaml, SILVER],
+     [2.5, 100, 17.0, Jobs/MapReduce_2_1.yaml, SILVER],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [210.0, 800, 180.0, Jobs/MapReduce_2_1.yaml, SILVER],
+     [3.0, 800, 180.0, Jobs/MapReduce_2_1.yaml, BRONZE],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [211.0, 60, 17.0, Jobs/MapReduce_2_1.yaml, SILVER]
+     [3.5, 60, 17.0, Jobs/MapReduce_2_1.yaml, BRONZE]
     ]
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
     LFFCost,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
     [
     ]
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
     BacktrackingPerf,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
     [
     ]
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
     BacktrackingCost,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
     [
     ]
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
     BruteForcePerf,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
     [
     ]
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
     BruteForceCost,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
     [
     ]
    ]

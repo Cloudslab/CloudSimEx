@@ -2,8 +2,10 @@ package org.cloudbus.cloudsim.ex.mapreduce.models.cloud;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.*;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.UserClass;
 import org.cloudbus.cloudsim.ex.util.Id;
 
 public class Cloud {
@@ -73,5 +75,14 @@ public class Cloud {
 				return dataSource;
 		}
 		return null;
+	}
+
+	public void setUserClassesReservationPercentage(Map<UserClass, Double> userClassesReservationPercentage)
+	{
+		for (PrivateCloudDatacenter privateCloudDatacenter : privateCloudDatacenters)
+		{
+			privateCloudDatacenter.setUserClassesReservationPercentage(userClassesReservationPercentage);
+		}
+		
 	}
 }

@@ -391,7 +391,7 @@ public class MapReduceEngine extends DatacenterBroker {
 		}
 		//REQUETS
 		CustomLog.redirectToFile("results/requests-"+currentExperimentRoundNumber+".csv");
-		CustomLog.printResults(Request.class, ",", new String[]{"Id", "J", "UserClass", "Policy", "Deadline", "Budget", "ExecutionTime", "Cost", "IsDeadlineViolated", "IsBudgetViolated"},  requests.requests);
+		CustomLog.printResults(Request.class, ",", new String[]{"Id", "J", "UserClass", "Policy", "Deadline", "Budget", "ExecutionTime", "Cost", "IsDeadlineViolated", "IsBudgetViolated", "NumberOfVMs"},  requests.requests);
 		
 		//Java Log Output, which sould be disabled from custom_log.properties
 		DecimalFormat dft = new DecimalFormat("000000.00");
