@@ -1,12 +1,10 @@
 package org.cloudbus.cloudsim.ex.mapreduce.models.cloud;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.cloudbus.cloudsim.*;
-
-import org.cloudbus.cloudsim.DatacenterCharacteristics;
+import org.cloudbus.cloudsim.Host;
+import org.cloudbus.cloudsim.VmAllocationPolicy;
 import org.cloudbus.cloudsim.ex.mapreduce.VmSchedulerSpaceSharedMapReduce;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.UserClass;
 
@@ -36,10 +34,10 @@ public class PrivateCloudDatacenter extends CloudDatacenter {
 
 	    totalResources += Math.floor((double) numberOfHostTotalPes / numberOfVmPes);
 	}
-	
+
 	int allowedResources = (int) Math.floor(totalResources * (allowedPercentage / 100.0));
 	int usedResources = totalResources - availableResource;
-	return allowedResources-usedResources;
+	return allowedResources - usedResources;
     }
 
     public Map<UserClass, Double> getUserClassesReservationPercentage()

@@ -1,66 +1,66 @@
 package org.cloudbus.cloudsim.ex.mapreduce.models.cloud;
 
-import org.cloudbus.cloudsim.ex.mapreduce.*;
-import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.Vm;
-import org.cloudbus.cloudsim.ex.util.*;
+import org.cloudbus.cloudsim.ex.mapreduce.MapReduceCloudletScheduler;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
+import org.cloudbus.cloudsim.ex.util.Id;
 
 public class VmType extends Vm {
 
-	public String name;
-	public double vmCostPerHour;
-	public double transferringCost;
-	public int bootTime;
-	
+    public String name;
+    public double vmCostPerHour;
+    public double transferringCost;
+    public int bootTime;
 
-	
-	public VmType(String name, Double vmCostPerHour, Double transferringCost, Double mips, int cores, int ram, int bootTime) {
-		//WARNING: bw is 1000, is that OK?
-		//WARNING: userId (Broker ID) is Cloud.brokerID, is that Ok?
-		//WARNING: Size is 0, is that OK?
-		super(Id.pollId(VmType.class), Cloud.brokerID, mips, cores, ram, 1000, 0, "Xen", new MapReduceCloudletScheduler());
-		
-		this.name = name;
-		this.vmCostPerHour = vmCostPerHour;
-		this.transferringCost = transferringCost;
-		this.bootTime = bootTime;
-	}
+    public VmType(String name, Double vmCostPerHour, Double transferringCost, Double mips, int cores, int ram,
+	    int bootTime) {
+	// WARNING: bw is 1000, is that OK?
+	// WARNING: userId (Broker ID) is Cloud.brokerID, is that Ok?
+	// WARNING: Size is 0, is that OK?
+	super(Id.pollId(VmType.class), Cloud.brokerID, mips, cores, ram, 1000, 0, "Xen",
+		new MapReduceCloudletScheduler());
 
-	public VmInstance getVmInstance(Request request) {
-		return new VmInstance(this,request);
-	}
+	this.name = name;
+	this.vmCostPerHour = vmCostPerHour;
+	this.transferringCost = transferringCost;
+	this.bootTime = bootTime;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public VmInstance getVmInstance(Request request) {
+	return new VmInstance(this, request);
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getName() {
+	return name;
+    }
 
-	public double getVmCostPerHour()
-	{
-		return vmCostPerHour;
-	}
+    public void setName(String name) {
+	this.name = name;
+    }
 
-	public void setVmCostPerHour(double vmCostPerHour) {
-		this.vmCostPerHour = vmCostPerHour;
-	}
+    public double getVmCostPerHour()
+    {
+	return vmCostPerHour;
+    }
 
-	public double getTransferringCost() {
-		return transferringCost;
-	}
+    public void setVmCostPerHour(double vmCostPerHour) {
+	this.vmCostPerHour = vmCostPerHour;
+    }
 
-	public void setTransferringCost(double transferringCost) {
-		this.transferringCost = transferringCost;
-	}
+    public double getTransferringCost() {
+	return transferringCost;
+    }
 
-	public int getBootTime() {
-		return bootTime;
-	}
+    public void setTransferringCost(double transferringCost) {
+	this.transferringCost = transferringCost;
+    }
 
-	public void setBootTime(int bootTime) {
-		this.bootTime = bootTime;
-	}
+    public int getBootTime() {
+	return bootTime;
+    }
+
+    public void setBootTime(int bootTime) {
+	this.bootTime = bootTime;
+    }
 
 }

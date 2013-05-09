@@ -1,24 +1,8 @@
 package org.cloudbus.cloudsim.ex.mapreduce.policy;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.cloudbus.cloudsim.Log;
-import org.cloudbus.cloudsim.ex.mapreduce.models.*;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
-import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.DataSource;
-import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PrivateCloudDatacenter;
-import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PublicCloudDatacenter;
-import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmInstance;
-import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType;
-import org.cloudbus.cloudsim.ex.mapreduce.models.request.*;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.policy.LFF.LFFSorts;
-import org.cloudbus.cloudsim.ex.mapreduce.policy.Policy.CloudDeploymentModel;
 
 /*
  * Problems with Hwang and Kim 2012 approach:
@@ -40,9 +24,9 @@ import org.cloudbus.cloudsim.ex.mapreduce.policy.Policy.CloudDeploymentModel;
  */
 public class LFFPerf extends Policy {
 
-	@Override
-	public Boolean runAlgorithm(Cloud cloud, Request request) {
-		LFF lFF = new LFF();
-		return lFF.runAlgorithm(cloud, request, LFFSorts.Performance);
-	}
+    @Override
+    public Boolean runAlgorithm(Cloud cloud, Request request) {
+	LFF lFF = new LFF();
+	return lFF.runAlgorithm(cloud, request, LFFSorts.Performance);
+    }
 }

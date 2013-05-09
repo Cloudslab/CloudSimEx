@@ -11,41 +11,42 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 
 public abstract class Policy {
-	
-	public enum CloudDeploymentModel {
-		Private, Public, Hybrid;
-	}
-	
-	public abstract Boolean runAlgorithm(Cloud cloud, Request request);
-	
-	public static List<VmInstance> getAllVmInstances(Cloud cloud, Request request, CloudDeploymentModel cloudDeploymentModel)
+
+    public enum CloudDeploymentModel {
+	Private, Public, Hybrid;
+    }
+
+    public abstract Boolean runAlgorithm(Cloud cloud, Request request);
+
+    public static List<VmInstance> getAllVmInstances(Cloud cloud, Request request,
+	    CloudDeploymentModel cloudDeploymentModel)
+    {
+	List<VmInstance> nVMs = new ArrayList<VmInstance>();
+	int numTasks = request.job.mapTasks.size() + request.job.reduceTasks.size();
+
+	if (cloudDeploymentModel == CloudDeploymentModel.Public || cloudDeploymentModel == CloudDeploymentModel.Hybrid)
 	{
-		List<VmInstance> nVMs = new ArrayList<VmInstance>();
-		int numTasks = request.job.mapTasks.size() + request.job.reduceTasks.size();
-		
-		if(cloudDeploymentModel == CloudDeploymentModel.Public || cloudDeploymentModel == CloudDeploymentModel.Hybrid)
-		{
-			for (PublicCloudDatacenter publicCloudDatacenter : cloud.publicCloudDatacenters) {
-				for (VmType vmType : publicCloudDatacenter.vmTypes)
-					for (int i = 0; i < numTasks; i++)
-						nVMs.add(new VmInstance(vmType, request));
-	
-			}
-		}
-		
-		if(cloudDeploymentModel == CloudDeploymentModel.Private || cloudDeploymentModel == CloudDeploymentModel.Hybrid)
-		{	
-			for (PrivateCloudDatacenter privateCloudDatacenter : cloud.privateCloudDatacenters) {
-				VmType firstVmType = privateCloudDatacenter.vmTypes.get(0);
-				int maxAvailableResource = privateCloudDatacenter
-						.getMaxAvailableResource(firstVmType,request.getUserClass());
-	
-				for (int i = 0; i < Math.min(numTasks, maxAvailableResource); i++)
-					nVMs.add(new VmInstance(firstVmType, request));
-	
-			}
-		}
-		
-		return nVMs;
+	    for (PublicCloudDatacenter publicCloudDatacenter : cloud.publicCloudDatacenters) {
+		for (VmType vmType : publicCloudDatacenter.vmTypes)
+		    for (int i = 0; i < numTasks; i++)
+			nVMs.add(new VmInstance(vmType, request));
+
+	    }
 	}
+
+	if (cloudDeploymentModel == CloudDeploymentModel.Private || cloudDeploymentModel == CloudDeploymentModel.Hybrid)
+	{
+	    for (PrivateCloudDatacenter privateCloudDatacenter : cloud.privateCloudDatacenters) {
+		VmType firstVmType = privateCloudDatacenter.vmTypes.get(0);
+		int maxAvailableResource = privateCloudDatacenter
+			.getMaxAvailableResource(firstVmType, request.getUserClass());
+
+		for (int i = 0; i < Math.min(numTasks, maxAvailableResource); i++)
+		    nVMs.add(new VmInstance(firstVmType, request));
+
+	    }
+	}
+
+	return nVMs;
+    }
 }
