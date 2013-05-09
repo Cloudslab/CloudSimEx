@@ -14,6 +14,6 @@ public class BruteForcePerf extends Policy
 	{
 
 		BruteForce BruteForce = new BruteForce();
-		return BruteForce.runAlgorithm(cloud, request, BruteForceSorts.Performance, CloudDeploymentModel.Hybrid);
+		return BruteForce.runAlgorithm(cloud, request, BruteForceSorts.Performance);
 	}
 }

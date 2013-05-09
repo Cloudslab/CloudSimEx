@@ -393,25 +393,25 @@ public class MapReduceEngine extends DatacenterBroker {
 		
 		//TASKS
 		CustomLog.redirectToFile("results/tasks.csv", true);
-		CustomLog.printResultsWithoutHeader(Task.class, ",", new String[]{"experimentNumber","RequestId", "CloudletId", "TaskType", "CloudletLength", "CloudletStatusString", "SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime", "InstanceVmId", "VmType"}, requests.getAllTasks());
+		CustomLog.printResultsWithoutHeader(Task.class, ",", new String[]{"experimentNumber", "RequestId", "J", "UserClass", "Policy", "CloudDeploymentModel", "CloudletId", "TaskType", "CloudletLength", "CloudletStatusString", "SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime", "InstanceVmId", "VmType"}, requests.getAllTasks());
 		//VMs
 		CustomLog.redirectToFile("results/vms.csv", true);
 		for (Request request : requests.requests) {
-			CustomLog.printResultsWithoutHeader(VmInstance.class, ",", new String[]{"experimentNumber", "RequestId", "J", "Policy", "Id", "Name", "ExecutionTime", "ExecutionCost","TasksIdAsString"}, request.mapAndReduceVmProvisionList);
-			CustomLog.printResultsWithoutHeader(VmInstance.class, ",", new String[]{"experimentNumber", "RequestId", "J", "Policy", "Id", "Name", "ExecutionTime", "ExecutionCost","TasksIdAsString"}, request.reduceOnlyVmProvisionList);
+			CustomLog.printResultsWithoutHeader(VmInstance.class, ",", new String[]{"experimentNumber", "RequestId", "J", "UserClass", "Policy", "CloudDeploymentModel", "Id", "Name", "ExecutionTime", "ExecutionCost","TasksIdAsString"}, request.mapAndReduceVmProvisionList);
+			CustomLog.printResultsWithoutHeader(VmInstance.class, ",", new String[]{"experimentNumber", "RequestId", "J", "UserClass", "Policy", "CloudDeploymentModel", "Id", "Name", "ExecutionTime", "ExecutionCost","TasksIdAsString"}, request.reduceOnlyVmProvisionList);
 		}
 		//REQUETS
 		CustomLog.redirectToFile("results/requests.csv", true);
-		CustomLog.printResultsWithoutHeader(Request.class, ",", new String[]{"experimentNumber","Id", "J", "UserClass", "Policy", "Deadline", "Budget", "ExecutionTime", "Cost", "IsDeadlineViolated", "IsBudgetViolated", "NumberOfVMs"},  requests.requests);
+		CustomLog.printResultsWithoutHeader(Request.class, ",", new String[]{"experimentNumber","Id", "J", "UserClass", "Policy", "CloudDeploymentModel", "Deadline", "Budget", "ExecutionTime", "Cost", "IsDeadlineViolated", "IsBudgetViolated", "NumberOfVMs"},  requests.requests);
 		//COSTS
 		CustomLog.redirectToFile("results/plots/costs.csv", true);
-		String costLine = requests.requests.get(0).getPolicy()+",";
+		String costLine = requests.requests.get(0).getPolicy()+","+requests.requests.get(0).getCloudDeploymentModel()+",";
 		for (Request request : requests.requests)
 			costLine+=request.getCost()+",";
 		CustomLog.printLine(costLine);
 		//EXECUTION TIME
 		CustomLog.redirectToFile("results/plots/times.csv", true);
-		String timeLine = requests.requests.get(0).getPolicy()+",";
+		String timeLine = requests.requests.get(0).getPolicy()+","+requests.requests.get(0).getCloudDeploymentModel()+",";
 		for (Request request : requests.requests)
 			timeLine+=request.getExecutionTime()+",";
 		CustomLog.printLine(timeLine);

@@ -13,6 +13,6 @@ public class BruteForceCost extends Policy {
 	@Override
 	public Boolean runAlgorithm(Cloud cloud, Request request) {
 		BruteForce BruteForce = new BruteForce();
-		return BruteForce.runAlgorithm(cloud, request, BruteForceSorts.Cost, CloudDeploymentModel.Hybrid);
+		return BruteForce.runAlgorithm(cloud, request, BruteForceSorts.Cost);
 	}
 }

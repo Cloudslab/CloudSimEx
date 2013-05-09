@@ -67,21 +67,26 @@ public class Simulation {
 		    props.load(is);
 		}
 		CustomLog.configLogger(props);
+		//VMs
 		CustomLog.redirectToFile("results/vms.csv");
-		CustomLog.printHeader(VmInstance.class, ",", new String[]{"experimentNumber", "RequestId", "J", "Policy", "Id", "Name", "ExecutionTime", "ExecutionCost","TasksIdAsString"});
-				CustomLog.redirectToFile("results/tasks.csv");
-		CustomLog.printHeader(Task.class, ",", new String[]{"experimentNumber","RequestId", "CloudletId", "TaskType", "CloudletLength", "CloudletStatusString", "SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime", "InstanceVmId", "VmType"});
+		CustomLog.printHeader(VmInstance.class, ",", new String[]{"experimentNumber", "RequestId", "J", "UserClass", "Policy", "CloudDeploymentModel", "Id", "Name", "ExecutionTime", "ExecutionCost","TasksIdAsString"});
+		//TASKs
+		CustomLog.redirectToFile("results/tasks.csv");
+		CustomLog.printHeader(Task.class, ",", new String[]{"experimentNumber", "RequestId", "J", "UserClass", "Policy", "CloudDeploymentModel", "CloudletId", "TaskType", "CloudletLength", "CloudletStatusString", "SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime", "InstanceVmId", "VmType"});
+		//REQUETs
 		CustomLog.redirectToFile("results/requests.csv");
-		CustomLog.printHeader(Request.class, ",", new String[]{"experimentNumber","Id", "J", "UserClass", "Policy", "Deadline", "Budget", "ExecutionTime", "Cost", "IsDeadlineViolated", "IsBudgetViolated", "NumberOfVMs"});
+		CustomLog.printHeader(Request.class, ",", new String[]{"experimentNumber","Id", "J", "UserClass", "Policy", "CloudDeploymentModel", "Deadline", "Budget", "ExecutionTime", "Cost", "IsDeadlineViolated", "IsBudgetViolated", "NumberOfVMs"});
+		//COST Plotting
 		CustomLog.redirectToFile("results/plots/costs.csv");
-		String costHeader = ",";
+		String costHeader = "Number of tasks,,";
 		for (Request request : experiments.experiments.get(0).requests.requests)
-			costHeader+=request.getJ()+",";
+			costHeader+=request.getNumberOfTasks()+",";
 		CustomLog.printLine(costHeader);
+		//TIME Plotting
 		CustomLog.redirectToFile("results/plots/times.csv");
-		String timeHeader = ",";
+		String timeHeader = "Number of tasks,,";
 		for (Request request : experiments.experiments.get(0).requests.requests)
-			timeHeader+=request.getJ()+",";
+			timeHeader+=request.getNumberOfTasks()+",";
 		CustomLog.printLine(timeHeader);
 		
 		for (int round=0; round<experiments.experiments.size(); round++) {
@@ -95,7 +100,7 @@ public class Simulation {
 	 * 
 	 */
 	private static void runSimulationRound(int experimentNumber, Map<UserClass, Double> userClassesReservationPercentage) {
-		Log.printLine("Starting simulation for experiment number: "+experimentNumber);
+		Log.printLine("Starting simulation for experiment number: "+(experimentNumber+1));
 
 		try {
 			
@@ -120,7 +125,10 @@ public class Simulation {
 			{
 				requests = Experiments.experiments.get(preExperimentIndex).requests;
 				for (Request request : requests.requests)
+				{
 					request.policy = Experiments.experiments.get(experimentNumber).policy;
+					request.setCloudDeploymentModel(Experiments.experiments.get(experimentNumber).cloudDeploymentModel);
+				}
 				preExperimentIndex--;
 			}
 			engine.setRequests(requests);

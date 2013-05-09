@@ -43,6 +43,6 @@ public class LFFPerf extends Policy {
 	@Override
 	public Boolean runAlgorithm(Cloud cloud, Request request) {
 		LFF lFF = new LFF();
-		return lFF.runAlgorithm(cloud, request, LFFSorts.Performance, CloudDeploymentModel.Hybrid);
+		return lFF.runAlgorithm(cloud, request, LFFSorts.Performance);
 	}
 }

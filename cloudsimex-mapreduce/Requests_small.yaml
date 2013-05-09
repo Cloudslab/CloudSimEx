@@ -3,7 +3,7 @@
 experiments:
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
-    LFFPerf,
+    LFFPerf, Hybrid,
       {
         GOLD: 100.0,
         SILVER: 60.0,
@@ -24,7 +24,7 @@ experiments:
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
-    LFFCost,
+    LFFCost, Hybrid,
       {
         GOLD: 100.0,
         SILVER: 60.0,
@@ -35,7 +35,7 @@ experiments:
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
-    BacktrackingPerf,
+    BacktrackingPerf, Hybrid,
       {
         GOLD: 100.0,
         SILVER: 60.0,
@@ -46,7 +46,7 @@ experiments:
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
-    BacktrackingPerfPublicCloudOnly,
+    BacktrackingCost, Hybrid,
       {
         GOLD: 100.0,
         SILVER: 60.0,
@@ -57,7 +57,7 @@ experiments:
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
-    BacktrackingCost,
+    BacktrackingCost, Public,
       {
         GOLD: 100.0,
         SILVER: 60.0,
@@ -68,7 +68,33 @@ experiments:
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
-    BacktrackingCostPublicCloudOnly,
+    BacktrackingCost, Private,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    BruteForceCost, Hybrid,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [0.0, 200, 100.0, Jobs/MapReduce_2_1.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [1.0, 70, 17.0, Jobs/MapReduce_3_1.yaml, SILVER]
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    BruteForcePerf, Hybrid,
       {
         GOLD: 100.0,
         SILVER: 60.0,

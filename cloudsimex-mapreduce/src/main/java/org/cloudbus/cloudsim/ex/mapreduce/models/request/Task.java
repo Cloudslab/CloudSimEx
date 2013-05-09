@@ -9,6 +9,7 @@ import org.cloudbus.cloudsim.ex.mapreduce.MapReduceEngine;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmInstance;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType;
+import org.cloudbus.cloudsim.ex.mapreduce.policy.Policy.CloudDeploymentModel;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.Textualize;
 
@@ -63,7 +64,7 @@ public class Task extends Cloudlet {
 	
 	public MapReduceEngine getMapReduceEngine()
 	{
-		return (MapReduceEngine) CloudSim.getEntity("MapReduceEngine");
+		return mapReduceEngine;
 	}
 		
 	public double getTaskExecutionTimeInSeconds()
@@ -144,5 +145,25 @@ public class Task extends Cloudlet {
 	public void setexperimentNumber(int experimentNumber)
 	{
 		this.experimentNumber = experimentNumber;
+	}
+	
+	public String getPolicy()
+	{
+		return getCurrentRequest().getPolicy();
+	}
+	
+	public String getJ()
+	{
+		return getCurrentRequest().getJ();
+	}
+	
+	public UserClass getUserClass()
+	{
+		return getCurrentRequest().getUserClass();
+	}
+	
+	public CloudDeploymentModel getCloudDeploymentModel()
+	{
+		return getCurrentRequest().getCloudDeploymentModel();
 	}
 }

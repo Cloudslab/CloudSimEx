@@ -42,6 +42,6 @@ public class LFFCost extends Policy {
 	@Override
 	public Boolean runAlgorithm(Cloud cloud, Request request) {
 		LFF lFF = new LFF();
-		return lFF.runAlgorithm(cloud, request, LFFSorts.Cost, CloudDeploymentModel.Hybrid);
+		return lFF.runAlgorithm(cloud, request, LFFSorts.Cost);
 	}
 }

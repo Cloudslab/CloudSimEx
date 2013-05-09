@@ -32,11 +32,14 @@ public class Backtracking {
 	private List<Task> rTasks = new ArrayList<Task>();
 	private Request request;
 
-	public Boolean runAlgorithm(Cloud cloud, Request request, BacktrackingSorts backtrackingSort, CloudDeploymentModel cloudDeploymentModel) {
+	public Boolean runAlgorithm(Cloud cloud, Request request, BacktrackingSorts backtrackingSort) {
 		this.request = request;
+		CloudDeploymentModel cloudDeploymentModel = request.getCloudDeploymentModel();
 		
 		// Fill nVMs
 		nVMs = Policy.getAllVmInstances(cloud, request, cloudDeploymentModel);
+		if(nVMs.size() == 0)
+			return false;
 		
 		if(backtrackingSort == BacktrackingSorts.Cost)
 		{

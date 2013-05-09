@@ -14,6 +14,7 @@ import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmInstance;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType;
+import org.cloudbus.cloudsim.ex.mapreduce.policy.Policy.CloudDeploymentModel;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.yaml.snakeyaml.Yaml;
 
@@ -34,6 +35,8 @@ public class Request extends SimEvent {
 	public String jobFile;
 	
 	private int experimentNumber;
+	
+	private CloudDeploymentModel cloudDeploymentModel = CloudDeploymentModel.Hybrid;
 
 	public Request(double submissionTime, int deadline, double budget, String jobFile, UserClass userClass) {
 		id = Id.pollId(Request.class);
@@ -153,6 +156,15 @@ public class Request extends SimEvent {
 
 	public void setJobFile(String jobFile) {
 		this.jobFile = jobFile;
+	}
+	
+	
+	public CloudDeploymentModel getCloudDeploymentModel() {
+		return cloudDeploymentModel;
+	}
+
+	public void setCloudDeploymentModel(CloudDeploymentModel cloudDeploymentModel) {
+		this.cloudDeploymentModel = cloudDeploymentModel;
 	}
 	
 	public double getExecutionTime()
@@ -333,6 +345,10 @@ public class Request extends SimEvent {
 	public void setexperimentNumber(int experimentNumber)
 	{
 		this.experimentNumber = experimentNumber;
+	}
+
+	public int getNumberOfTasks() {
+		return job.mapTasks.size() + job.reduceTasks.size();
 	}
 	
 	

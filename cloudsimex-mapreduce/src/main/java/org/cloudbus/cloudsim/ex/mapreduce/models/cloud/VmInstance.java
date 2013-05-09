@@ -1,11 +1,14 @@
 package org.cloudbus.cloudsim.ex.mapreduce.models.cloud;
 
+import java.net.Authenticator.RequestorType;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.MapTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.ReduceTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.UserClass;
+import org.cloudbus.cloudsim.ex.mapreduce.policy.Policy.CloudDeploymentModel;
 import org.cloudbus.cloudsim.ex.util.Textualize;
 
 public class VmInstance extends VmType {
@@ -101,6 +104,16 @@ public class VmInstance extends VmType {
 	public void setexperimentNumber(int experimentNumber)
 	{
 		this.experimentNumber = experimentNumber;
+	}
+	
+	public UserClass getUserClass()
+	{
+		return request.getUserClass();
+	}
+	
+	public CloudDeploymentModel getCloudDeploymentModel()
+	{
+		return request.getCloudDeploymentModel();
 	}
 	
 	

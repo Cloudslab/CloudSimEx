@@ -27,6 +27,6 @@ public class BacktrackingPerf extends Policy {
 	@Override
 	public Boolean runAlgorithm(Cloud cloud, Request request) {
 		Backtracking backtracking = new Backtracking();
-		return backtracking.runAlgorithm(cloud, request, BacktrackingSorts.Performance, CloudDeploymentModel.Hybrid);
+		return backtracking.runAlgorithm(cloud, request, BacktrackingSorts.Performance);
 	}
 }

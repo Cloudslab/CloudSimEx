@@ -43,8 +43,9 @@ public class LFF {
 		Cost, Performance;
 	}
 	
-	public Boolean runAlgorithm(Cloud cloud, Request request, LFFSorts lFFSort, CloudDeploymentModel cloudDeploymentModel) {
-
+	public Boolean runAlgorithm(Cloud cloud, Request request, LFFSorts lFFSort) {
+		CloudDeploymentModel cloudDeploymentModel = request.getCloudDeploymentModel();
+		
 		// Fill VPList
 		List<VmInstance> VPList = Policy.getAllVmInstances(cloud, request, cloudDeploymentModel);
 		
