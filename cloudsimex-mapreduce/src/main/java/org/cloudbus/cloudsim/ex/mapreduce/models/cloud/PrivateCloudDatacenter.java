@@ -17,6 +17,16 @@ public class PrivateCloudDatacenter extends CloudDatacenter {
 	super(name, hosts, memory_perhost, cores_perhost, mips_precore_perhost, vmtypes);
     }
 
+    /**
+     * It dosen't take into account other requests with reduce only VMs, or
+     * requests that arrives in the time
+     * 
+     * @param firstVmType
+     *            Supports only one type of VM
+     * @param userClass
+     *            The class of the user to give priority
+     * @return
+     */
     public int getMaxAvailableResource(VmType firstVmType, UserClass userClass) {
 	Double allowedPercentage = userClassAllowedPercentage.get(userClass);
 
