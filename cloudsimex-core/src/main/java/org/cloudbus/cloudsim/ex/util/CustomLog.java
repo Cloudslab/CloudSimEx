@@ -173,6 +173,21 @@ public class CustomLog {
     public static void printHeader(final Class<?> klass, final String delim, final String[] properties) {
 	CustomLog.printLine(TextUtil.getCaptionLine(klass, delim, properties));
     }
+    
+    /**
+     * Prints a header for the specified class. The format is as per the
+     * specification in {@link TextUtil}
+     * 
+     * @param klass
+     *            - the class. Must not be null.
+     * @param delim
+     *            - the delimeter. Must not be null.
+     * @param properties
+     * 		  - the properties to use for the header.
+     */
+    public static void printHeader(final Class<?> klass, final String delim) {
+	CustomLog.printLine(TextUtil.getCaptionLine(klass, delim));
+    }
 
     /**
      * Prints a header for the specified class. The format is as per the
@@ -209,6 +224,19 @@ public class CustomLog {
      */
     public static void printLineForObject(final Object o) {
 	CustomLog.print(TextUtil.getTxtLine(o));
+    }
+    
+    /**
+     * Prints a line for the object. The format is as per the specification in
+     * {@link TextUtil}
+     * 
+     * @param o
+     *            - the object. Must not be null.
+     * @param delim
+     *            - the delimeter to use.
+     */
+    public static void printLineForObject(final Object o, final String delim) {
+	CustomLog.print(TextUtil.getTxtLine(o, delim));
     }
 
     /**
@@ -291,13 +319,21 @@ public class CustomLog {
 	}
 	
 	// Print details for each cloudlet
-	for (List<?> list : lines) {
-	    for (Object o : list) {
-		printLineForObject(o, delim, properties);
-	    }
-	}
+	printResultsWithoutHeader(klass,delim,properties,lines);
     }
     
+    /**
+     * Prints the objects' details without a header in a CSV - like format.
+     * 
+     * @param klass
+     *            - the class to be used for the header. If null no header is printed.
+     * @param delim
+     *            - the delimeter to use.
+     * @param properties
+     * 		  - the properties to print.
+     * @param list
+     *            - list of objects. All objects, must be of type klass.
+     */
     public static void printResultsWithoutHeader(final Class<?> klass, final String delim, final String[] properties, final List<?>... lines) {
     	// Print details for each cloudlet
     	for (List<?> list : lines) {
@@ -305,7 +341,26 @@ public class CustomLog {
     		printLineForObject(o, delim, properties);
     	    }
     	}
-        }
+    }
+    
+    /**
+     * Prints the objects' details without a header in a CSV - like format.
+     * 
+     * @param klass
+     *            - the class to be used for the header. If null no header is printed.
+     * @param delim
+     *            - the delimeter to use.
+     * @param list
+     *            - list of objects. All objects, must be of type klass.
+     */
+    public static void printResultsWithoutHeader(final Class<?> klass, final String delim, final List<?>... lines) {
+    	// Print details for each cloudlet
+    	for (List<?> list : lines) {
+    	    for (Object o : list) {
+    		printLineForObject(o, delim);
+    	    }
+    	}
+    }
 
     /**
      * Logs the stacktrace of the exception.
@@ -408,8 +463,23 @@ public class CustomLog {
      *            to the standard output.
      */
     public static void redirectToFile(final String fileName) {
+    	redirectToFile(fileName, false);
+    }
+    
+    
+    /**
+     * Redirects this logger to a file.
+     * 
+     * @param fileName
+     * 			- the name of the new log file. If null the log is redirected
+     *            to the standard output.
+     * @param append specifies append mode
+     * 			
+     */
+    public static void redirectToFile(final String fileName, Boolean append) {
 	for (Handler h : LOGGER.getHandlers()) {
 	    LOGGER.removeHandler(h);
+	    h.close();
 	}
 
 	if (fileName != null) {
@@ -418,7 +488,7 @@ public class CustomLog {
 
 	StreamHandler handler;
 	try {
-	    handler = fileName != null ? new FileHandler(fileName, false)
+	    handler = fileName != null ? new FileHandler(fileName, append)
 		    : new ConsoleHandler();
 	    handler.setLevel(granularityLevel);
 	    handler.setFormatter(formatter);
