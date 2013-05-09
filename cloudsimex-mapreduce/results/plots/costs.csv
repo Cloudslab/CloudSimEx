@@ -1,0 +1,7 @@
+,J={2-1},J={3-1},J={4-1},J={5-1},J={6-1},
+LFFPerf,4.0,6.0,8.0,10.0,12.0,
+LFFCost,0.0,3.4499999999999997,4.6,4.6,6.9,
+BacktrackingPerf,2.0,2.0,2.0,2.0,2.0,
+BacktrackingCost,0.0,1.15,1.15,1.15,1.15,
+BacktrackingCostPublicCloudOnly,1.15,1.15,1.15,1.15,1.15,
+BacktrackingPerfPublicCloudOnly,2.0,2.0,2.0,2.0,2.0,

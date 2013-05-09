@@ -32,6 +32,8 @@ public class Request extends SimEvent {
 	
 	public String policy;
 	public String jobFile;
+	
+	private int experimentNumber;
 
 	public Request(double submissionTime, int deadline, double budget, String jobFile, UserClass userClass) {
 		id = Id.pollId(Request.class);
@@ -322,5 +324,17 @@ public class Request extends SimEvent {
 		
 		return provisioningPlans;
 	}
+
+	public int getexperimentNumber()
+	{
+		return experimentNumber;
+	}
+
+	public void setexperimentNumber(int experimentNumber)
+	{
+		this.experimentNumber = experimentNumber;
+	}
+	
+	
 
 }

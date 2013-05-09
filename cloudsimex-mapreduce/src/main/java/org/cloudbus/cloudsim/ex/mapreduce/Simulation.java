@@ -14,8 +14,10 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PrivateCloudDatacenter;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.PublicCloudDatacenter;
+import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmInstance;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Requests;
+import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.UserClass;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.yaml.snakeyaml.Yaml;
@@ -50,12 +52,6 @@ public class Simulation {
 	 */
 	public static void main(String[] args) throws Exception {
 		
-		java.util.Properties props = new java.util.Properties();
-		try (InputStream is = Files.newInputStream(Paths.get("custom_log.properties"))) {
-		    props.load(is);
-		}
-		CustomLog.configLogger(props);
-		
 		Log.printLine("========== Simulation configuration ==========");
 		for (Properties property: Properties.values()){
 			Log.printLine("= "+property+": "+property.getProperty());
@@ -64,9 +60,32 @@ public class Simulation {
 		Log.printLine("");
 		
 		
-		Experiments Experiments = YamlFile.getRequestsFromYaml(Properties.REQUESTS.getProperty());
-		for (int round=0; round<Experiments.experiments.size(); round++) {
-			runSimulationRound(round, Experiments.experiments.get(round).userClassesReservationPercentage);
+		Experiments experiments = YamlFile.getRequestsFromYaml(Properties.REQUESTS.getProperty());
+		
+		java.util.Properties props = new java.util.Properties();
+		try (InputStream is = Files.newInputStream(Paths.get("custom_log.properties"))) {
+		    props.load(is);
+		}
+		CustomLog.configLogger(props);
+		CustomLog.redirectToFile("results/vms.csv");
+		CustomLog.printHeader(VmInstance.class, ",", new String[]{"experimentNumber", "RequestId", "J", "Policy", "Id", "Name", "ExecutionTime", "ExecutionCost","TasksIdAsString"});
+				CustomLog.redirectToFile("results/tasks.csv");
+		CustomLog.printHeader(Task.class, ",", new String[]{"experimentNumber","RequestId", "CloudletId", "TaskType", "CloudletLength", "CloudletStatusString", "SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime", "InstanceVmId", "VmType"});
+		CustomLog.redirectToFile("results/requests.csv");
+		CustomLog.printHeader(Request.class, ",", new String[]{"experimentNumber","Id", "J", "UserClass", "Policy", "Deadline", "Budget", "ExecutionTime", "Cost", "IsDeadlineViolated", "IsBudgetViolated", "NumberOfVMs"});
+		CustomLog.redirectToFile("results/plots/costs.csv");
+		String costHeader = ",";
+		for (Request request : experiments.experiments.get(0).requests.requests)
+			costHeader+=request.getJ()+",";
+		CustomLog.printLine(costHeader);
+		CustomLog.redirectToFile("results/plots/times.csv");
+		String timeHeader = ",";
+		for (Request request : experiments.experiments.get(0).requests.requests)
+			timeHeader+=request.getJ()+",";
+		CustomLog.printLine(timeHeader);
+		
+		for (int round=0; round<experiments.experiments.size(); round++) {
+			runSimulationRound(round, experiments.experiments.get(round).userClassesReservationPercentage);
 		}
 	}
 				

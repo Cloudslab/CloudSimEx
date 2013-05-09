@@ -22,11 +22,11 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
 import org.cloudbus.cloudsim.ex.mapreduce.policy.Backtracking.BacktrackingSorts;
 
-public class BacktrackingPerf extends Policy {
+public class BacktrackingPerfPublicCloudOnly extends Policy {
 
 	@Override
 	public Boolean runAlgorithm(Cloud cloud, Request request) {
 		Backtracking backtracking = new Backtracking();
-		return backtracking.runAlgorithm(cloud, request, BacktrackingSorts.Performance, CloudDeploymentModel.Hybrid);
+		return backtracking.runAlgorithm(cloud, request, BacktrackingSorts.Performance, CloudDeploymentModel.Public);
 	}
 }

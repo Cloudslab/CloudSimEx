@@ -379,21 +379,45 @@ public class MapReduceEngine extends DatacenterBroker {
 
 	// Output information supplied at the end of the simulation
 	public void printExecutionSummary() {
-		//TASKS
-		CustomLog.redirectToFile("results/tasks-"+currentExperimentRoundNumber+".csv");
-		CustomLog.printResults(Task.class, ",", new String[]{"RequestId", "CloudletId", "TaskType", "CloudletLength", "CloudletStatusString", "SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime", "InstanceVmId", "VmType"},  requests.getAllTasks());
-		//VMs
-		CustomLog.redirectToFile("results/vms-"+currentExperimentRoundNumber+".csv");
-		CustomLog.printHeader(VmInstance.class, ",", new String[]{"RequestId", "J", "Policy", "Id", "Name", "ExecutionTime", "ExecutionCost","TasksIdAsString"});
+		//set experimentNumber values on Tasks, Requests and VmInstances
+		for (Task task : requests.getAllTasks())
+			task.setexperimentNumber(currentExperimentRoundNumber);
 		for (Request request : requests.requests) {
-			CustomLog.printResultsWithoutHeader(VmInstance.class, ",", new String[]{"RequestId", "J", "Policy", "Id", "Name", "ExecutionTime", "ExecutionCost","TasksIdAsString"}, request.mapAndReduceVmProvisionList);
-			CustomLog.printResultsWithoutHeader(VmInstance.class, ",", new String[]{"RequestId", "J", "Policy", "Id", "Name", "ExecutionTime", "ExecutionCost","TasksIdAsString"}, request.reduceOnlyVmProvisionList);
+			for (VmInstance vm : request.mapAndReduceVmProvisionList)
+				vm.setexperimentNumber(currentExperimentRoundNumber);
+			for (VmInstance vm : request.reduceOnlyVmProvisionList)
+				vm.setexperimentNumber(currentExperimentRoundNumber);
+		}
+		for (Request request : requests.requests)
+			request.setexperimentNumber(currentExperimentRoundNumber);
+		
+		//TASKS
+		CustomLog.redirectToFile("results/tasks.csv", true);
+		CustomLog.printResultsWithoutHeader(Task.class, ",", new String[]{"experimentNumber","RequestId", "CloudletId", "TaskType", "CloudletLength", "CloudletStatusString", "SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime", "InstanceVmId", "VmType"}, requests.getAllTasks());
+		//VMs
+		CustomLog.redirectToFile("results/vms.csv", true);
+		for (Request request : requests.requests) {
+			CustomLog.printResultsWithoutHeader(VmInstance.class, ",", new String[]{"experimentNumber", "RequestId", "J", "Policy", "Id", "Name", "ExecutionTime", "ExecutionCost","TasksIdAsString"}, request.mapAndReduceVmProvisionList);
+			CustomLog.printResultsWithoutHeader(VmInstance.class, ",", new String[]{"experimentNumber", "RequestId", "J", "Policy", "Id", "Name", "ExecutionTime", "ExecutionCost","TasksIdAsString"}, request.reduceOnlyVmProvisionList);
 		}
 		//REQUETS
-		CustomLog.redirectToFile("results/requests-"+currentExperimentRoundNumber+".csv");
-		CustomLog.printResults(Request.class, ",", new String[]{"Id", "J", "UserClass", "Policy", "Deadline", "Budget", "ExecutionTime", "Cost", "IsDeadlineViolated", "IsBudgetViolated", "NumberOfVMs"},  requests.requests);
+		CustomLog.redirectToFile("results/requests.csv", true);
+		CustomLog.printResultsWithoutHeader(Request.class, ",", new String[]{"experimentNumber","Id", "J", "UserClass", "Policy", "Deadline", "Budget", "ExecutionTime", "Cost", "IsDeadlineViolated", "IsBudgetViolated", "NumberOfVMs"},  requests.requests);
+		//COSTS
+		CustomLog.redirectToFile("results/plots/costs.csv", true);
+		String costLine = requests.requests.get(0).getPolicy()+",";
+		for (Request request : requests.requests)
+			costLine+=request.getCost()+",";
+		CustomLog.printLine(costLine);
+		//EXECUTION TIME
+		CustomLog.redirectToFile("results/plots/times.csv", true);
+		String timeLine = requests.requests.get(0).getPolicy()+",";
+		for (Request request : requests.requests)
+			timeLine+=request.getExecutionTime()+",";
+		CustomLog.printLine(timeLine);
 		
-		//Java Log Output, which sould be disabled from custom_log.properties
+		
+		//Java Log Output, which should be disabled from custom_log.properties
 		DecimalFormat dft = new DecimalFormat("000000.00");
 		String indent = "\t";
 		Log.printLine("========== MAPREDUCE EXECUTION SUMMARY ==========");

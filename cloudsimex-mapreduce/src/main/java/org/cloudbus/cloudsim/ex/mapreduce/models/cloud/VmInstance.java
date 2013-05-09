@@ -6,11 +6,14 @@ import java.util.List;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.MapTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.ReduceTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
+import org.cloudbus.cloudsim.ex.util.Textualize;
 
 public class VmInstance extends VmType {
 
 	public int vmTypeId;
 	public Request request;
+	
+	private int experimentNumber;
 	
 	public VmInstance(VmType vmType, Request request) {
 		super(vmType.name, vmType.vmCostPerHour, vmType.transferringCost, vmType.getMips(), vmType.getNumberOfPes(), vmType.getRam(), vmType.bootTime);
@@ -89,4 +92,16 @@ public class VmInstance extends VmType {
 	{
 		return request.getJ();
 	}
+
+	public int getexperimentNumber()
+	{
+		return experimentNumber;
+	}
+
+	public void setexperimentNumber(int experimentNumber)
+	{
+		this.experimentNumber = experimentNumber;
+	}
+	
+	
 }

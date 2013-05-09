@@ -21,6 +21,8 @@ public class Task extends Cloudlet {
 	public int dSize;
 	public MapReduceEngine mapReduceEngine;
 	
+	private int experimentNumber;
+
 	public Task(String name, int dSize, int mi) {
 		//Cloudlet lengh is 0, it will be updated after we run the algorithm
 		//File size is 0, we will use the new dSize
@@ -132,5 +134,15 @@ public class Task extends Cloudlet {
 	public String getVmType()
 	{
 		return getRequests().getVmInstance(getVmId()).name;
+	}
+	
+	public int getexperimentNumber()
+	{
+		return experimentNumber;
+	}
+
+	public void setexperimentNumber(int experimentNumber)
+	{
+		this.experimentNumber = experimentNumber;
 	}
 }

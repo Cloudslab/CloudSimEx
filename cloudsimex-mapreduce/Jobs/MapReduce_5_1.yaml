@@ -1,0 +1,21 @@
+!!org.cloudbus.cloudsim.ex.mapreduce.models.request.Job
+
+dataSourceName: S3-sensors
+
+mapTasks:
+# Map task info: [number of tasks, data Size in megabyte, million instructions per byte, [intermediate Data]]
+- [4, 64, 10000,
+      {
+        # intermediate Data information: [Reduce Task ID, intermediate data size in megabyte]
+        reduce: 15
+      }
+  ]
+- [1, 32, 5000,
+      {
+        reduce: 10
+      }
+  ]
+
+reduceTasks:
+# Reduce task info:[name, million instructions]
+- [reduce, 3000]

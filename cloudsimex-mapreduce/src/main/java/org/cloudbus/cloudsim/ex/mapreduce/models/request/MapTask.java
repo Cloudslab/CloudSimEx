@@ -16,6 +16,7 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.Textualize;
 
+@Textualize(properties = {})
 public class MapTask extends Task
 {
 	public String dataSourceName;
