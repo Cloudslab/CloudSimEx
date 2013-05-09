@@ -74,11 +74,11 @@ public class Cloud {
 	return null;
     }
 
-    public void setUserClassesReservationPercentage(Map<UserClass, Double> userClassesReservationPercentage)
+    public void setUserClassAllowedPercentage(Map<UserClass, Double> userClassAllowedPercentage)
     {
 	for (PrivateCloudDatacenter privateCloudDatacenter : privateCloudDatacenters)
 	{
-	    privateCloudDatacenter.setUserClassesReservationPercentage(userClassesReservationPercentage);
+	    privateCloudDatacenter.setUserClassesReservationPercentage(userClassAllowedPercentage);
 	}
 
     }

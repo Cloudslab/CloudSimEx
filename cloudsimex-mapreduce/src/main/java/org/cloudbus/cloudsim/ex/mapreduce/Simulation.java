@@ -88,7 +88,7 @@ public class Simulation {
 	CustomLog.printLine(timeHeader);
 
 	for (int round = 0; round < experiments.experiments.size(); round++) {
-	    runSimulationRound(round, experiments.experiments.get(round).userClassesReservationPercentage);
+	    runSimulationRound(round, experiments.experiments.get(round).userClassAllowedPercentage);
 	}
     }
 
@@ -97,7 +97,7 @@ public class Simulation {
      * to the log.
      * 
      */
-    private static void runSimulationRound(int experimentNumber, Map<UserClass, Double> userClassesReservationPercentage) {
+    private static void runSimulationRound(int experimentNumber, Map<UserClass, Double> userClassAllowedPercentage) {
 	Log.printLine("Starting simulation for experiment number: " + (experimentNumber + 1));
 
 	try {
@@ -112,7 +112,7 @@ public class Simulation {
 
 	    // Create datacentres and cloudlets
 	    cloud = YamlFile.getCloudFromYaml(Properties.CLOUD.getProperty());
-	    cloud.setUserClassesReservationPercentage(userClassesReservationPercentage);
+	    cloud.setUserClassAllowedPercentage(userClassAllowedPercentage);
 	    engine.setCloud(cloud);
 	    Experiments Experiments = YamlFile.getRequestsFromYaml(Properties.REQUESTS.getProperty());
 

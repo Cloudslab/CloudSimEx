@@ -14,10 +14,10 @@ public class Experiment
 {
     String policy;
     CloudDeploymentModel cloudDeploymentModel = CloudDeploymentModel.Hybrid;
-    Map<UserClass, Double> userClassesReservationPercentage = new HashMap<UserClass, Double>();
+    Map<UserClass, Double> userClassAllowedPercentage = new HashMap<UserClass, Double>();
     Requests requests;
 
-    public Experiment(String policy, String cloudDeploymentModel, Map<String, Double> userClassesReservationPercentage,
+    public Experiment(String policy, String cloudDeploymentModel, Map<String, Double> userClassAllowedPercentage,
 	    ArrayList<Request> requests)
     {
 	this.policy = policy;
@@ -31,9 +31,9 @@ public class Experiment
 	    Log.printLine("CloudDeploymentModel.Hybrid will be used");
 	}
 
-	for (Map.Entry<String, Double> userClassMap : userClassesReservationPercentage.entrySet()) {
+	for (Map.Entry<String, Double> userClassMap : userClassAllowedPercentage.entrySet()) {
 	    UserClass userClass = UserClass.valueOf(userClassMap.getKey());
-	    this.userClassesReservationPercentage.put(userClass, userClassMap.getValue());
+	    this.userClassAllowedPercentage.put(userClass, userClassMap.getValue());
 	}
 	this.requests = new Requests(requests);
 

@@ -10,7 +10,7 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.request.UserClass;
 
 public class PrivateCloudDatacenter extends CloudDatacenter {
 
-    Map<UserClass, Double> userClassesReservationPercentage;
+    Map<UserClass, Double> userClassAllowedPercentage;
 
     public PrivateCloudDatacenter(String name, int hosts, int memory_perhost, int cores_perhost,
 	    int mips_precore_perhost, List<VmType> vmtypes) throws Exception {
@@ -18,7 +18,7 @@ public class PrivateCloudDatacenter extends CloudDatacenter {
     }
 
     public int getMaxAvailableResource(VmType firstVmType, UserClass userClass) {
-	Double allowedPercentage = userClassesReservationPercentage.get(userClass);
+	Double allowedPercentage = userClassAllowedPercentage.get(userClass);
 
 	VmAllocationPolicy vmAllocationPolicy = getVmAllocationPolicy();
 	List<Host> hostList = vmAllocationPolicy.getHostList();
@@ -42,12 +42,12 @@ public class PrivateCloudDatacenter extends CloudDatacenter {
 
     public Map<UserClass, Double> getUserClassesReservationPercentage()
     {
-	return userClassesReservationPercentage;
+	return userClassAllowedPercentage;
     }
 
     public void setUserClassesReservationPercentage(Map<UserClass, Double> userClassesReservationPercentage)
     {
-	this.userClassesReservationPercentage = userClassesReservationPercentage;
+	this.userClassAllowedPercentage = userClassesReservationPercentage;
     }
 
 }
