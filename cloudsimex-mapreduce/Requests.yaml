@@ -3,15 +3,15 @@
 experiments:
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
-    LFFPerf,
+    LFFPerf, Hybrid,
       {
         GOLD: 100.0,
         SILVER: 60.0,
-        BRONZE: 30.0
+        BRONZE: 0.0
       },
     [
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [0.0, 200, 100.0, Jobs/MapReduce_50_1.yaml, GOLD],
+     [0.0, 201, 100.0, Jobs/MapReduce_50_1.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
      [10.0, 70, 17.0, Jobs/MapReduce_9_2.yaml, SILVER],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
@@ -28,11 +28,88 @@ experiments:
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
-    LFFCost,
+    LFFPerf, Public,
       {
         GOLD: 100.0,
         SILVER: 60.0,
-        BRONZE: 30.0
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    LFFPerf, Private,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    LFFCost, Hybrid,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    LFFCost, Public,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    LFFCost, Private,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    BacktrackingMultithreadedCostMinimization, Hybrid,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    BacktrackingMultithreadedCostMinimization, Public,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    BacktrackingMultithreadedCostMinimization, Private,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
       },
     [
     ]

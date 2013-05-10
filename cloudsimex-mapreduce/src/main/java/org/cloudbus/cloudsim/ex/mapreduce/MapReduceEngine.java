@@ -421,7 +421,7 @@ public class MapReduceEngine extends DatacenterBroker {
 	CustomLog.redirectToFile("results/requests.csv", true);
 	CustomLog.printResultsWithoutHeader(Request.class, ",", new String[] { "experimentNumber", "Id", "J",
 		"UserClass", "Policy", "CloudDeploymentModel", "Deadline", "Budget", "ExecutionTime", "Cost",
-		"IsDeadlineViolated", "IsBudgetViolated", "NumberOfVMs" }, requests.requests);
+		"IsDeadlineViolated", "IsBudgetViolated", "NumberOfVMs", "LogMessage" }, requests.requests);
 	// COSTS
 	CustomLog.redirectToFile("results/plots/costs.csv", true);
 	String costLine = requests.requests.get(0).getPolicy() + ","
@@ -438,6 +438,10 @@ public class MapReduceEngine extends DatacenterBroker {
 	CustomLog.printLine(timeLine);
 
 	// Java Log Output, which should be disabled from custom_log.properties
+	printInConsole();
+    }
+
+    private void printInConsole() {
 	DecimalFormat dft = new DecimalFormat("000000.00");
 	String indent = "\t";
 	Log.printLine("========== MAPREDUCE EXECUTION SUMMARY ==========");
@@ -453,11 +457,17 @@ public class MapReduceEngine extends DatacenterBroker {
 	    else
 		Log.print("Task!");
 	    Log.print(indent + task.getCloudletStatusString());
-	    VmInstance vm = requests.getVmInstance(task.getVmId());
-	    double executionTime = task.getFinishTime() - task.getExecStartTime();
-	    Log.printLine(indent + indent + dft.format(task.getSubmissionTime()) + indent
-		    + dft.format(task.getExecStartTime()) + indent + dft.format(executionTime) + indent + indent
-		    + dft.format(task.getFinishTime()) + indent + vm.getId() + indent + vm.name);
+	    if (task.getCloudletStatus() == Cloudlet.SUCCESS)
+	    {
+		VmInstance vm = requests.getVmInstance(task.getVmId());
+		double executionTime = task.getFinishTime() - task.getExecStartTime();
+		Log.printLine(indent + indent + dft.format(task.getSubmissionTime()) + indent
+			+ dft.format(task.getExecStartTime()) + indent + dft.format(executionTime) + indent + indent
+			+ dft.format(task.getFinishTime()) + indent + vm.getId() + indent + vm.name);
+	    }
+	    else
+		Log.printLine();
+
 	}
 	Log.printLine();
 
@@ -483,10 +493,12 @@ public class MapReduceEngine extends DatacenterBroker {
 	    Log.printLine("= Budget Violation: " + costViolation);
 	    Log.printLine("= Execution Time: " + request.getExecutionTime() + " seconds");
 	    Log.printLine("= Cost: $" + request.getCost());
+	    Log.printLine("= Message: " + request.getLogMessage());
 	    Log.printLine();
 	}
 	Log.printLine("========== END OF SUMMARY =========");
 	Log.printLine();
+
     }
 
 }

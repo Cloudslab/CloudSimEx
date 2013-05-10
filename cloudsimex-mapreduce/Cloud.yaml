@@ -23,7 +23,7 @@ publicCloudDatacenters:
 privateCloudDatacenters:
  - [
     # Private Cloud info: [name, hosts, memory_perhost, cores_perhost, mips_precore_perhost, [vmTypes]]
-    openstack-unimelb, 1, 32768, 3, 100,
+    openstack-unimelb-IBM, 4, 32768, 8, 100,
       [
         # VM Type info (You have multiples): [name, cost per hour, transferring.cost, mips, cores, ram, boot_time]
         !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType

@@ -73,7 +73,7 @@ public class Simulation {
 	CustomLog.redirectToFile("results/requests.csv");
 	CustomLog.printHeader(Request.class, ",", new String[] { "experimentNumber", "Id", "J", "UserClass", "Policy",
 		"CloudDeploymentModel", "Deadline", "Budget", "ExecutionTime", "Cost", "IsDeadlineViolated",
-		"IsBudgetViolated", "NumberOfVMs" });
+		"IsBudgetViolated", "NumberOfVMs", "LogMessage" });
 	// COST Plotting
 	CustomLog.redirectToFile("results/plots/costs.csv");
 	String costHeader = "Number of tasks,,";

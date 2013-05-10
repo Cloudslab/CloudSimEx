@@ -1,0 +1,17 @@
+!!org.cloudbus.cloudsim.ex.mapreduce.Experiments
+
+experiments:
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    BacktrackingMultithreadedCostMinimization, Hybrid,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+     #[Submission Time, Deadline, Budget, Job, user class]
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [0.0, 400, 100.0, Jobs/MapReduce_50_1.yaml, GOLD]
+    ]
+   ]

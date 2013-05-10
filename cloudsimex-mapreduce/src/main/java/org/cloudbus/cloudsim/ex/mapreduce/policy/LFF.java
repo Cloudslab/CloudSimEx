@@ -43,7 +43,8 @@ public class LFF {
 	CloudDeploymentModel cloudDeploymentModel = request.getCloudDeploymentModel();
 
 	// Fill VPList
-	List<VmInstance> VPList = Policy.getAllVmInstances(cloud, request, cloudDeploymentModel);
+	int numTasks = request.job.mapTasks.size() + request.job.reduceTasks.size();
+	List<VmInstance> VPList = Policy.getAllVmInstances(cloud, request, cloudDeploymentModel, numTasks);
 
 	if (lFFSort == LFFSorts.Performance)
 	{
@@ -64,7 +65,6 @@ public class LFF {
 	}
 
 	// Allocation
-	int numTasks = request.job.mapTasks.size() + request.job.reduceTasks.size();
 	boolean isJobAlloc = false;
 	while (isJobAlloc == false && VPList.size() >= numTasks) {
 	    // Allocate all Map Tasks

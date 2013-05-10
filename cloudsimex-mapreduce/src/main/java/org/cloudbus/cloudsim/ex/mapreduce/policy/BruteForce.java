@@ -29,7 +29,8 @@ public class BruteForce
 	CloudDeploymentModel cloudDeploymentModel = request.getCloudDeploymentModel();
 
 	// Fill nVMs
-	nVMs = Policy.getAllVmInstances(cloud, request, cloudDeploymentModel);
+	int numTasks = request.job.mapTasks.size() + request.job.reduceTasks.size();
+	nVMs = Policy.getAllVmInstances(cloud, request, cloudDeploymentModel, numTasks);
 	if (nVMs.size() == 0)
 	    return false;
 

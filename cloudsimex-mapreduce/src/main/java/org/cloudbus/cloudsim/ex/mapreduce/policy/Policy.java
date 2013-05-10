@@ -19,16 +19,15 @@ public abstract class Policy {
     public abstract Boolean runAlgorithm(Cloud cloud, Request request);
 
     public static List<VmInstance> getAllVmInstances(Cloud cloud, Request request,
-	    CloudDeploymentModel cloudDeploymentModel)
+	    CloudDeploymentModel cloudDeploymentModel, int numberOfDuplicates)
     {
 	List<VmInstance> nVMs = new ArrayList<VmInstance>();
-	int numTasks = request.job.mapTasks.size() + request.job.reduceTasks.size();
 
 	if (cloudDeploymentModel == CloudDeploymentModel.Public || cloudDeploymentModel == CloudDeploymentModel.Hybrid)
 	{
 	    for (PublicCloudDatacenter publicCloudDatacenter : cloud.publicCloudDatacenters) {
 		for (VmType vmType : publicCloudDatacenter.vmTypes)
-		    for (int i = 0; i < numTasks; i++)
+		    for (int i = 0; i < numberOfDuplicates; i++)
 			nVMs.add(new VmInstance(vmType, request));
 
 	    }
@@ -41,7 +40,7 @@ public abstract class Policy {
 		int maxAvailableResource = privateCloudDatacenter
 			.getMaxAvailableResource(firstVmType, request.getUserClass());
 
-		for (int i = 0; i < Math.min(numTasks, maxAvailableResource); i++)
+		for (int i = 0; i < Math.min(numberOfDuplicates, maxAvailableResource); i++)
 		    nVMs.add(new VmInstance(firstVmType, request));
 
 	    }

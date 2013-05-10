@@ -34,6 +34,8 @@ public class Request extends SimEvent {
     private int experimentNumber;
 
     private CloudDeploymentModel cloudDeploymentModel = CloudDeploymentModel.Hybrid;
+    
+    private String logMessage = "";
 
     public Request(double submissionTime, int deadline, double budget, String jobFile, UserClass userClass) {
 	id = Id.pollId(Request.class);
@@ -154,6 +156,19 @@ public class Request extends SimEvent {
     public void setJobFile(String jobFile) {
 	this.jobFile = jobFile;
     }
+    
+    
+
+    public String getLogMessage() {
+        return logMessage;
+    }
+
+    public synchronized void setLogMessage(String logMessage) {
+	if(this.logMessage.equals(""))
+	    this.logMessage = logMessage;
+	else
+	    this.logMessage += "-"+logMessage;
+    }
 
     public CloudDeploymentModel getCloudDeploymentModel() {
 	return cloudDeploymentModel;
@@ -189,6 +204,8 @@ public class Request extends SimEvent {
 
     public double getCost()
     {
+	if(mapAndReduceVmProvisionList.size() == 0 && reduceOnlyVmProvisionList.size() == 0)
+	    return -1;
 	double totalCost = 0.0;
 	for (VmInstance vm : mapAndReduceVmProvisionList)
 	    totalCost += vm.getExecutionCost();
@@ -200,16 +217,23 @@ public class Request extends SimEvent {
 
     public String getIsDeadlineViolated()
     {
-	if (deadline >= getExecutionTime())
-	    return "No (" + (deadline - getExecutionTime()) + " seconds) earlier";
-	return "YES! (" + (getExecutionTime() - deadline) + " seconds) over deadline";
+	if(getExecutionTime() == -1)
+	    return "YES! FAILED TO RUN";
+	
+	if (getExecutionTime() > deadline)
+	    return "YES! (" + (getExecutionTime() - deadline) + " seconds) over deadline";
+	return "No (" + (deadline - getExecutionTime()) + " seconds) earlier";
     }
 
     public String getIsBudgetViolated()
     {
-	if (budget >= getCost())
-	    return "No ($" + (budget - getCost()) + ") savings";
-	return "YES! ($" + (getCost() - budget) + ") over budget";
+	if(getCost() == -1)
+	    return "YES! FAILED TO RUN";
+	
+	if (getCost() > budget)
+	    return "YES! ($" + (getCost() - budget) + ") over budget";
+	return "No ($" + (budget - getCost()) + ") savings";
+	
     }
 
     public String getJ()
