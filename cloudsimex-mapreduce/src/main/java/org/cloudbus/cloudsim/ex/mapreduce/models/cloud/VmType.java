@@ -14,9 +14,6 @@ public class VmType extends Vm {
 
     public VmType(String name, Double vmCostPerHour, Double transferringCost, Double mips, int cores, int ram,
 	    int bootTime) {
-	// WARNING: bw is 1000, is that OK?
-	// WARNING: userId (Broker ID) is Cloud.brokerID, is that Ok?
-	// WARNING: Size is 0, is that OK?
 	super(Id.pollId(VmType.class), Cloud.brokerID, mips, cores, ram, 1000, 0, "Xen",
 		new MapReduceCloudletScheduler());
 

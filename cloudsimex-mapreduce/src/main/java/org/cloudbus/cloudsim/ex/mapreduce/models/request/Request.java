@@ -167,7 +167,7 @@ public class Request extends SimEvent {
 	if(this.logMessage.equals(""))
 	    this.logMessage = logMessage;
 	else
-	    this.logMessage += "-"+logMessage;
+	    this.logMessage += " | "+logMessage;
     }
 
     public CloudDeploymentModel getCloudDeploymentModel() {

@@ -279,7 +279,8 @@ public class MostDuplicatedBacktracking extends Policy {
 		{
 		    return schedulingPlan;
 		}
-		if (executionTimeAndCost[1] <= request.getBudget() && executionTimeAndCost[0] <= request.getDeadline())
+		boolean budgetViolationOnLeaf = executionTimeAndCost[1] > request.getBudget() && res.length == r;
+		if (executionTimeAndCost[0] <= request.getDeadline() && !budgetViolationOnLeaf)
 		{
 		    if (res.length == r)
 		    {
