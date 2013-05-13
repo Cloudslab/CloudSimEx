@@ -93,7 +93,8 @@ public class MostDuplicatedBacktracking extends Policy {
 	    return false;
 
 	// 1- Provisioning
-	ArrayList<ArrayList<VmInstance>> provisioningPlans = new PredictionEngine().getProvisioningPlan(selectedSchedulingPlan, nVMs,
+	ArrayList<ArrayList<VmInstance>> provisioningPlans = new PredictionEngine().getProvisioningPlan(
+		selectedSchedulingPlan, nVMs,
 		request.job);
 	request.mapAndReduceVmProvisionList = provisioningPlans.get(0);
 	request.reduceOnlyVmProvisionList = provisioningPlans.get(1);
@@ -159,8 +160,9 @@ public class MostDuplicatedBacktracking extends Policy {
 		Map<Integer, Integer> schedulingPlan = vectorToScheduleingPlan(resObj, nVMs);
 		double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
 			schedulingPlan, nVMs, request.job);
-		//CustomLog.printLine("Cost " + Arrays.toString(resObj) + "->" + (r - res.length) + " : "
-		//	+ Arrays.toString(executionTimeAndCost));
+		 CustomLog.printLine("Cost " + Arrays.toString(resObj) + "->"
+		 + (r - res.length) + " : "
+		 + Arrays.toString(executionTimeAndCost));
 		if (perfTreeSolution != null
 			&& perfTreeSolutionCost <= executionTimeAndCost[1] + (executionTimeAndCost[1] * 0.05))
 		{
@@ -249,8 +251,8 @@ public class MostDuplicatedBacktracking extends Policy {
 		Map<Integer, Integer> schedulingPlan = vectorToScheduleingPlan(resObj, nVMs);
 		double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
 			schedulingPlan, nVMs, request.job);
-		CustomLog.printLine("Perf " + Arrays.toString(resObj) + "->" + (r - res.length) + " : "
-			+ Arrays.toString(executionTimeAndCost));
+		//CustomLog.printLine("Perf " + Arrays.toString(resObj) + "->" + (r - res.length) + " : "
+		//	+ Arrays.toString(executionTimeAndCost));
 		if (res[0] > 1)
 		{
 		    request.setLogMessage("Very short deadline!");
@@ -291,8 +293,6 @@ public class MostDuplicatedBacktracking extends Policy {
     }
 
     public class BackTrackingAlgorithm {
-	private int mostVmValue = -1;
-	private int replacmentValue = 1;
 	private boolean doChangMostVmValue = false;
 
 	private int[] goBack(int[] num, int n, int r) {
@@ -316,13 +316,12 @@ public class MostDuplicatedBacktracking extends Policy {
 			{
 			    mostVmDuplicates = vmDuplicate;
 			    mostVmLastIndex = vmLastIndex;
-			    mostVmValue = num[i];
 			}
 		    }
 		    if (mostVmLastIndex == -1)
 			res = new int[num.length];
 		    else
-			res = new int[mostVmLastIndex+1];
+			res = new int[mostVmLastIndex + 1];
 		}
 		else
 		    res = new int[num.length - 1];
@@ -343,27 +342,12 @@ public class MostDuplicatedBacktracking extends Policy {
 		res[i] = num[i];
 	    }
 	    if (!doChangMostVmValue)
-	    {
 		res[res.length - 1] = 1;
-		return res;
-	    }
-	    if (mostVmValue == -1)
-		res[res.length - 1] = replacmentValue;
 	    else
 	    {
-		while (true)
-		{
-		    if (replacmentValue != mostVmValue)
-		    {
-			res[res.length - 1] = replacmentValue;
-			break;
-		    }
-		    else if (replacmentValue + 1 > n)
-			replacmentValue = 1;
-		    else
-			replacmentValue++;
-		}
-		doChangMostVmValue = false;
+		res[res.length - 1]++;
+		if (res[res.length - 1] > n)
+		    res[res.length - 1] = 1;
 	    }
 	    return res;
 	}
