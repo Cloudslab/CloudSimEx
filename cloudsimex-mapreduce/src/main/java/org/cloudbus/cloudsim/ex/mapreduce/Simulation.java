@@ -36,6 +36,8 @@ public class Simulation {
     private static Requests requests;
 
     private static MapReduceEngine engine;
+    
+    private static java.util.Properties props = new java.util.Properties();
 
     /**
      * Prints input parameters and execute the simulation a number of times, as
@@ -55,7 +57,6 @@ public class Simulation {
 
 	Experiments experiments = YamlFile.getRequestsFromYaml(Properties.EXPERIMENTS.getProperty());
 
-	java.util.Properties props = new java.util.Properties();
 	try (InputStream is = Files.newInputStream(Paths.get("custom_log.properties"))) {
 	    props.load(is);
 	}
@@ -86,8 +87,6 @@ public class Simulation {
 	for (Request request : experiments.experiments.get(0).requests.requests)
 	    timeHeader += request.getNumberOfTasks() + ",";
 	CustomLog.printLine(timeHeader);
-	//BACK TO DEFAULT FILE
-	CustomLog.redirectToFile(props.getProperty("FilePath"));
 	
 	for (int round = 0; round < experiments.experiments.size(); round++) {
 	    runSimulationRound(round, experiments.experiments.get(round).userClassAllowedPercentage);
@@ -101,7 +100,9 @@ public class Simulation {
      */
     private static void runSimulationRound(int experimentNumber, Map<UserClass, Double> userClassAllowedPercentage) {
 	Log.printLine("Starting simulation for experiment number: " + (experimentNumber + 1));
-
+	//BACK TO DEFAULT LOG FILE
+	CustomLog.redirectToFile(props.getProperty("FilePath"));
+		
 	try {
 
 	    // Initialize the CloudSim library

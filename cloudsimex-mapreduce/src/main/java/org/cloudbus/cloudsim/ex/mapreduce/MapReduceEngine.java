@@ -126,9 +126,10 @@ public class MapReduceEngine extends DatacenterBroker {
 	}
 
 	// ToDo: increase the clock during the ALGORITHM search
-	Log.printLine(" =========== SEARCHING START USING ALGORITHM:" + policyName + " FOR REQUEST: " + request.id
-		+ " : [" + request.submissionTime + "," + request.deadline + "," + request.budget + ","
-		+ request.jobFile + "," + request.userClass + "]===========");
+	Log.printLine(" =========== SEARCHING START USING ALGORITHM:" + request.policy + "-"
+		+ request.getCloudDeploymentModel() + " FOR REQUEST: " + request.id
+		+ " [" + request.submissionTime + "," + request.deadline + "," + request.budget + ","
+		+ request.jobFile + "," + request.userClass + "] ===========");
 	Log.printLine(getName() + " is searching for the optimal Resource Set...");
 	if (!policy.runAlgorithm(cloud, request))
 	    Log.printLine(" =========== ERROR: THE ALGORITHM COULD NOT FIND VMs FOR REQUEST: " + request.id

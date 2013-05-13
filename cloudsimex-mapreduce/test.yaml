@@ -12,6 +12,6 @@ experiments:
     [
      #[Submission Time, Deadline, Budget, Job, user class]
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [0.0, 600, 3.0, Jobs/MapReduce_100_3.yaml, GOLD]
+     [0.0, 650, 5.0, Jobs/MapReduce_100_3.yaml, GOLD]
     ]
    ]

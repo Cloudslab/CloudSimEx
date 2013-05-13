@@ -147,7 +147,7 @@ public class PredictionEngine
 
 	return provisioningPlans;
     }
-    
+
     public Map<Integer, Integer> vectorToScheduleingPlan(Integer[] res, List<VmInstance> nVMs, List<Task> rTasks)
     {
 	Map<Integer, Integer> scheduleingPlan = new HashMap<Integer, Integer>();
