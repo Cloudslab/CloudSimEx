@@ -83,7 +83,7 @@ experiments:
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
-    BacktrackingMultithreadedCostMinimization, Hybrid,
+    MostDuplicatedBacktracking, Hybrid,
       {
         GOLD: 100.0,
         SILVER: 60.0,
@@ -94,7 +94,7 @@ experiments:
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
-    BacktrackingMultithreadedCostMinimization, Public,
+    MostDuplicatedBacktracking, Public,
       {
         GOLD: 100.0,
         SILVER: 60.0,
@@ -105,7 +105,7 @@ experiments:
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
-    BacktrackingMultithreadedCostMinimization, Private,
+    MostDuplicatedBacktracking, Private,
       {
         GOLD: 100.0,
         SILVER: 60.0,

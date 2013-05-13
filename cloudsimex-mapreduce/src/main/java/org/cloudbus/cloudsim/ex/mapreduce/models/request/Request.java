@@ -322,46 +322,7 @@ public class Request extends SimEvent {
 
 	return null;
     }
-
-    /***
-     * Get VM provisioning plan from a scheduling plan
-     */
-    public static ArrayList<ArrayList<VmInstance>> getProvisioningPlan(Map<Integer, Integer> schedulingPlan,
-	    List<VmInstance> nVMs, Job job)
-    {
-	ArrayList<ArrayList<VmInstance>> provisioningPlans = new ArrayList<ArrayList<VmInstance>>(2); // To
-												      // remove
-												      // the
-												      // temporary
-												      // VMs
-	// Index 0 for: mapAndReduceVmProvisionList
-	provisioningPlans.add(new ArrayList<VmInstance>());
-	// Index 1 for: reduceOnlyVmProvisionList
-	provisioningPlans.add(new ArrayList<VmInstance>());
-
-	for (Map.Entry<Integer, Integer> entry : schedulingPlan.entrySet()) {
-	    Task task = job.getTask(entry.getKey());
-	    if (task instanceof MapTask)
-		for (VmInstance vm : nVMs) {
-		    if (entry.getValue() == vm.getId())
-			if (!provisioningPlans.get(0).contains(vm) && !provisioningPlans.get(1).contains(vm))
-			    provisioningPlans.get(0).add(vm);
-		}
-	}
-
-	for (Map.Entry<Integer, Integer> entry : schedulingPlan.entrySet()) {
-	    Task task = job.getTask(entry.getKey());
-	    if (task instanceof ReduceTask)
-		for (VmInstance vm : nVMs) {
-		    if (entry.getValue() == vm.getId())
-			if (!provisioningPlans.get(0).contains(vm) && !provisioningPlans.get(1).contains(vm))
-			    provisioningPlans.get(1).add(vm);
-		}
-	}
-
-	return provisioningPlans;
-    }
-
+    
     public int getexperimentNumber()
     {
 	return experimentNumber;

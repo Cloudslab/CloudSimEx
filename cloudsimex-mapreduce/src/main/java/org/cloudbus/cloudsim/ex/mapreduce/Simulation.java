@@ -53,7 +53,7 @@ public class Simulation {
 	Log.printLine("==============================================");
 	Log.printLine("");
 
-	Experiments experiments = YamlFile.getRequestsFromYaml(Properties.REQUESTS.getProperty());
+	Experiments experiments = YamlFile.getRequestsFromYaml(Properties.EXPERIMENTS.getProperty());
 
 	java.util.Properties props = new java.util.Properties();
 	try (InputStream is = Files.newInputStream(Paths.get("custom_log.properties"))) {
@@ -86,7 +86,9 @@ public class Simulation {
 	for (Request request : experiments.experiments.get(0).requests.requests)
 	    timeHeader += request.getNumberOfTasks() + ",";
 	CustomLog.printLine(timeHeader);
-
+	//BACK TO DEFAULT FILE
+	CustomLog.redirectToFile(props.getProperty("FilePath"));
+	
 	for (int round = 0; round < experiments.experiments.size(); round++) {
 	    runSimulationRound(round, experiments.experiments.get(round).userClassAllowedPercentage);
 	}
@@ -114,7 +116,7 @@ public class Simulation {
 	    cloud = YamlFile.getCloudFromYaml(Properties.CLOUD.getProperty());
 	    cloud.setUserClassAllowedPercentage(userClassAllowedPercentage);
 	    engine.setCloud(cloud);
-	    Experiments Experiments = YamlFile.getRequestsFromYaml(Properties.REQUESTS.getProperty());
+	    Experiments Experiments = YamlFile.getRequestsFromYaml(Properties.EXPERIMENTS.getProperty());
 
 	    requests = Experiments.experiments.get(experimentNumber).requests;
 

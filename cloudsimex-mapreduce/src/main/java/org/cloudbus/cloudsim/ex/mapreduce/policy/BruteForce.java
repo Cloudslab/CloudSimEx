@@ -23,6 +23,7 @@ public class BruteForce
 
     private List<VmInstance> nVMs = new ArrayList<VmInstance>();
     private List<Task> rTasks = new ArrayList<Task>();
+    PredictionEngine predictionEngine = new PredictionEngine();
 
     public Boolean runAlgorithm(Cloud cloud, Request request, BruteForceSorts bruteForceSort)
     {
@@ -118,7 +119,7 @@ public class BruteForce
 	}
 
 	// 1- Provisioning
-	ArrayList<ArrayList<VmInstance>> provisioningPlans = Request.getProvisioningPlan(selectedSchedulingPlan, nVMs,
+	ArrayList<ArrayList<VmInstance>> provisioningPlans = predictionEngine.getProvisioningPlan(selectedSchedulingPlan, nVMs,
 		request.job);
 	request.mapAndReduceVmProvisionList = provisioningPlans.get(0);
 	request.reduceOnlyVmProvisionList = provisioningPlans.get(1);
@@ -203,23 +204,25 @@ public class BruteForce
 
 	return scheduleingPlan;
     }
+    
+    class ExecutionPlan {
+	    public Map<Integer, Integer> schedulingPlan = new HashMap<Integer, Integer>(); // <Task
+											   // ID,
+											   // VM
+											   // ID>
+	    public double ExecutionTime = 0;
+	    public double Cost = 0;
+
+	    public ExecutionPlan(Map<Integer, Integer> schedulingPlan, List<VmInstance> nVMs, Job job)
+	    {
+		this.schedulingPlan = schedulingPlan;
+		double[] predictedExecutionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
+			schedulingPlan, nVMs, job);
+		ExecutionTime = predictedExecutionTimeAndCost[0];
+		Cost = predictedExecutionTimeAndCost[1];
+	    }
+	}
 
 }
 
-class ExecutionPlan {
-    public Map<Integer, Integer> schedulingPlan = new HashMap<Integer, Integer>(); // <Task
-										   // ID,
-										   // VM
-										   // ID>
-    public double ExecutionTime = 0;
-    public double Cost = 0;
 
-    public ExecutionPlan(Map<Integer, Integer> schedulingPlan, List<VmInstance> nVMs, Job job)
-    {
-	this.schedulingPlan = schedulingPlan;
-	double[] predictedExecutionTimeAndCost = PredictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
-		schedulingPlan, nVMs, job);
-	ExecutionTime = predictedExecutionTimeAndCost[0];
-	Cost = predictedExecutionTimeAndCost[1];
-    }
-}

@@ -17,19 +17,21 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.request.ReduceTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
 import org.cloudbus.cloudsim.ex.mapreduce.policy.Policy.CloudDeploymentModel;
+import org.cloudbus.cloudsim.ex.util.CustomLog;
 
 public class Backtracking {
 
     public enum BacktrackingSorts {
 	Cost, Performance;
     }
-
+    
+    private PredictionEngine predictionEngine = new PredictionEngine();
     private List<VmInstance> nVMs = new ArrayList<VmInstance>();
     private List<Task> rTasks = new ArrayList<Task>();
     private Request request;
     private BacktrackingSorts backtrackingSort;
 
-    public Boolean runAlgorithm(Cloud cloud, Request request, BacktrackingSorts backtrackingSort) {
+    public Boolean runAlgorithm(Cloud cloud, final Request request, BacktrackingSorts backtrackingSort) {
 	this.request = request;
 	this.backtrackingSort = backtrackingSort;
 	CloudDeploymentModel cloudDeploymentModel = request.getCloudDeploymentModel();
@@ -45,7 +47,11 @@ public class Backtracking {
 	    // Sort nVMs by cost
 	    Collections.sort(nVMs, new Comparator<VmInstance>() {
 		public int compare(VmInstance VmInstance1, VmInstance VmInstance2) {
-		    return Double.compare(VmInstance1.vmCostPerHour, VmInstance2.vmCostPerHour);
+		    double vmInstance1Cost = VmInstance1.transferringCost + VmInstance1.vmCostPerHour
+			    / VmInstance1.getMips();
+		    double vmInstance2Cost = VmInstance2.transferringCost + VmInstance2.vmCostPerHour
+			    / VmInstance2.getMips();
+		    return Double.compare(vmInstance1Cost, vmInstance2Cost);
 		}
 	    });
 	}
@@ -55,7 +61,13 @@ public class Backtracking {
 	    // Sort nVMs by mips (performance)
 	    Collections.sort(nVMs, new Comparator<VmInstance>() {
 		public int compare(VmInstance VmInstance1, VmInstance VmInstance2) {
-		    return Double.compare(VmInstance2.getMips(), VmInstance1.getMips());
+		    MapTask anyMapTask = request.job.mapTasks.get(0);
+		    double vmInstance1Perf = VmInstance1.getMips() + VmInstance1.bootTime
+			    + anyMapTask.dataTransferTimeFromTheDataSource(VmInstance1);
+		    double vmInstance2Perf = VmInstance2.getMips() + VmInstance2.bootTime
+			    + anyMapTask.dataTransferTimeFromTheDataSource(VmInstance2);
+		    ;
+		    return Double.compare(vmInstance2Perf, vmInstance1Perf);
 		}
 	    });
 	}
@@ -72,7 +84,7 @@ public class Backtracking {
 	    return false;
 
 	// 1- Provisioning
-	ArrayList<ArrayList<VmInstance>> provisioningPlans = Request.getProvisioningPlan(selectedSchedulingPlan, nVMs,
+	ArrayList<ArrayList<VmInstance>> provisioningPlans = predictionEngine.getProvisioningPlan(selectedSchedulingPlan, nVMs,
 		request.job);
 	request.mapAndReduceVmProvisionList = provisioningPlans.get(0);
 	request.reduceOnlyVmProvisionList = provisioningPlans.get(1);
@@ -85,9 +97,6 @@ public class Backtracking {
 
     private Map<Integer, Integer> getFirstSolutionOfBackTracking(int n, int r) {
 	int[] res = new int[] { 1 };
-	// for (int i = 0; i < res.length; i++) {
-	// res[i] = 1;
-	// }
 	boolean done = false;
 	while (!done) {
 	    // Convert int[] to Integer[]
@@ -96,13 +105,13 @@ public class Backtracking {
 		resObj[i] = res[i];
 	    }
 	    Map<Integer, Integer> schedulingPlan = vectorToScheduleingPlan(resObj);
-	    double[] executionTimeAndCost = PredictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
+	    double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
 		    schedulingPlan, nVMs, request.job);
-	    //if((System.currentTimeMillis()/5000) % 5 == 0)
-		//Log.printLine(Arrays.toString(resObj) + "->"+(r-res.length)+" : " + Arrays.toString(executionTimeAndCost));
-	    if(backtrackingSort == BacktrackingSorts.Performance && executionTimeAndCost[0] > request.getDeadline())
+	    //CustomLog.printLine(backtrackingSort + " " + Arrays.toString(resObj) + "->" + (r - res.length) + " : "
+		//    + Arrays.toString(executionTimeAndCost));
+	    if (backtrackingSort == BacktrackingSorts.Performance && executionTimeAndCost[0] > request.getDeadline())
 		return null;
-	    if(backtrackingSort == BacktrackingSorts.Cost && executionTimeAndCost[1] > request.getBudget())
+	    if (backtrackingSort == BacktrackingSorts.Cost && executionTimeAndCost[1] > request.getBudget())
 		return null;
 	    if (executionTimeAndCost[0] <= request.deadline && executionTimeAndCost[1] <= request.budget)
 	    {

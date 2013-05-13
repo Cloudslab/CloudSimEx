@@ -20,12 +20,13 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
 import org.cloudbus.cloudsim.ex.mapreduce.policy.Backtracking.BacktrackingSorts;
 import org.cloudbus.cloudsim.ex.mapreduce.policy.Policy.CloudDeploymentModel;
+import org.cloudbus.cloudsim.ex.util.CustomLog;
 
-public class BacktrackingMultithreadedCostMinimization extends Policy {
+public class MostDuplicatedBacktracking extends Policy {
 
     private static List<Task> rTasks = new ArrayList<Task>();
     private Request request;
-    private static Random rand = new Random();
+    public boolean isMostDuplicatedEnabled = true;
 
     public Boolean runAlgorithm(Cloud cloud, Request request) {
 	this.request = request;
@@ -79,6 +80,11 @@ public class BacktrackingMultithreadedCostMinimization extends Policy {
 		    selectedSchedulingPlan = backTrackingPerfTree.solution;
 		    break;
 		}
+		if (backTrackingPerfTree.solution != null)
+		{
+		    backTrackingCostTree.setPerfTreeSolution(backTrackingPerfTree.solution);
+		    backTrackingCostTree.setPerfTreeSolution(backTrackingPerfTree.perfTreeSolutionCost);
+		}
 	    } catch (InterruptedException e) {
 		e.printStackTrace();
 	    }
@@ -87,7 +93,7 @@ public class BacktrackingMultithreadedCostMinimization extends Policy {
 	    return false;
 
 	// 1- Provisioning
-	ArrayList<ArrayList<VmInstance>> provisioningPlans = Request.getProvisioningPlan(selectedSchedulingPlan, nVMs,
+	ArrayList<ArrayList<VmInstance>> provisioningPlans = new PredictionEngine().getProvisioningPlan(selectedSchedulingPlan, nVMs,
 		request.job);
 	request.mapAndReduceVmProvisionList = provisioningPlans.get(0);
 	request.reduceOnlyVmProvisionList = provisioningPlans.get(1);
@@ -98,10 +104,27 @@ public class BacktrackingMultithreadedCostMinimization extends Policy {
 	return true;
     }
 
+    /**
+     * 
+     * @author Mohammed Alrokayan
+     * 
+     */
     public class BackTrackingCostTree implements Runnable {
+	PredictionEngine predictionEngine = new PredictionEngine();
 	Map<Integer, Integer> solution = null;
 	private List<VmInstance> nVMs = new ArrayList<VmInstance>();
-	private int mostVmValue = -1;
+	private BackTrackingAlgorithm backTrackingAlgorithm = new BackTrackingAlgorithm();
+	private double DeadlineViolationPercentge = 0.2;
+	private Map<Integer, Integer> perfTreeSolution = null;
+	private double perfTreeSolutionCost;
+
+	public synchronized void setPerfTreeSolution(Map<Integer, Integer> perfTreeSolution) {
+	    this.perfTreeSolution = perfTreeSolution;
+	}
+
+	public synchronized void setPerfTreeSolution(double perfTreeSolutionCost) {
+	    this.perfTreeSolutionCost = perfTreeSolutionCost;
+	}
 
 	public BackTrackingCostTree(List<VmInstance> nVMs)
 	{
@@ -116,8 +139,6 @@ public class BacktrackingMultithreadedCostMinimization extends Policy {
 			    / VmInstance1.getMips();
 		    double vmInstance2Cost = VmInstance2.transferringCost + VmInstance2.vmCostPerHour
 			    / VmInstance2.getMips();
-		    // Log.printLine(VmInstance1.name
-		    // +"("+vmInstance1Cost+") vs "+VmInstance2.name+" ("+vmInstance2Cost+")");
 		    return Double.compare(vmInstance1Cost, vmInstance2Cost);
 		}
 	    });
@@ -136,11 +157,16 @@ public class BacktrackingMultithreadedCostMinimization extends Policy {
 		    resObj[i] = res[i];
 		}
 		Map<Integer, Integer> schedulingPlan = vectorToScheduleingPlan(resObj, nVMs);
-		double[] executionTimeAndCost = PredictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
+		double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
 			schedulingPlan, nVMs, request.job);
-		// Log.printLine(Arrays.toString(resObj) + "->" + (r -
-		// res.length) + " : "
-		// + Arrays.toString(executionTimeAndCost));
+		//CustomLog.printLine("Cost " + Arrays.toString(resObj) + "->" + (r - res.length) + " : "
+		//	+ Arrays.toString(executionTimeAndCost));
+		if (perfTreeSolution != null
+			&& perfTreeSolutionCost <= executionTimeAndCost[1] + (executionTimeAndCost[1] * 0.05))
+		{
+		    request.setLogMessage("Accepted Perf Tree Solution!");
+		    return perfTreeSolution;
+		}
 		if (executionTimeAndCost[1] - (executionTimeAndCost[1] * 0.05) > request.getBudget())
 		{
 		    request.setLogMessage("Very low budget!");
@@ -151,7 +177,7 @@ public class BacktrackingMultithreadedCostMinimization extends Policy {
 		    if (res.length == r)
 			return schedulingPlan;
 		    else
-			res = goDeeper(res, n);
+			res = backTrackingAlgorithm.goDeeper(res, n);
 		}
 		else
 		{
@@ -160,7 +186,9 @@ public class BacktrackingMultithreadedCostMinimization extends Policy {
 		    else
 		    {
 			double deadlineViolationPercentage = 1.0 - (request.getDeadline() / executionTimeAndCost[0]);
-			done = (res = goBack(res, n, r, deadlineViolationPercentage)) == null ? true : false;
+			if (deadlineViolationPercentage > DeadlineViolationPercentge)
+			    backTrackingAlgorithm.doChangMostVmValue = true;
+			done = (res = backTrackingAlgorithm.goBack(res, n, r)) == null ? true : false;
 		    }
 		}
 	    }
@@ -168,80 +196,20 @@ public class BacktrackingMultithreadedCostMinimization extends Policy {
 	    return null;
 	}
 
-	private int[] goBack(int[] num, int n, int r, double deadlineViolationPercentage) {
-	    do {
-		int[] res;
-		if (deadlineViolationPercentage > 0.2)
-		{
-		    int mostVmDuplicates = 0;
-		    int mostVmLastIndex = -1;
-		    for (int i = 0; i < num.length; i++)
-		    {
-			int vmDuplicate = 0;
-			int vmLastIndex = -1;
-			for (int j = 0; j < num.length; j++)
-			    if (num[i] == num[j])
-			    {
-				vmDuplicate++;
-				vmLastIndex = j;
-			    }
-			if (vmDuplicate > (mostVmDuplicates*1.2) && vmLastIndex != -1)
-			{
-			    mostVmDuplicates = vmDuplicate;
-			    mostVmLastIndex = vmLastIndex;
-			    mostVmValue = num[i];
-			}
-		    }
-		    if (mostVmLastIndex == -1)
-			res = new int[num.length];
-		    else
-			res = new int[mostVmLastIndex];
-		}
-		else
-		    res = new int[num.length - 1];
-		if (res.length == 0)
-		    return null;
-		for (int i = 0; i < res.length; i++)
-		    res[i] = num[i];
-		res[res.length - 1]++;
-		num = res;
-	    } while (num[num.length - 1] > n);
-	    return num;
-
-	}
-
-	private int[] goDeeper(int[] num, int n) {
-	    int[] res = new int[num.length + 1];
-	    for (int i = 0; i < res.length - 1; i++) {
-		res[i] = num[i];
-	    }
-	    if (mostVmValue == -1)
-		res[res.length - 1] = 1;
-	    else
-	    {
-		int value = 1;
-		while (value <= n)
-		{
-		    if (value != mostVmValue)
-		    {
-			res[res.length - 1] = value;
-			break;
-		    }
-		    else
-			value++;
-		}
-		if (value > n)
-		    res[res.length - 1] = 1;
-	    }
-	    return res;
-	}
-
     }
 
+    /**
+     * 
+     * @author Mohammed Alrokayan
+     * 
+     */
     public class BackTrackingPerfTree implements Runnable {
+	PredictionEngine predictionEngine = new PredictionEngine();
 	Map<Integer, Integer> solution = null;
 	private List<VmInstance> nVMs = new ArrayList<VmInstance>();
-	private int mostVmValue = -1;
+	private BackTrackingAlgorithm backTrackingAlgorithm = new BackTrackingAlgorithm();
+	double perfTreeSolutionCost;
+	private double DeadlineViolationPercentge = 0.0025;
 
 	public BackTrackingPerfTree(List<VmInstance> nVMs)
 	{
@@ -252,7 +220,16 @@ public class BacktrackingMultithreadedCostMinimization extends Policy {
 	    // Sort nVMs by mips (performance)
 	    Collections.sort(nVMs, new Comparator<VmInstance>() {
 		public int compare(VmInstance VmInstance1, VmInstance VmInstance2) {
-		    return Double.compare(VmInstance2.getMips(), VmInstance1.getMips());
+		    // TODO Add data trasfere time from data source + out from
+		    // VM
+		    MapTask anyMapTask = request.job.mapTasks.get(0);
+		    double vmInstance1Perf = VmInstance1.getMips() + VmInstance1.bootTime
+			    + anyMapTask.dataTransferTimeFromTheDataSource(VmInstance1);
+		    double vmInstance2Perf = VmInstance2.getMips() + VmInstance2.bootTime
+			    + anyMapTask.dataTransferTimeFromTheDataSource(VmInstance2);
+		    ;
+		    return Double.compare(vmInstance2Perf, vmInstance1Perf);
+
 		}
 	    });
 
@@ -270,21 +247,29 @@ public class BacktrackingMultithreadedCostMinimization extends Policy {
 		    resObj[i] = res[i];
 		}
 		Map<Integer, Integer> schedulingPlan = vectorToScheduleingPlan(resObj, nVMs);
-		double[] executionTimeAndCost = PredictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
+		double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
 			schedulingPlan, nVMs, request.job);
-		//Log.printLine(Arrays.toString(resObj) + "->" + (r - res.length) + " : "
-		//	+ Arrays.toString(executionTimeAndCost));
+		CustomLog.printLine("Perf " + Arrays.toString(resObj) + "->" + (r - res.length) + " : "
+			+ Arrays.toString(executionTimeAndCost));
 		if (res[0] > 1)
 		{
 		    request.setLogMessage("Very short deadline!");
 		    return null;
 		}
+		if (solution != null
+			&& executionTimeAndCost[0] - (executionTimeAndCost[0] * 0.05) > request.getDeadline())
+		{
+		    return schedulingPlan;
+		}
 		if (executionTimeAndCost[1] <= request.getBudget() && executionTimeAndCost[0] <= request.getDeadline())
 		{
 		    if (res.length == r)
-			return schedulingPlan;
+		    {
+			solution = schedulingPlan;
+			perfTreeSolutionCost = executionTimeAndCost[1];
+		    }
 		    else
-			res = goDeeper(res, n);
+			res = backTrackingAlgorithm.goDeeper(res, n);
 		}
 		else
 		{
@@ -293,7 +278,9 @@ public class BacktrackingMultithreadedCostMinimization extends Policy {
 		    else
 		    {
 			double deadlineViolationPercentage = 1.0 - (request.getDeadline() / (executionTimeAndCost[0]));
-			done = (res = goBack(res, n, r, deadlineViolationPercentage)) == null ? true : false;
+			if (deadlineViolationPercentage > DeadlineViolationPercentge)
+			    backTrackingAlgorithm.doChangMostVmValue = true;
+			done = (res = backTrackingAlgorithm.goBack(res, n, r)) == null ? true : false;
 		    }
 		}
 	    }
@@ -301,10 +288,17 @@ public class BacktrackingMultithreadedCostMinimization extends Policy {
 	    return null;
 	}
 
-	private int[] goBack(int[] num, int n, int r, double deadlineViolationPercentage) {
+    }
+
+    public class BackTrackingAlgorithm {
+	private int mostVmValue = -1;
+	private int replacmentValue = 1;
+	private boolean doChangMostVmValue = false;
+
+	private int[] goBack(int[] num, int n, int r) {
 	    do {
 		int[] res;
-		if (deadlineViolationPercentage > 0.05)
+		if (isMostDuplicatedEnabled && doChangMostVmValue)
 		{
 		    int mostVmDuplicates = 0;
 		    int mostVmLastIndex = -1;
@@ -318,7 +312,7 @@ public class BacktrackingMultithreadedCostMinimization extends Policy {
 				vmDuplicate++;
 				vmLastIndex = j;
 			    }
-			if (vmDuplicate > (mostVmDuplicates*1.2) && vmLastIndex != -1)
+			if (vmDuplicate > (mostVmDuplicates * 1.2) && vmLastIndex != -1)
 			{
 			    mostVmDuplicates = vmDuplicate;
 			    mostVmLastIndex = vmLastIndex;
@@ -328,7 +322,7 @@ public class BacktrackingMultithreadedCostMinimization extends Policy {
 		    if (mostVmLastIndex == -1)
 			res = new int[num.length];
 		    else
-			res = new int[mostVmLastIndex];
+			res = new int[mostVmLastIndex+1];
 		}
 		else
 		    res = new int[num.length - 1];
@@ -348,23 +342,28 @@ public class BacktrackingMultithreadedCostMinimization extends Policy {
 	    for (int i = 0; i < res.length - 1; i++) {
 		res[i] = num[i];
 	    }
-	    if (mostVmValue == -1)
+	    if (!doChangMostVmValue)
+	    {
 		res[res.length - 1] = 1;
+		return res;
+	    }
+	    if (mostVmValue == -1)
+		res[res.length - 1] = replacmentValue;
 	    else
 	    {
-		int value = 1;
-		while (value <= n)
+		while (true)
 		{
-		    if (value != mostVmValue)
+		    if (replacmentValue != mostVmValue)
 		    {
-			res[res.length - 1] = value;
+			res[res.length - 1] = replacmentValue;
 			break;
 		    }
+		    else if (replacmentValue + 1 > n)
+			replacmentValue = 1;
 		    else
-			value++;
+			replacmentValue++;
 		}
-		if (value > n)
-		    res[res.length - 1] = 1;
+		doChangMostVmValue = false;
 	    }
 	    return res;
 	}
