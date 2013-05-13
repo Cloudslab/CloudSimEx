@@ -24,7 +24,6 @@ import org.cloudbus.cloudsim.ex.util.CustomLog;
 
 public class MostDuplicatedBacktracking extends Policy {
 
-    private static List<Task> rTasks = new ArrayList<Task>();
     private Request request;
     public boolean isMostDuplicatedEnabled = true;
 
@@ -39,6 +38,7 @@ public class MostDuplicatedBacktracking extends Policy {
 	    return false;
 
 	// Fill rTasks
+	List<Task> rTasks = new ArrayList<Task>();
 	for (MapTask mapTask : request.job.mapTasks)
 	    rTasks.add(mapTask);
 	for (ReduceTask reduceTask : request.job.reduceTasks)
@@ -48,7 +48,7 @@ public class MostDuplicatedBacktracking extends Policy {
 	 * Run the cost tree
 	 */
 	// Selected SchedulingPlan from backtracking
-	BackTrackingCostTree backTrackingCostTree = new BackTrackingCostTree(nVMs);
+	BackTrackingCostTree backTrackingCostTree = new BackTrackingCostTree(nVMs, rTasks);
 	Thread backTrackingCostTreeThread = new Thread(backTrackingCostTree);
 	backTrackingCostTreeThread.start();
 
@@ -56,7 +56,7 @@ public class MostDuplicatedBacktracking extends Policy {
 	 * Run the performance tree
 	 */
 	// Selected SchedulingPlan from backtracking
-	BackTrackingPerfTree backTrackingPerfTree = new BackTrackingPerfTree(nVMs);
+	BackTrackingPerfTree backTrackingPerfTree = new BackTrackingPerfTree(nVMs, rTasks);
 	Thread backTrackingPerfTreeThread = new Thread(backTrackingPerfTree);
 	backTrackingPerfTreeThread.start();
 
@@ -113,11 +113,20 @@ public class MostDuplicatedBacktracking extends Policy {
     public class BackTrackingCostTree implements Runnable {
 	PredictionEngine predictionEngine = new PredictionEngine();
 	Map<Integer, Integer> solution = null;
-	private List<VmInstance> nVMs = new ArrayList<VmInstance>();
+	private List<VmInstance> nVMs;
+	private List<Task> rTasks;
 	private BackTrackingAlgorithm backTrackingAlgorithm = new BackTrackingAlgorithm();
 	private double DeadlineViolationPercentge = 0.2;
 	private Map<Integer, Integer> perfTreeSolution = null;
 	private double perfTreeSolutionCost;
+	private int logCounter = 0;
+	private int logEvery = 100000;
+
+	public BackTrackingCostTree(List<VmInstance> nVMs, List<Task> rTasks)
+	{
+	    this.nVMs = new ArrayList<VmInstance>(nVMs);
+	    this.rTasks = rTasks;
+	}
 
 	public synchronized void setPerfTreeSolution(Map<Integer, Integer> perfTreeSolution) {
 	    this.perfTreeSolution = perfTreeSolution;
@@ -125,11 +134,6 @@ public class MostDuplicatedBacktracking extends Policy {
 
 	public synchronized void setPerfTreeSolution(double perfTreeSolutionCost) {
 	    this.perfTreeSolutionCost = perfTreeSolutionCost;
-	}
-
-	public BackTrackingCostTree(List<VmInstance> nVMs)
-	{
-	    this.nVMs = nVMs;
 	}
 
 	public void run() {
@@ -157,12 +161,15 @@ public class MostDuplicatedBacktracking extends Policy {
 		for (int i = 0; i < res.length; i++) {
 		    resObj[i] = res[i];
 		}
-		Map<Integer, Integer> schedulingPlan = vectorToScheduleingPlan(resObj, nVMs);
+		Map<Integer, Integer> schedulingPlan = predictionEngine.vectorToScheduleingPlan(resObj, nVMs, rTasks);
 		double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
 			schedulingPlan, nVMs, request.job);
-		 CustomLog.printLine("Cost " + Arrays.toString(resObj) + "->"
-		 + (r - res.length) + " : "
-		 + Arrays.toString(executionTimeAndCost));
+		if (logCounter >= logEvery)
+		{
+		    CustomLog.printLine("Cost " + Arrays.toString(resObj) + "->"
+			    + (r - res.length) + " : " + Arrays.toString(executionTimeAndCost));
+		    logCounter = 0;
+		}
 		if (perfTreeSolution != null
 			&& perfTreeSolutionCost <= executionTimeAndCost[1] + (executionTimeAndCost[1] * 0.05))
 		{
@@ -193,6 +200,7 @@ public class MostDuplicatedBacktracking extends Policy {
 			done = (res = backTrackingAlgorithm.goBack(res, n, r)) == null ? true : false;
 		    }
 		}
+		logCounter++;
 	    }
 	    request.setLogMessage("No Solution!");
 	    return null;
@@ -208,14 +216,18 @@ public class MostDuplicatedBacktracking extends Policy {
     public class BackTrackingPerfTree implements Runnable {
 	PredictionEngine predictionEngine = new PredictionEngine();
 	Map<Integer, Integer> solution = null;
-	private List<VmInstance> nVMs = new ArrayList<VmInstance>();
+	private List<VmInstance> nVMs;
+	private List<Task> rTasks = new ArrayList<Task>();
 	private BackTrackingAlgorithm backTrackingAlgorithm = new BackTrackingAlgorithm();
 	double perfTreeSolutionCost;
+	private int logCounter = 0;
+	private int logEvery = 250000;
 	private double DeadlineViolationPercentge = 0.0025;
 
-	public BackTrackingPerfTree(List<VmInstance> nVMs)
+	public BackTrackingPerfTree(List<VmInstance> nVMs, List<Task> rTasks)
 	{
-	    this.nVMs = nVMs;
+	    this.rTasks = rTasks;
+	    this.nVMs = new ArrayList<VmInstance>(nVMs);
 	}
 
 	public void run() {
@@ -248,11 +260,15 @@ public class MostDuplicatedBacktracking extends Policy {
 		for (int i = 0; i < res.length; i++) {
 		    resObj[i] = res[i];
 		}
-		Map<Integer, Integer> schedulingPlan = vectorToScheduleingPlan(resObj, nVMs);
+		Map<Integer, Integer> schedulingPlan = predictionEngine.vectorToScheduleingPlan(resObj, nVMs, rTasks);
 		double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
 			schedulingPlan, nVMs, request.job);
-		//CustomLog.printLine("Perf " + Arrays.toString(resObj) + "->" + (r - res.length) + " : "
-		//	+ Arrays.toString(executionTimeAndCost));
+		if (logCounter >= logEvery)
+		{
+		    CustomLog.printLine("Perf " + Arrays.toString(resObj) + "->" + (r - res.length) + " : "
+			    + Arrays.toString(executionTimeAndCost));
+		    logCounter = 0;
+		}
 		if (res[0] > 1)
 		{
 		    request.setLogMessage("Very short deadline!");
@@ -285,6 +301,7 @@ public class MostDuplicatedBacktracking extends Policy {
 			done = (res = backTrackingAlgorithm.goBack(res, n, r)) == null ? true : false;
 		    }
 		}
+		logCounter++;
 	    }
 	    request.setLogMessage("No Solution!");
 	    return null;
@@ -353,21 +370,4 @@ public class MostDuplicatedBacktracking extends Policy {
 	}
 
     }
-
-    // ///// Helper functions
-
-    private static Map<Integer, Integer> vectorToScheduleingPlan(Integer[] res, List<VmInstance> nVMs)
-    {
-	Map<Integer, Integer> scheduleingPlan = new HashMap<Integer, Integer>();
-
-	for (int i = 0; i < res.length; i++)
-	{
-	    int TaskId = rTasks.get(i).getCloudletId();
-	    int VmId = nVMs.get(res[i] - 1).getId();
-	    scheduleingPlan.put(TaskId, VmId);
-	}
-
-	return scheduleingPlan;
-    }
-
 }

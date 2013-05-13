@@ -1,6 +1,7 @@
 package org.cloudbus.cloudsim.ex.mapreduce;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -145,6 +146,20 @@ public class PredictionEngine
 	}
 
 	return provisioningPlans;
+    }
+    
+    public Map<Integer, Integer> vectorToScheduleingPlan(Integer[] res, List<VmInstance> nVMs, List<Task> rTasks)
+    {
+	Map<Integer, Integer> scheduleingPlan = new HashMap<Integer, Integer>();
+
+	for (int i = 0; i < res.length; i++)
+	{
+	    int TaskId = rTasks.get(i).getCloudletId();
+	    int VmId = nVMs.get(res[i] - 1).getId();
+	    scheduleingPlan.put(TaskId, VmId);
+	}
+
+	return scheduleingPlan;
     }
 
 }
