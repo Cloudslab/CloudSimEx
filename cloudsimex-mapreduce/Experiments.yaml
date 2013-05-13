@@ -12,7 +12,7 @@ experiments:
     [
      #[Submission Time, Deadline, Budget, Job, user class]
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [0.0, 200, 0.0, Jobs/MapReduce_2_1.yaml, GOLD],
+     [0.0, 205, 0.1, Jobs/MapReduce_2_1.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
      [10.0, 205, 3.5, Jobs/MapReduce_3_1.yaml, SILVER],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
@@ -24,13 +24,13 @@ experiments:
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
      [210.0, 305, 4.5, Jobs/MapReduce_9_2.yaml, BRONZE],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [211.0, 450, 2.0, Jobs/MapReduce_50_1.yaml, BRONZE],
+     [211.0, 501, 8.0, Jobs/MapReduce_50_1.yaml, BRONZE],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [211.1, 650, 5.0, Jobs/MapReduce_100_3.yaml, BRONZE],
+     [211.1, 850, 5.0, Jobs/MapReduce_100_3.yaml, BRONZE],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [211.2, 450, 2.0, Jobs/MapReduce_50_1.yaml, GOLD],
+     [211.2, 455, 2.0, Jobs/MapReduce_50_1.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [211.3, 650, 5.0, Jobs/MapReduce_100_3.yaml, GOLD]
+     [211.3, 850, 5.0, Jobs/MapReduce_100_3.yaml, GOLD]
     ]
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment

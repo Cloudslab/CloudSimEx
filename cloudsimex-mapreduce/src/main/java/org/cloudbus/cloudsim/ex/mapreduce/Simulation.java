@@ -36,7 +36,7 @@ public class Simulation {
     private static Requests requests;
 
     private static MapReduceEngine engine;
-    
+
     private static java.util.Properties props = new java.util.Properties();
 
     /**
@@ -77,19 +77,23 @@ public class Simulation {
 		"IsBudgetViolated", "NumberOfVMs", "LogMessage" });
 	// COST Plotting
 	CustomLog.redirectToFile("results/plots/costs.csv");
-	String costHeader = "Number of tasks,,";
+	String costHeader = "Algorithm,";
 	for (Request request : experiments.experiments.get(0).requests.requests)
 	    costHeader += request.getNumberOfTasks() + ",";
 	CustomLog.printLine(costHeader);
 	// TIME Plotting
 	CustomLog.redirectToFile("results/plots/times.csv");
-	String timeHeader = "Number of tasks,,";
+	String timeHeader = "Algorithm,";
 	for (Request request : experiments.experiments.get(0).requests.requests)
 	    timeHeader += request.getNumberOfTasks() + ",";
 	CustomLog.printLine(timeHeader);
-	
+
 	for (int round = 0; round < experiments.experiments.size(); round++) {
+	    // BACK TO DEFAULT LOG FILE
+	    CustomLog.redirectToFile(props.getProperty("FilePath"), true);
+	    CustomLog.printLine("[[[[[[[ Experiment Number: " + round + 1 + " ]]]]]]]");
 	    runSimulationRound(round, experiments.experiments.get(round).userClassAllowedPercentage);
+	    CustomLog.closeAndRemoveHandlers();
 	}
     }
 
@@ -100,9 +104,7 @@ public class Simulation {
      */
     private static void runSimulationRound(int experimentNumber, Map<UserClass, Double> userClassAllowedPercentage) {
 	Log.printLine("Starting simulation for experiment number: " + (experimentNumber + 1));
-	//BACK TO DEFAULT LOG FILE
-	CustomLog.redirectToFile(props.getProperty("FilePath"));
-		
+
 	try {
 
 	    // Initialize the CloudSim library
@@ -136,7 +138,7 @@ public class Simulation {
 
 	    // START
 	    CloudSim.startSimulation();
-	    engine.printExecutionSummary();
+	    engine.logExecutionSummary();
 
 	    Log.printLine("");
 	    Log.printLine("");

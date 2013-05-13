@@ -165,6 +165,7 @@ public class MostDuplicatedBacktracking extends Policy {
 		double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
 			schedulingPlan, nVMs, request.job);
 		if (logCounter >= logEvery)
+		//if (true)
 		{
 		    CustomLog.printLine("Cost " + Arrays.toString(resObj) + "->"
 			    + (r - res.length) + " : " + Arrays.toString(executionTimeAndCost));
@@ -264,6 +265,7 @@ public class MostDuplicatedBacktracking extends Policy {
 		double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
 			schedulingPlan, nVMs, request.job);
 		if (logCounter >= logEvery)
+		//if (true)
 		{
 		    CustomLog.printLine("Perf " + Arrays.toString(resObj) + "->" + (r - res.length) + " : "
 			    + Arrays.toString(executionTimeAndCost));

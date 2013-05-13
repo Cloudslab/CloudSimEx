@@ -389,7 +389,7 @@ public class MapReduceEngine extends DatacenterBroker {
     }
 
     // Output information supplied at the end of the simulation
-    public void printExecutionSummary() {
+    public void logExecutionSummary() {
 	// set experimentNumber values on Tasks, Requests and VmInstances
 	for (Task task : requests.getAllTasks())
 	    task.setexperimentNumber(currentExperimentRoundNumber);
@@ -425,14 +425,14 @@ public class MapReduceEngine extends DatacenterBroker {
 		"IsDeadlineViolated", "IsBudgetViolated", "NumberOfVMs", "LogMessage" }, requests.requests);
 	// COSTS
 	CustomLog.redirectToFile("results/plots/costs.csv", true);
-	String costLine = requests.requests.get(0).getPolicy() + ","
+	String costLine = requests.requests.get(0).getPolicy() + "-"
 		+ requests.requests.get(0).getCloudDeploymentModel() + ",";
 	for (Request request : requests.requests)
 	    costLine += request.getCost() + ",";
 	CustomLog.printLine(costLine);
 	// EXECUTION TIME
 	CustomLog.redirectToFile("results/plots/times.csv", true);
-	String timeLine = requests.requests.get(0).getPolicy() + ","
+	String timeLine = requests.requests.get(0).getPolicy() + "-"
 		+ requests.requests.get(0).getCloudDeploymentModel() + ",";
 	for (Request request : requests.requests)
 	    timeLine += request.getExecutionTime() + ",";
