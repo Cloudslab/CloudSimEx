@@ -58,15 +58,22 @@ public class MostDuplicatedBacktracking extends Policy {
 	// Selected SchedulingPlan from backtracking
 	BackTrackingPerfTree backTrackingPerfTree = new BackTrackingPerfTree(nVMs, rTasks);
 	Thread backTrackingPerfTreeThread = new Thread(backTrackingPerfTree);
+	try {
+	    Thread.currentThread().sleep(2000);
+	} catch (InterruptedException e1) {
+	    // TODO Auto-generated catch block
+	    e1.printStackTrace();
+	}
 	backTrackingPerfTreeThread.start();
 
 	/**
 	 * Wait for any of the two trees to finish
 	 */
-	Map<Integer, Integer> selectedSchedulingPlan;
-	while (true)
-	{
-	    try {
+	Map<Integer, Integer> selectedSchedulingPlan = null;
+
+	try {
+	    while (true)
+	    {
 		Thread.currentThread().sleep(500);
 		if (!backTrackingCostTreeThread.isAlive())
 		{
@@ -84,14 +91,15 @@ public class MostDuplicatedBacktracking extends Policy {
 		    backTrackingCostTree.setPerfTreeSolution(backTrackingPerfTree.solution);
 		    backTrackingCostTree.setPerfTreeSolution(backTrackingPerfTree.perfTreeSolutionCost);
 		}
-	    } catch (InterruptedException e) {
-		e.printStackTrace();
-	    } finally
-	    {
-		backTrackingCostTreeThread.stop();
-		backTrackingPerfTreeThread.stop();
 	    }
+	} catch (InterruptedException e) {
+	    e.printStackTrace();
+	} finally
+	{
+	    backTrackingCostTreeThread.stop();
+	    backTrackingPerfTreeThread.stop();
 	}
+
 	if (selectedSchedulingPlan == null)
 	    return false;
 
@@ -119,9 +127,11 @@ public class MostDuplicatedBacktracking extends Policy {
 	private List<VmInstance> nVMs;
 	private List<Task> rTasks;
 	private BackTrackingAlgorithm backTrackingAlgorithm = new BackTrackingAlgorithm();
-	private double deadlineViolationPercentageLimit = 0.2;
+	private double deadlineViolationPercentageLimit = 0.025;
 	private Map<Integer, Integer> perfTreeSolution = null;
 	private double perfTreeSolutionCost;
+	private Map<Integer, Integer> costTreeBestSolutionSoFar = null;
+	private double costTreeBestCostSoFar;
 	private int logCounter = 100000;
 	private int logEvery = 100000;
 
@@ -167,15 +177,20 @@ public class MostDuplicatedBacktracking extends Policy {
 		Map<Integer, Integer> schedulingPlan = predictionEngine.vectorToScheduleingPlan(resObj, nVMs, rTasks);
 		double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
 			schedulingPlan, nVMs, request.job);
-		//if (logCounter >= logEvery)
-		if (true)
+		if (logCounter >= logEvery)
+		// if (true)
 		{
 		    CustomLog.printLine("Cost " + Arrays.toString(resObj) + "->"
 			    + (r - res.length) + " : " + Arrays.toString(executionTimeAndCost));
 		    logCounter = 0;
 		}
+		if (costTreeBestSolutionSoFar == null || executionTimeAndCost[1] < costTreeBestCostSoFar)
+		{
+		    costTreeBestCostSoFar = executionTimeAndCost[1];
+		    costTreeBestSolutionSoFar = schedulingPlan;
+		}
 		if (perfTreeSolution != null
-			&& perfTreeSolutionCost <= executionTimeAndCost[1] + (executionTimeAndCost[1] * 0.05))
+			&& perfTreeSolutionCost <= costTreeBestCostSoFar + (costTreeBestCostSoFar * 0.05))
 		{
 		    request.setLogMessage("Accepted Perf Tree Solution!");
 		    return perfTreeSolution;
@@ -183,7 +198,12 @@ public class MostDuplicatedBacktracking extends Policy {
 		if (executionTimeAndCost[0] <= request.getDeadline() && executionTimeAndCost[1] <= request.getBudget())
 		{
 		    if (res.length == r)
+		    {
+			CustomLog.printLine("Cost " + Arrays.toString(resObj) + "->"
+				+ (r - res.length) + " : " + Arrays.toString(executionTimeAndCost)
+				+ " is the selected solution");
 			return schedulingPlan;
+		    }
 		    else
 			res = backTrackingAlgorithm.goDeeper(res, n);
 		}
@@ -324,7 +344,7 @@ public class MostDuplicatedBacktracking extends Policy {
 		if (isMostDuplicatedEnabled && doChangMostVmValue)
 		{
 		    doChangMostVmValue = false;
-		    int mostVmDuplicates = 0;
+		    int mostVmDuplicates = 1;
 		    int mostVmLastIndex = -1;
 		    for (int i = 0; i < num.length; i++)
 		    {

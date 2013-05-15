@@ -109,10 +109,10 @@ public class Backtracking {
 		    schedulingPlan, nVMs, request.job);
 	    //CustomLog.printLine(backtrackingSort + " " + Arrays.toString(resObj) + "->" + (r - res.length) + " : "
 		//    + Arrays.toString(executionTimeAndCost));
-	    if (backtrackingSort == BacktrackingSorts.Performance && executionTimeAndCost[0] > request.getDeadline())
-		return null;
-	    if (backtrackingSort == BacktrackingSorts.Cost && executionTimeAndCost[1] > request.getBudget())
-		return null;
+	    //if (backtrackingSort == BacktrackingSorts.Performance && executionTimeAndCost[0] > request.getDeadline())
+		//return null;
+	    //if (backtrackingSort == BacktrackingSorts.Cost && executionTimeAndCost[1] > request.getBudget())
+		//return null;
 	    if (executionTimeAndCost[0] <= request.deadline && executionTimeAndCost[1] <= request.budget)
 	    {
 		if (res.length == r)
