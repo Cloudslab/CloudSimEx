@@ -126,10 +126,12 @@ public class MapReduceEngine extends DatacenterBroker {
 	}
 
 	// ToDo: increase the clock during the ALGORITHM search
+	String requestString = " [" + request.submissionTime + "," + request.deadline + "," + request.budget + ","
+		+ request.jobFile + "," + request.userClass + "]";
+	CustomLog.printLine(requestString);
 	Log.printLine(" =========== SEARCHING START USING ALGORITHM:" + request.policy + "-"
 		+ request.getCloudDeploymentModel() + " FOR REQUEST: " + request.id
-		+ " [" + request.submissionTime + "," + request.deadline + "," + request.budget + ","
-		+ request.jobFile + "," + request.userClass + "] ===========");
+		+ requestString + " ===========");
 	Log.printLine(getName() + " is searching for the optimal Resource Set...");
 	if (!policy.runAlgorithm(cloud, request))
 	    Log.printLine(" =========== ERROR: THE ALGORITHM COULD NOT FIND VMs FOR REQUEST: " + request.id
@@ -343,7 +345,7 @@ public class MapReduceEngine extends DatacenterBroker {
 
 	// NEW CODE
 	// CHECK: if all map tasks finished to start the reduce phase
-	if (isAllMapTaskFinished(cloudlet.getCloudletId()))
+	if (cloudlet instanceof MapTask && isAllMapTaskFinished(cloudlet.getCloudletId()))
 	{
 	    Request request = requests.getRequestFromTaskId(cloudlet.getCloudletId());
 	    startReducePhase(request);
@@ -423,20 +425,27 @@ public class MapReduceEngine extends DatacenterBroker {
 	CustomLog.printResultsWithoutHeader(Request.class, ",", new String[] { "experimentNumber", "Id", "J",
 		"UserClass", "Policy", "CloudDeploymentModel", "Deadline", "Budget", "ExecutionTime", "Cost",
 		"IsDeadlineViolated", "IsBudgetViolated", "NumberOfVMs", "LogMessage" }, requests.requests);
-	// COSTS
-	CustomLog.redirectToFile("results/plots/costs.csv", true);
-	String costLine = requests.requests.get(0).getPolicy() + "-"
+	// Number of Tasks vs Cost vs Algorithm Plotting
+	CustomLog.redirectToFile("results/plots/Tasks_Cost_Algorithm.csv", true);
+	String plottingValue = requests.requests.get(0).getPolicy() + "-"
 		+ requests.requests.get(0).getCloudDeploymentModel() + ",";
 	for (Request request : requests.requests)
-	    costLine += request.getCost() + ",";
-	CustomLog.printLine(costLine);
-	// EXECUTION TIME
-	CustomLog.redirectToFile("results/plots/times.csv", true);
-	String timeLine = requests.requests.get(0).getPolicy() + "-"
+	    plottingValue += request.getCost() + ",";
+	CustomLog.printLine(plottingValue);
+	// Number of Tasks vs Execution Time vs Algorithm Plotting
+	CustomLog.redirectToFile("results/plots/Tasks_ExecutionTime_Algorithm.csv", true);
+	plottingValue = requests.requests.get(0).getPolicy() + "-"
 		+ requests.requests.get(0).getCloudDeploymentModel() + ",";
 	for (Request request : requests.requests)
-	    timeLine += request.getExecutionTime() + ",";
-	CustomLog.printLine(timeLine);
+	    plottingValue += request.getExecutionTime() + ",";
+	CustomLog.printLine(plottingValue);
+	// Deadline vs Cost vs Algorithms Plotting
+	CustomLog.redirectToFile("results/plots/Deadline_Cost_Algorithm.csv", true);
+	plottingValue = requests.requests.get(0).getPolicy() + "-"
+		+ requests.requests.get(0).getCloudDeploymentModel() + ",";
+	for (Request request : requests.requests)
+	    plottingValue += request.getCost() + ",";
+	CustomLog.printLine(plottingValue);
 
 	// Java Log Output, which should be disabled from custom_log.properties
 	printInConsole();

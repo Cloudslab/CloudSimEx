@@ -67,16 +67,15 @@ public class MostDuplicatedBacktracking extends Policy {
 	while (true)
 	{
 	    try {
-		Thread.currentThread().sleep(2000);
+		Thread.currentThread().sleep(500);
 		if (!backTrackingCostTreeThread.isAlive())
 		{
-		    backTrackingPerfTreeThread.interrupt();
 		    selectedSchedulingPlan = backTrackingCostTree.solution;
 		    break;
 		}
 		if (!backTrackingPerfTreeThread.isAlive())
 		{
-		    backTrackingCostTreeThread.interrupt();
+
 		    selectedSchedulingPlan = backTrackingPerfTree.solution;
 		    break;
 		}
@@ -87,6 +86,10 @@ public class MostDuplicatedBacktracking extends Policy {
 		}
 	    } catch (InterruptedException e) {
 		e.printStackTrace();
+	    } finally
+	    {
+		backTrackingCostTreeThread.stop();
+		backTrackingPerfTreeThread.stop();
 	    }
 	}
 	if (selectedSchedulingPlan == null)
@@ -116,15 +119,15 @@ public class MostDuplicatedBacktracking extends Policy {
 	private List<VmInstance> nVMs;
 	private List<Task> rTasks;
 	private BackTrackingAlgorithm backTrackingAlgorithm = new BackTrackingAlgorithm();
-	private double DeadlineViolationPercentge = 0.2;
+	private double deadlineViolationPercentageLimit = 0.2;
 	private Map<Integer, Integer> perfTreeSolution = null;
 	private double perfTreeSolutionCost;
-	private int logCounter = 0;
+	private int logCounter = 100000;
 	private int logEvery = 100000;
 
 	public BackTrackingCostTree(List<VmInstance> nVMs, List<Task> rTasks)
 	{
-	    this.nVMs = new ArrayList<VmInstance>(nVMs);
+	    this.nVMs = nVMs;
 	    this.rTasks = rTasks;
 	}
 
@@ -164,8 +167,8 @@ public class MostDuplicatedBacktracking extends Policy {
 		Map<Integer, Integer> schedulingPlan = predictionEngine.vectorToScheduleingPlan(resObj, nVMs, rTasks);
 		double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
 			schedulingPlan, nVMs, request.job);
-		if (logCounter >= logEvery)
-		//if (true)
+		//if (logCounter >= logEvery)
+		if (true)
 		{
 		    CustomLog.printLine("Cost " + Arrays.toString(resObj) + "->"
 			    + (r - res.length) + " : " + Arrays.toString(executionTimeAndCost));
@@ -177,12 +180,7 @@ public class MostDuplicatedBacktracking extends Policy {
 		    request.setLogMessage("Accepted Perf Tree Solution!");
 		    return perfTreeSolution;
 		}
-		if (executionTimeAndCost[1] - (executionTimeAndCost[1] * 0.05) > request.getBudget())
-		{
-		    request.setLogMessage("Very low budget!");
-		    return null;
-		}
-		if (executionTimeAndCost[0] <= request.deadline)
+		if (executionTimeAndCost[0] <= request.getDeadline() && executionTimeAndCost[1] <= request.getBudget())
 		{
 		    if (res.length == r)
 			return schedulingPlan;
@@ -191,12 +189,12 @@ public class MostDuplicatedBacktracking extends Policy {
 		}
 		else
 		{
-		    if (res.length == r && res[res.length - 1] < n)
+		    if (res[res.length - 1] < n)
 			res[res.length - 1]++;
 		    else
 		    {
 			double deadlineViolationPercentage = 1.0 - (request.getDeadline() / executionTimeAndCost[0]);
-			if (deadlineViolationPercentage > DeadlineViolationPercentge)
+			if (deadlineViolationPercentage > deadlineViolationPercentageLimit)
 			    backTrackingAlgorithm.doChangMostVmValue = true;
 			done = (res = backTrackingAlgorithm.goBack(res, n, r)) == null ? true : false;
 		    }
@@ -221,9 +219,9 @@ public class MostDuplicatedBacktracking extends Policy {
 	private List<Task> rTasks = new ArrayList<Task>();
 	private BackTrackingAlgorithm backTrackingAlgorithm = new BackTrackingAlgorithm();
 	double perfTreeSolutionCost;
-	private int logCounter = 0;
+	private int logCounter = 250000;
 	private int logEvery = 250000;
-	private double DeadlineViolationPercentge = 0.0025;
+	private double deadlineViolationPercentageLimit = 0.0025;
 
 	public BackTrackingPerfTree(List<VmInstance> nVMs, List<Task> rTasks)
 	{
@@ -265,7 +263,7 @@ public class MostDuplicatedBacktracking extends Policy {
 		double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
 			schedulingPlan, nVMs, request.job);
 		if (logCounter >= logEvery)
-		//if (true)
+		// if (true)
 		{
 		    CustomLog.printLine("Perf " + Arrays.toString(resObj) + "->" + (r - res.length) + " : "
 			    + Arrays.toString(executionTimeAndCost));
@@ -286,20 +284,25 @@ public class MostDuplicatedBacktracking extends Policy {
 		{
 		    if (res.length == r)
 		    {
-			solution = schedulingPlan;
-			perfTreeSolutionCost = executionTimeAndCost[1];
+			if (solution == null || executionTimeAndCost[1] < perfTreeSolutionCost)
+			{
+			    solution = schedulingPlan;
+			    perfTreeSolutionCost = executionTimeAndCost[1];
+			    CustomLog.printLine("Perf " + Arrays.toString(resObj) + " : "
+				    + Arrays.toString(executionTimeAndCost) + " is a soulation");
+			}
 		    }
 		    else
 			res = backTrackingAlgorithm.goDeeper(res, n);
 		}
 		else
 		{
-		    if (res.length == r && res[res.length - 1] < n)
+		    if (res[res.length - 1] < n)
 			res[res.length - 1]++;
 		    else
 		    {
 			double deadlineViolationPercentage = 1.0 - (request.getDeadline() / (executionTimeAndCost[0]));
-			if (deadlineViolationPercentage > DeadlineViolationPercentge)
+			if (deadlineViolationPercentage > deadlineViolationPercentageLimit)
 			    backTrackingAlgorithm.doChangMostVmValue = true;
 			done = (res = backTrackingAlgorithm.goBack(res, n, r)) == null ? true : false;
 		    }
@@ -320,6 +323,7 @@ public class MostDuplicatedBacktracking extends Policy {
 		int[] res;
 		if (isMostDuplicatedEnabled && doChangMostVmValue)
 		{
+		    doChangMostVmValue = false;
 		    int mostVmDuplicates = 0;
 		    int mostVmLastIndex = -1;
 		    for (int i = 0; i < num.length; i++)
@@ -339,7 +343,7 @@ public class MostDuplicatedBacktracking extends Policy {
 			}
 		    }
 		    if (mostVmLastIndex == -1)
-			res = new int[num.length];
+			res = new int[num.length - 1];
 		    else
 			res = new int[mostVmLastIndex + 1];
 		}
@@ -361,14 +365,7 @@ public class MostDuplicatedBacktracking extends Policy {
 	    for (int i = 0; i < res.length - 1; i++) {
 		res[i] = num[i];
 	    }
-	    if (!doChangMostVmValue)
-		res[res.length - 1] = 1;
-	    else
-	    {
-		res[res.length - 1]++;
-		if (res[res.length - 1] > n)
-		    res[res.length - 1] = 1;
-	    }
+	    res[res.length - 1] = 1;
 	    return res;
 	}
 

@@ -1,0 +1,114 @@
+!!org.cloudbus.cloudsim.ex.mapreduce.Experiments
+
+experiments:
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    LFFCost, Hybrid,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+     #[Submission Time, Deadline, Budget, Job, user class]
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [0000000, 100, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [0100000, 110, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [0200000, 120, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [0300000, 130, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [0400000, 140, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [0500000, 150, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [0600000, 160, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [0700000, 170, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [0800000, 180, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [0900000, 190, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [1000000, 200, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [1100000, 210, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [1200000, 220, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [1300000, 230, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [1400000, 240, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [1500000, 250, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [1600000, 260, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [1700000, 270, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [1800000, 280, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [1900000, 290, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [2000000, 300, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [2100000, 310, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [2200000, 320, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [2300000, 330, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [2400000, 340, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [2500000, 350, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [2600000, 360, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
+     
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    LFFPerf, Hybrid,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    BacktrackingCost, Hybrid,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    BacktrackingPerf, Hybrid,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    MostDuplicatedBacktracking, Hybrid,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]

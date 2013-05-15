@@ -5,26 +5,13 @@ dataSourceName: S3-sensors
 
 mapTasks:
 # Map task info: [number of tasks, data Size in megabyte, million instructions, [intermediate Data]]
-- [3, 64, 10000,
+- [9, 64, 10000,
       {
         # intermediate Data information: [Reduce Task ID, intermediate data size in megabyte]
         reduce-2011: 10,
         reduce-2012: 5
       }
   ]
-- [5, 64, 10000,
-      {
-        reduce-2011: 15,
-        reduce-2012: 0
-      }
-  ]
-- [1, 10, 2000,
-      {
-        reduce-2011: 5,
-        reduce-2012: 1
-      }
-  ]
-
 reduceTasks:
 # Reduce task info:[name, million instructions]
 - [reduce-2011, 5000]

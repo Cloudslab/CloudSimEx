@@ -75,18 +75,24 @@ public class Simulation {
 	CustomLog.printHeader(Request.class, ",", new String[] { "experimentNumber", "Id", "J", "UserClass", "Policy",
 		"CloudDeploymentModel", "Deadline", "Budget", "ExecutionTime", "Cost", "IsDeadlineViolated",
 		"IsBudgetViolated", "NumberOfVMs", "LogMessage" });
-	// COST Plotting
-	CustomLog.redirectToFile("results/plots/costs.csv");
-	String costHeader = "Algorithm,";
+	// Number of Tasks vs Cost vs Algorithm Plotting
+	CustomLog.redirectToFile("results/plots/Tasks_Cost_Algorithm.csv");
+	String header = "Number of Tasks,";
 	for (Request request : experiments.experiments.get(0).requests.requests)
-	    costHeader += request.getNumberOfTasks() + ",";
-	CustomLog.printLine(costHeader);
-	// TIME Plotting
-	CustomLog.redirectToFile("results/plots/times.csv");
-	String timeHeader = "Algorithm,";
+	    header += request.getNumberOfTasks() + ",";
+	CustomLog.printLine(header);
+	// Number of Tasks vs Execution Time vs Algorithm Plotting
+	CustomLog.redirectToFile("results/plots/Tasks_ExecutionTime_Algorithm.csv");
+	header = "Number of Tasks,";
 	for (Request request : experiments.experiments.get(0).requests.requests)
-	    timeHeader += request.getNumberOfTasks() + ",";
-	CustomLog.printLine(timeHeader);
+	    header += request.getNumberOfTasks() + ",";
+	CustomLog.printLine(header);
+	// Deadline vs Cost vs Algorithms Plotting
+	CustomLog.redirectToFile("results/plots/Deadline_Cost_Algorithm.csv");
+	header = "Deadline,";
+	for (Request request : experiments.experiments.get(0).requests.requests)
+	    header += request.getDeadline() + ",";
+	CustomLog.printLine(header);
 
 	for (int round = 0; round < experiments.experiments.size(); round++) {
 	    // BACK TO DEFAULT LOG FILE

@@ -122,7 +122,7 @@ public class Backtracking {
 	    }
 	    else
 	    {
-		if (res.length == r && res[res.length - 1] < n)
+		if (res[res.length - 1] < n)
 		    res[res.length - 1]++;
 		else
 		    done = (res = goBack(res, n, r)) == null ? true : false;
