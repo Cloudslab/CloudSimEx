@@ -78,14 +78,10 @@ public class MostDuplicatedBacktracking extends Policy {
 		    selectedSchedulingPlan = backTrackingPerfTree.solution;
 		    break;
 		}
-		/*
-		 * if (backTrackingPerfTree.solution != null) {
-		 * backTrackingCostTree
-		 * .setPerfTreeSolution(backTrackingPerfTree.solution);
-		 * backTrackingCostTree
-		 * .setPerfTreeSolution(backTrackingPerfTree.
-		 * perfTreeSolutionCost); }
-		 */
+		if (backTrackingPerfTree.solution != null) {
+		    backTrackingCostTree.setPerfTreeSolution(backTrackingPerfTree.solution);
+		    backTrackingCostTree.setPerfTreeSolution(backTrackingPerfTree.perfTreeSolutionCost);
+		}
 
 		Thread.currentThread().sleep(500);
 	    }
@@ -162,7 +158,7 @@ public class MostDuplicatedBacktracking extends Policy {
 	    // here will be the cheapest solution after the 1st major branch to
 	    // compare it with the solution from PerfTree
 	    Map<Integer, Integer> costTreeBestSolutionSoFar = null;
-	    double costTreeBestCostSoFar = Double.MAX_VALUE;
+	    double costTreeBestCostSoFar = -1.0;
 
 	    // The first 1 is for the number of VMs, the rest is for each task
 	    // in which VM
@@ -201,7 +197,7 @@ public class MostDuplicatedBacktracking extends Policy {
 			costTreeBestCostSoFar = executionTimeAndCost[1];
 			costTreeBestSolutionSoFar = schedulingPlan;
 		    }
-		    if (perfTreeSolution != null
+		    if (perfTreeSolution != null && costTreeBestSolutionSoFar != null
 			    && perfTreeSolutionCost <= costTreeBestCostSoFar + (costTreeBestCostSoFar * 0.05))
 		    {
 			request.setLogMessage("Accepted Perf Tree Solution!");
@@ -243,7 +239,7 @@ public class MostDuplicatedBacktracking extends Policy {
 			    }
 			    // if the new subRes has been scanned by previous
 			    // major branch; just skip it, and go next.
-			} while (!done && Arrays.asList(res).contains(subN));
+			} while (!done && !Arrays.asList(res).contains(subN));
 		    }
 		    logCounter++;
 		} while (!done);
@@ -367,7 +363,7 @@ public class MostDuplicatedBacktracking extends Policy {
 			    }
 			    // if the new subRes has been scanned by previous
 			    // major branch; just skip it, and go next.
-			} while (!done && Arrays.asList(res).contains(subN));
+			} while (!done && !Arrays.asList(res).contains(subN));
 		    }
 		    logCounter++;
 		} while (!done);
