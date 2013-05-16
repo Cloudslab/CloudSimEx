@@ -58,12 +58,6 @@ public class MostDuplicatedBacktracking extends Policy {
 	// Selected SchedulingPlan from backtracking
 	BackTrackingPerfTree backTrackingPerfTree = new BackTrackingPerfTree(nVMs, rTasks);
 	Thread backTrackingPerfTreeThread = new Thread(backTrackingPerfTree);
-	try {
-	    Thread.currentThread().sleep(2000);
-	} catch (InterruptedException e1) {
-	    // TODO Auto-generated catch block
-	    e1.printStackTrace();
-	}
 	backTrackingPerfTreeThread.start();
 
 	/**
@@ -79,17 +73,20 @@ public class MostDuplicatedBacktracking extends Policy {
 		    selectedSchedulingPlan = backTrackingCostTree.solution;
 		    break;
 		}
-		if (!backTrackingPerfTreeThread.isAlive())
-		{
+		if (!backTrackingPerfTreeThread.isAlive()) {
 
 		    selectedSchedulingPlan = backTrackingPerfTree.solution;
 		    break;
 		}
-		if (backTrackingPerfTree.solution != null)
-		{
-		    backTrackingCostTree.setPerfTreeSolution(backTrackingPerfTree.solution);
-		    backTrackingCostTree.setPerfTreeSolution(backTrackingPerfTree.perfTreeSolutionCost);
-		}
+		/*
+		 * if (backTrackingPerfTree.solution != null) {
+		 * backTrackingCostTree
+		 * .setPerfTreeSolution(backTrackingPerfTree.solution);
+		 * backTrackingCostTree
+		 * .setPerfTreeSolution(backTrackingPerfTree.
+		 * perfTreeSolutionCost); }
+		 */
+
 		Thread.currentThread().sleep(500);
 	    }
 	} catch (InterruptedException e) {
@@ -130,10 +127,6 @@ public class MostDuplicatedBacktracking extends Policy {
 	private double deadlineViolationPercentageLimit = 0.025;
 	private Map<Integer, Integer> perfTreeSolution = null;
 	private double perfTreeSolutionCost;
-	private Map<Integer, Integer> costTreeBestSolutionSoFar = null;
-	private double costTreeBestCostSoFar;
-	private int logCounter = 100000;
-	private int logEvery = 100000;
 
 	public BackTrackingCostTree(List<VmInstance> nVMs, List<Task> rTasks)
 	{
@@ -166,65 +159,105 @@ public class MostDuplicatedBacktracking extends Policy {
 	}
 
 	private Map<Integer, Integer> getFirstSolutionOfBackTracking(int n, int r) {
-	    int[] res = new int[] { 1 };
-	    boolean done = false;
-	    while (!done) {
-		// Convert int[] to Integer[]
-		Integer[] resObj = new Integer[res.length];
-		for (int i = 0; i < res.length; i++) {
-		    resObj[i] = res[i];
-		}
-		Map<Integer, Integer> schedulingPlan = predictionEngine.vectorToScheduleingPlan(resObj, nVMs, rTasks);
-		double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
-			schedulingPlan, nVMs, request.job);
-		if (logCounter >= logEvery)
-		// if (true)
-		{
-		    CustomLog.printLine("Cost " + Arrays.toString(resObj) + "->"
-			    + (r - res.length) + " : " + Arrays.toString(executionTimeAndCost));
-		    logCounter = 0;
-		}
-		if (res.length == r && (costTreeBestSolutionSoFar == null || executionTimeAndCost[1] < costTreeBestCostSoFar))
-		{
-		    costTreeBestCostSoFar = executionTimeAndCost[1];
-		    costTreeBestSolutionSoFar = schedulingPlan;
-		}
-		if (perfTreeSolution != null
-			&& perfTreeSolutionCost <= costTreeBestCostSoFar + (costTreeBestCostSoFar * 0.05))
-		{
-		    request.setLogMessage("Accepted Perf Tree Solution!");
-		    return perfTreeSolution;
-		}
-		if (executionTimeAndCost[0] <= request.getDeadline() && executionTimeAndCost[1] <= request.getBudget())
-		{
-		    if (res.length == r)
+	    // here will be the cheapest solution after the 1st major branch to
+	    // compare it with the solution from PerfTree
+	    Map<Integer, Integer> costTreeBestSolutionSoFar = null;
+	    double costTreeBestCostSoFar = Double.MAX_VALUE;
+
+	    // The first 1 is for the number of VMs, the rest is for each task
+	    // in which VM
+	    int subN = 1;
+	    while (subN <= n)
+	    {
+		boolean isBudgetViolatedInLeaf = false;
+		int logCounter = 250000;
+		int logEvery = 250000;
+
+		Integer[] res = new Integer[] { 1 };
+		boolean done;
+		do {
+		    done = false;
+		    // Get the execution time and cost of current node (res)
+		    // without the first element, because the first element is
+		    // for determine the number of VMs.
+		    Map<Integer, Integer> schedulingPlan = predictionEngine.vectorToScheduleingPlan(res, nVMs,
+			    rTasks);
+		    double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
+			    schedulingPlan, nVMs, request.job);
+		    // Logging
+		    if (logCounter >= logEvery)
 		    {
-			CustomLog.printLine("Cost " + Arrays.toString(resObj) + "->"
-				+ (r - res.length) + " : " + Arrays.toString(executionTimeAndCost)
-				+ " is the selected solution");
-			return schedulingPlan;
+			CustomLog.printLine("Cost n=" + subN + " :" + Arrays.toString(res) + "->"
+				+ (r - res.length) + " : "
+				+ Arrays.toString(executionTimeAndCost));
+			logCounter = 0;
 		    }
-		    else
-			res = backTrackingAlgorithm.goDeeper(res, n);
-		}
-		else
-		{
-		    if (res[res.length - 1] < n)
-			res[res.length - 1]++;
+		    // If what PerfTree found is very close (5% margin) to the
+		    // cheapest complete solution (leaf) after finishing the
+		    // first major branch, then accept it.
+		    if (subN > 1 && res.length == r
+			    && (costTreeBestSolutionSoFar == null || executionTimeAndCost[1] < costTreeBestCostSoFar))
+		    {
+			costTreeBestCostSoFar = executionTimeAndCost[1];
+			costTreeBestSolutionSoFar = schedulingPlan;
+		    }
+		    if (perfTreeSolution != null
+			    && perfTreeSolutionCost <= costTreeBestCostSoFar + (costTreeBestCostSoFar * 0.05))
+		    {
+			request.setLogMessage("Accepted Perf Tree Solution!");
+			return perfTreeSolution;
+		    }
+		    // Record that there is a budget violation on a leaf, so we
+		    // don't terminate the tree and return "very low budget!"
+		    if (!isBudgetViolatedInLeaf && res.length == r && executionTimeAndCost[1] > request.getBudget())
+			isBudgetViolatedInLeaf = true;
+
+		    // If the budget and deadline are not violated
+		    if (executionTimeAndCost[0] <= request.getDeadline()
+			    && executionTimeAndCost[1] <= request.getBudget())
+		    {
+			if (res.length == r)
+			{
+			    CustomLog.printLine("Cost n=" + subN + " :"
+				    + Arrays.toString(backTrackingAlgorithm.getSubRes(res)) + "->"
+				    + (r - res.length) + " : " + Arrays.toString(executionTimeAndCost)
+				    + " is the selected solution");
+			    return schedulingPlan;
+			}
+			else
+			    res = backTrackingAlgorithm.goDeeper(res, subN);
+		    }
+		    // Come here if the node does violate the budget and/or the
+		    // deadline
 		    else
 		    {
-			double deadlineViolationPercentage = 1.0 - (request.getDeadline() / executionTimeAndCost[0]);
-			if (deadlineViolationPercentage > deadlineViolationPercentageLimit)
-			    backTrackingAlgorithm.doChangMostVmValue = true;
-			done = (res = backTrackingAlgorithm.goBack(res, n, r)) == null ? true : false;
+			do {
+			    if (res[res.length - 1] < subN)
+				res[res.length - 1]++;
+			    else
+			    {
+				double deadlineViolationPercentage = 1.0 - (request.getDeadline() / executionTimeAndCost[0]);
+				if (deadlineViolationPercentage > deadlineViolationPercentageLimit)
+				    backTrackingAlgorithm.doChangMostVmValue = true;
+				done = (res = backTrackingAlgorithm.goBack(res, subN, r)) == null ? true : false;
+			    }
+			    // if the new subRes has been scanned by previous
+			    // major branch; just skip it, and go next.
+			} while (!done && Arrays.asList(res).contains(subN));
 		    }
+		    logCounter++;
+		} while (!done);
+		if (isBudgetViolatedInLeaf)
+		{
+		    request.setLogMessage("Very low budget!");
+		    return null;
 		}
-		logCounter++;
+		// Increase the number of VMs to look into
+		subN++;
 	    }
 	    request.setLogMessage("No Solution!");
 	    return null;
 	}
-
     }
 
     /**
@@ -239,8 +272,6 @@ public class MostDuplicatedBacktracking extends Policy {
 	private List<Task> rTasks = new ArrayList<Task>();
 	private BackTrackingAlgorithm backTrackingAlgorithm = new BackTrackingAlgorithm();
 	double perfTreeSolutionCost;
-	private int logCounter = 250000;
-	private int logEvery = 250000;
 	private double deadlineViolationPercentageLimit = 0.0025;
 
 	public BackTrackingPerfTree(List<VmInstance> nVMs, List<Task> rTasks)
@@ -271,63 +302,82 @@ public class MostDuplicatedBacktracking extends Policy {
 	}
 
 	private Map<Integer, Integer> getFirstSolutionOfBackTracking(int n, int r) {
-	    int[] res = new int[] { 1 };
-	    boolean done = false;
-	    while (!done) {
-		// Convert int[] to Integer[]
-		Integer[] resObj = new Integer[res.length];
-		for (int i = 0; i < res.length; i++) {
-		    resObj[i] = res[i];
-		}
-		Map<Integer, Integer> schedulingPlan = predictionEngine.vectorToScheduleingPlan(resObj, nVMs, rTasks);
-		double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
-			schedulingPlan, nVMs, request.job);
-		if (logCounter >= logEvery)
-		// if (true)
-		{
-		    CustomLog.printLine("Perf " + Arrays.toString(resObj) + "->" + (r - res.length) + " : "
-			    + Arrays.toString(executionTimeAndCost));
-		    logCounter = 0;
-		}
-		if (res[0] > 1)
-		{
-		    request.setLogMessage("Very short deadline!");
-		    return null;
-		}
-		if (solution != null
-			&& executionTimeAndCost[0] - (executionTimeAndCost[0] * 0.05) > request.getDeadline())
-		{
-		    return schedulingPlan;
-		}
-		boolean budgetViolationOnLeaf = executionTimeAndCost[1] > request.getBudget() && res.length == r;
-		if (executionTimeAndCost[0] <= request.getDeadline() && !budgetViolationOnLeaf)
-		{
-		    if (res.length == r)
+	    // The first 1 is for the number of VMs, the rest is for each task
+	    // in which VM
+	    int subN = 1;
+	    while (subN <= n)
+	    {
+		boolean isDeadlineViolatedInLeaf = false;
+		int logCounter = 250000;
+		int logEvery = 250000;
+
+		Integer[] res = new Integer[] { 1 };
+		boolean done;
+		do {
+		    done = false;
+		    // Get the execution time and cost of current node (res)
+		    // without the first element, because the first element is
+		    // for determine the number of VMs.
+		    Map<Integer, Integer> schedulingPlan = predictionEngine.vectorToScheduleingPlan(res, nVMs,
+			    rTasks);
+		    double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
+			    schedulingPlan, nVMs, request.job);
+		    // Logging
+		    if (logCounter >= logEvery)
+		    {
+			CustomLog.printLine("Perf n=" + subN + " :" + Arrays.toString(res) + "->"
+				+ (r - res.length) + " : "
+				+ Arrays.toString(executionTimeAndCost));
+			logCounter = 0;
+		    }
+		    // If there is a solution, and the current execution time
+		    // violate the deadline (5% margin) then just take that
+		    // solution and send it to the CostTree to compare it with
+		    // what they have so far
+		    if (solution != null
+			    && executionTimeAndCost[0] - (executionTimeAndCost[0] * 0.05) > request.getDeadline())
+			return schedulingPlan;
+		    // Record that there a deadline violation on one of the
+		    // leafs, so we don't terminate the tree and return
+		    // "very short deadline!"
+		    if (res.length == r && executionTimeAndCost[0] > request.getDeadline())
+			isDeadlineViolatedInLeaf = true;
+
+		    if (res.length != r)
+			res = backTrackingAlgorithm.goDeeper(res, subN);
+		    else
 		    {
 			if (solution == null || executionTimeAndCost[1] < perfTreeSolutionCost)
 			{
 			    solution = schedulingPlan;
 			    perfTreeSolutionCost = executionTimeAndCost[1];
-			    CustomLog.printLine("Perf " + Arrays.toString(resObj) + " : "
+			    CustomLog.printLine("Perf n=" + subN + " :" + Arrays.toString(res) + " : "
 				    + Arrays.toString(executionTimeAndCost) + " is a soulation");
+
 			}
+			do {
+			    if (res[res.length - 1] < subN)
+				res[res.length - 1]++;
+			    else
+			    {
+				double deadlineViolationPercentage = 1.0 - (request.getDeadline() / executionTimeAndCost[0]);
+				if (deadlineViolationPercentage > deadlineViolationPercentageLimit)
+				    backTrackingAlgorithm.doChangMostVmValue = true;
+				done = (res = backTrackingAlgorithm.goBack(res, subN, r)) == null ? true : false;
+			    }
+			    // if the new subRes has been scanned by previous
+			    // major branch; just skip it, and go next.
+			} while (!done && Arrays.asList(res).contains(subN));
 		    }
-		    else
-			res = backTrackingAlgorithm.goDeeper(res, n);
-		}
-		else
+		    logCounter++;
+		} while (!done);
+		if (isDeadlineViolatedInLeaf)
 		{
-		    if (res[res.length - 1] < n)
-			res[res.length - 1]++;
-		    else
-		    {
-			double deadlineViolationPercentage = 1.0 - (request.getDeadline() / (executionTimeAndCost[0]));
-			if (deadlineViolationPercentage > deadlineViolationPercentageLimit)
-			    backTrackingAlgorithm.doChangMostVmValue = true;
-			done = (res = backTrackingAlgorithm.goBack(res, n, r)) == null ? true : false;
-		    }
+		    request.setLogMessage("Very short deadline!");
+		    return null;
 		}
-		logCounter++;
+		// Increase the number of VMs to look into
+		subN++;
 	    }
 	    request.setLogMessage("No Solution!");
 	    return null;
@@ -338,9 +388,9 @@ public class MostDuplicatedBacktracking extends Policy {
     public class BackTrackingAlgorithm {
 	private boolean doChangMostVmValue = false;
 
-	private int[] goBack(int[] num, int n, int r) {
+	private Integer[] goBack(Integer[] num, int n, int r) {
 	    do {
-		int[] res;
+		Integer[] res;
 		if (isMostDuplicatedEnabled && doChangMostVmValue)
 		{
 		    doChangMostVmValue = false;
@@ -363,12 +413,12 @@ public class MostDuplicatedBacktracking extends Policy {
 			}
 		    }
 		    if (mostVmLastIndex == -1)
-			res = new int[num.length - 1];
+			res = new Integer[num.length - 1];
 		    else
-			res = new int[mostVmLastIndex + 1];
+			res = new Integer[mostVmLastIndex + 1];
 		}
 		else
-		    res = new int[num.length - 1];
+		    res = new Integer[num.length - 1];
 		if (res.length == 0)
 		    return null;
 		for (int i = 0; i < res.length; i++)
@@ -380,8 +430,26 @@ public class MostDuplicatedBacktracking extends Policy {
 
 	}
 
-	private int[] goDeeper(int[] num, int n) {
-	    int[] res = new int[num.length + 1];
+	public Integer[] getRes(Integer indexZeroValue, Integer[] subRes) {
+	    Integer[] res = new Integer[subRes.length + 1];
+	    res[0] = indexZeroValue;
+	    for (int i = 1; i < res.length; i++)
+	    {
+		res[i] = subRes[i - 1];
+	    }
+	    return res;
+	}
+
+	public Integer[] getSubRes(Integer[] res) {
+	    Integer[] resObj = new Integer[res.length - 1];
+	    for (int i = 0; i < resObj.length; i++) {
+		resObj[i] = res[i + 1];
+	    }
+	    return resObj;
+	}
+
+	private Integer[] goDeeper(Integer[] num, int n) {
+	    Integer[] res = new Integer[num.length + 1];
 	    for (int i = 0; i < res.length - 1; i++) {
 		res[i] = num[i];
 	    }

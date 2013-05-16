@@ -1,2 +1,2 @@
 experimentNumber,     Id,J,UserClass,Policy,CloudDeploymentModel,Deadline,    Budget,ExecutionTime,      Cost,IsDeadlineViolated,IsBudgetViolated,NumberOfVMs,LogMessage
-               1,      5,J={9-2},     GOLD,MostDuplicatedBacktracking,              Hybrid,     210,      2.50,       210.10,      2.00,YES! (0.09999999999999432 seconds) over deadline,No ($0.5) savings,          6,By Cost Tree
+               1,      5,J={9-2},     GOLD,MostDuplicatedBacktracking,              Hybrid,     210,      2.50,       160.00,      0.00,No (50.0 seconds) earlier,No ($2.5) savings,          9,By Cost Tree
