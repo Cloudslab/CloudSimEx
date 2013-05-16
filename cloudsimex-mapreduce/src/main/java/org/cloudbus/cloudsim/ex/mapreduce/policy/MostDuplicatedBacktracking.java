@@ -74,7 +74,6 @@ public class MostDuplicatedBacktracking extends Policy {
 	try {
 	    while (true)
 	    {
-		Thread.currentThread().sleep(500);
 		if (!backTrackingCostTreeThread.isAlive())
 		{
 		    selectedSchedulingPlan = backTrackingCostTree.solution;
@@ -91,6 +90,7 @@ public class MostDuplicatedBacktracking extends Policy {
 		    backTrackingCostTree.setPerfTreeSolution(backTrackingPerfTree.solution);
 		    backTrackingCostTree.setPerfTreeSolution(backTrackingPerfTree.perfTreeSolutionCost);
 		}
+		Thread.currentThread().sleep(500);
 	    }
 	} catch (InterruptedException e) {
 	    e.printStackTrace();
@@ -184,7 +184,7 @@ public class MostDuplicatedBacktracking extends Policy {
 			    + (r - res.length) + " : " + Arrays.toString(executionTimeAndCost));
 		    logCounter = 0;
 		}
-		if (costTreeBestSolutionSoFar == null || executionTimeAndCost[1] < costTreeBestCostSoFar)
+		if (res.length == r && (costTreeBestSolutionSoFar == null || executionTimeAndCost[1] < costTreeBestCostSoFar))
 		{
 		    costTreeBestCostSoFar = executionTimeAndCost[1];
 		    costTreeBestSolutionSoFar = schedulingPlan;

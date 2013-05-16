@@ -12,8 +12,6 @@ experiments:
     [
      #[Submission Time, Deadline, Budget, Job, user class]
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [0000000, 100, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
-     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
      [0100000, 110, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
      [0200000, 120, 2.5, Jobs/MapReduce_9_2.yaml, GOLD],
@@ -81,6 +79,17 @@ experiments:
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
+    MostDuplicatedBacktracking, Hybrid,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
     BacktrackingCost, Hybrid,
       {
         GOLD: 100.0,
@@ -93,17 +102,6 @@ experiments:
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
     BacktrackingPerf, Hybrid,
-      {
-        GOLD: 100.0,
-        SILVER: 60.0,
-        BRONZE: 0.0
-      },
-    [
-    ]
-   ]
- - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
-   [
-    MostDuplicatedBacktracking, Hybrid,
       {
         GOLD: 100.0,
         SILVER: 60.0,
