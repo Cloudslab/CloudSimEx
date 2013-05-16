@@ -200,6 +200,10 @@ public class MostDuplicatedBacktracking extends Policy {
 		    if (perfTreeSolution != null && costTreeBestSolutionSoFar != null
 			    && perfTreeSolutionCost <= costTreeBestCostSoFar + (costTreeBestCostSoFar * 0.05))
 		    {
+			CustomLog.printLine("Cost n=" + subN + " :"
+				    + Arrays.toString(backTrackingAlgorithm.getSubRes(res)) + "->"
+				    + (r - res.length) + " : " + Arrays.toString(executionTimeAndCost)
+				    + " is the aceepted solution from the PerfTree");
 			request.setLogMessage("Accepted Perf Tree Solution!");
 			return perfTreeSolution;
 		    }
@@ -239,7 +243,7 @@ public class MostDuplicatedBacktracking extends Policy {
 			    }
 			    // if the new subRes has been scanned by previous
 			    // major branch; just skip it, and go next.
-			} while (!done && !Arrays.asList(res).contains(subN));
+			} while (!done && !Arrays.asList(res).contains(subN) && res.length == r);
 		    }
 		    logCounter++;
 		} while (!done);
@@ -363,7 +367,7 @@ public class MostDuplicatedBacktracking extends Policy {
 			    }
 			    // if the new subRes has been scanned by previous
 			    // major branch; just skip it, and go next.
-			} while (!done && !Arrays.asList(res).contains(subN));
+			} while (!done && !Arrays.asList(res).contains(subN) && res.length == r);
 		    }
 		    logCounter++;
 		} while (!done);
