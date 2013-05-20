@@ -4,11 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.CountDownLatch;
 
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.ex.mapreduce.PredictionEngine;
@@ -18,11 +15,13 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.request.MapTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.ReduceTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
-import org.cloudbus.cloudsim.ex.mapreduce.policy.Backtracking.BacktrackingSorts;
-import org.cloudbus.cloudsim.ex.mapreduce.policy.Policy.CloudDeploymentModel;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 
 public class MostDuplicatedBacktracking extends Policy {
+    
+    public enum BacktrackingSorts {
+	Cost, Performance;
+    }
 
     private Request request;
     public boolean isMostDuplicatedEnabled = true;
@@ -48,7 +47,8 @@ public class MostDuplicatedBacktracking extends Policy {
 	 * Run the cost tree
 	 */
 	// Selected SchedulingPlan from backtracking
-	BackTrackingCostTree backTrackingCostTree = new BackTrackingCostTree(nVMs, rTasks);
+	long costTreeRunningTime = System.currentTimeMillis();
+	BackTrackingTree backTrackingCostTree = new BackTrackingTree(nVMs, rTasks, BacktrackingSorts.Cost,0.025,250000);
 	Thread backTrackingCostTreeThread = new Thread(backTrackingCostTree);
 	backTrackingCostTreeThread.start();
 
@@ -56,10 +56,11 @@ public class MostDuplicatedBacktracking extends Policy {
 	 * Run the performance tree
 	 */
 	// Selected SchedulingPlan from backtracking
-	BackTrackingPerfTree backTrackingPerfTree = new BackTrackingPerfTree(nVMs, rTasks);
+	boolean checkPerfTree = false;
+	BackTrackingTree backTrackingPerfTree = new BackTrackingTree(nVMs, rTasks, BacktrackingSorts.Performance,0.0025,250000);
 	Thread backTrackingPerfTreeThread = new Thread(backTrackingPerfTree);
 	backTrackingPerfTreeThread.start();
-
+	
 	/**
 	 * Wait for any of the two trees to finish
 	 */
@@ -73,16 +74,33 @@ public class MostDuplicatedBacktracking extends Policy {
 		    selectedSchedulingPlan = backTrackingCostTree.solution;
 		    break;
 		}
-		if (!backTrackingPerfTreeThread.isAlive()) {
-
-		    selectedSchedulingPlan = backTrackingPerfTree.solution;
-		    break;
+		if (!checkPerfTree)
+		{
+		    long currentRunningTime = System.currentTimeMillis();
+		    if (currentRunningTime-costTreeRunningTime >= 20000)
+			if(backTrackingCostTree.solution != null)
+			{
+			    selectedSchedulingPlan = backTrackingCostTree.solution;
+			    request.setLogMessage("CostTree forced to accept a solution");
+			    break;
+			}
+			else
+			    checkPerfTree = true;
 		}
-		if (backTrackingPerfTree.solution != null) {
-		    backTrackingCostTree.setPerfTreeSolution(backTrackingPerfTree.solution);
-		    backTrackingCostTree.setPerfTreeSolution(backTrackingPerfTree.perfTreeSolutionCost);
+		if (checkPerfTree)
+		{
+		    if (backTrackingCostTree.solution != null)
+		    {
+			selectedSchedulingPlan = backTrackingCostTree.solution;
+			request.setLogMessage("CostTree forced to accept a solution");
+			break;
+		    }
+		    else if (!backTrackingPerfTreeThread.isAlive())
+		    {
+			selectedSchedulingPlan = backTrackingPerfTree.solution;
+			break;
+		    }
 		}
-
 		Thread.currentThread().sleep(500);
 	    }
 	} catch (InterruptedException e) {
@@ -108,6 +126,194 @@ public class MostDuplicatedBacktracking extends Policy {
 
 	return true;
     }
+    
+    /**
+     * 
+     * @author Mohammed Alrokayan
+     *
+     */
+    public class BackTrackingTree implements Runnable {
+	private PredictionEngine predictionEngine;
+	private BackTrackingAlgorithm backTrackingAlgorithm;
+	private List<VmInstance> nVMs;
+	private List<Task> rTasks;
+	private BacktrackingSorts sort;
+	private double deadlineViolationPercentageLimit;
+	private Map<Integer, Integer> solution;
+	private double solutionCost = Double.MAX_VALUE;
+	private Integer[] solutionVector;
+	private int logginCounter;
+	private int loggingFrequent;
+	
+	public BackTrackingTree(List<VmInstance> nVMs, List<Task> rTasks, BacktrackingSorts sort, double deadlineViolationPercentageLimit, int loggingFrequent)
+	{
+	    predictionEngine = new PredictionEngine();
+	    backTrackingAlgorithm = new BackTrackingAlgorithm();
+	    this.nVMs = new ArrayList<VmInstance>(nVMs);
+	    this.rTasks = rTasks;
+	    this.sort = sort;
+	    this.deadlineViolationPercentageLimit = deadlineViolationPercentageLimit;
+	    logginCounter = loggingFrequent;
+	    this.loggingFrequent = loggingFrequent;
+	}
+
+	public Map<Integer, Integer> getSolution() {
+	    return solution;
+	}
+
+	public void setSolution(Map<Integer, Integer> solution) {
+	    this.solution = solution;
+	}
+
+	public void run() {
+	    if(sort == BacktrackingSorts.Cost)
+		// Sort nVMs by cost per mips
+		Collections.sort(nVMs, new Comparator<VmInstance>() {
+			public int compare(VmInstance VmInstance1, VmInstance VmInstance2) {
+			    double vmInstance1Cost = VmInstance1.transferringCost + VmInstance1.vmCostPerHour
+				    / VmInstance1.getMips();
+			    double vmInstance2Cost = VmInstance2.transferringCost + VmInstance2.vmCostPerHour
+				    / VmInstance2.getMips();
+			    return Double.compare(vmInstance1Cost, vmInstance2Cost);
+			}
+		    });
+	    if(sort == BacktrackingSorts.Performance)
+		// Sort nVMs by mips (performance)
+		    Collections.sort(nVMs, new Comparator<VmInstance>() {
+			public int compare(VmInstance VmInstance1, VmInstance VmInstance2) {
+			    // TODO Add data trasfere time from data source + out from
+			    // VM
+			    MapTask anyMapTask = request.job.mapTasks.get(0);
+			    double vmInstance1Perf = VmInstance1.getMips() + VmInstance1.bootTime
+				    + anyMapTask.dataTransferTimeFromTheDataSource(VmInstance1);
+			    double vmInstance2Perf = VmInstance2.getMips() + VmInstance2.bootTime
+				    + anyMapTask.dataTransferTimeFromTheDataSource(VmInstance2);
+			    ;
+			    return Double.compare(vmInstance2Perf, vmInstance1Perf);
+
+			}
+		    });
+
+	    if(sort == BacktrackingSorts.Cost)
+		Log.print("Cost Tree Progress [");
+	    solution = getFirstSolutionOfBackTracking(nVMs.size(), rTasks.size());
+	    if(sort == BacktrackingSorts.Cost)
+		Log.printLine("]");
+	    request.setLogMessage("By "+sort+" Tree");
+	}
+
+	private Map<Integer, Integer> getFirstSolutionOfBackTracking(int n, int r) {
+	    int subN = 1;
+	    while (subN <= n)
+	    {
+		if(sort == BacktrackingSorts.Cost)
+		    Log.print("-");
+		//If cost: the violation will be the budget,
+		//but if perf: the violation will be deadline.
+		boolean isQoSViolationInLeaf = true;
+		boolean isLeafReached = false;
+
+		Integer[] res = new Integer[] { 1 };
+		boolean done;
+		do {
+		    done = false;
+		    // Get the execution time and cost of current node (res)
+		    Map<Integer, Integer> schedulingPlan = predictionEngine.vectorToScheduleingPlan(res, nVMs,
+			    rTasks);
+		    double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
+			    schedulingPlan, nVMs, request.job);
+		    // Logging
+		    //if (logginCounter >= loggingFrequent)
+		    if(sort == BacktrackingSorts.Cost)
+		    {
+			CustomLog.printLine("Cost n=" + subN + " :" + Arrays.toString(res) + "->"
+				+ (r - res.length) + " : "
+				+ Arrays.toString(executionTimeAndCost));
+			logginCounter = 0;
+		    }
+		    // Record that there is a QoS violation on a leaf, so we
+		    // terminate the tree and return "very low budget!" or "very short deadline!"
+		    if(!isLeafReached && res.length == r)
+			isLeafReached = true;
+		    if (isQoSViolationInLeaf && res.length == r)
+		    {
+			if(sort == BacktrackingSorts.Cost && executionTimeAndCost[1] <= request.getBudget())
+			    isQoSViolationInLeaf = false;
+			if(sort == BacktrackingSorts.Performance && executionTimeAndCost[0] <= request.getDeadline())
+			    isQoSViolationInLeaf = false;
+		    }
+		    
+		    //If this is a new major branch, and we have a solution from the previous major branch, just take it.
+		    if(solution != null && Arrays.equals(res, new Integer[]{ 1 }))
+		    {
+			CustomLog.printLine(sort+" n=" + subN + " :"
+				    + Arrays.toString(solutionVector) + "->"
+				    + (r - solutionVector.length) + " : "
+				    + Arrays.toString(executionTimeAndCost)
+				    + " is the selected solution");
+			return solution;
+		    }
+		    
+		    //Save the solution if we are in the leaf and it does not violate the deadline and budget, and the found one is better than the previous one (if any)
+		    if (executionTimeAndCost[1] <= request.getBudget()
+			    && executionTimeAndCost[0] <= request.getDeadline()
+			    && res.length == r
+			    && (solution == null || executionTimeAndCost[1] < solutionCost))
+		    {
+			CustomLog.printLine(sort + " n=" + subN + " :"
+				+ Arrays.toString(res) + "->"
+				+ (r - res.length) + " : " + Arrays.toString(executionTimeAndCost)
+				+ " is a solution");
+			solution = schedulingPlan;
+			solutionCost = executionTimeAndCost[1];
+			solutionVector = res;
+			if(sort == BacktrackingSorts.Cost)
+				Log.print("C");
+			if(sort == BacktrackingSorts.Performance)
+				Log.print("P");
+		    }
+		    
+		    // If the budget and deadline are not violated, and we are not in a leaf -> go deep
+		    if (executionTimeAndCost[1] <= request.getBudget()
+			    && executionTimeAndCost[0] <= request.getDeadline()
+			    && res.length != r)
+			res = backTrackingAlgorithm.goDeeper(res, subN);
+		    // Come here if the node does violate the budget and/or the
+		    // deadline, or we are in the leaf
+		    else
+		    {
+			do {
+			    if (res[res.length - 1] < subN)
+				res[res.length - 1]++;
+			    else
+			    {
+				double deadlineViolationPercentage = 1.0 - (request.getDeadline() / executionTimeAndCost[0]);
+				if (deadlineViolationPercentage > deadlineViolationPercentageLimit)
+				    backTrackingAlgorithm.doChangMostVmValue = true;
+				done = (res = backTrackingAlgorithm.goBack(res, subN, r)) == null ? true : false;
+			    }
+			    // if the new subRes has been scanned by previous
+			    // major branch; just skip it, and go next.
+			} while (!done && !Arrays.asList(res).contains(subN) && res.length == r);
+		    }
+		    logginCounter++;
+		} while (!done);
+		if (isLeafReached && isQoSViolationInLeaf)
+		{
+		    if(sort == BacktrackingSorts.Cost)
+			request.setLogMessage("Very low budget!");
+		    if(sort == BacktrackingSorts.Performance)
+			request.setLogMessage("Very short deadline!");
+		    return null;
+		}
+		// Increase the number of VMs to look into
+		subN++;
+	    }
+	    request.setLogMessage("No Solution!");
+	    return null;
+	}
+    }
+
 
     /**
      * 
@@ -121,8 +327,8 @@ public class MostDuplicatedBacktracking extends Policy {
 	private List<Task> rTasks;
 	private BackTrackingAlgorithm backTrackingAlgorithm = new BackTrackingAlgorithm();
 	private double deadlineViolationPercentageLimit = 0.025;
-	private Map<Integer, Integer> perfTreeSolution = null;
-	private double perfTreeSolutionCost;
+	//private Map<Integer, Integer> perfTreeSolution = null;
+	//private double perfTreeSolutionCost;
 
 	public BackTrackingCostTree(List<VmInstance> nVMs, List<Task> rTasks)
 	{
@@ -130,13 +336,13 @@ public class MostDuplicatedBacktracking extends Policy {
 	    this.rTasks = rTasks;
 	}
 
-	public synchronized void setPerfTreeSolution(Map<Integer, Integer> perfTreeSolution) {
-	    this.perfTreeSolution = perfTreeSolution;
-	}
+	//public synchronized void setPerfTreeSolution(Map<Integer, Integer> perfTreeSolution) {
+	//    this.perfTreeSolution = perfTreeSolution;
+	//}
 
-	public synchronized void setPerfTreeSolution(double perfTreeSolutionCost) {
-	    this.perfTreeSolutionCost = perfTreeSolutionCost;
-	}
+	//public synchronized void setPerfTreeSolution(double perfTreeSolutionCost) {
+	//    this.perfTreeSolutionCost = perfTreeSolutionCost;
+	//}
 
 	public void run() {
 	    // Sort nVMs by cost per mips
@@ -157,15 +363,16 @@ public class MostDuplicatedBacktracking extends Policy {
 	private Map<Integer, Integer> getFirstSolutionOfBackTracking(int n, int r) {
 	    // here will be the cheapest solution after the 1st major branch to
 	    // compare it with the solution from PerfTree
-	    Map<Integer, Integer> costTreeBestSolutionSoFar = null;
-	    double costTreeBestCostSoFar = -1.0;
+	    //Map<Integer, Integer> costTreeBestSolutionSoFar = null;
+	    //double costTreeBestCostSoFar = -1.0;
 
 	    // The first 1 is for the number of VMs, the rest is for each task
 	    // in which VM
 	    int subN = 1;
 	    while (subN <= n)
 	    {
-		boolean isBudgetViolatedInLeaf = false;
+		boolean isBudgetViolatedInLeaf = true;
+		boolean isLeafReached = false;
 		int logCounter = 250000;
 		int logEvery = 250000;
 
@@ -191,26 +398,28 @@ public class MostDuplicatedBacktracking extends Policy {
 		    // If what PerfTree found is very close (5% margin) to the
 		    // cheapest complete solution (leaf) after finishing the
 		    // first major branch, then accept it.
-		    if (subN > 1 && res.length == r
-			    && (costTreeBestSolutionSoFar == null || executionTimeAndCost[1] < costTreeBestCostSoFar))
-		    {
-			costTreeBestCostSoFar = executionTimeAndCost[1];
-			costTreeBestSolutionSoFar = schedulingPlan;
-		    }
-		    if (perfTreeSolution != null && costTreeBestSolutionSoFar != null
-			    && perfTreeSolutionCost <= costTreeBestCostSoFar + (costTreeBestCostSoFar * 0.05))
-		    {
-			CustomLog.printLine("Cost n=" + subN + " :"
-				    + Arrays.toString(backTrackingAlgorithm.getSubRes(res)) + "->"
-				    + (r - res.length) + " : " + Arrays.toString(executionTimeAndCost)
-				    + " is the aceepted solution from the PerfTree");
-			request.setLogMessage("Accepted Perf Tree Solution!");
-			return perfTreeSolution;
-		    }
+		    //if (subN > 1 && res.length == r
+			//    && (costTreeBestSolutionSoFar == null || executionTimeAndCost[1] < costTreeBestCostSoFar))
+		    //{
+			//costTreeBestCostSoFar = executionTimeAndCost[1];
+			//costTreeBestSolutionSoFar = schedulingPlan;
+		   // }
+		    //if (perfTreeSolution != null && costTreeBestSolutionSoFar != null
+			//    && perfTreeSolutionCost <= costTreeBestCostSoFar + (costTreeBestCostSoFar * 0.05))
+		    //{
+			//CustomLog.printLine("Cost n=" + subN + " :"
+			//	    + Arrays.toString(backTrackingAlgorithm.getSubRes(res)) + "->"
+			//	    + (r - res.length) + " : " + Arrays.toString(executionTimeAndCost)
+			//	    + " is the aceepted solution from the PerfTree");
+			//request.setLogMessage("Accepted Perf Tree Solution!");
+			//return perfTreeSolution;
+		    //}
 		    // Record that there is a budget violation on a leaf, so we
-		    // don't terminate the tree and return "very low budget!"
-		    if (!isBudgetViolatedInLeaf && res.length == r && executionTimeAndCost[1] > request.getBudget())
-			isBudgetViolatedInLeaf = true;
+		    // terminate the tree and return "very low budget!"
+		    if(!isLeafReached && res.length == r)
+			isLeafReached = true;
+		    if (isBudgetViolatedInLeaf && res.length == r && executionTimeAndCost[1] <= request.getBudget())
+			isBudgetViolatedInLeaf = false;
 
 		    // If the budget and deadline are not violated
 		    if (executionTimeAndCost[0] <= request.getDeadline()
@@ -219,7 +428,7 @@ public class MostDuplicatedBacktracking extends Policy {
 			if (res.length == r)
 			{
 			    CustomLog.printLine("Cost n=" + subN + " :"
-				    + Arrays.toString(backTrackingAlgorithm.getSubRes(res)) + "->"
+				    + Arrays.toString(res) + "->"
 				    + (r - res.length) + " : " + Arrays.toString(executionTimeAndCost)
 				    + " is the selected solution");
 			    return schedulingPlan;
@@ -247,7 +456,7 @@ public class MostDuplicatedBacktracking extends Policy {
 		    }
 		    logCounter++;
 		} while (!done);
-		if (isBudgetViolatedInLeaf)
+		if (isLeafReached && isBudgetViolatedInLeaf)
 		{
 		    request.setLogMessage("Very low budget!");
 		    return null;
@@ -271,7 +480,7 @@ public class MostDuplicatedBacktracking extends Policy {
 	private List<VmInstance> nVMs;
 	private List<Task> rTasks = new ArrayList<Task>();
 	private BackTrackingAlgorithm backTrackingAlgorithm = new BackTrackingAlgorithm();
-	double perfTreeSolutionCost;
+	//double perfTreeSolutionCost;
 	private double deadlineViolationPercentageLimit = 0.0025;
 
 	public BackTrackingPerfTree(List<VmInstance> nVMs, List<Task> rTasks)
@@ -307,7 +516,8 @@ public class MostDuplicatedBacktracking extends Policy {
 	    int subN = 1;
 	    while (subN <= n)
 	    {
-		boolean isDeadlineViolatedInLeaf = false;
+		boolean isDeadlineViolatedInLeaf = true;
+		boolean isLeafReached = false;
 		int logCounter = 250000;
 		int logEvery = 250000;
 
@@ -334,25 +544,30 @@ public class MostDuplicatedBacktracking extends Policy {
 		    // violate the deadline (5% margin) then just take that
 		    // solution and send it to the CostTree to compare it with
 		    // what they have so far
-		    if (solution != null
-			    && executionTimeAndCost[0] - (executionTimeAndCost[0] * 0.05) > request.getDeadline())
-			return schedulingPlan;
-		    // Record that there a deadline violation on one of the
-		    // leafs, so we don't terminate the tree and return
-		    // "very short deadline!"
-		    if (res.length == r && executionTimeAndCost[0] > request.getDeadline())
-			isDeadlineViolatedInLeaf = true;
+		    //if (solution != null
+			//    && executionTimeAndCost[0] - (executionTimeAndCost[0] * 0.05) > request.getDeadline())
+			//return schedulingPlan;
+		    // Record that there is a deadline violation on a leaf, so we
+		    // terminate the tree and return "very short deadline!!"
+		    if(!isLeafReached && res.length == r)
+			isLeafReached = true;
+		    if (isDeadlineViolatedInLeaf && res.length == r && executionTimeAndCost[0] <= request.getDeadline())
+			isDeadlineViolatedInLeaf = false;
 
-		    if (res.length != r)
+		    /*
+		    if (res.length != r && executionTimeAndCost[0] <= request.getDeadline())
 			res = backTrackingAlgorithm.goDeeper(res, subN);
 		    else
 		    {
-			if (solution == null || executionTimeAndCost[1] < perfTreeSolutionCost)
+			//if (solution == null || executionTimeAndCost[1] < perfTreeSolutionCost)
+			if (executionTimeAndCost[0] <= request.getDeadline()
+				    && executionTimeAndCost[1] <= request.getBudget())
 			{
-			    solution = schedulingPlan;
-			    perfTreeSolutionCost = executionTimeAndCost[1];
-			    CustomLog.printLine("Perf n=" + subN + " :" + Arrays.toString(res) + " : "
-				    + Arrays.toString(executionTimeAndCost) + " is a soulation");
+			    return schedulingPlan;
+			    //solution = schedulingPlan;
+			    //perfTreeSolutionCost = executionTimeAndCost[1];
+			    //CustomLog.printLine("Perf n=" + subN + " :" + Arrays.toString(res) + " : "
+				//    + Arrays.toString(executionTimeAndCost) + " is a soulation");
 
 			}
 			do {
@@ -368,10 +583,46 @@ public class MostDuplicatedBacktracking extends Policy {
 			    // if the new subRes has been scanned by previous
 			    // major branch; just skip it, and go next.
 			} while (!done && !Arrays.asList(res).contains(subN) && res.length == r);
+			
+		    }*/
+		    
+		 // If the budget and deadline are not violated
+		    if (executionTimeAndCost[0] <= request.getDeadline()
+			    && executionTimeAndCost[1] <= request.getBudget())
+		    {
+			if (res.length == r)
+			{
+			    CustomLog.printLine("Perf n=" + subN + " :"
+				    + Arrays.toString(res) + "->"
+				    + (r - res.length) + " : " + Arrays.toString(executionTimeAndCost)
+				    + " is the selected solution");
+			    return schedulingPlan;
+			}
+			else
+			    res = backTrackingAlgorithm.goDeeper(res, subN);
 		    }
+		    // Come here if the node does violate the budget and/or the
+		    // deadline
+		    else
+		    {
+			do {
+			    if (res[res.length - 1] < subN)
+				res[res.length - 1]++;
+			    else
+			    {
+				double deadlineViolationPercentage = 1.0 - (request.getDeadline() / executionTimeAndCost[0]);
+				if (deadlineViolationPercentage > deadlineViolationPercentageLimit)
+				    backTrackingAlgorithm.doChangMostVmValue = true;
+				done = (res = backTrackingAlgorithm.goBack(res, subN, r)) == null ? true : false;
+			    }
+			    // if the new subRes has been scanned by previous
+			    // major branch; just skip it, and go next.
+			} while (!done && !Arrays.asList(res).contains(subN) && res.length == r);
+		    }
+		    
 		    logCounter++;
 		} while (!done);
-		if (isDeadlineViolatedInLeaf)
+		if (isLeafReached && isDeadlineViolatedInLeaf)
 		{
 		    request.setLogMessage("Very short deadline!");
 		    return null;
@@ -428,24 +679,6 @@ public class MostDuplicatedBacktracking extends Policy {
 	    } while (num[num.length - 1] > n);
 	    return num;
 
-	}
-
-	public Integer[] getRes(Integer indexZeroValue, Integer[] subRes) {
-	    Integer[] res = new Integer[subRes.length + 1];
-	    res[0] = indexZeroValue;
-	    for (int i = 1; i < res.length; i++)
-	    {
-		res[i] = subRes[i - 1];
-	    }
-	    return res;
-	}
-
-	public Integer[] getSubRes(Integer[] res) {
-	    Integer[] resObj = new Integer[res.length - 1];
-	    for (int i = 0; i < resObj.length; i++) {
-		resObj[i] = res[i + 1];
-	    }
-	    return resObj;
 	}
 
 	private Integer[] goDeeper(Integer[] num, int n) {
