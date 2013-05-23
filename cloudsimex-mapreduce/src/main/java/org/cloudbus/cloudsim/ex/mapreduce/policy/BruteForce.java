@@ -24,10 +24,14 @@ public class BruteForce
     private List<VmInstance> nVMs = new ArrayList<VmInstance>();
     private List<Task> rTasks = new ArrayList<Task>();
     PredictionEngine predictionEngine = new PredictionEngine();
-
+    private long forceToExitTimeMillis = 2 * 60 * 1000;// 2 min
+    private Request request;
+    private long startTime;
+    
     public Boolean runAlgorithm(Cloud cloud, Request request, BruteForceSorts bruteForceSort)
     {
 	CloudDeploymentModel cloudDeploymentModel = request.getCloudDeploymentModel();
+	this.request = request;
 
 	// Fill nVMs
 	int numTasks = request.job.mapTasks.size() + request.job.reduceTasks.size();
@@ -41,85 +45,15 @@ public class BruteForce
 	for (ReduceTask reduceTask : request.job.reduceTasks)
 	    rTasks.add(reduceTask);
 
+	startTime = System.currentTimeMillis();
 	// Get permutations
-	List<Integer[]> nPr = getPermutations(nVMs.size(), rTasks.size());
+	ExecutionPlan selectedExecutionPlan = geExecutionPlan(nVMs.size(), rTasks.size());
 
-	Map<Integer, Integer> selectedSchedulingPlan = new HashMap<Integer, Integer>();
-
-	if (bruteForceSort == BruteForceSorts.Performance)
-	{
-	    // Select the fastest
-	    double fastest = -1;
-	    for (Integer[] one_nPr : nPr)
-	    {
-		Map<Integer, Integer> schedulingPlan = vectorToScheduleingPlan(one_nPr);
-		ExecutionPlan executionPlan = new ExecutionPlan(schedulingPlan, nVMs, request.job);
-		if (fastest == -1)
-		    fastest = executionPlan.ExecutionTime;
-		else if (executionPlan.ExecutionTime < fastest)
-		    fastest = executionPlan.ExecutionTime;
-	    }
-
-	    // Collect the candidate ExecutionPlans, where they are close to the
-	    // fastest value
-	    double margin = 0.0;
-	    List<ExecutionPlan> candidateExecutionPlans = new ArrayList<ExecutionPlan>();
-	    for (Integer[] one_nPr : nPr)
-	    {
-		Map<Integer, Integer> schedulingPlan = vectorToScheduleingPlan(one_nPr);
-		ExecutionPlan executionPlan = new ExecutionPlan(schedulingPlan, nVMs, request.job);
-		if (executionPlan.ExecutionTime - margin <= fastest)
-		    candidateExecutionPlans.add(executionPlan);
-	    }
-
-	    // Select the cheapest from the fastest
-	    ExecutionPlan cheapestFastestExecutionPlan = candidateExecutionPlans.get(0);
-	    for (ExecutionPlan executionPlan : candidateExecutionPlans)
-		if (executionPlan.Cost < cheapestFastestExecutionPlan.Cost)
-		    cheapestFastestExecutionPlan = executionPlan;
-
-	    // Selected SchedulingPlan
-	    selectedSchedulingPlan = cheapestFastestExecutionPlan.schedulingPlan;
-	}
-	if (bruteForceSort == BruteForceSorts.Cost)
-	{
-	    // Select the cheapest
-	    double chapest = -1;
-	    for (Integer[] one_nPr : nPr)
-	    {
-		Map<Integer, Integer> schedulingPlan = vectorToScheduleingPlan(one_nPr);
-		ExecutionPlan executionPlan = new ExecutionPlan(schedulingPlan, nVMs, request.job);
-		if (chapest == -1)
-		    chapest = executionPlan.Cost;
-		else if (executionPlan.Cost < chapest)
-		    chapest = executionPlan.Cost;
-	    }
-
-	    // Collect the candidate ExecutionPlans, where they are close to the
-	    // fastest value
-	    double margin = 0.0;
-	    List<ExecutionPlan> candidateExecutionPlans = new ArrayList<ExecutionPlan>();
-	    for (Integer[] one_nPr : nPr)
-	    {
-		Map<Integer, Integer> schedulingPlan = vectorToScheduleingPlan(one_nPr);
-		ExecutionPlan executionPlan = new ExecutionPlan(schedulingPlan, nVMs, request.job);
-		if (executionPlan.Cost - margin <= chapest)
-		    candidateExecutionPlans.add(executionPlan);
-	    }
-
-	    // Select the fastest from the cheapest
-	    ExecutionPlan fastestCheapestExecutionPlan = candidateExecutionPlans
-		    .get(0);
-	    for (ExecutionPlan executionPlan : candidateExecutionPlans)
-		if (executionPlan.ExecutionTime < fastestCheapestExecutionPlan.ExecutionTime)
-		    fastestCheapestExecutionPlan = executionPlan;
-
-	    // Selected SchedulingPlan
-	    selectedSchedulingPlan = fastestCheapestExecutionPlan.schedulingPlan;
-	}
-
+	Map<Integer, Integer> selectedSchedulingPlan = selectedExecutionPlan.schedulingPlan;
+	
 	// 1- Provisioning
-	ArrayList<ArrayList<VmInstance>> provisioningPlans = predictionEngine.getProvisioningPlan(selectedSchedulingPlan, nVMs,
+	ArrayList<ArrayList<VmInstance>> provisioningPlans = predictionEngine.getProvisioningPlan(
+		selectedSchedulingPlan, nVMs,
 		request.job);
 	request.mapAndReduceVmProvisionList = provisioningPlans.get(0);
 	request.reduceOnlyVmProvisionList = provisioningPlans.get(1);
@@ -130,11 +64,11 @@ public class BruteForce
 	return true;
     }
 
-    private List<Integer[]> getPermutations(int n, int r)
+    private ExecutionPlan geExecutionPlan(int n, int r)
     {
-	List<Integer[]> permutations = new ArrayList<Integer[]>();
+	ExecutionPlan selectedExecutionPlan= null;
 
-	int[] res = new int[r];
+	Integer[] res = new Integer[r];
 	for (int i = 0; i < res.length; i++)
 	{
 	    res[i] = 1;
@@ -142,28 +76,22 @@ public class BruteForce
 	boolean done = false;
 	while (!done)
 	{
-	    // Convert int[] to Integer[]
-	    Integer[] resObj = new Integer[r];
-	    for (int i = 0; i < res.length; i++)
-	    {
-		resObj[i] = res[i];
-	    }
-	    permutations.add(resObj);
-	    // Log.printLine(Arrays.toString(resObj));
+	    Map<Integer, Integer> schedulingPlan = vectorToScheduleingPlan(res);
+	    ExecutionPlan executionPlan = new ExecutionPlan(schedulingPlan, nVMs, request.job);
+	    if (selectedExecutionPlan == null || executionPlan.Cost < selectedExecutionPlan.Cost)
+		selectedExecutionPlan = executionPlan;
+
+	    long currentRunningTime = System.currentTimeMillis();
+	    if (currentRunningTime - startTime >= forceToExitTimeMillis)
+		break;
+
 	    done = getNext(res, n, r);
 	}
 
-	// int count = 1;
-	// for (Integer[] i : nCr) {
-	// System.out.println(count++ + Arrays.toString(i));
-	// }
-
-	return permutations;
+	return selectedExecutionPlan;
     }
 
-    // ///////
-
-    private boolean getNext(final int[] num, final int n, final int r)
+    private boolean getNext(final Integer[] num, final int n, final int r)
     {
 	int target = r - 1;
 	num[target]++;
@@ -204,25 +132,23 @@ public class BruteForce
 
 	return scheduleingPlan;
     }
-    
-    class ExecutionPlan {
-	    public Map<Integer, Integer> schedulingPlan = new HashMap<Integer, Integer>(); // <Task
-											   // ID,
-											   // VM
-											   // ID>
-	    public double ExecutionTime = 0;
-	    public double Cost = 0;
 
-	    public ExecutionPlan(Map<Integer, Integer> schedulingPlan, List<VmInstance> nVMs, Job job)
-	    {
-		this.schedulingPlan = schedulingPlan;
-		double[] predictedExecutionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
-			schedulingPlan, nVMs, job);
-		ExecutionTime = predictedExecutionTimeAndCost[0];
-		Cost = predictedExecutionTimeAndCost[1];
-	    }
+    class ExecutionPlan {
+	public Map<Integer, Integer> schedulingPlan = new HashMap<Integer, Integer>(); // <Task
+										       // ID,
+										       // VM
+										       // ID>
+	public double ExecutionTime = 0;
+	public double Cost = 0;
+
+	public ExecutionPlan(Map<Integer, Integer> schedulingPlan, List<VmInstance> nVMs, Job job)
+	{
+	    this.schedulingPlan = schedulingPlan;
+	    double[] predictedExecutionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
+		    schedulingPlan, nVMs, job);
+	    ExecutionTime = predictedExecutionTimeAndCost[0];
+	    Cost = predictedExecutionTimeAndCost[1];
 	}
+    }
 
 }
-
-

@@ -17,12 +17,11 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 
-public class BacktrackingCost extends MRBT_MultiCostTrees {
+public class MRBT_SingleTree extends MRBT_MultiCostTrees {
     
     public Boolean runAlgorithm(Cloud cloud, Request request) {
 	numCostTrees = 1;
 	enablePerfTree = false;
-	isMostDuplicatedEnabled = false;
 	return super.runAlgorithm(cloud, request);
     }
 }
