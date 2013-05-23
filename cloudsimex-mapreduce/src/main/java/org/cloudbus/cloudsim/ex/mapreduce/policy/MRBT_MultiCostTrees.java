@@ -26,8 +26,8 @@ public class MRBT_MultiCostTrees extends Policy {
     private Request request;
     protected boolean isMostDuplicatedEnabled = true;
     protected int numCostTrees = 5;
-    private long forceToAceeptAnySolutionTimeMillis = 20*1000;//20 sec
-    private long forceToExitTimeMillis = 2*60*1000;// 2 min
+    private long forceToAceeptAnySolutionTimeMillis = 2*60*1000;//2 min
+    private long forceToExitTimeMillis = 3*60*1000;//3 mins
     private boolean enableProgressBar = true;
     protected boolean enablePerfTree = true;
     

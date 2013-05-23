@@ -24,7 +24,7 @@ public class BruteForce
     private List<VmInstance> nVMs = new ArrayList<VmInstance>();
     private List<Task> rTasks = new ArrayList<Task>();
     PredictionEngine predictionEngine = new PredictionEngine();
-    private long forceToExitTimeMillis = 2 * 60 * 1000;// 2 min
+    private long forceToExitTimeMillis = 3 * 60 * 1000;// 3 min
     private Request request;
     private long startTime;
     
