@@ -44,7 +44,10 @@ public class Experiments
 	{
 	    String plottingValue = requests.requests.get(0).getPolicy() + ",";
 	    for (Request request : requests.requests)
-		plottingValue += request.getCost() + ",";
+		if(!request.getIsBudgetViolatedBoolean() && !request.getIsDeadlineViolatedBoolean())
+		    plottingValue += request.getCost() + ",";
+		else
+		    plottingValue +="-1,";
 	    CustomLog.printLine(plottingValue);
 	}
     }

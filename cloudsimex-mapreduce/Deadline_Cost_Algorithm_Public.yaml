@@ -43,7 +43,29 @@ experiments:
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
+    LFFPerf, Public,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
     BruteForceCost, Public,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    BacktrackingPerf, Public,
       {
         GOLD: 100.0,
         SILVER: 60.0,

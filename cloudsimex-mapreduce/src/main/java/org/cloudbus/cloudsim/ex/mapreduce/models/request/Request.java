@@ -235,6 +235,27 @@ public class Request extends SimEvent {
 	return "No ($" + (budget - getCost()) + ") savings";
 	
     }
+    
+    public boolean getIsDeadlineViolatedBoolean()
+    {
+	if(getExecutionTime() == -1)
+	    return true;
+	
+	if (getExecutionTime() > deadline)
+	    return true;
+	return false;
+    }
+
+    public boolean getIsBudgetViolatedBoolean()
+    {
+	if(getCost() == -1)
+	    return true;
+	
+	if (getCost() > budget)
+	    return true;
+	return false;
+	
+    }
 
     public String getJ()
     {
