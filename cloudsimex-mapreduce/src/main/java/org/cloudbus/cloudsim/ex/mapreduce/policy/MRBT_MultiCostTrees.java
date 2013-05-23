@@ -25,7 +25,7 @@ public class MRBT_MultiCostTrees extends Policy {
 
     private Request request;
     protected boolean isMostDuplicatedEnabled = true;
-    protected int numCostTrees = 5;
+    protected int numCostTrees = 4;
     private long forceToAceeptAnySolutionTimeMillis = 2*60*1000;//2 min
     private long forceToExitTimeMillis = 3*60*1000;//3 mins
     private boolean enableProgressBar = true;
@@ -83,7 +83,7 @@ public class MRBT_MultiCostTrees extends Policy {
 		    loggingFrequent, lastBranchUsed + 1, lastBranchUsed + numBranchesInEachTree);
 	    if (i == 1 && enableProgressBar)
 	    {
-		Log.print("All Trees Progress [");
+		Log.print("All "+(numCostTrees+1)+" Trees Progress [");
 	    }
 	    backTrackingCostTrees.add(backTrackingCostTree);
 	    Thread backTrackingCostTreeThread = new Thread(backTrackingCostTree);
@@ -113,7 +113,7 @@ public class MRBT_MultiCostTrees extends Policy {
 	 * Wait for any of the two trees to finish
 	 */
 	Map<Integer, Integer> selectedSchedulingPlan = null;
-
+	boolean forceToAceeptAnySolution = false;
 	try {
 	    while (true)
 	    {
@@ -123,10 +123,12 @@ public class MRBT_MultiCostTrees extends Policy {
 		    selectedSchedulingPlan = checkCostTrees(backTrackingCostTrees);
 		    if (selectedSchedulingPlan != null)
 			break;
+		    else
+			forceToAceeptAnySolution = true;
 		}
 		if (!checkPerfTree && enablePerfTree)
 		{
-		    if (currentRunningTime - costTreeRunningTime >= forceToAceeptAnySolutionTimeMillis)
+		    if (forceToAceeptAnySolution || currentRunningTime - costTreeRunningTime >= forceToAceeptAnySolutionTimeMillis)
 		    {
 			selectedSchedulingPlan = checkCostTrees(backTrackingCostTrees);
 			if (selectedSchedulingPlan != null)
@@ -380,6 +382,7 @@ public class MRBT_MultiCostTrees extends Policy {
 			request.setLogMessage("Very low budget!");
 		    if (sort == BacktrackingSorts.Performance)
 			request.setLogMessage("Very short deadline!");
+		    Log.print(Thread.currentThread().getName()+"x");
 		    return null;
 		}
 		// Increase the number of VMs to look into
@@ -387,6 +390,7 @@ public class MRBT_MultiCostTrees extends Policy {
 	    }
 	    if(solution!=null)
 		return solution;
+	    Log.print(Thread.currentThread().getName()+"x");
 	    request.setLogMessage("No Solution!");
 	    return null;
 	}

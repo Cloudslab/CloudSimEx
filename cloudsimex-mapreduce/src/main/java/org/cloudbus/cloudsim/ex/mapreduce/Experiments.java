@@ -19,12 +19,18 @@ public class Experiments
 	CustomLog.redirectToFile("results/plots/" + Experiments.experimentsName + ".csv");
 
 	if (Experiments.experimentsName.equals("Deadline_Cost_Algorithm_Public")
-		|| Experiments.experimentsName.equals("Deadline_Cost_Algorithm_Hybrid"))
+		|| Experiments.experimentsName.equals("Deadline_Cost_Algorithm_Hybrid")
+		|| Experiments.experimentsName.equals("test"))
 	{
 	    String header = "Deadline,";
+	    String budgetEntry = "Budget QoS,";
 	    for (Request request : requests.requests)
+	    {
 		header += request.getDeadline() + ",";
+		budgetEntry+= request.getBudget() + ",";
+	    }
 	    CustomLog.printLine(header);
+	    CustomLog.printLine(budgetEntry);
 	}
     }
 
@@ -33,7 +39,8 @@ public class Experiments
 	CustomLog.redirectToFile("results/plots/" + Experiments.experimentsName + ".csv", true);
 
 	if (Experiments.experimentsName.equals("Deadline_Cost_Algorithm_Public")
-		|| Experiments.experimentsName.equals("Deadline_Cost_Algorithm_Hybrid"))
+		|| Experiments.experimentsName.equals("Deadline_Cost_Algorithm_Hybrid")
+		|| Experiments.experimentsName.equals("test"))
 	{
 	    String plottingValue = requests.requests.get(0).getPolicy() + ",";
 	    for (Request request : requests.requests)

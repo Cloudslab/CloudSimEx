@@ -1,0 +1,18 @@
+!!org.cloudbus.cloudsim.ex.mapreduce.models.request.Job
+# This job is to calculate the average temperature of one of the Great Barrier Reef (GBR) temperature sensor in 2011 and 2012
+
+dataSourceName: S3-sensors
+
+mapTasks:
+# Map task info: [number of tasks, data Size in megabyte, million instructions, [intermediate Data]]
+- [15, 64, 1000000,
+      {
+        # intermediate Data information: [Reduce Task ID, intermediate data size in megabyte]
+        reduce-2011: 500,
+        reduce-2012: 350
+      }
+  ]
+reduceTasks:
+# Reduce task info:[name, million instructions]
+- [reduce-2011, 50000]
+- [reduce-2012, 10000]

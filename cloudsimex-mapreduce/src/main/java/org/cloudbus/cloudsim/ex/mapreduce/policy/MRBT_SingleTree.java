@@ -22,6 +22,7 @@ public class MRBT_SingleTree extends MRBT_MultiCostTrees {
     public Boolean runAlgorithm(Cloud cloud, Request request) {
 	numCostTrees = 1;
 	enablePerfTree = false;
+	isMostDuplicatedEnabled = true;
 	return super.runAlgorithm(cloud, request);
     }
 }

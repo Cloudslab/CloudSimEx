@@ -3,7 +3,7 @@
 experiments:
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
-    BruteForceCost, Hybrid,
+    LFFCost, Public,
       {
         GOLD: 100.0,
         SILVER: 60.0,
@@ -12,6 +12,77 @@ experiments:
     [
      #[Submission Time, Deadline, Budget, Job, user class]
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [500000, 150, 2.5, Jobs/MapReduce_9_2.yaml, GOLD]
+     [1.0, 80000, 15, Jobs/MapReduce_15_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [10000, 70500, 15, Jobs/MapReduce_15_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [20000, 70000, 15, Jobs/MapReduce_15_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [30000, 60500, 15, Jobs/MapReduce_15_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [40000, 60000, 15, Jobs/MapReduce_15_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [50000, 50500, 15, Jobs/MapReduce_15_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [60000, 50000, 15, Jobs/MapReduce_15_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [70000, 40700, 15, Jobs/MapReduce_15_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [80000, 40500, 15, Jobs/MapReduce_15_2.yaml, GOLD]
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    BruteForceCost, Public,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    BacktrackingCost, Public,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    MRBT_SingleTree, Public,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    MRBT_CostPerfTrees, Public,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    MRBT_MultiCostTrees, Public,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
     ]
    ]
