@@ -425,26 +425,8 @@ public class MapReduceEngine extends DatacenterBroker {
 	CustomLog.printResultsWithoutHeader(Request.class, ",", new String[] { "experimentNumber", "Id", "J",
 		"UserClass", "Policy", "CloudDeploymentModel", "Deadline", "Budget", "ExecutionTime", "Cost",
 		"IsDeadlineViolated", "IsBudgetViolated", "NumberOfVMs", "LogMessage" }, requests.requests);
-	// Number of Tasks vs Cost vs Algorithm Plotting
-	CustomLog.redirectToFile("results/plots/Tasks_Cost_Algorithm.csv", true);
-	String plottingValue = requests.requests.get(0).getPolicy()
-		+ requests.requests.get(0).getCloudDeploymentModel() + ",";
-	for (Request request : requests.requests)
-	    plottingValue += request.getCost() + ",";
-	CustomLog.printLine(plottingValue);
-	// Number of Tasks vs Execution Time vs Algorithm Plotting
-	CustomLog.redirectToFile("results/plots/Tasks_ExecutionTime_Algorithm.csv", true);
-	plottingValue = requests.requests.get(0).getPolicy()
-		+ requests.requests.get(0).getCloudDeploymentModel() + ",";
-	for (Request request : requests.requests)
-	    plottingValue += request.getExecutionTime() + ",";
-	CustomLog.printLine(plottingValue);
-	// Deadline vs Cost vs Algorithms Plotting
-	CustomLog.redirectToFile("results/plots/Deadline_Cost_Algorithm.csv", true);
-	plottingValue = requests.requests.get(0).getPolicy() + ",";
-	for (Request request : requests.requests)
-	    plottingValue += request.getCost() + ",";
-	CustomLog.printLine(plottingValue);
+	// Experiments Plotting
+	Experiments.logExperimentsData(requests);
 
 	// Java Log Output, which should be disabled from custom_log.properties
 	printInConsole();

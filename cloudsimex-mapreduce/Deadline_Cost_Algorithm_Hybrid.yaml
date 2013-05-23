@@ -43,29 +43,7 @@ experiments:
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
-    MRBT_MultiCostTrees, Hybrid,
-      {
-        GOLD: 100.0,
-        SILVER: 60.0,
-        BRONZE: 0.0
-      },
-    [
-    ]
-   ]
- - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
-   [
-    MRBT_CostPerfTrees, Hybrid,
-      {
-        GOLD: 100.0,
-        SILVER: 60.0,
-        BRONZE: 0.0
-      },
-    [
-    ]
-   ]
- - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
-   [
-    MRBT_SingleTree, Hybrid,
+    BruteForceCost, Hybrid,
       {
         GOLD: 100.0,
         SILVER: 60.0,
@@ -87,7 +65,29 @@ experiments:
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
    [
-    BruteForceCost, Hybrid,
+    MRBT_SingleTree, Hybrid,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    MRBT_CostPerfTrees, Hybrid,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Experiment
+   [
+    MRBT_MultiCostTrees, Hybrid,
       {
         GOLD: 100.0,
         SILVER: 60.0,
