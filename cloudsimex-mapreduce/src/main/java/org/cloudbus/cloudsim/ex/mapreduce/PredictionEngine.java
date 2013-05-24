@@ -1,5 +1,6 @@
 package org.cloudbus.cloudsim.ex.mapreduce;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ public class PredictionEngine
 {
     Request request;
     Cloud cloud;
+    DecimalFormat df = new DecimalFormat(".00");
 
     public PredictionEngine(Request request, Cloud cloud)
     {
@@ -106,7 +108,7 @@ public class PredictionEngine
 	    }
 	}
 
-	return new double[] { maxExecutionTime, totalCost };
+	return new double[] { Double.valueOf(df. format(maxExecutionTime)), Double.valueOf(df.format(totalCost)) };
     }
 
     private double getTotalExecutionTimeForTasksOnVm(ArrayList<Task> tasks, VmInstance vm,

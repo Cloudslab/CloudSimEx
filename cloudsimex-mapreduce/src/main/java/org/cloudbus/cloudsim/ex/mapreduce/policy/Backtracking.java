@@ -1,5 +1,6 @@
 package org.cloudbus.cloudsim.ex.mapreduce.policy;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,7 +34,7 @@ public class Backtracking {
     private Cloud cloud;
     private boolean enableProgressBar = true;
     private int loggingFrequent = 250000;
-
+    
     public Boolean runAlgorithm(Cloud cloud, Request request, int numCostTrees, boolean enablePerfTree,
 	    long forceToAceeptAnySolutionTimeMillis, long forceToExitTimeMillis, BacktrackingType backtrackingType) {
 	this.request = request;

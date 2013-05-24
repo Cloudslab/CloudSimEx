@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +20,7 @@ public class Request extends SimEvent {
     public int id;
     public double submissionTime;
     public double budget;
-    public int deadline;
+    public double deadline;
     public Job job;
     public UserClass userClass;
 
@@ -38,11 +39,12 @@ public class Request extends SimEvent {
 
     private String logMessage = "";
 
-    public Request(double submissionTime, int deadline, double budget, String jobFile, UserClass userClass) {
+    public Request(double submissionTime, double deadline, double budget, String jobFile, UserClass userClass) {
 	id = Id.pollId(Request.class);
 	this.submissionTime = submissionTime;
-	this.budget = budget;
-	this.deadline = deadline;
+	DecimalFormat df = new DecimalFormat(".00");
+	this.budget = Double.valueOf(df.format(budget));
+	this.deadline = Double.valueOf(df.format(deadline));
 	this.jobFile = "inputs/profiles/" + jobFile;
 	this.userClass = userClass;
 	mapAndReduceVmProvisionList = new ArrayList<VmInstance>();
@@ -68,7 +70,7 @@ public class Request extends SimEvent {
 	}
     }
 
-    public Request(double submissionTime, int deadline, double budget, Job job, String jobFile, UserClass userClass,
+    public Request(double submissionTime, double deadline, double budget, Job job, String jobFile, UserClass userClass,
 	    List<VmInstance> mapAndReduceVmProvisionList, List<VmInstance> reduceOnlyVmProvisionList,
 	    Map<Integer, Integer> schedulingPlan, int experimentNumber, int workloadNumber,
 	    CloudDeploymentModel cloudDeploymentModel, String logMessage)
@@ -113,11 +115,11 @@ public class Request extends SimEvent {
 	this.budget = budget;
     }
 
-    public int getDeadline() {
+    public double getDeadline() {
 	return deadline;
     }
 
-    public void setDeadline(int deadline) {
+    public void setDeadline(double deadline) {
 	this.deadline = deadline;
     }
 
