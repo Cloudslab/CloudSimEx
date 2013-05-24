@@ -17,24 +17,19 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 
-public class MRBT_MultiCostTrees extends Policy {
+public class BacktrackingMultiCost extends Policy {
 
     public enum BacktrackingSorts {
 	Cost, Performance;
     }
 
     private Request request;
-    protected boolean isMostDuplicatedEnabled = true;
     protected int numCostTrees = 4;
-    private long forceToAceeptAnySolutionTimeMillis = 2*60*1000;//2 min
-    private long forceToExitTimeMillis = 3*60*1000;//3 mins
+    private long forceToAceeptAnySolutionTimeMillis = 2 * 60 * 1000;// 2 min
+    private long forceToExitTimeMillis = 3 * 60 * 1000;// 3 mins
     private boolean enableProgressBar = true;
     protected boolean enablePerfTree = true;
-    
-    private double deadlineViolationPercentageLimitCostTree = 0.025;
-    private double deadlineViolationPercentageLimitPerfTree = 0.0025;
     private int loggingFrequent = 250000;
-    
 
     public Boolean runAlgorithm(Cloud cloud, Request request) {
 	this.request = request;
@@ -45,8 +40,9 @@ public class MRBT_MultiCostTrees extends Policy {
 	List<VmInstance> nVMs = Policy.getAllVmInstances(cloud, request, cloudDeploymentModel, numTasks);
 	if (nVMs.size() == 0)
 	    return false;
-	
-	// Sort nVMs by cost per mips - Perf Tree will have copy it and re-sort it
+
+	// Sort nVMs by cost per mips - Perf Tree will have copy it and re-sort
+	// it
 	Collections.sort(nVMs, new Comparator<VmInstance>() {
 	    public int compare(VmInstance VmInstance1, VmInstance VmInstance2) {
 		double vmInstance1Cost = VmInstance1.transferringCost + VmInstance1.vmCostPerHour
@@ -77,13 +73,13 @@ public class MRBT_MultiCostTrees extends Policy {
 	{
 	    BackTrackingTree backTrackingCostTree;
 	    if (i == numCostTrees)
-		backTrackingCostTree = new BackTrackingTree(nVMs, rTasks, BacktrackingSorts.Cost, deadlineViolationPercentageLimitCostTree,
+		backTrackingCostTree = new BackTrackingTree(nVMs, rTasks, BacktrackingSorts.Cost,
 			loggingFrequent, lastBranchUsed + 1, nVMs.size());
-	    backTrackingCostTree = new BackTrackingTree(nVMs, rTasks, BacktrackingSorts.Cost, deadlineViolationPercentageLimitCostTree,
+	    backTrackingCostTree = new BackTrackingTree(nVMs, rTasks, BacktrackingSorts.Cost,
 		    loggingFrequent, lastBranchUsed + 1, lastBranchUsed + numBranchesInEachTree);
 	    if (i == 1 && enableProgressBar)
 	    {
-		Log.print("All "+(numCostTrees+1)+" Trees Progress [");
+		Log.print("All " + (numCostTrees + 1) + " Trees Progress [");
 	    }
 	    backTrackingCostTrees.add(backTrackingCostTree);
 	    Thread backTrackingCostTreeThread = new Thread(backTrackingCostTree);
@@ -100,10 +96,10 @@ public class MRBT_MultiCostTrees extends Policy {
 	boolean checkPerfTree = false;
 	BackTrackingTree backTrackingPerfTree = null;
 	Thread backTrackingPerfTreeThread = null;
-	if(enablePerfTree)
+	if (enablePerfTree)
 	{
 	    backTrackingPerfTree = new BackTrackingTree(new ArrayList<VmInstance>(nVMs), rTasks,
-		    BacktrackingSorts.Performance, deadlineViolationPercentageLimitPerfTree, loggingFrequent, 1, nVMs.size());
+		    BacktrackingSorts.Performance, loggingFrequent, 1, nVMs.size());
 	    backTrackingPerfTreeThread = new Thread(backTrackingPerfTree);
 	    backTrackingPerfTreeThread.setName("P");
 	    backTrackingPerfTreeThread.start();
@@ -128,7 +124,8 @@ public class MRBT_MultiCostTrees extends Policy {
 		}
 		if (!checkPerfTree && enablePerfTree)
 		{
-		    if (forceToAceeptAnySolution || currentRunningTime - costTreeRunningTime >= forceToAceeptAnySolutionTimeMillis)
+		    if (forceToAceeptAnySolution
+			    || currentRunningTime - costTreeRunningTime >= forceToAceeptAnySolutionTimeMillis)
 		    {
 			selectedSchedulingPlan = checkCostTrees(backTrackingCostTrees);
 			if (selectedSchedulingPlan != null)
@@ -151,12 +148,13 @@ public class MRBT_MultiCostTrees extends Policy {
 		if (currentRunningTime - costTreeRunningTime >= forceToExitTimeMillis)
 		{
 		    selectedSchedulingPlan = checkCostTrees(backTrackingCostTrees);
-		    if (selectedSchedulingPlan == null && backTrackingPerfTree != null && backTrackingPerfTree.solution != null)
+		    if (selectedSchedulingPlan == null && backTrackingPerfTree != null
+			    && backTrackingPerfTree.solution != null)
 			selectedSchedulingPlan = backTrackingPerfTree.solution;
 		    request.setLogMessage("Force To Exit");
 		    break;
 		}
-		    
+
 		Thread.currentThread().sleep(500);
 	    }
 	} catch (InterruptedException e) {
@@ -165,7 +163,7 @@ public class MRBT_MultiCostTrees extends Policy {
 	{
 	    for (int i = 0; i < backTrackingCostTreeThreads.size(); i++)
 		backTrackingCostTreeThreads.get(i).stop();
-	    if(enablePerfTree)
+	    if (enablePerfTree)
 		backTrackingPerfTreeThread.stop();
 	    if (enableProgressBar)
 		Log.printLine("]");
@@ -219,7 +217,6 @@ public class MRBT_MultiCostTrees extends Policy {
 	private List<VmInstance> nVMs;
 	private List<Task> rTasks;
 	private BacktrackingSorts sort;
-	private double deadlineViolationPercentageLimit;
 	private Map<Integer, Integer> solution = null;
 	public double solutionCost = Double.MAX_VALUE;
 	private Integer[] solutionVector = null;
@@ -229,14 +226,13 @@ public class MRBT_MultiCostTrees extends Policy {
 	private int minN;
 	private int maxN;
 
-	public BackTrackingTree(List<VmInstance> nVMs, List<Task> rTasks, BacktrackingSorts sort,
-		double deadlineViolationPercentageLimit, int loggingFrequent, int minN, int maxN)
+	public BackTrackingTree(List<VmInstance> nVMs, List<Task> rTasks, BacktrackingSorts sort, int loggingFrequent,
+		int minN, int maxN)
 	{
 	    predictionEngine = new PredictionEngine();
 	    this.nVMs = nVMs;
 	    this.rTasks = rTasks;
 	    this.sort = sort;
-	    this.deadlineViolationPercentageLimit = deadlineViolationPercentageLimit;
 	    logginCounter = loggingFrequent;
 	    this.loggingFrequent = loggingFrequent;
 	    this.minN = minN;
@@ -361,13 +357,7 @@ public class MRBT_MultiCostTrees extends Policy {
 			    if (res[res.length - 1] < subN)
 				res[res.length - 1]++;
 			    else
-			    {
-				boolean doChangMostVmValue = false;
-				double deadlineViolationPercentage = 1.0 - (request.getDeadline() / executionTimeAndCost[0]);
-				if (deadlineViolationPercentage > deadlineViolationPercentageLimit)
-				    doChangMostVmValue = true;
-				done = (res = goBack(res, subN, r, doChangMostVmValue)) == null ? true : false;
-			    }
+				done = (res = goBack(res, subN, r)) == null ? true : false;
 			    // if the new subRes has been scanned by previous
 			    // major branch; just skip it, and go next.
 			} while (!done && !Arrays.asList(res).contains(subN) && res.length == r);
@@ -376,56 +366,29 @@ public class MRBT_MultiCostTrees extends Policy {
 		} while (!done);
 		if (isLeafReached && isQoSViolationInLeaf)
 		{
-		    if(solution!=null)
+		    if (solution != null)
 			return solution;
 		    if (sort == BacktrackingSorts.Cost)
 			request.setLogMessage("Very low budget!");
 		    if (sort == BacktrackingSorts.Performance)
 			request.setLogMessage("Very short deadline!");
-		    Log.print(Thread.currentThread().getName()+"x");
+		    Log.print(Thread.currentThread().getName() + "x");
 		    return null;
 		}
 		// Increase the number of VMs to look into
 		subN++;
 	    }
-	    if(solution!=null)
+	    if (solution != null)
 		return solution;
-	    Log.print(Thread.currentThread().getName()+"x");
+	    Log.print(Thread.currentThread().getName() + "x");
 	    request.setLogMessage("No Solution!");
 	    return null;
 	}
 
-	private Integer[] goBack(Integer[] num, int n, int r, boolean doChangMostVmValue) {
+	private Integer[] goBack(Integer[] num, int n, int r) {
 	    do {
 		Integer[] res;
-		if (isMostDuplicatedEnabled && doChangMostVmValue)
-		{
-		    doChangMostVmValue = false;
-		    int mostVmDuplicates = 1;
-		    int mostVmLastIndex = -1;
-		    for (int i = 0; i < num.length; i++)
-		    {
-			int vmDuplicate = 0;
-			int vmLastIndex = -1;
-			for (int j = 0; j < num.length; j++)
-			    if (num[i] == num[j])
-			    {
-				vmDuplicate++;
-				vmLastIndex = j;
-			    }
-			if (vmDuplicate > (mostVmDuplicates * 1.2) && vmLastIndex != -1)
-			{
-			    mostVmDuplicates = vmDuplicate;
-			    mostVmLastIndex = vmLastIndex;
-			}
-		    }
-		    if (mostVmLastIndex == -1)
-			res = new Integer[num.length - 1];
-		    else
-			res = new Integer[mostVmLastIndex + 1];
-		}
-		else
-		    res = new Integer[num.length - 1];
+		res = new Integer[num.length - 1];
 		if (res.length == 0)
 		    return null;
 		for (int i = 0; i < res.length; i++)
