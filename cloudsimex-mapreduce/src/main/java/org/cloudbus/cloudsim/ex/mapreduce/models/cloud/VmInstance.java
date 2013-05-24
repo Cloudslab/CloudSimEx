@@ -15,6 +15,7 @@ public class VmInstance extends VmType {
     public Request request;
 
     private int experimentNumber;
+    private int workloadNumber;
 
     public VmInstance(VmType vmType, Request request) {
 	super(vmType.name, vmType.vmCostPerHour, vmType.transferringCost, vmType.getMips(), vmType.getNumberOfPes(),
@@ -95,14 +96,24 @@ public class VmInstance extends VmType {
 	return request.getJ();
     }
 
-    public int getexperimentNumber()
+    public int getExperimentNumber()
     {
 	return experimentNumber;
     }
 
-    public void setexperimentNumber(int experimentNumber)
+    public void setExperimentNumber(int experimentNumber)
     {
 	this.experimentNumber = experimentNumber;
+    }
+    
+    public int getWorkloadNumber()
+    {
+	return workloadNumber;
+    }
+
+    public void setWorkloadNumber(int workloadNumber)
+    {
+	this.workloadNumber = workloadNumber;
     }
 
     public UserClass getUserClass()

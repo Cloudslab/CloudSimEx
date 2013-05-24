@@ -18,6 +18,7 @@ public class Task extends Cloudlet {
     public MapReduceEngine mapReduceEngine;
 
     private int experimentNumber;
+    private int workloadNumber;
 
     public Task(String name, int dSize, int mi) {
 	// Cloudlet lengh is 0, it will be updated after we run the algorithm
@@ -133,14 +134,24 @@ public class Task extends Cloudlet {
 	return getRequests().getVmInstance(getVmId()).name;
     }
 
-    public int getexperimentNumber()
+    public int getExperimentNumber()
     {
 	return experimentNumber;
     }
 
-    public void setexperimentNumber(int experimentNumber)
+    public void setExperimentNumber(int experimentNumber)
     {
 	this.experimentNumber = experimentNumber;
+    }
+    
+    public int getWorkloadNumber()
+    {
+	return workloadNumber;
+    }
+
+    public void setWorkloadNumber(int workloadNumber)
+    {
+	this.workloadNumber = workloadNumber;
     }
 
     public String getPolicy()

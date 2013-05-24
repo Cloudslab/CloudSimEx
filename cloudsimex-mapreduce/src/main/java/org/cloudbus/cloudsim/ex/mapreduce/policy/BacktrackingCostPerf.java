@@ -18,9 +18,9 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 
 public class BacktrackingCostPerf extends BacktrackingMultiCost {
-    
+
     public Boolean runAlgorithm(Cloud cloud, Request request) {
-	numCostTrees = 1;
-	return super.runAlgorithm(cloud, request);
+	Backtracking backtracking = new Backtracking();
+	return backtracking.runAlgorithm(cloud, request, 1, true, 2 * 60 * 1000, 3 * 60 * 1000);
     }
 }

@@ -32,6 +32,7 @@ public class Request extends SimEvent {
     public String jobFile;
 
     private int experimentNumber;
+    private int workloadNumber;
 
     private CloudDeploymentModel cloudDeploymentModel = CloudDeploymentModel.Hybrid;
     
@@ -42,13 +43,13 @@ public class Request extends SimEvent {
 	this.submissionTime = submissionTime;
 	this.budget = budget;
 	this.deadline = deadline;
-	this.jobFile = jobFile;
+	this.jobFile = "inputs/profiles/"+jobFile;
 	this.userClass = userClass;
 	mapAndReduceVmProvisionList = new ArrayList<VmInstance>();
 	reduceOnlyVmProvisionList = new ArrayList<VmInstance>();
 	schedulingPlan = new HashMap<Integer, Integer>();
 
-	job = readJobYAML(jobFile);
+	job = readJobYAML(this.jobFile);
 	// Add Extra Map Tasks
 	List<MapTask> copyOfMapTasks = new ArrayList<MapTask>(job.mapTasks);
 	for (MapTask mapTask : copyOfMapTasks) {
@@ -344,14 +345,24 @@ public class Request extends SimEvent {
 	return null;
     }
     
-    public int getexperimentNumber()
+    public int getExperimentNumber()
     {
 	return experimentNumber;
     }
 
-    public void setexperimentNumber(int experimentNumber)
+    public void setExperimentNumber(int experimentNumber)
     {
 	this.experimentNumber = experimentNumber;
+    }
+    
+    public int getWorkloadNumber()
+    {
+	return workloadNumber;
+    }
+
+    public void setWorkloadNumber(int workloadNumber)
+    {
+	this.workloadNumber = workloadNumber;
     }
 
     public int getNumberOfTasks() {

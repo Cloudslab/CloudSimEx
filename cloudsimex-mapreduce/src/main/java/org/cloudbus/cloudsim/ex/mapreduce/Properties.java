@@ -17,7 +17,7 @@ package org.cloudbus.cloudsim.ex.mapreduce;
 public enum Properties {
 
     CLOUD("cloud.file"),
-    EXPERIMENTS("experiments.file");
+    EXPERIMENT("experiment.files");
 
     private String key;
     private Configuration configuration = Configuration.INSTANCE;

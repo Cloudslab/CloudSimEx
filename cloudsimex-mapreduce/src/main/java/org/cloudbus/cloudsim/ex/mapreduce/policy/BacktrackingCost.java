@@ -17,11 +17,10 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 
-public class BacktrackingCost extends BacktrackingMultiCost {
-    
+public class BacktrackingCost extends Policy {
+
     public Boolean runAlgorithm(Cloud cloud, Request request) {
-	numCostTrees = 1;
-	enablePerfTree = false;
-	return super.runAlgorithm(cloud, request);
+	Backtracking backtracking = new Backtracking();
+	return backtracking.runAlgorithm(cloud, request, 1, false, 2 * 60 * 1000, 3 * 60 * 1000);
     }
 }

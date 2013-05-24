@@ -55,35 +55,54 @@ public class Simulation {
 	Log.printLine("==============================================");
 	Log.printLine("");
 
-	Experiments experiments = YamlFile.getRequestsFromYaml(Properties.EXPERIMENTS.getProperty());
+	String[] experimentFilesName = Properties.EXPERIMENT.getProperty().split(",");
+	if (experimentFilesName.length == 0)
+	    experimentFilesName = new String[] { Properties.EXPERIMENT.getProperty() };
 
+	// default.log logging
 	try (InputStream is = Files.newInputStream(Paths.get("custom_log.properties"))) {
 	    props.load(is);
 	}
 	CustomLog.configLogger(props);
-	// VMs
-	CustomLog.redirectToFile("results/vms.csv");
-	CustomLog.printHeader(VmInstance.class, ",", new String[] { "experimentNumber", "RequestId", "J", "UserClass",
-		"Policy", "CloudDeploymentModel", "Id", "Name", "ExecutionTime", "ExecutionCost", "TasksIdAsString" });
-	// TASKs
-	CustomLog.redirectToFile("results/tasks.csv");
-	CustomLog.printHeader(Task.class, ",", new String[] { "experimentNumber", "RequestId", "J", "UserClass",
-		"Policy", "CloudDeploymentModel", "CloudletId", "TaskType", "CloudletLength", "CloudletStatusString",
-		"SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime", "InstanceVmId", "VmType" });
-	// REQUETs
-	CustomLog.redirectToFile("results/requests.csv");
-	CustomLog.printHeader(Request.class, ",", new String[] { "experimentNumber", "Id", "J", "UserClass", "Policy",
+
+	// vms.csv logging
+	CustomLog.redirectToFile("output/logs/vms.csv");
+	CustomLog.printHeader(VmInstance.class, ",",
+		new String[] { "ExperimentNumber", "WorkloadNumber", "RequestId", "J", "UserClass",
+			"Policy", "CloudDeploymentModel", "Id", "Name", "ExecutionTime", "ExecutionCost",
+			"TasksIdAsString" });
+	// tasks.csv logging
+	CustomLog.redirectToFile("output/logs/tasks.csv");
+	CustomLog.printHeader(Task.class, ",", new String[] { "ExperimentNumber", "WorkloadNumber", "RequestId", "J",
+		"UserClass",
+		"Policy", "CloudDeploymentModel", "CloudletId", "TaskType", "CloudletLength",
+		"CloudletStatusString", "SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime",
+		"InstanceVmId", "VmType" });
+	// requests.csv logging
+	CustomLog.redirectToFile("output/logs/requests.csv");
+	CustomLog.printHeader(Request.class, ",", new String[] { "ExperimentNumber", "WorkloadNumber", "Id", "J",
+		"UserClass", "Policy",
 		"CloudDeploymentModel", "Deadline", "Budget", "ExecutionTime", "Cost", "IsDeadlineViolated",
 		"IsBudgetViolated", "NumberOfVMs", "LogMessage" });
-	// Experiments Plotting
-	Experiments.logExperimentsHeader(experiments.experiments.get(0).requests);
 
-	for (int round = 0; round < experiments.experiments.size(); round++) {
-	    // BACK TO DEFAULT LOG FILE
-	    CustomLog.redirectToFile(props.getProperty("FilePath"), true);
-	    CustomLog.printLine("[[[[[[[ Experiment Number: " + round + 1 + " ]]]]]]]");
-	    runSimulationRound(round, experiments.experiments.get(round).userClassAllowedPercentage);
-	    CustomLog.closeAndRemoveHandlers();
+	for (int experimentNumber = 0; experimentNumber < experimentFilesName.length; experimentNumber++)
+	{
+	    String experimentFileName = "experiments/" + experimentFilesName[experimentNumber];
+	    Experiment experiment = YamlFile.getRequestsFromYaml(experimentFileName);
+	    Experiment.currentExperimentName = experimentFilesName[experimentNumber].split(".yaml")[0];
+
+	    // Experiments Plotting
+	    Experiment.logExperimentsHeader(experiment.workloads.get(0).requests);
+
+	    for (int workloadNumber = 0; workloadNumber < experiment.workloads.size(); workloadNumber++) {
+		// BACK TO DEFAULT LOG FILE
+		CustomLog.redirectToFile(props.getProperty("FilePath"), true);
+		CustomLog.printLine("[[[[[[[ Experiment Number: " + (experimentNumber + 1) + " | Workload Number: "
+			+ (workloadNumber + 1) + " ]]]]]]]");
+		runSimulationRound(experimentNumber, experimentFileName, workloadNumber,
+			experiment.workloads.get(workloadNumber).userClassAllowedPercentage);
+		CustomLog.closeAndRemoveHandlers();
+	    }
 	}
     }
 
@@ -92,8 +111,10 @@ public class Simulation {
      * to the log.
      * 
      */
-    private static void runSimulationRound(int experimentNumber, Map<UserClass, Double> userClassAllowedPercentage) {
-	Log.printLine("Starting simulation for experiment number: " + (experimentNumber + 1));
+    private static void runSimulationRound(int experimentNumber, String experimentFileName, int workloadNumber,
+	    Map<UserClass, Double> userClassAllowedPercentage) {
+	Log.printLine("Starting simulation for experiment number: " + (experimentNumber + 1) + " and workload number: "
+		+ (workloadNumber + 1));
 
 	try {
 
@@ -102,25 +123,26 @@ public class Simulation {
 
 	    // Create Broker
 	    engine = new MapReduceEngine();
-	    engine.currentExperimentRoundNumber = experimentNumber + 1;
+	    engine.currentWorkloadNumber = workloadNumber + 1;
+	    engine.currentExperimentNumber = experimentNumber + 1;
 	    Cloud.brokerID = engine.getId();
 
 	    // Create datacentres and cloudlets
-	    cloud = YamlFile.getCloudFromYaml(Properties.CLOUD.getProperty());
+	    cloud = YamlFile.getCloudFromYaml("inputs/" + Properties.CLOUD.getProperty());
 	    cloud.setUserClassAllowedPercentage(userClassAllowedPercentage);
 	    engine.setCloud(cloud);
-	    Experiments Experiments = YamlFile.getRequestsFromYaml(Properties.EXPERIMENTS.getProperty());
+	    Experiment Experiments = YamlFile.getRequestsFromYaml(experimentFileName);
 
-	    requests = Experiments.experiments.get(experimentNumber).requests;
+	    requests = Experiments.workloads.get(workloadNumber).requests;
 
-	    int preExperimentIndex = experimentNumber - 1;
+	    int preExperimentIndex = workloadNumber - 1;
 	    while (requests.requests.size() == 0 && preExperimentIndex >= 0)
 	    {
-		requests = Experiments.experiments.get(preExperimentIndex).requests;
+		requests = Experiments.workloads.get(preExperimentIndex).requests;
 		for (Request request : requests.requests)
 		{
-		    request.policy = Experiments.experiments.get(experimentNumber).policy;
-		    request.setCloudDeploymentModel(Experiments.experiments.get(experimentNumber).cloudDeploymentModel);
+		    request.policy = Experiments.workloads.get(workloadNumber).policy;
+		    request.setCloudDeploymentModel(Experiments.workloads.get(workloadNumber).cloudDeploymentModel);
 		}
 		preExperimentIndex--;
 	    }

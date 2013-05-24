@@ -16,8 +16,8 @@ public class YamlFile extends Yaml {
 	return (Cloud) getObjectFromYaml(fileName);
     }
 
-    public static Experiments getRequestsFromYaml(String fileName) {
-	return (Experiments) getObjectFromYaml(fileName);
+    public static Experiment getRequestsFromYaml(String fileName) {
+	return (Experiment) getObjectFromYaml(fileName);
     }
 
     private static Object getObjectFromYaml(String fileName) {

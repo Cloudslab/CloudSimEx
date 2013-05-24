@@ -1,6 +1,6 @@
 require(ggplot2);
 require(reshape);
-experimentName <- "Deadline_Cost_Algorithm_Public";
+experimentName <- "test2";
 csvData <- read.csv(paste(c(experimentName,".csv"),collapse = ''),header=F);
 rownames(csvData) <- csvData [,1];
 csvData [,1] <- NULL;
@@ -9,11 +9,5 @@ csvData <- as.data.frame(csvData );
 csvData[csvData==-1] = NA;
 #plot(csvData$Deadline, csvData$LFFCostHybrid, type="l");
 csvData <- melt(csvData ,  id = 'Deadline', variable_name = 'Algorithms');
-p <- ggplot(csvData, aes(Deadline,value)) + geom_line(aes(colour = Algorithms));
-png(paste(c(experimentName,".png"),collapse = ''));
-p;
-dev.off();
-pdf(paste(c(experimentName,".pdf"),collapse = ''));
-p;
-dev.off();
-p;
+#ggplot(csvData, aes(Deadline,value)) + geom_line(aes(colour = Algorithms));
+ggplot(csvData, aes(Deadline,value)) + geom_line() + facet_grid(Algorithms ~ .)

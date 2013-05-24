@@ -1,4 +1,0 @@
-experimentNumber,     Id,J,UserClass,Policy,CloudDeploymentModel,Deadline,    Budget,ExecutionTime,      Cost,IsDeadlineViolated,IsBudgetViolated,NumberOfVMs,LogMessage
-               1,      5,J={9-2},     GOLD,BacktrackingCost,              Hybrid,   80000,     15.00,       966.40,      0.00,No (79033.6 seconds) earlier,No ($15.0) savings,          1,By Cost Tree | CostTree forced to accept a solution
-               2,      9,J={9-2},     GOLD,BacktrackingCostPerf,              Hybrid,   80000,     15.00,       966.40,      0.00,No (79033.6 seconds) earlier,No ($15.0) savings,          1,By Cost Tree | By Performance Tree | CostTree forced to accept a solution
-               3,     13,J={9-2},     GOLD,BacktrackingMultiCost,              Hybrid,   80000,     15.00,       966.40,      0.00,No (79033.6 seconds) earlier,No ($15.0) savings,          1,By Cost Tree | By Performance Tree | CostTree forced to accept a solution

@@ -27,7 +27,8 @@ import org.cloudbus.cloudsim.lists.VmList;
 
 public class MapReduceEngine extends DatacenterBroker {
 
-    public int currentExperimentRoundNumber;
+    public int currentWorkloadNumber;
+    public int currentExperimentNumber;
 
     public MapReduceEngine() throws Exception {
 	super("MapReduceEngine");
@@ -394,39 +395,52 @@ public class MapReduceEngine extends DatacenterBroker {
     public void logExecutionSummary() {
 	// set experimentNumber values on Tasks, Requests and VmInstances
 	for (Task task : requests.getAllTasks())
-	    task.setexperimentNumber(currentExperimentRoundNumber);
+	{
+	    task.setWorkloadNumber(currentWorkloadNumber);
+	    task.setExperimentNumber(currentExperimentNumber);
+	}
 	for (Request request : requests.requests) {
 	    for (VmInstance vm : request.mapAndReduceVmProvisionList)
-		vm.setexperimentNumber(currentExperimentRoundNumber);
+	    {
+		vm.setWorkloadNumber(currentWorkloadNumber);
+		vm.setExperimentNumber(currentExperimentNumber);
+	    }
 	    for (VmInstance vm : request.reduceOnlyVmProvisionList)
-		vm.setexperimentNumber(currentExperimentRoundNumber);
+	    {
+		vm.setWorkloadNumber(currentWorkloadNumber);
+		vm.setExperimentNumber(currentExperimentNumber);
+	    }
 	}
 	for (Request request : requests.requests)
-	    request.setexperimentNumber(currentExperimentRoundNumber);
+	{
+	    request.setWorkloadNumber(currentWorkloadNumber);
+	    request.setExperimentNumber(currentExperimentNumber);
+	}
 
-	// TASKS
-	CustomLog.redirectToFile("results/tasks.csv", true);
-	CustomLog.printResultsWithoutHeader(Task.class, ",", new String[] { "experimentNumber", "RequestId", "J",
-		"UserClass", "Policy", "CloudDeploymentModel", "CloudletId", "TaskType", "CloudletLength",
-		"CloudletStatusString", "SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime",
-		"InstanceVmId", "VmType" }, requests.getAllTasks());
-	// VMs
-	CustomLog.redirectToFile("results/vms.csv", true);
+	
+	//vms.csv logging
+	CustomLog.redirectToFile("output/logs/vms.csv", true);
 	for (Request request : requests.requests) {
-	    CustomLog.printResultsWithoutHeader(VmInstance.class, ",", new String[] { "experimentNumber", "RequestId",
+	    CustomLog.printResultsWithoutHeader(VmInstance.class, ",", new String[] { "ExperimentNumber", "WorkloadNumber", "RequestId",
 		    "J", "UserClass", "Policy", "CloudDeploymentModel", "Id", "Name", "ExecutionTime", "ExecutionCost",
 		    "TasksIdAsString" }, request.mapAndReduceVmProvisionList);
-	    CustomLog.printResultsWithoutHeader(VmInstance.class, ",", new String[] { "experimentNumber", "RequestId",
+	    CustomLog.printResultsWithoutHeader(VmInstance.class, ",", new String[] { "ExperimentNumber", "WorkloadNumber", "RequestId",
 		    "J", "UserClass", "Policy", "CloudDeploymentModel", "Id", "Name", "ExecutionTime", "ExecutionCost",
 		    "TasksIdAsString" }, request.reduceOnlyVmProvisionList);
 	}
-	// REQUETS
-	CustomLog.redirectToFile("results/requests.csv", true);
-	CustomLog.printResultsWithoutHeader(Request.class, ",", new String[] { "experimentNumber", "Id", "J",
+	//tasks.csv logging
+		CustomLog.redirectToFile("output/logs/tasks.csv", true);
+		CustomLog.printResultsWithoutHeader(Task.class, ",", new String[] { "ExperimentNumber", "WorkloadNumber", "RequestId", "J",
+			"UserClass", "Policy", "CloudDeploymentModel", "CloudletId", "TaskType", "CloudletLength",
+			"CloudletStatusString", "SubmissionTime", "ExecStartTime", "FinalExecTime", "FinishTime",
+			"InstanceVmId", "VmType" }, requests.getAllTasks());
+	//requests.csv logging
+	CustomLog.redirectToFile("output/logs/requests.csv", true);
+	CustomLog.printResultsWithoutHeader(Request.class, ",", new String[] { "ExperimentNumber", "WorkloadNumber", "Id", "J",
 		"UserClass", "Policy", "CloudDeploymentModel", "Deadline", "Budget", "ExecutionTime", "Cost",
 		"IsDeadlineViolated", "IsBudgetViolated", "NumberOfVMs", "LogMessage" }, requests.requests);
 	// Experiments Plotting
-	Experiments.logExperimentsData(requests);
+	Experiment.logExperimentsData(requests);
 
 	// Java Log Output, which should be disabled from custom_log.properties
 	printInConsole();
