@@ -24,12 +24,16 @@ public class Backtracking {
 	Cost, Performance;
     }
 
+    public enum BacktrackingType {
+	Full, Decision;
+    }
+
     private Request request;
     private boolean enableProgressBar = true;
     private int loggingFrequent = 250000;
 
     public Boolean runAlgorithm(Cloud cloud, Request request, int numCostTrees, boolean enablePerfTree,
-	    long forceToAceeptAnySolutionTimeMillis, long forceToExitTimeMillis) {
+	    long forceToAceeptAnySolutionTimeMillis, long forceToExitTimeMillis, BacktrackingType backtrackingType) {
 	this.request = request;
 	CloudDeploymentModel cloudDeploymentModel = request.getCloudDeploymentModel();
 
@@ -106,7 +110,7 @@ public class Backtracking {
 	/**
 	 * Wait for any of the two trees to finish
 	 */
-	Map<Integer, Integer> selectedSchedulingPlan = null;
+	Integer[] solutionVector = null;
 	boolean forceToAceeptAnySolution = false;
 	try {
 	    while (true)
@@ -114,8 +118,8 @@ public class Backtracking {
 		long currentRunningTime = System.currentTimeMillis();
 		if (!backTrackingCostTreeThreads.get(0).isAlive())
 		{
-		    selectedSchedulingPlan = checkCostTrees(backTrackingCostTrees);
-		    if (selectedSchedulingPlan != null)
+		    solutionVector = checkCostTrees(backTrackingCostTrees);
+		    if (solutionVector != null)
 			break;
 		    else
 			forceToAceeptAnySolution = true;
@@ -125,30 +129,37 @@ public class Backtracking {
 		    if (forceToAceeptAnySolution
 			    || currentRunningTime - costTreeRunningTime >= forceToAceeptAnySolutionTimeMillis)
 		    {
-			selectedSchedulingPlan = checkCostTrees(backTrackingCostTrees);
-			if (selectedSchedulingPlan != null)
+			solutionVector = checkCostTrees(backTrackingCostTrees);
+			if (solutionVector != null)
+			{
+			    request.setLogMessage("Forced to accept a solution");
 			    break;
+			}
 			checkPerfTree = true;
 		    }
 		}
 		if (checkPerfTree)
 		{
-		    selectedSchedulingPlan = checkCostTrees(backTrackingCostTrees);
-		    if (selectedSchedulingPlan != null)
+		    solutionVector = checkCostTrees(backTrackingCostTrees);
+		    if (solutionVector != null)
+		    {
+			request.setLogMessage("Forced to accept a solution");
 			break;
+		    }
 		    if (!backTrackingPerfTreeThread.isAlive())
 		    {
-			selectedSchedulingPlan = backTrackingPerfTree.solution;
+			solutionVector = backTrackingPerfTree.getSolutionVector();
+			request.setLogMessage("Forced to accept a solution");
 			break;
 		    }
 		}
 
 		if (currentRunningTime - costTreeRunningTime >= forceToExitTimeMillis)
 		{
-		    selectedSchedulingPlan = checkCostTrees(backTrackingCostTrees);
-		    if (selectedSchedulingPlan == null && backTrackingPerfTree != null
-			    && backTrackingPerfTree.solution != null)
-			selectedSchedulingPlan = backTrackingPerfTree.solution;
+		    solutionVector = checkCostTrees(backTrackingCostTrees);
+		    if (solutionVector == null && backTrackingPerfTree != null
+			    && backTrackingPerfTree.solutionVector != null)
+			solutionVector = backTrackingPerfTree.solutionVector;
 		    request.setLogMessage("Force To Exit");
 		    break;
 		}
@@ -166,14 +177,22 @@ public class Backtracking {
 	    if (enableProgressBar)
 		Log.printLine("]");
 	}
-
-	if (selectedSchedulingPlan == null)
+	if (solutionVector == null)
+	{
+	    CustomLog.printLine("Solution: Could't find a solution");
 	    return false;
+	}
+	PredictionEngine predictionEngine = new PredictionEngine();
+	Map<Integer, Integer> selectedSchedulingPlan = predictionEngine.vectorToScheduleingPlan(solutionVector, nVMs,
+		rTasks);
+	double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
+		selectedSchedulingPlan, nVMs, request.job);
+	CustomLog.printLine("Solution: " + Arrays.toString(solutionVector) + " : "
+		+ Arrays.toString(executionTimeAndCost));
 
 	// 1- Provisioning
 	ArrayList<ArrayList<VmInstance>> provisioningPlans = new PredictionEngine().getProvisioningPlan(
-		selectedSchedulingPlan, nVMs,
-		request.job);
+		selectedSchedulingPlan, nVMs, request.job);
 	request.mapAndReduceVmProvisionList = provisioningPlans.get(0);
 	request.reduceOnlyVmProvisionList = provisioningPlans.get(1);
 
@@ -183,26 +202,79 @@ public class Backtracking {
 	return true;
     }
 
-    private Map<Integer, Integer> checkCostTrees(List<BackTrackingTree> backTrackingCostTrees) {
+    private Integer[] checkCostTrees(List<BackTrackingTree> backTrackingCostTrees) {
 	for (int i = 0; i < backTrackingCostTrees.size(); i++)
 	{
-	    if (backTrackingCostTrees.get(i).getSolution() != null)
+	    if (backTrackingCostTrees.get(i).getSolutionVector() != null)
 	    {
 		double minCost = backTrackingCostTrees.get(i).getSolutionCost();
-		Map<Integer, Integer> solution = backTrackingCostTrees.get(i).getSolution();
-		for (int j = 0; j < backTrackingCostTrees.size(); j++)
+		Integer[] solutionVector = backTrackingCostTrees.get(i).getSolutionVector();
+		for (int j = i + 1; j < backTrackingCostTrees.size(); j++)
 		{
 		    if (backTrackingCostTrees.get(j).getSolutionCost() < minCost)
 		    {
 			minCost = backTrackingCostTrees.get(j).getSolutionCost();
-			solution = backTrackingCostTrees.get(j).getSolution();
+			solutionVector = backTrackingCostTrees.get(j).getSolutionVector();
 		    }
 		}
-		request.setLogMessage("CostTree forced to accept a solution");
-		return solution;
+		return solutionVector;
 	    }
 	}
 	return null;
+    }
+
+    public class BackTrackingDecisionTree implements Runnable {
+	private PredictionEngine predictionEngine;
+	private List<VmInstance> nVMs;
+	private List<Task> rTasks;
+	// Support only Cost
+	// private BacktrackingSorts sort;
+	private Map<Integer, Integer> solution = null;
+	private double solutionCost = Double.MAX_VALUE;
+	private Integer[] solutionVector = null;
+	private int logginCounter;
+	private int loggingFrequent;
+
+	// Support only one tree
+	// private int minN;
+	// private int maxN;
+
+	public BackTrackingDecisionTree(List<VmInstance> nVMs, List<Task> rTasks, int loggingFrequent)
+	{
+	    predictionEngine = new PredictionEngine();
+	    this.nVMs = nVMs;
+	    this.rTasks = rTasks;
+	    logginCounter = loggingFrequent;
+	    this.loggingFrequent = loggingFrequent;
+	}
+
+	public synchronized double getSolutionCost() {
+	    return solutionCost;
+	}
+
+	public synchronized Integer[] getSolutionVector() {
+	    return solutionVector;
+	}
+
+	public synchronized void setSolutionCost(double solutionCost) {
+	    this.solutionCost = solutionCost;
+	}
+
+	public synchronized void setSolutionVector(Integer[] solutionVector) {
+	    this.solutionVector = solutionVector.clone();
+	}
+
+	@Override
+	public void run() {
+	    solution = getFirstSolutionOfBackTrackingDecision();
+	    request.setLogMessage("By Decision Tree");
+	}
+
+	private Map<Integer, Integer> getFirstSolutionOfBackTrackingDecision() {
+	    // TODO Auto-generated method stub
+	    return null;
+	}
+
     }
 
     /**
@@ -215,7 +287,6 @@ public class Backtracking {
 	private List<VmInstance> nVMs;
 	private List<Task> rTasks;
 	private BacktrackingSorts sort;
-	private Map<Integer, Integer> solution = null;
 	private double solutionCost = Double.MAX_VALUE;
 	private Integer[] solutionVector = null;
 	private int logginCounter;
@@ -237,21 +308,20 @@ public class Backtracking {
 	    this.maxN = maxN;
 	}
 
-	public Map<Integer, Integer> getSolution() {
-	    return solution;
-	}
-
-	public void setSolution(Map<Integer, Integer> solution) {
-	    this.solution = solution;
-	}
-	
-	
-	public double getSolutionCost() {
+	public synchronized double getSolutionCost() {
 	    return solutionCost;
 	}
 
-	public void setSolutionCost(double solutionCost) {
+	public synchronized Integer[] getSolutionVector() {
+	    return solutionVector;
+	}
+
+	public synchronized void setSolutionCost(double solutionCost) {
 	    this.solutionCost = solutionCost;
+	}
+
+	public synchronized void setSolutionVector(Integer[] solutionVector) {
+	    this.solutionVector = solutionVector.clone();
 	}
 
 	public void run() {
@@ -273,11 +343,12 @@ public class Backtracking {
 		    }
 		});
 
-	    solution = getFirstSolutionOfBackTracking(rTasks.size());
+	    getFirstSolutionOfBackTracking();
 	    request.setLogMessage("By " + sort + " Tree");
 	}
 
-	private Map<Integer, Integer> getFirstSolutionOfBackTracking(int r) {
+	private void getFirstSolutionOfBackTracking() {
+	    int r = rTasks.size();
 	    int subN = minN;
 	    while (subN <= maxN)
 	    {
@@ -288,31 +359,31 @@ public class Backtracking {
 		boolean isQoSViolationInLeaf = true;
 		boolean isLeafReached = false;
 
-		Integer[] res = new Integer[] { 1 };
+		Integer[] currentVector = new Integer[] { 1 };
 		boolean done;
 		do {
 		    done = false;
 		    // Get the execution time and cost of current node (res)
-		    Map<Integer, Integer> schedulingPlan = predictionEngine.vectorToScheduleingPlan(res, nVMs,
+		    Map<Integer, Integer> schedulingPlan = predictionEngine.vectorToScheduleingPlan(currentVector, nVMs,
 			    rTasks);
 		    double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
 			    schedulingPlan, nVMs, request.job);
 		    // Logging
-		    if (logginCounter >= loggingFrequent)
+		    if (logginCounter >= loggingFrequent && currentVector.length == r)
 		    // if(Thread.currentThread().getName().equals("C1"))
 		    {
 			CustomLog.printLine(Thread.currentThread().getName() + " n=" + subN + " :"
-				+ Arrays.toString(res) + "->"
-				+ (r - res.length) + " : "
+				+ Arrays.toString(currentVector) + "->"
+				+ (r - currentVector.length) + " : "
 				+ Arrays.toString(executionTimeAndCost));
 			logginCounter = 0;
 		    }
 		    // Record that there is a QoS violation on a leaf, so we
 		    // terminate the tree and return "very low budget!" or
 		    // "very short deadline!"
-		    if (!isLeafReached && res.length == r)
+		    if (!isLeafReached && currentVector.length == r)
 			isLeafReached = true;
-		    if (isQoSViolationInLeaf && res.length == r)
+		    if (isQoSViolationInLeaf && currentVector.length == r)
 		    {
 			if (sort == BacktrackingSorts.Cost && executionTimeAndCost[1] <= request.getBudget())
 			    isQoSViolationInLeaf = false;
@@ -322,14 +393,14 @@ public class Backtracking {
 
 		    // If this is a new major branch, and we have a solution
 		    // from the previous major branch, just take it.
-		    if (solution != null && Arrays.equals(res, new Integer[] { 1 }))
+		    if (getSolutionVector() != null && Arrays.equals(currentVector, new Integer[] { 1 }))
 		    {
 			CustomLog.printLine(Thread.currentThread().getName() + " n=" + subN + " :"
-				+ Arrays.toString(solutionVector) + "->"
-				+ (r - solutionVector.length) + " : "
+				+ Arrays.toString(getSolutionVector()) + "->"
+				+ (r - getSolutionVector().length) + " : "
 				+ Arrays.toString(executionTimeAndCost)
 				+ " is the returned solution");
-			return solution;
+			return;
 		    }
 
 		    // Save the solution if we are in the leaf and it does not
@@ -337,59 +408,58 @@ public class Backtracking {
 		    // better than the previous one (if any)
 		    if (executionTimeAndCost[1] <= request.getBudget()
 			    && executionTimeAndCost[0] <= request.getDeadline()
-			    && res.length == r
-			    && (solution == null || executionTimeAndCost[1] < solutionCost))
+			    && currentVector.length == r
+			    && (getSolutionVector() == null || executionTimeAndCost[1] < solutionCost))
 		    {
 			CustomLog.printLine(Thread.currentThread().getName() + " n=" + subN + " :"
-				+ Arrays.toString(res) + "->"
-				+ (r - res.length) + " : " + Arrays.toString(executionTimeAndCost)
+				+ Arrays.toString(currentVector) + "->"
+				+ (r - currentVector.length) + " : " + Arrays.toString(executionTimeAndCost)
 				+ " is a solution");
-			solution = schedulingPlan;
 			solutionCost = executionTimeAndCost[1];
-			solutionVector = res;
+			setSolutionVector(currentVector);
 			Log.print(Thread.currentThread().getName());
 		    }
 
+		    boolean forceNextOrBack = false;
 		    // If the budget and deadline are not violated, and we are
 		    // not in a leaf -> go deep
 		    if (executionTimeAndCost[1] <= request.getBudget()
 			    && executionTimeAndCost[0] <= request.getDeadline()
-			    && res.length != r)
-			res = goDeeper(res, subN);
+			    && currentVector.length != r)
+			currentVector = goDeeper(currentVector, subN);
 		    // Come here if the node does violate the budget and/or the
 		    // deadline, or we are in the leaf
 		    else
+			forceNextOrBack = true;
+		    // if the new subRes has been scanned by previous
+		    // major branch; just skip it, and go next.
+		    while (forceNextOrBack || (!done && !Arrays.asList(currentVector).contains(subN) && currentVector.length == r))
 		    {
-			do {
-			    if (res[res.length - 1] < subN)
-				res[res.length - 1]++;
-			    else
-				done = (res = goBack(res, subN, r)) == null ? true : false;
-			    // if the new subRes has been scanned by previous
-			    // major branch; just skip it, and go next.
-			} while (!done && !Arrays.asList(res).contains(subN) && res.length == r);
+			forceNextOrBack = false;
+
+			if (currentVector[currentVector.length - 1] < subN)
+			    currentVector[currentVector.length - 1]++;
+			else
+			    done = (currentVector = goBack(currentVector, subN, r)) == null ? true : false;
 		    }
+
 		    logginCounter++;
 		} while (!done);
 		if (isLeafReached && isQoSViolationInLeaf)
 		{
-		    if (solution != null)
-			return solution;
 		    if (sort == BacktrackingSorts.Cost)
 			request.setLogMessage("Very low budget!");
 		    if (sort == BacktrackingSorts.Performance)
 			request.setLogMessage("Very short deadline!");
 		    Log.print(Thread.currentThread().getName() + "x");
-		    return null;
+		    return;
 		}
 		// Increase the number of VMs to look into
 		subN++;
 	    }
-	    if (solution != null)
-		return solution;
 	    Log.print(Thread.currentThread().getName() + "x");
 	    request.setLogMessage("No Solution!");
-	    return null;
+	    return;
 	}
 
 	private Integer[] goBack(Integer[] num, int n, int r) {
