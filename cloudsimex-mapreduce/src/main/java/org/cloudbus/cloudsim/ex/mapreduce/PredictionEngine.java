@@ -25,7 +25,7 @@ public class PredictionEngine
 
     public PredictionEngine(Request request, Cloud cloud)
     {
-	this.request = request;
+	this.request = request.clone();
 	this.cloud = cloud;
     }
 
@@ -40,20 +40,13 @@ public class PredictionEngine
     {
 	ArrayList<ArrayList<VmInstance>> provisioningPlans = getProvisioningPlan(schedulingPlanInput, nVMs, request.job);
 
-	// If this is leaf (complete solution) include data trasfere time
-	boolean includeDataTransferTimes = false;
 	int rTasks = request.job.mapTasks.size() + request.job.reduceTasks.size();
-	if (schedulingPlanInput.size() == rTasks)
-	{
-	    request = request.clone();
 	    // 1- Provisioning
 	    request.mapAndReduceVmProvisionList = provisioningPlans.get(0);
 	    request.reduceOnlyVmProvisionList = provisioningPlans.get(1);
 
 	    // 2- Scheduling
 	    request.schedulingPlan = schedulingPlanInput;
-	    includeDataTransferTimes = true;
-	}
 
 	// Get the mapPhaseFinishTime
 	double mapPhaseFinishTime = 0;
@@ -70,8 +63,7 @@ public class PredictionEngine
 		    }
 		}
 
-		double totalExecutionTimeInVmForMapOnly = getTotalExecutionTimeForTasksOnVm(mapTasks, vm,
-			includeDataTransferTimes, request);
+		double totalExecutionTimeInVmForMapOnly = getTotalExecutionTimeForTasksOnVm(mapTasks, vm);
 		if (totalExecutionTimeInVmForMapOnly > mapPhaseFinishTime)
 		    mapPhaseFinishTime = totalExecutionTimeInVmForMapOnly;
 	    }
@@ -101,7 +93,7 @@ public class PredictionEngine
 		}
 
 		double totalExecutionTimeInVm = mapPhaseFinishTime
-			+ getTotalExecutionTimeForTasksOnVm(reduceTasks, vm, includeDataTransferTimes, request);
+			+ getTotalExecutionTimeForTasksOnVm(reduceTasks, vm);
 		if (totalExecutionTimeInVm > maxExecutionTime)
 		    maxExecutionTime = totalExecutionTimeInVm;
 		totalCost += getTotalCostOnVm(mapTasks, vm, totalExecutionTimeInVm);
@@ -111,12 +103,11 @@ public class PredictionEngine
 	return new double[] { Double.valueOf(df. format(maxExecutionTime)), Double.valueOf(df.format(totalCost)) };
     }
 
-    private double getTotalExecutionTimeForTasksOnVm(ArrayList<Task> tasks, VmInstance vm,
-	    boolean includeDataTransferTimes, Request request)
+    private double getTotalExecutionTimeForTasksOnVm(ArrayList<Task> tasks, VmInstance vm)
     {
 	double totalExecutionTime = 0.0;
 	for (Task task : tasks)
-	    if (includeDataTransferTimes && task instanceof MapTask)
+	    if (task instanceof MapTask)
 		totalExecutionTime += dataTransferTimeFromTheDataSource((MapTask) task)
 			+ ((double) task.mi / vm.getMips()) + dataTransferTimeToAllReducers((MapTask) task);
 	    else
@@ -151,15 +142,16 @@ public class PredictionEngine
 	return 0.0;
     }
 
-    public double dataTransferTimeToAllReducers(MapTask task)
+    public double dataTransferTimeToAllReducers(MapTask mapTask)
     {
 	double transferTime = 0.0;
-	VmInstance vm = request.getProvisionedVmFromTaskId(task.getCloudletId());
+	VmInstance vm = request.getProvisionedVmFromTaskId(mapTask.getCloudletId());
 
 	// For each reduce get the transfer Time
 	for (ReduceTask reduceTask : request.job.reduceTasks)
 	{
-	    transferTime += dataTransferTimeToOneReducer(reduceTask, task, vm);
+	    if(request.schedulingPlan.containsKey(reduceTask.getCloudletId()))
+		transferTime += dataTransferTimeToOneReducer(reduceTask, mapTask, vm);
 	}
 
 	return transferTime;
