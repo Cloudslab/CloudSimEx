@@ -12,6 +12,6 @@ workloads:
     [
      #[Submission Time, Deadline, Budget, Job, user class]
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [1.0, 110, 2.5, MapReduce_9_2.yaml, GOLD],
+     [1.0, 120, 2.5, MapReduce_9_2.yaml, GOLD],
     ]
    ]

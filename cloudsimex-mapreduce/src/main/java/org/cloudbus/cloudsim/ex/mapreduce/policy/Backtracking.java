@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,12 +30,14 @@ public class Backtracking {
     }
 
     private Request request;
+    private Cloud cloud;
     private boolean enableProgressBar = true;
     private int loggingFrequent = 250000;
 
     public Boolean runAlgorithm(Cloud cloud, Request request, int numCostTrees, boolean enablePerfTree,
 	    long forceToAceeptAnySolutionTimeMillis, long forceToExitTimeMillis, BacktrackingType backtrackingType) {
 	this.request = request;
+	this.cloud = cloud;
 	CloudDeploymentModel cloudDeploymentModel = request.getCloudDeploymentModel();
 
 	// Fill nVMs
@@ -182,17 +185,16 @@ public class Backtracking {
 	    CustomLog.printLine("Solution: Could't find a solution");
 	    return false;
 	}
-	PredictionEngine predictionEngine = new PredictionEngine();
+	PredictionEngine predictionEngine = new PredictionEngine(request, cloud);
 	Map<Integer, Integer> selectedSchedulingPlan = predictionEngine.vectorToScheduleingPlan(solutionVector, nVMs,
 		rTasks);
 	double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
-		selectedSchedulingPlan, nVMs, request.job);
+		selectedSchedulingPlan, nVMs);
 	CustomLog.printLine("Solution: " + Arrays.toString(solutionVector) + " : "
 		+ Arrays.toString(executionTimeAndCost));
 
 	// 1- Provisioning
-	ArrayList<ArrayList<VmInstance>> provisioningPlans = new PredictionEngine().getProvisioningPlan(
-		selectedSchedulingPlan, nVMs, request.job);
+	ArrayList<ArrayList<VmInstance>> provisioningPlans = predictionEngine.getProvisioningPlan(selectedSchedulingPlan, nVMs, request.job);
 	request.mapAndReduceVmProvisionList = provisioningPlans.get(0);
 	request.reduceOnlyVmProvisionList = provisioningPlans.get(1);
 
@@ -241,7 +243,7 @@ public class Backtracking {
 
 	public BackTrackingDecisionTree(List<VmInstance> nVMs, List<Task> rTasks, int loggingFrequent)
 	{
-	    predictionEngine = new PredictionEngine();
+	    predictionEngine = new PredictionEngine(request, cloud);
 	    this.nVMs = nVMs;
 	    this.rTasks = rTasks;
 	    logginCounter = loggingFrequent;
@@ -298,7 +300,7 @@ public class Backtracking {
 	public BackTrackingTree(List<VmInstance> nVMs, List<Task> rTasks, BacktrackingSorts sort, int loggingFrequent,
 		int minN, int maxN)
 	{
-	    predictionEngine = new PredictionEngine();
+	    predictionEngine = new PredictionEngine(request, cloud);
 	    this.nVMs = nVMs;
 	    this.rTasks = rTasks;
 	    this.sort = sort;
@@ -367,7 +369,7 @@ public class Backtracking {
 		    Map<Integer, Integer> schedulingPlan = predictionEngine.vectorToScheduleingPlan(currentVector, nVMs,
 			    rTasks);
 		    double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
-			    schedulingPlan, nVMs, request.job);
+			    schedulingPlan, nVMs);
 		    // Logging
 		    if (logginCounter >= loggingFrequent && currentVector.length == r)
 		    // if(Thread.currentThread().getName().equals("C1"))

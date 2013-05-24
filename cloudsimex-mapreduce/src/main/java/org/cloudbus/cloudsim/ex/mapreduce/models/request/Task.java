@@ -31,6 +31,8 @@ public class Task extends Cloudlet {
 	isFinished = false;
 	this.mi = mi;
 	this.dSize = dSize;
+	
+	
 
 	this.setUserId(Cloud.brokerID);
     }
@@ -47,7 +49,7 @@ public class Task extends Cloudlet {
 
     public Request getCurrentRequest()
     {
-	return getRequests().getRequestFromId(requestId);
+    	return getRequests().getRequestFromId(requestId);
     }
 
     public VmInstance getCurrentVmInstance()

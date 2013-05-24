@@ -35,7 +35,7 @@ public class Request extends SimEvent {
     private int workloadNumber;
 
     private CloudDeploymentModel cloudDeploymentModel = CloudDeploymentModel.Hybrid;
-    
+
     private String logMessage = "";
 
     public Request(double submissionTime, int deadline, double budget, String jobFile, UserClass userClass) {
@@ -43,7 +43,7 @@ public class Request extends SimEvent {
 	this.submissionTime = submissionTime;
 	this.budget = budget;
 	this.deadline = deadline;
-	this.jobFile = "inputs/profiles/"+jobFile;
+	this.jobFile = "inputs/profiles/" + jobFile;
 	this.userClass = userClass;
 	mapAndReduceVmProvisionList = new ArrayList<VmInstance>();
 	reduceOnlyVmProvisionList = new ArrayList<VmInstance>();
@@ -66,6 +66,27 @@ public class Request extends SimEvent {
 	    reduceTask.requestId = id;
 	    reduceTask.updateDSize(this);
 	}
+    }
+
+    public Request(double submissionTime, int deadline, double budget, Job job, String jobFile, UserClass userClass,
+	    List<VmInstance> mapAndReduceVmProvisionList, List<VmInstance> reduceOnlyVmProvisionList,
+	    Map<Integer, Integer> schedulingPlan, int experimentNumber, int workloadNumber,
+	    CloudDeploymentModel cloudDeploymentModel, String logMessage)
+    {
+	id = Id.pollId(Request.class);
+	this.submissionTime = submissionTime;
+	this.budget = budget;
+	this.deadline = deadline;
+	this.job = job;
+	this.jobFile = jobFile;
+	this.userClass = userClass;
+	this.mapAndReduceVmProvisionList = mapAndReduceVmProvisionList;
+	this.reduceOnlyVmProvisionList = reduceOnlyVmProvisionList;
+	this.schedulingPlan = schedulingPlan;
+	this.experimentNumber = experimentNumber;
+	this.workloadNumber = workloadNumber;
+	this.cloudDeploymentModel = cloudDeploymentModel;
+	this.logMessage = logMessage;
     }
 
     public int getId() {
@@ -157,18 +178,16 @@ public class Request extends SimEvent {
     public void setJobFile(String jobFile) {
 	this.jobFile = jobFile;
     }
-    
-    
 
     public String getLogMessage() {
-        return logMessage;
+	return logMessage;
     }
 
     public synchronized void setLogMessage(String logMessage) {
-	if(this.logMessage.equals(""))
+	if (this.logMessage.equals(""))
 	    this.logMessage = logMessage;
 	else
-	    this.logMessage += " | "+logMessage;
+	    this.logMessage += " | " + logMessage;
     }
 
     public CloudDeploymentModel getCloudDeploymentModel() {
@@ -205,7 +224,7 @@ public class Request extends SimEvent {
 
     public double getCost()
     {
-	if(mapAndReduceVmProvisionList.size() == 0 && reduceOnlyVmProvisionList.size() == 0)
+	if (mapAndReduceVmProvisionList.size() == 0 && reduceOnlyVmProvisionList.size() == 0)
 	    return -1;
 	double totalCost = 0.0;
 	for (VmInstance vm : mapAndReduceVmProvisionList)
@@ -218,9 +237,9 @@ public class Request extends SimEvent {
 
     public String getIsDeadlineViolated()
     {
-	if(getExecutionTime() == -1)
+	if (getExecutionTime() == -1)
 	    return "YES! FAILED TO RUN";
-	
+
 	if (getExecutionTime() > deadline)
 	    return "YES! (" + (getExecutionTime() - deadline) + " seconds) over deadline";
 	return "No (" + (deadline - getExecutionTime()) + " seconds) earlier";
@@ -228,20 +247,20 @@ public class Request extends SimEvent {
 
     public String getIsBudgetViolated()
     {
-	if(getCost() == -1)
+	if (getCost() == -1)
 	    return "YES! FAILED TO RUN";
-	
+
 	if (getCost() > budget)
 	    return "YES! ($" + (getCost() - budget) + ") over budget";
 	return "No ($" + (budget - getCost()) + ") savings";
-	
+
     }
-    
+
     public boolean getIsDeadlineViolatedBoolean()
     {
-	if(getExecutionTime() == -1)
+	if (getExecutionTime() == -1)
 	    return true;
-	
+
 	if (getExecutionTime() > deadline)
 	    return true;
 	return false;
@@ -249,13 +268,13 @@ public class Request extends SimEvent {
 
     public boolean getIsBudgetViolatedBoolean()
     {
-	if(getCost() == -1)
+	if (getCost() == -1)
 	    return true;
-	
+
 	if (getCost() > budget)
 	    return true;
 	return false;
-	
+
     }
 
     public String getJ()
@@ -344,7 +363,7 @@ public class Request extends SimEvent {
 
 	return null;
     }
-    
+
     public int getExperimentNumber()
     {
 	return experimentNumber;
@@ -354,7 +373,7 @@ public class Request extends SimEvent {
     {
 	this.experimentNumber = experimentNumber;
     }
-    
+
     public int getWorkloadNumber()
     {
 	return workloadNumber;
@@ -367,6 +386,13 @@ public class Request extends SimEvent {
 
     public int getNumberOfTasks() {
 	return job.mapTasks.size() + job.reduceTasks.size();
+    }
+
+    @Override
+    public Request clone() {
+	return new Request(submissionTime, deadline, budget, job, jobFile, userClass,
+		mapAndReduceVmProvisionList, reduceOnlyVmProvisionList,
+		schedulingPlan, experimentNumber, workloadNumber, cloudDeploymentModel, logMessage);
     }
 
 }

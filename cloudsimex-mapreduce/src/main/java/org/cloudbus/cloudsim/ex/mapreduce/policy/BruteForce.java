@@ -23,7 +23,7 @@ public class BruteForce
 
     private List<VmInstance> nVMs = new ArrayList<VmInstance>();
     private List<Task> rTasks = new ArrayList<Task>();
-    PredictionEngine predictionEngine = new PredictionEngine();
+    PredictionEngine predictionEngine;
     private long forceToExitTimeMillis = 3 * 60 * 1000;// 3 min
     private Request request;
     private long startTime;
@@ -32,6 +32,7 @@ public class BruteForce
     {
 	CloudDeploymentModel cloudDeploymentModel = request.getCloudDeploymentModel();
 	this.request = request;
+	predictionEngine = new PredictionEngine(request, cloud);
 
 	// Fill nVMs
 	int numTasks = request.job.mapTasks.size() + request.job.reduceTasks.size();
@@ -145,7 +146,7 @@ public class BruteForce
 	{
 	    this.schedulingPlan = schedulingPlan;
 	    double[] predictedExecutionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
-		    schedulingPlan, nVMs, job);
+		    schedulingPlan, nVMs);
 	    ExecutionTime = predictedExecutionTimeAndCost[0];
 	    Cost = predictedExecutionTimeAndCost[1];
 	}
