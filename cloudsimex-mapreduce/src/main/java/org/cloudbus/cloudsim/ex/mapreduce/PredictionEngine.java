@@ -40,18 +40,17 @@ public class PredictionEngine
     {
 	ArrayList<ArrayList<VmInstance>> provisioningPlans = getProvisioningPlan(schedulingPlanInput, nVMs, request.job);
 
-	int rTasks = request.job.mapTasks.size() + request.job.reduceTasks.size();
-	    // 1- Provisioning
-	    request.mapAndReduceVmProvisionList = provisioningPlans.get(0);
-	    request.reduceOnlyVmProvisionList = provisioningPlans.get(1);
+	// 1- Provisioning
+	request.mapAndReduceVmProvisionList = provisioningPlans.get(0);
+	request.reduceOnlyVmProvisionList = provisioningPlans.get(1);
 
-	    // 2- Scheduling
-	    request.schedulingPlan = schedulingPlanInput;
+	// 2- Scheduling
+	request.schedulingPlan = schedulingPlanInput;
 
 	// Get the mapPhaseFinishTime
 	double mapPhaseFinishTime = 0;
-	for (ArrayList<VmInstance> BothMapAndReduceAndReduceOnlyVms : provisioningPlans) {
-	    for (VmInstance vm : BothMapAndReduceAndReduceOnlyVms) {
+	for (ArrayList<VmInstance> mapAndReduce_andReduceOnlyVms : provisioningPlans) {
+	    for (VmInstance vm : mapAndReduce_andReduceOnlyVms) {
 		// Get a list of all map tasks that scheduled to run in this vm
 		ArrayList<Task> mapTasks = new ArrayList<Task>();
 		for (Entry<Integer, Integer> schedulingPlan : schedulingPlanInput.entrySet()) {
@@ -100,7 +99,7 @@ public class PredictionEngine
 	    }
 	}
 
-	return new double[] { Double.valueOf(df. format(maxExecutionTime)), Double.valueOf(df.format(totalCost)) };
+	return new double[] { Double.valueOf(df.format(maxExecutionTime)), Double.valueOf(df.format(totalCost)) };
     }
 
     private double getTotalExecutionTimeForTasksOnVm(ArrayList<Task> tasks, VmInstance vm)
@@ -150,7 +149,7 @@ public class PredictionEngine
 	// For each reduce get the transfer Time
 	for (ReduceTask reduceTask : request.job.reduceTasks)
 	{
-	    if(request.schedulingPlan.containsKey(reduceTask.getCloudletId()))
+	    if (request.schedulingPlan.containsKey(reduceTask.getCloudletId()))
 		transferTime += dataTransferTimeToOneReducer(reduceTask, mapTask, vm);
 	}
 
@@ -201,8 +200,7 @@ public class PredictionEngine
 	double vmCost = 0;// VMC
 	double dataTransferCostToReduceVms = 0;// DC-out
 
-	for (Task task : mapTasks) {
-	    MapTask mapTask = (MapTask) task;
+	for (MapTask mapTask : mapTasks) {
 	    dataTransferCostFromTheDataSource += mapTask.dataTransferCostFromTheDataSource();
 	    dataTransferCostToReduceVms += mapTask.dataTransferCostToAllReducers(vm);
 	}
@@ -251,14 +249,28 @@ public class PredictionEngine
 	return provisioningPlans;
     }
 
-    public Map<Integer, Integer> vectorToScheduleingPlan(Integer[] res, List<VmInstance> nVMs, List<Task> rTasks)
+    public Map<Integer, Integer> vectorToScheduleingPlan(Integer[] vector, List<VmInstance> nVMs, List<Task> rTasks)
     {
 	Map<Integer, Integer> scheduleingPlan = new HashMap<Integer, Integer>();
 
-	for (int i = 0; i < res.length; i++)
+	for (int i = 0; i < vector.length; i++)
 	{
 	    int TaskId = rTasks.get(i).getCloudletId();
-	    int VmId = nVMs.get(res[i] - 1).getId();
+	    int VmId = nVMs.get(vector[i] - 1).getId();
+	    scheduleingPlan.put(TaskId, VmId);
+	}
+
+	return scheduleingPlan;
+    }
+
+    public Map<Integer, Integer> vectorToScheduleingPlan(Integer[] vector, List<Task> rTasks)
+    {
+	Map<Integer, Integer> scheduleingPlan = new HashMap<Integer, Integer>();
+
+	for (int i = 0; i < vector.length; i++)
+	{
+	    int TaskId = rTasks.get(i).getCloudletId();
+	    int VmId = vector[i];
 	    scheduleingPlan.put(TaskId, VmId);
 	}
 

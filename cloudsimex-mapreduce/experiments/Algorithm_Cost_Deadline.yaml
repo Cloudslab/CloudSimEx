@@ -3,7 +3,7 @@
 workloads:
  - !!org.cloudbus.cloudsim.ex.mapreduce.Workload
    [
-    LFFCost, Hybrid,
+    BacktrackingMultiCost, Hybrid,
       {
         GOLD: 100.0,
         SILVER: 60.0,
@@ -11,8 +11,6 @@ workloads:
       },
     [
      #[Submission Time, Deadline, Budget, Job, user class]
-     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [100000, 110, 2.5, MapReduce_9_2.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
      [200000, 120, 2.5, MapReduce_9_2.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
@@ -77,6 +75,17 @@ workloads:
  - !!org.cloudbus.cloudsim.ex.mapreduce.Workload
    [
     BacktrackingMultiCost, Hybrid,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Workload
+   [
+    BacktrackingDecision, Hybrid,
       {
         GOLD: 100.0,
         SILVER: 60.0,

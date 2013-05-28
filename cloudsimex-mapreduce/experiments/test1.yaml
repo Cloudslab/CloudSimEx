@@ -3,7 +3,7 @@
 workloads:
  - !!org.cloudbus.cloudsim.ex.mapreduce.Workload
    [
-    BacktrackingMultiCost, Hybrid,
+    BacktrackingDecision, Hybrid,
       {
         GOLD: 100.0,
         SILVER: 60.0,
@@ -12,6 +12,41 @@ workloads:
     [
      #[Submission Time, Deadline, Budget, Job, user class]
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [1.0, 130, 2.5, MapReduce_9_2.yaml, GOLD],
+     [200000, 120, 2.5, MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [300000, 130, 2.5, MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [400000, 140, 2.5, MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [500000, 150, 2.5, MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [600000, 160, 2.5, MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [700000, 170, 2.5, MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [800000, 180, 2.5, MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [900000, 190, 2.5, MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [1000000, 200, 2.5, MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [1100000, 210, 2.5, MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [1200000, 220, 2.5, MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [1300000, 230, 2.5, MapReduce_9_2.yaml, GOLD],
+     !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
+     [1400000, 240, 2.5, MapReduce_9_2.yaml, GOLD]
+    ]
+   ]
+ - !!org.cloudbus.cloudsim.ex.mapreduce.Workload
+   [
+    BacktrackingMultiCost, Hybrid,
+      {
+        GOLD: 100.0,
+        SILVER: 60.0,
+        BRONZE: 0.0
+      },
+    [
     ]
    ]
