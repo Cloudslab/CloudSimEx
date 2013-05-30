@@ -7,6 +7,6 @@ csvData [,1] <- NULL;
 csvData <- t(csvData );
 csvData <- as.data.frame(csvData );
 csvData[csvData==-1] = NA;
-#plot(csvData$ExecutionTime, csvData$LFFCostHybrid, type="l");
-csvData <- melt(csvData ,  id = 'ExecutionTime', variable_name = 'Algorithms');
-ggplot(csvData, aes(ExecutionTime,value)) + geom_line() + facet_grid(Algorithms ~ .)
+#plot(csvData$Budget, csvData$LFFCostHybrid, type="l");
+csvData <- melt(csvData ,  id = 'Budget', variable_name = 'Algorithms');
+ggplot(csvData, aes(Budget,value)) + geom_line() + facet_grid(Algorithms ~ .)

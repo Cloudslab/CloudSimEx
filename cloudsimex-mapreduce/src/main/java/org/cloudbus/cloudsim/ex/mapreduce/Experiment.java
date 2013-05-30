@@ -30,9 +30,9 @@ public class Experiment
 
 	if (Experiment.currentExperimentName.equals("Algorithm_ExecutionTime_Budget"))
 	{
-	    String header = "ExecutionTime,";
+	    String header = "Budget,";
 	    for (Request request : requests.requests)
-		header += request.getDeadline() + ",";
+		header += request.getBudget() + ",";
 	    CustomLog.printLine(header);
 	}
     }
