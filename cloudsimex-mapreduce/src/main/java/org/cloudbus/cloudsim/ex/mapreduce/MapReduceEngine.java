@@ -134,6 +134,7 @@ public class MapReduceEngine extends DatacenterBroker {
 		+ request.getCloudDeploymentModel() + " FOR REQUEST: " + request.id
 		+ requestString + " ===========");
 	Log.printLine(getName() + " is searching for the optimal Resource Set...");
+	long beforeTime = System.currentTimeMillis();
 	if (!policy.runAlgorithm(cloud, request))
 	    Log.printLine(" =========== ERROR: THE ALGORITHM COULD NOT FIND VMs FOR REQUEST: " + request.id
 		    + " ===========");
@@ -147,6 +148,8 @@ public class MapReduceEngine extends DatacenterBroker {
 		reduceTask.updateCloudletLength();
 
 	}
+	long afterTime = System.currentTimeMillis();
+	request.setAlgorithRunningTime((afterTime-beforeTime)/1000);
 	// Provision all types of virtual machines from Cloud
 	Log.printLine(" =========== ALGORITHM: FINISHED SEARCHING FOR REQUEST: " + request.id + " ===========");
 	// 1- VMs provisioning for those has at least one map task

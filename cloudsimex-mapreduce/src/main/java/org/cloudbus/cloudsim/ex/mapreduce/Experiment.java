@@ -19,9 +19,18 @@ public class Experiment
 
 	if (Experiment.currentExperimentName.equals("Algorithm_Cost_Deadline")
 		|| Experiment.currentExperimentName.equals("test1")
-		|| Experiment.currentExperimentName.equals("test2"))
+		|| Experiment.currentExperimentName.equals("test2")
+		|| Experiment.currentExperimentName.equals("Algorithm_AlgoTime_Deadline"))
 	{
 	    String header = "Deadline,";
+	    for (Request request : requests.requests)
+		header += request.getDeadline() + ",";
+	    CustomLog.printLine(header);
+	}
+
+	if (Experiment.currentExperimentName.equals("Algorithm_ExecutionTime_Budget"))
+	{
+	    String header = "ExecutionTime,";
 	    for (Request request : requests.requests)
 		header += request.getDeadline() + ",";
 	    CustomLog.printLine(header);
@@ -38,10 +47,29 @@ public class Experiment
 	{
 	    String plottingValue = requests.requests.get(0).getPolicy() + ",";
 	    for (Request request : requests.requests)
-		if(!request.getIsBudgetViolatedBoolean() && !request.getIsDeadlineViolatedBoolean())
+		if (!request.getIsBudgetViolatedBoolean() && !request.getIsDeadlineViolatedBoolean())
 		    plottingValue += request.getCost() + ",";
 		else
-		    plottingValue +="-1,";
+		    plottingValue += "-1,";
+	    CustomLog.printLine(plottingValue);
+	}
+
+	if (Experiment.currentExperimentName.equals("Algorithm_AlgoTime_Deadline"))
+	{
+	    String plottingValue = requests.requests.get(0).getPolicy() + ",";
+	    for (Request request : requests.requests)
+		plottingValue += request.getAlgorithRunningTime() + ",";
+	    CustomLog.printLine(plottingValue);
+	}
+	
+	if (Experiment.currentExperimentName.equals("Algorithm_ExecutionTime_Budget"))
+	{
+	    String plottingValue = requests.requests.get(0).getPolicy() + ",";
+	    for (Request request : requests.requests)
+		if (!request.getIsBudgetViolatedBoolean() && !request.getIsDeadlineViolatedBoolean())
+		    plottingValue += request.getExecutionTime() + ",";
+		else
+		    plottingValue += "-1,";
 	    CustomLog.printLine(plottingValue);
 	}
     }

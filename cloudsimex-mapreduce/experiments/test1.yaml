@@ -12,31 +12,31 @@ workloads:
     [
      #[Submission Time, Deadline, Budget, Job, user class]
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [200000, 120, 2.5, MapReduce_9_2.yaml, GOLD],
+     [200000, 4000, 10.5, MapReduce_15_2.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [300000, 130, 2.5, MapReduce_9_2.yaml, GOLD],
+     [300000, 4100, 10.5, MapReduce_15_2.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [400000, 140, 2.5, MapReduce_9_2.yaml, GOLD],
+     [400000, 4200, 10.5, MapReduce_15_2.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [500000, 150, 2.5, MapReduce_9_2.yaml, GOLD],
+     [500000, 4300, 10.5, MapReduce_15_2.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [600000, 160, 2.5, MapReduce_9_2.yaml, GOLD],
+     [600000, 4400, 10.5, MapReduce_15_2.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [700000, 170, 2.5, MapReduce_9_2.yaml, GOLD],
+     [700000, 4500, 10.5, MapReduce_15_2.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [800000, 180, 2.5, MapReduce_9_2.yaml, GOLD],
+     [800000, 4600, 10.5, MapReduce_15_2.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [900000, 190, 2.5, MapReduce_9_2.yaml, GOLD],
+     [900000, 4700, 10.5, MapReduce_15_2.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [1000000, 200, 2.5, MapReduce_9_2.yaml, GOLD],
+     [1000000, 4800, 10.5, MapReduce_15_2.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [1100000, 210, 2.5, MapReduce_9_2.yaml, GOLD],
+     [1100000, 4900, 10.5, MapReduce_15_2.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [1200000, 220, 2.5, MapReduce_9_2.yaml, GOLD],
+     [1200000, 5000, 10.5, MapReduce_15_2.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [1300000, 230, 2.5, MapReduce_9_2.yaml, GOLD],
+     [1300000, 5100, 10.5, MapReduce_15_2.yaml, GOLD],
      !!org.cloudbus.cloudsim.ex.mapreduce.models.request.Request
-     [1400000, 240, 2.5, MapReduce_9_2.yaml, GOLD]
+     [1400000, 5200, 10.5, MapReduce_15_2.yaml, GOLD]
     ]
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Workload

@@ -34,6 +34,8 @@ public class Request extends SimEvent {
 
     private int experimentNumber;
     private int workloadNumber;
+    
+    private double algorithRunningTime;
 
     private CloudDeploymentModel cloudDeploymentModel = CloudDeploymentModel.Hybrid;
 
@@ -388,6 +390,16 @@ public class Request extends SimEvent {
 
     public int getNumberOfTasks() {
 	return job.mapTasks.size() + job.reduceTasks.size();
+    }
+    
+    
+
+    public double getAlgorithRunningTime() {
+        return algorithRunningTime;
+    }
+
+    public void setAlgorithRunningTime(double algorithRunningTime) {
+        this.algorithRunningTime = algorithRunningTime;
     }
 
     @Override
