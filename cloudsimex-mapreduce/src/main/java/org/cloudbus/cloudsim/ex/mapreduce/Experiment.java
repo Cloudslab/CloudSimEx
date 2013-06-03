@@ -27,7 +27,7 @@ public class Experiment
 		header += request.getDeadline() + ",";
 	    CustomLog.printLine(header);
 	}
-
+	
 	if (Experiment.currentExperimentName.equals("Algorithm_ExecutionTime_Budget"))
 	{
 	    String header = "Budget,";
@@ -51,6 +51,19 @@ public class Experiment
 		    plottingValue += request.getCost() + ",";
 		else
 		    plottingValue += "-1,";
+	    CustomLog.printLine(plottingValue);
+	}
+	
+	if(Experiment.currentExperimentName.equals("Algorithm_Cost_D110")
+		|| Experiment.currentExperimentName.equals("Algorithm_Cost_D220")
+		|| Experiment.currentExperimentName.equals("Algorithm_Cost_D260"))
+	{
+	    Request request = requests.requests.get(0);
+	    String plottingValue = requests.requests.get(0).getPolicy() + ",";
+	    if (!request.getIsBudgetViolatedBoolean() && !request.getIsDeadlineViolatedBoolean())
+		plottingValue += request.getCost();
+	    else
+		plottingValue += "-1";
 	    CustomLog.printLine(plottingValue);
 	}
 
