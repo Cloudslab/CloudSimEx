@@ -3,7 +3,7 @@
 workloads:
  - !!org.cloudbus.cloudsim.ex.mapreduce.Workload
    [
-    BacktrackingDecision, Hybrid,
+    BTDecision, Hybrid,
       {
         GOLD: 100.0,
         SILVER: 60.0,
@@ -41,7 +41,7 @@ workloads:
    ]
  - !!org.cloudbus.cloudsim.ex.mapreduce.Workload
    [
-    BacktrackingMultiCost, Hybrid,
+    BTMultiCost, Hybrid,
       {
         GOLD: 100.0,
         SILVER: 60.0,

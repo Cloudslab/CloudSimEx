@@ -166,6 +166,12 @@ public class BackTrackingTree implements Runnable {
 		    solutionCost = executionTimeAndCost[1];
 		    setSolutionVector(currentVector);
 		    Log.print(Thread.currentThread().getName());
+		    if (request.getAlgoFirstSoulationFoundedTime() == null)
+		    {
+			Long algoStartTime = request.getAlgoStartTime();
+			Long currentTime = System.currentTimeMillis();
+			request.setAlgoFirstSoulationFoundedTime((currentTime - algoStartTime) / 1000);
+		    }
 		}
 
 		boolean forceNextOrBack = false;

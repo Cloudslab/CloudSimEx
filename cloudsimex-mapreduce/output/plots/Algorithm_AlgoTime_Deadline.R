@@ -9,4 +9,5 @@ csvData <- as.data.frame(csvData );
 csvData[csvData==-1] = NA;
 #plot(csvData$Deadline, csvData$LFFCostHybrid, type="l");
 csvData <- melt(csvData ,  id = 'Deadline', variable_name = 'Algorithms');
-ggplot(csvData, aes(Deadline,value)) + geom_line() + facet_grid(Algorithms ~ .)
+csvData <- rename(csvData, c("value"="Algorithm_Running_Time"));
+ggplot(csvData, aes(Deadline,Algorithm_Running_Time)) + geom_line() + facet_grid(Algorithms ~ .);

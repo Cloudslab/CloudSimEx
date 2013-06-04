@@ -35,11 +35,15 @@ public class Request extends SimEvent {
     private int experimentNumber;
     private int workloadNumber;
     
+    private Long algoStartTime = null;
+    private Long algoFirstSoulationFoundedTime = null;
     private double algorithRunningTime;
 
     private CloudDeploymentModel cloudDeploymentModel = CloudDeploymentModel.Hybrid;
 
     private String logMessage = "";
+    
+    
 
     public Request(double submissionTime, double deadline, double budget, String jobFile, UserClass userClass) {
 	id = Id.pollId(Request.class);
@@ -400,6 +404,25 @@ public class Request extends SimEvent {
 
     public void setAlgorithRunningTime(double algorithRunningTime) {
         this.algorithRunningTime = algorithRunningTime;
+    }
+    
+    
+
+    public synchronized Long getAlgoStartTime() {
+        return algoStartTime;
+    }
+
+    public synchronized void setAlgoStartTime(Long algoStartTime) {
+        this.algoStartTime = algoStartTime;
+    }
+    
+
+    public synchronized Long getAlgoFirstSoulationFoundedTime() {
+        return algoFirstSoulationFoundedTime;
+    }
+
+    public synchronized void setAlgoFirstSoulationFoundedTime(Long algoFirstSoulationFoundedTime) {
+        this.algoFirstSoulationFoundedTime = algoFirstSoulationFoundedTime;
     }
 
     @Override

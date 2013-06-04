@@ -9,7 +9,7 @@ publicCloudDatacenters:
         !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
         [large-aws-us-east-1, 1.15, 0.005, 800.0, 1, 1024, 0],
         !!org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmType
-        [small-aws-us-east-1, 1.15, 0.005, 500.0, 1, 1024, 0]
+        [small-aws-us-east-1, 0.5, 0.005, 500.0, 1, 1024, 0]
       ]
    ]
  - [

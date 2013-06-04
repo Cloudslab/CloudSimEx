@@ -42,8 +42,7 @@ public class Experiment
 	CustomLog.redirectToFile("output/plots/" + Experiment.currentExperimentName + ".csv", true);
 
 	if (Experiment.currentExperimentName.equals("Algorithm_Cost_Deadline")
-		|| Experiment.currentExperimentName.equals("test1")
-		|| Experiment.currentExperimentName.equals("test2"))
+		|| Experiment.currentExperimentName.equals("test1"))
 	{
 	    String plottingValue = requests.requests.get(0).getPolicy() + ",";
 	    for (Request request : requests.requests)
@@ -53,25 +52,13 @@ public class Experiment
 		    plottingValue += "-1,";
 	    CustomLog.printLine(plottingValue);
 	}
-	
-	if(Experiment.currentExperimentName.equals("Algorithm_Cost_D110")
-		|| Experiment.currentExperimentName.equals("Algorithm_Cost_D220")
-		|| Experiment.currentExperimentName.equals("Algorithm_Cost_D260"))
-	{
-	    Request request = requests.requests.get(0);
-	    String plottingValue = requests.requests.get(0).getPolicy() + ",";
-	    if (!request.getIsBudgetViolatedBoolean() && !request.getIsDeadlineViolatedBoolean())
-		plottingValue += request.getCost();
-	    else
-		plottingValue += "-1";
-	    CustomLog.printLine(plottingValue);
-	}
 
-	if (Experiment.currentExperimentName.equals("Algorithm_AlgoTime_Deadline"))
+	if (Experiment.currentExperimentName.equals("Algorithm_AlgoTime_Deadline")
+		|| Experiment.currentExperimentName.equals("test2"))
 	{
 	    String plottingValue = requests.requests.get(0).getPolicy() + ",";
 	    for (Request request : requests.requests)
-		plottingValue += request.getAlgorithRunningTime() + ",";
+		plottingValue += request.getAlgoFirstSoulationFoundedTime() + ",";
 	    CustomLog.printLine(plottingValue);
 	}
 	

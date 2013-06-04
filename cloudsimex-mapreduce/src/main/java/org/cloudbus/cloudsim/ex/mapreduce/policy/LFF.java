@@ -116,6 +116,12 @@ public class LFF {
 		    VPList.remove(0);
 	    }
 	}
+	if (request.getAlgoFirstSoulationFoundedTime() == null)
+	{
+	    Long algoStartTime = request.getAlgoStartTime();
+	    Long currentTime = System.currentTimeMillis();
+	    request.setAlgoFirstSoulationFoundedTime((currentTime - algoStartTime) / 1000);
+	}
 	return isJobAlloc;
     }
 

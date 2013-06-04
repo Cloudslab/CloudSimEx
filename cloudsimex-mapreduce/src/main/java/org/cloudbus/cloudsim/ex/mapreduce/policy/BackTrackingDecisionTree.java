@@ -118,6 +118,12 @@ public class BackTrackingDecisionTree implements Runnable
 			solutionCost = executionTimeAndCost[1];
 			solutionExecutionTime = executionTimeAndCost[0];
 			Log.print(Thread.currentThread().getName().charAt(0));
+			if (request.getAlgoFirstSoulationFoundedTime() == null)
+			{
+			    Long algoStartTime = request.getAlgoStartTime();
+			    Long currentTime = System.currentTimeMillis();
+			    request.setAlgoFirstSoulationFoundedTime((currentTime - algoStartTime) / 1000);
+			}
 		    }
 		}
 		else

@@ -5,7 +5,7 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.policy.Backtracking.BacktrackingType;
 
-public class BacktrackingDecision extends Policy {
+public class BTDecision extends Policy {
 
 
     @Override
