@@ -150,7 +150,7 @@ public class MapReduceEngine extends DatacenterBroker {
 	}
 	long beforeTime = request.getAlgoStartTime();
 	long afterTime = System.currentTimeMillis();
-	request.setAlgorithRunningTime((afterTime-beforeTime)/1000);
+	request.setAlgorithRunningTime(afterTime-beforeTime);
 	// Provision all types of virtual machines from Cloud
 	Log.printLine(" =========== ALGORITHM: FINISHED SEARCHING FOR REQUEST: " + request.id + " ===========");
 	// 1- VMs provisioning for those has at least one map task

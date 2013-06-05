@@ -27,7 +27,7 @@ public class BruteForce
     private long forceToExitTimeMillis = 3 * 60 * 1000;// 3 min
     private Request request;
     private long startTime;
-    
+
     public Boolean runAlgorithm(Cloud cloud, Request request, BruteForceSorts bruteForceSort)
     {
 	CloudDeploymentModel cloudDeploymentModel = request.getCloudDeploymentModel();
@@ -51,7 +51,7 @@ public class BruteForce
 	ExecutionPlan selectedExecutionPlan = geExecutionPlan(nVMs.size(), rTasks.size());
 
 	Map<Integer, Integer> selectedSchedulingPlan = selectedExecutionPlan.schedulingPlan;
-	
+
 	// 1- Provisioning
 	ArrayList<ArrayList<VmInstance>> provisioningPlans = predictionEngine.getProvisioningPlan(
 		selectedSchedulingPlan, nVMs,
@@ -67,7 +67,7 @@ public class BruteForce
 
     private ExecutionPlan geExecutionPlan(int n, int r)
     {
-	ExecutionPlan selectedExecutionPlan= null;
+	ExecutionPlan selectedExecutionPlan = null;
 
 	Integer[] res = new Integer[r];
 	for (int i = 0; i < res.length; i++)
@@ -81,6 +81,15 @@ public class BruteForce
 	    ExecutionPlan executionPlan = new ExecutionPlan(schedulingPlan, nVMs, request.job);
 	    if (selectedExecutionPlan == null || executionPlan.Cost < selectedExecutionPlan.Cost)
 		selectedExecutionPlan = executionPlan;
+
+	    if (request.getAlgoFirstSoulationFoundedTime() == null
+		    && executionPlan.Cost <= request.getBudget()
+		    && executionPlan.ExecutionTime <= request.getDeadline())
+	    {
+		Long algoStartTime = request.getAlgoStartTime();
+		Long currentTime = System.currentTimeMillis();
+		request.setAlgoFirstSoulationFoundedTime((currentTime - algoStartTime));
+	    }
 
 	    long currentRunningTime = System.currentTimeMillis();
 	    if (currentRunningTime - startTime >= forceToExitTimeMillis)

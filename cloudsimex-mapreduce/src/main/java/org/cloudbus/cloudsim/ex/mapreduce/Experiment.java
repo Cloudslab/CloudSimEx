@@ -27,7 +27,7 @@ public class Experiment
 		header += request.getDeadline() + ",";
 	    CustomLog.printLine(header);
 	}
-	
+
 	if (Experiment.currentExperimentName.equals("Algorithm_ExecutionTime_Budget"))
 	{
 	    String header = "Budget,";
@@ -58,10 +58,14 @@ public class Experiment
 	{
 	    String plottingValue = requests.requests.get(0).getPolicy() + ",";
 	    for (Request request : requests.requests)
-		plottingValue += request.getAlgoFirstSoulationFoundedTime() + ",";
+		if (!request.getIsBudgetViolatedBoolean() && !request.getIsDeadlineViolatedBoolean()
+			&& request.getAlgoFirstSoulationFoundedTime() != null)
+		    plottingValue += request.getAlgoFirstSoulationFoundedTime() + ",";
+		else
+		    plottingValue += request.getAlgorithRunningTime() + ",";
 	    CustomLog.printLine(plottingValue);
 	}
-	
+
 	if (Experiment.currentExperimentName.equals("Algorithm_ExecutionTime_Budget"))
 	{
 	    String plottingValue = requests.requests.get(0).getPolicy() + ",";

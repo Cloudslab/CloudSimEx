@@ -120,7 +120,7 @@ public class LFF {
 	{
 	    Long algoStartTime = request.getAlgoStartTime();
 	    Long currentTime = System.currentTimeMillis();
-	    request.setAlgoFirstSoulationFoundedTime((currentTime - algoStartTime) / 1000);
+	    request.setAlgoFirstSoulationFoundedTime((currentTime - algoStartTime));
 	}
 	return isJobAlloc;
     }

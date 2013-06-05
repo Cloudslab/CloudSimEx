@@ -37,7 +37,7 @@ public class Request extends SimEvent {
     
     private Long algoStartTime = null;
     private Long algoFirstSoulationFoundedTime = null;
-    private double algorithRunningTime;
+    private Long algorithRunningTime = null;
 
     private CloudDeploymentModel cloudDeploymentModel = CloudDeploymentModel.Hybrid;
 
@@ -398,11 +398,11 @@ public class Request extends SimEvent {
     
     
 
-    public double getAlgorithRunningTime() {
+    public Long getAlgorithRunningTime() {
         return algorithRunningTime;
     }
 
-    public void setAlgorithRunningTime(double algorithRunningTime) {
+    public void setAlgorithRunningTime(Long algorithRunningTime) {
         this.algorithRunningTime = algorithRunningTime;
     }
     
