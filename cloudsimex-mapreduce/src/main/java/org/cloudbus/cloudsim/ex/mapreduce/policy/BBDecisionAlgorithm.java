@@ -11,7 +11,7 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 
-public class BackTrackingDecisionAlgorithm {
+public class BBDecisionAlgorithm {
     private Request request;
     private Cloud cloud;
     private PredictionEngine predictionEngine;
@@ -29,7 +29,7 @@ public class BackTrackingDecisionAlgorithm {
     private long forceToExitTimeMillis;
     private static boolean enableProgressBar = true;
 
-    public BackTrackingDecisionAlgorithm(Request request, Cloud cloud, List<VmInstance> nVMs, List<Task> rTasks,
+    public BBDecisionAlgorithm(Request request, Cloud cloud, List<VmInstance> nVMs, List<Task> rTasks,
 	    int loggingFrequent, long forceToAceeptAnySolutionTimeMillis, long forceToExitTimeMillis)
     {
 	this.request = request;
@@ -80,11 +80,11 @@ public class BackTrackingDecisionAlgorithm {
 	if (enableProgressBar)
 	    Log.print("All " + (vmGroupByType.size() + 1) + " Trees Progress [");
 
-	ArrayList<BackTrackingDecisionTree> searchTrees = new ArrayList<BackTrackingDecisionTree>();
+	ArrayList<DecisionTree> searchTrees = new ArrayList<DecisionTree>();
 	ArrayList<Thread> threads = new ArrayList<Thread>();
 	for (ArrayList<VmInstance> vmGroup : vmGroupByType)
 	{
-	    BackTrackingDecisionTree searchTree = new BackTrackingDecisionTree(vmGroup.get(0).getId(), request, cloud,
+	    DecisionTree searchTree = new DecisionTree(vmGroup.get(0).getId(), request, cloud,
 		    nVMs, rTasks, loggingFrequent, forceToAceeptAnySolutionTimeMillis, forceToExitTimeMillis,
 		    vmGroupByType);
 	    searchTrees.add(searchTree);
@@ -101,11 +101,11 @@ public class BackTrackingDecisionAlgorithm {
 		e.printStackTrace();
 	    }
 	}
-	
-	if(enableProgressBar)
+
+	if (enableProgressBar)
 	    Log.printLine("]");
 
-	for (BackTrackingDecisionTree searchTree : searchTrees) {
+	for (DecisionTree searchTree : searchTrees) {
 	    if (searchTree.getSolutionVector() != null)
 	    {
 		if (solutionVector == null

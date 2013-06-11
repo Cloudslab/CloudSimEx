@@ -14,5 +14,5 @@ violation <- c(
   (length(csvData[5,][csvData[5,] == -1])/ncol(csvData))*100,
   (length(csvData[6,][csvData[6,] == -1])/ncol(csvData))*100);
 pdf(paste(c(experimentName,"_Violation.pdf"),collapse = ''),width=10);
-barplot(violation,ylab="QoS Violation Percentage", names.arg=rownames(csvData));
+barplot(violation,ylab="SLA Violation Percentage", names.arg=rownames(csvData));
 dev.off();

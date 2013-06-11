@@ -1,11 +1,9 @@
 package org.cloudbus.cloudsim.ex.mapreduce.policy;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,14 +18,14 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
 import org.cloudbus.cloudsim.ex.mapreduce.policy.Policy.CloudDeploymentModel;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 
-public class Backtracking {
+public class BB {
 
     public enum BacktrackingSorts {
 	Cost, Performance;
     }
 
     public enum BacktrackingType {
-	Full, Decision;
+	Standard, Decision;
     }
 
     private Request request;
@@ -49,6 +47,7 @@ public class Backtracking {
 	// Sort nVMs by cost per mips - Perf Tree will have copy it and re-sort
 	// it
 	Collections.sort(nVMs, new Comparator<VmInstance>() {
+	    @Override
 	    public int compare(VmInstance VmInstance1, VmInstance VmInstance2) {
 		double vmInstance1Cost = VmInstance1.transferringCost + VmInstance1.vmCostPerHour
 			/ VmInstance1.getMips();
@@ -68,12 +67,12 @@ public class Backtracking {
 	Integer[] solutionVector = null;
 	if (backtrackingType == BacktrackingType.Decision)
 	{
-	    BackTrackingDecisionAlgorithm backTrackingDecisionAlgorithm = new BackTrackingDecisionAlgorithm(request,
+	    BBDecisionAlgorithm backTrackingDecisionAlgorithm = new BBDecisionAlgorithm(request,
 		    cloud, nVMs, rTasks, loggingFrequent, forceToAceeptAnySolutionTimeMillis, forceToExitTimeMillis);
 	    backTrackingDecisionAlgorithm.getBestSolutionOfBackTrackingDecision();
 	    solutionVector = backTrackingDecisionAlgorithm.getSolutionVector();
 	}
-	if (backtrackingType == BacktrackingType.Full)
+	if (backtrackingType == BacktrackingType.Standard)
 	{
 
 	    /**
@@ -81,19 +80,19 @@ public class Backtracking {
 	     */
 	    // Get SchedulingPlan from backtracking
 	    long costTreeRunningTime = System.currentTimeMillis();
-	    List<BackTrackingTree> backTrackingCostTrees = new ArrayList<BackTrackingTree>();
+	    List<StandardTree> backTrackingCostTrees = new ArrayList<StandardTree>();
 	    List<Thread> backTrackingCostTreeThreads = new ArrayList<Thread>();
 	    int numBranchesInEachTree = (int) Math.floor((double) nVMs.size() / numCostTrees);
 	    int lastBranchUsed = 0;
 	    for (int i = 1; i <= numCostTrees; i++)
 	    {
-		BackTrackingTree backTrackingCostTree;
+		StandardTree backTrackingCostTree;
 		if (i == numCostTrees)
-		    backTrackingCostTree = new BackTrackingTree(request, cloud, nVMs, rTasks, BacktrackingSorts.Cost,
+		    backTrackingCostTree = new StandardTree(request, cloud, nVMs, rTasks, BacktrackingSorts.Cost,
 			    loggingFrequent, lastBranchUsed + 1, nVMs.size());
-		backTrackingCostTree = new BackTrackingTree(request, cloud, nVMs, rTasks, BacktrackingSorts.Cost,
+		backTrackingCostTree = new StandardTree(request, cloud, nVMs, rTasks, BacktrackingSorts.Cost,
 			loggingFrequent, lastBranchUsed + 1, lastBranchUsed + numBranchesInEachTree);
-		if (i == 1 && BackTrackingTree.enableProgressBar)
+		if (i == 1 && StandardTree.enableProgressBar)
 		{
 		    Log.print("All " + (numCostTrees + 1) + " Trees Progress [");
 		}
@@ -110,11 +109,11 @@ public class Backtracking {
 	     */
 	    // Get SchedulingPlan from backtracking
 	    boolean checkPerfTree = false;
-	    BackTrackingTree backTrackingPerfTree = null;
+	    StandardTree backTrackingPerfTree = null;
 	    Thread backTrackingPerfTreeThread = null;
 	    if (enablePerfTree)
 	    {
-		backTrackingPerfTree = new BackTrackingTree(request, cloud, new ArrayList<VmInstance>(nVMs), rTasks,
+		backTrackingPerfTree = new StandardTree(request, cloud, new ArrayList<VmInstance>(nVMs), rTasks,
 			BacktrackingSorts.Performance, loggingFrequent, 1, nVMs.size());
 		backTrackingPerfTreeThread = new Thread(backTrackingPerfTree);
 		backTrackingPerfTreeThread.setName("P");
@@ -177,7 +176,8 @@ public class Backtracking {
 			break;
 		    }
 
-		    Thread.currentThread().sleep(500);
+		    Thread.currentThread();
+		    Thread.sleep(500);
 		}
 	    } catch (InterruptedException e) {
 		e.printStackTrace();
@@ -187,7 +187,7 @@ public class Backtracking {
 		    backTrackingCostTreeThreads.get(i).stop();
 		if (enablePerfTree)
 		    backTrackingPerfTreeThread.stop();
-		if (BackTrackingTree.enableProgressBar)
+		if (StandardTree.enableProgressBar)
 		    Log.printLine("]");
 	    }
 	}
@@ -200,7 +200,7 @@ public class Backtracking {
 	Map<Integer, Integer> selectedSchedulingPlan = null;
 	if (backtrackingType == BacktrackingType.Decision)
 	    selectedSchedulingPlan = predictionEngine.vectorToScheduleingPlan(solutionVector, rTasks);
-	if (backtrackingType == BacktrackingType.Full)
+	if (backtrackingType == BacktrackingType.Standard)
 	    selectedSchedulingPlan = predictionEngine.vectorToScheduleingPlan(solutionVector, nVMs, rTasks);
 
 	double[] executionTimeAndCost = predictionEngine.predictExecutionTimeAndCostFromScheduleingPlan(
@@ -220,7 +220,7 @@ public class Backtracking {
 	return true;
     }
 
-    private Integer[] checkCostTrees(List<BackTrackingTree> backTrackingCostTrees) {
+    private Integer[] checkCostTrees(List<StandardTree> backTrackingCostTrees) {
 	for (int i = 0; i < backTrackingCostTrees.size(); i++)
 	{
 	    if (backTrackingCostTrees.get(i).getSolutionVector() != null)

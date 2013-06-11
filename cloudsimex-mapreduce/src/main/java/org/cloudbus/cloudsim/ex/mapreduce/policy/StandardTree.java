@@ -13,7 +13,7 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmInstance;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.MapTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
-import org.cloudbus.cloudsim.ex.mapreduce.policy.Backtracking.BacktrackingSorts;
+import org.cloudbus.cloudsim.ex.mapreduce.policy.BB.BacktrackingSorts;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 
 /**
@@ -21,7 +21,7 @@ import org.cloudbus.cloudsim.ex.util.CustomLog;
  * @author Mohammed Alrokayan
  * 
  */
-public class BackTrackingTree implements Runnable {
+public class StandardTree implements Runnable {
     public static boolean enableProgressBar = true;
     private Request request;
     private Cloud cloud;
@@ -38,7 +38,7 @@ public class BackTrackingTree implements Runnable {
     private int minN;
     private int maxN;
 
-    public BackTrackingTree(Request request, Cloud cloud, List<VmInstance> nVMs, List<Task> rTasks,
+    public StandardTree(Request request, Cloud cloud, List<VmInstance> nVMs, List<Task> rTasks,
 	    BacktrackingSorts sort, int loggingFrequent,
 	    int minN, int maxN)
     {
@@ -70,10 +70,12 @@ public class BackTrackingTree implements Runnable {
 	this.solutionVector = solutionVector.clone();
     }
 
+    @Override
     public void run() {
 	if (sort == BacktrackingSorts.Performance)
 	    // Sort nVMs by mips (performance)
 	    Collections.sort(nVMs, new Comparator<VmInstance>() {
+		@Override
 		public int compare(VmInstance VmInstance1, VmInstance VmInstance2) {
 		    // TODO Add data trasfere time from data source + out
 		    // from

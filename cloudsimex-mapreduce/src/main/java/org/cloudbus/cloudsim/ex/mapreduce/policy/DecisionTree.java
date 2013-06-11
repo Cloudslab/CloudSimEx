@@ -13,7 +13,7 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 
-public class BackTrackingDecisionTree implements Runnable
+public class DecisionTree implements Runnable
 {
     private Integer vmId;
 
@@ -33,7 +33,7 @@ public class BackTrackingDecisionTree implements Runnable
     private long forceToAceeptAnySolutionTimeMillis;
     private long forceToExitTimeMillis;
 
-    public BackTrackingDecisionTree(Integer vmTypeId, Request request, Cloud cloud, List<VmInstance> nVMs,
+    public DecisionTree(Integer vmTypeId, Request request, Cloud cloud, List<VmInstance> nVMs,
 	    List<Task> rTasks,
 	    int loggingFrequent, long forceToAceeptAnySolutionTimeMillis, long forceToExitTimeMillis,
 	    ArrayList<ArrayList<VmInstance>> vmGroupByType)
@@ -66,7 +66,7 @@ public class BackTrackingDecisionTree implements Runnable
 	    CustomLog.printLine(Thread.currentThread().getName() + ": returned solution: "
 		    + Arrays.toString(solutionVector) + " : ["
 		    + solutionExecutionTime + " seconds, $" + solutionCost + "]");
-	Log.print(Thread.currentThread().getName().charAt(0)+"x");
+	Log.print(Thread.currentThread().getName().charAt(0) + "x");
     }
 
     private void search(ArrayList<Integer> currentBranch, ArrayList<Integer> path) {

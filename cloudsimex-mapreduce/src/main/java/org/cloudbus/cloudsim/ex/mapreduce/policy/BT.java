@@ -15,7 +15,7 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
 import org.cloudbus.cloudsim.ex.mapreduce.policy.Policy.CloudDeploymentModel;
 
-public class BruteForce
+public class BT
 {
     public enum BruteForceSorts {
 	Cost, Performance;

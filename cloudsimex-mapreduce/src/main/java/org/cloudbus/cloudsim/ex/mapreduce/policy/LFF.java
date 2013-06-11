@@ -50,6 +50,7 @@ public class LFF {
 	{
 	    // Sort VPList by mips (performance)
 	    Collections.sort(VPList, new Comparator<VmType>() {
+		@Override
 		public int compare(VmType vmType1, VmType vmType2) {
 		    return Double.compare(vmType2.getMips(), vmType1.getMips());
 		}
@@ -58,6 +59,7 @@ public class LFF {
 	if (lFFSort == LFFSorts.Cost)
 	{
 	    Collections.sort(VPList, new Comparator<VmType>() {
+		@Override
 		public int compare(VmType vmType1, VmType vmType2) {
 		    return Double.compare(vmType1.vmCostPerHour, vmType2.vmCostPerHour);
 		}
