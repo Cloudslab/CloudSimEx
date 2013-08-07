@@ -103,7 +103,7 @@ public class ExperimentsRunner {
 			if (resultStatus != 0) {
 			    System.err.println("!!! Experiment " + experiment.getCanonicalName() + " has failed!!!");
 			}
-		    };
+		    }
 		};
 		futures.add(pool.submit(runnable));
 	    }

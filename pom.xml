@@ -106,5 +106,6 @@
 		<module>cloudsimex-core</module>
 		<module>cloudsimex-experiments</module>
 		<module>cloudsimex-mapreduce</module>
+		<module>cloudsimex-geolocation</module>
 	</modules>
 </project>

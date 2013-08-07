@@ -262,7 +262,7 @@ public class CustomLog {
 			printHeader(klass, TextUtil.DEFAULT_DELIM, properties);
 		}
 
-		// Print details for each cloudlet
+		// Print details for each element
 		for (List<?> list : lines) {
 			for (Object o : list) {
 				printLineForObject(o, TextUtil.DEFAULT_DELIM, properties);

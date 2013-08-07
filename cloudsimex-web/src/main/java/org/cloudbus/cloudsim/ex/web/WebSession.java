@@ -9,7 +9,7 @@ import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.Textualize;
 
 /**
- * A web session is a session established between a user an application server
+ * A web session is a session established between a user and an application server
  * (deployed in a VM) and can use several database servers (deployed in separate
  * VMs). Throughout it's lifetime a session continuously generates workload on
  * the servers deployed in these virtual machines. The workload is represented
