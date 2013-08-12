@@ -87,7 +87,7 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
 
 	IPRange range = ranges.get(idx);
 
-	int ip = range.to + getRandom().nextInt(range.to - range.from);
+	int ip = range.from + getRandom().nextInt(range.to - range.from);
 	return IPUtil.convertIPv4(ip);
     }
 
@@ -103,7 +103,7 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
 	    while ((line = reader.readLine()) != null) {
 		Iterable<String> lineElementsIterable =
 			Splitter.on(",")
-				.trimResults(CharMatcher.WHITESPACE.and(CharMatcher.is('\"')))
+				.trimResults(CharMatcher.WHITESPACE.or(CharMatcher.is('\"')))
 				.split(line);
 
 		List<String> lineElements = Lists.newArrayList(lineElementsIterable);
@@ -141,6 +141,11 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
 	    super();
 	    this.from = from;
 	    this.to = to;
+	}
+
+	@Override
+	public String toString() {
+	    return String.format("[$d,%d]", from, to);
 	}
     }
 }

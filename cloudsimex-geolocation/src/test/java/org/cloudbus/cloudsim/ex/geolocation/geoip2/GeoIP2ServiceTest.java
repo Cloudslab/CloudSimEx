@@ -34,10 +34,11 @@ public class GeoIP2ServiceTest {
 	service = new GeoIP2Service(new File("GeoLite2-City.mmdb"));
     }
 
-    @SuppressWarnings("resource")
     @Test(expected = IllegalArgumentException.class)
-    public void testFailedServiceCreation() {
-	new GeoIP2Service(new File("./nonexisting"));
+    public void testFailedServiceCreation() throws IOException {
+	try (GeoIP2Service geoService = new GeoIP2Service(new File("./nonexisting"))){
+	    //pass
+	}
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -29,4 +29,24 @@ public interface IPGenerator {
      */
     public abstract String pollRandomIP();
 
+    /**
+     * Creates a random IP from the specified countries. Sometimes the origins
+     * of IPs of an {@link IPGenerator} and an {@link IGeolocationService} may
+     * be different - e.g. different data bases. In such cases generating an IP
+     * from this generator, may not have the same metadata in a given service.
+     * This method repeatedly generates IPs until an IP which is in the desired
+     * location according to the service is found.
+     * 
+     * 
+     * @param service
+     *            - the service, with which the IP will be checked. Must not be
+     *            null.
+     * @param attempts
+     *            - maximum unsuccessful attempts to poll IPs. If -1 IPs are
+     *            polled until success.
+     * @return a random IP from the specified countries, according to the
+     *         specified service, or null, if no value could be generated.
+     */
+    public String pollRandomIP(IGeolocationService service, int attempts);
+
 }
