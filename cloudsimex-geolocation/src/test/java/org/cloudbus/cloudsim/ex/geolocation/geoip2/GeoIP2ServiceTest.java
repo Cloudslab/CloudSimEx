@@ -1,10 +1,11 @@
-package org.cloudbus.cloudsim.ex.geolocation;
+package org.cloudbus.cloudsim.ex.geolocation.geoip2;
 
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
 
+import org.cloudbus.cloudsim.ex.geolocation.geoip2.GeoIP2Service;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.helpers.TestUtil;
 import org.junit.AfterClass;

@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.ex.geolocation;
+package org.cloudbus.cloudsim.ex.geolocation.geoip2;
 
 import java.io.Closeable;
 import java.io.File;
@@ -8,6 +8,8 @@ import java.net.UnknownHostException;
 import java.util.Objects;
 import java.util.logging.Level;
 
+import org.cloudbus.cloudsim.ex.geolocation.BaseGeolocationService;
+import org.cloudbus.cloudsim.ex.geolocation.IGeolocationService;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 
 import com.maxmind.geoip2.DatabaseReader;

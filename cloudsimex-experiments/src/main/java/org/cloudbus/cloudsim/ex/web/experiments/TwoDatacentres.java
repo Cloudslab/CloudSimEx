@@ -122,9 +122,9 @@ public class TwoDatacentres {
 	    vmScheduler1.map(dbServerVMDC1.getId(), pe1.getId());
 	    vmScheduler1.map(appServersVMDC1.get(0).getId(), pe2.getId());
 
-	    HddVm dbServerVMDC2 = createVM(brokerDC2.getId(), (int) (10000 * (2561 / 3400.0)), 7500, 1740);
+	    HddVm dbServerVMDC2 = createVM(brokerDC2.getId(), (int) (10000 * (2561 / 3400.0)), 7500, 1666);
 	    List<HddVm> appServersVMDC2 =
-		    Arrays.asList(createVM(brokerDC2.getId(), (int) (10000 * (2263 / 3400.0)), 7500, 1740));
+		    Arrays.asList(createVM(brokerDC2.getId(), (int) (10000 * (2263 / 3400.0)), 7500, 1656));
 
 	    vmScheduler2.map(dbServerVMDC2.getId(), pe3.getId());
 	    vmScheduler2.map(appServersVMDC2.get(0).getId(), pe4.getId());
