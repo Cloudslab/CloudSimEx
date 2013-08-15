@@ -2,16 +2,17 @@ package org.cloudbus.cloudsim.ex.web.workload.freq;
 
 /**
  * A frequency function that defines periodic behaviour - for example the
- * workload changes over everyday/week etc. During each period, the frequency
- * values are defined as values of a statistical/stochastic distribution.
+ * workload repeats everyday/week etc. During each period, the frequency values
+ * are defined as values of a statistical/stochastic distribution.
  * 
+ * <br>
  * <br>
  * 
  * The main properties that define the behaviour of the function are:
  * <ul>
  * <li>periodLength - the length of a period.</li>
- * <li>nullPoint - a point which defines a starting point of an interval.
- * Intervals/periods are considered sets in the form [nullPoint+i*periodLength,
+ * <li>nullPoint - a point which defines a starting point of an interval. The
+ * considered intervals/periods are in the form [nullPoint+i*periodLength,
  * nullPoint+(i+1)*periodLength], where i is an integer.</li>
  * <li>valuedSet - value generator for the values within the interval
  * [0,periodLength].</li>

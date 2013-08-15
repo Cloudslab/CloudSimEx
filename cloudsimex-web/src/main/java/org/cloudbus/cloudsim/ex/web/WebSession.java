@@ -9,11 +9,11 @@ import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.Textualize;
 
 /**
- * A web session is a session established between a user and an application server
- * (deployed in a VM) and can use several database servers (deployed in separate
- * VMs). Throughout it's lifetime a session continuously generates workload on
- * the servers deployed in these virtual machines. The workload is represented
- * as cloudlets, which are sent to the assigned servers.
+ * A web session is a session established between a user and an application
+ * server (deployed in a VM) and can use several database servers (deployed in
+ * separate VMs). Throughout it's lifetime a session continuously generates
+ * workload on the servers deployed in these virtual machines. The workload is
+ * represented as cloudlets, which are sent to the assigned servers.
  * 
  * <br/>
  * <br/>
@@ -59,6 +59,8 @@ public class WebSession {
     private double idealEnd;
     private Double startTime;
 
+    private String sourceIP;
+
     private final int sessionId;
 
     /**
@@ -88,6 +90,29 @@ public class WebSession {
 
 	this.cloudletsLeft = numberOfCloudlets;
 	this.idealEnd = idealEnd;
+    }
+
+    /**
+     * Returns the source IP of the session. If null - the source is unknown.
+     * 
+     * @return the source IP of the session or null if unknown. The returned
+     *         value is either null or a string in the standard dot form for
+     *         IPv4 or IPv6 addresses.
+     */
+    public String getSourceIP() {
+	return sourceIP;
+    }
+
+    /**
+     * Sets the source IP of the session. If null - the source is considered
+     * unknown.
+     * 
+     * @param sourceIP
+     *            - the new source IP to set. Either null or a string in the
+     *            standard dot form for IPv4 or IPv6 addresses.
+     */
+    public void setSourceIP(final String sourceIP) {
+	this.sourceIP = sourceIP;
     }
 
     public int getUserId() {

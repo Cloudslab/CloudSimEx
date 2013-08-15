@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.ex.web;
+package org.cloudbus.cloudsim.ex.web.workload.brokers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,13 +16,16 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
+import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
+import org.cloudbus.cloudsim.ex.web.WebCloudlet;
+import org.cloudbus.cloudsim.ex.web.WebSession;
 import org.cloudbus.cloudsim.ex.web.workload.IWorkloadGenerator;
 
 /**
- * A broker that takes care of the submission of web sessions to the data
- * centers it handles. The broker submits the cloudlets of the provided web
- * sessions continously over a specified period. Consequently clients must
- * specify the endpoint (in terms of time) of the simulation.
+ * A broker that takes care of the submission of web sessions to the data center
+ * it handles. The broker submits the cloudlets of the provided web sessions
+ * continuously over a specified period. Consequently clients must specify the
+ * endpoint (in terms of time) of the simulation.
  * 
  * @author nikolay.grozev
  * 
@@ -48,27 +51,9 @@ public class WebBroker extends DatacenterBroker {
 
     /**
      * By default CloudSim's brokers use all available datacenters. So we need
-     * to enforce only the data centers we want.
+     * to enforce only the data center we want.
      */
-    private final List<Integer> dataCenterIds;
-
-    /**
-     * Creates a new web broker.
-     * 
-     * @param name
-     *            - the name of the broker.
-     * @param refreshPeriod
-     *            - the period of polling web sessions for new cloudlets.
-     * @param lifeLength
-     *            - the length of the simulation.
-     * @throws Exception
-     *             - if something goes wrong. See the documentation of the super
-     *             class.
-     */
-    public WebBroker(final String name, final double refreshPeriod,
-	    final double lifeLength) throws Exception {
-	this(name, refreshPeriod, lifeLength, null);
-    }
+    private final int dataCenterId;
 
     /**
      * Creates a new web broker.
@@ -87,17 +72,25 @@ public class WebBroker extends DatacenterBroker {
      *             - if something goes wrong. See the documentation of the super
      *             class.
      */
-    public WebBroker(final String name, final double refreshPeriod,
-	    final double lifeLength, final List<Integer> dataCenterIds) throws Exception {
+    public WebBroker(final String name, final double refreshPeriod, final double lifeLength, final int dataCenterId)
+	    throws Exception {
 	super(name);
 	this.stepPeriod = refreshPeriod;
 	this.lifeLength = lifeLength;
-	this.dataCenterIds = dataCenterIds;
+	this.dataCenterId = dataCenterId;
     }
 
     /**
-     * Returns the session that were canceled due to lack of resources to serve
-     * them.
+     * Returns the id of the datacentre that this web broker handles.
+     * 
+     * @return the id of the datacentre that this web broker handles.
+     */
+    public int getDataCenterId() {
+	return dataCenterId;
+    }
+
+    /**
+     * Returns the sessions canceled due to lack of resources to serve them.
      * 
      * @return the session that were canceled due to lack of resources to serve
      *         them.
@@ -107,14 +100,19 @@ public class WebBroker extends DatacenterBroker {
     }
 
     /**
-     * Returns the sessions that were sucessfully served.
+     * Returns the sessions that were successfully served.
      * 
-     * @return the sessions that were sucessfully served.
+     * @return the sessions that were successfully served.
      */
     public List<WebSession> getServedSessions() {
 	return new ArrayList<>(servedSessions.values());
     }
 
+    /**
+     * Returns the load balancers of this broker.
+     * 
+     * @return the load balancers of this broker.
+     */
     public Map<Long, ILoadBalancer> getLoadBalancers() {
 	return loadBalancers;
     }
@@ -122,9 +120,9 @@ public class WebBroker extends DatacenterBroker {
     public double getStepPeriod() {
 	return stepPeriod;
     }
-    
+
     public double getLifeLength() {
-        return lifeLength;
+	return lifeLength;
     }
 
     /*
@@ -156,35 +154,29 @@ public class WebBroker extends DatacenterBroker {
      * @param webSessions
      *            - the new web sessions.
      */
-    public void submitSessions(final List<WebSession> webSessions,
-	    final long loadBalancerId) {
+    public void submitSessions(final List<WebSession> webSessions, final long appId) {
 	if (!CloudSim.running()) {
-	    submitSessionsAtTime(webSessions, loadBalancerId, 0);
+	    submitSessionsAtTime(webSessions, appId, 0);
 	} else {
 	    List<WebSession> copyWebSessions = new ArrayList<>(webSessions);
-	    loadBalancers.get(loadBalancerId).assignToServers(
-		    copyWebSessions.toArray(new WebSession[copyWebSessions
-			    .size()]));
+	    loadBalancers.get(appId).assignToServers(
+		    copyWebSessions.toArray(new WebSession[copyWebSessions.size()]));
 
-	    for (ListIterator<WebSession> iter = copyWebSessions.listIterator(); iter
-		    .hasNext();) {
+	    for (ListIterator<WebSession> iter = copyWebSessions.listIterator(); iter.hasNext();) {
 		WebSession session = iter.next();
 		// If the load balancer could not assign it...
-		if (session.getAppVmId() == null
-			|| session.getDbBalancer() == null) {
+		if (session.getAppVmId() == null || session.getDbBalancer() == null) {
 		    iter.remove();
 		    canceledSessions.add(session);
-		    CustomLog
-			    .printf("Session could not be served and is canceled. Session id:%d",
-				    session.getSessionId());
+		    CustomLog.printf("Session could not be served and is canceled. Session id:%d",
+			    session.getSessionId());
 		} else {
 		    // Let the session prepare the first cloudlets
 		    if (session.areVirtualMachinesReady()) {
 			session.notifyOfTime(CloudSim.clock());
 		    } else {
 			// If the VMs are not yet ready - start the session
-			// later
-			// and extend its ideal end
+			// later and extend its ideal end
 			session.setIdealEnd(session.getIdealEnd() + stepPeriod);
 			session.notifyOfTime(CloudSim.clock() + stepPeriod);
 		    }
@@ -200,8 +192,7 @@ public class WebBroker extends DatacenterBroker {
 		if (sess.areVirtualMachinesReady()) {
 		    updateSessions(sess.getSessionId());
 		} else {
-		    send(getId(), stepPeriod, UPDATE_SESSION_TAG,
-			    sess.getSessionId());
+		    send(getId(), stepPeriod, UPDATE_SESSION_TAG, sess.getSessionId());
 		}
 	    }
 	}
@@ -233,8 +224,8 @@ public class WebBroker extends DatacenterBroker {
      *            - the balancer to add. Must not be null.
      */
     public void addLoadBalancer(final ILoadBalancer balancer) {
-	loadBalancers.put(balancer.getId(), balancer);
-	loadBalancersToGenerators.put(balancer.getId(), new ArrayList<IWorkloadGenerator>());
+	loadBalancers.put(balancer.getAppId(), balancer);
+	loadBalancersToGenerators.put(balancer.getAppId(), new ArrayList<IWorkloadGenerator>());
     }
 
     /**
@@ -289,8 +280,7 @@ public class WebBroker extends DatacenterBroker {
 		    if (currTime == sessEntry.getKey()) {
 			submitSessions(sessEntry.getValue(), balancerId);
 		    } else {
-			submitSessionsAtTime(sessEntry.getValue(), balancerId,
-				sessEntry.getKey() - currTime);
+			submitSessionsAtTime(sessEntry.getValue(), balancerId, sessEntry.getKey() - currTime);
 		    }
 		}
 	    }
@@ -298,7 +288,6 @@ public class WebBroker extends DatacenterBroker {
     }
 
     private void updateSessions(final Integer... sessionIds) {
-
 	for (Integer id : sessionIds.length == 0 ? servedSessions.keySet() : Arrays.asList(sessionIds)) {
 	    WebSession sess = servedSessions.get(id);
 
@@ -355,7 +344,7 @@ public class WebBroker extends DatacenterBroker {
     @Override
     public void startEntity() {
 	Log.printLine(getName() + " is starting...");
-	schedule(getId(), 0, CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST, dataCenterIds);
+	schedule(getId(), 0, CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST, Arrays.asList(dataCenterId));
     }
 
     @SuppressWarnings("unchecked")

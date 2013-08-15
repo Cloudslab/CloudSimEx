@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.ex.web.experiments;
+package org.cloudbus.cloudsim.ex.web.workload.brokers;
 
 import java.util.Arrays;
 import java.util.List;
@@ -10,7 +10,6 @@ import org.cloudbus.cloudsim.ex.disk.HddVm;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.TextUtil;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
-import org.cloudbus.cloudsim.ex.web.WebBroker;
 
 /**
  * 
@@ -39,19 +38,11 @@ public class PerformanceLoggingWebBroker extends WebBroker {
 
     private final double idlePeriod;
 
-    public PerformanceLoggingWebBroker(final String name, final double refreshPeriod, final double lifeLength,
-	    final double logPeriod, final double offset, final double idlePeriod) throws Exception {
-	super(name, refreshPeriod, lifeLength);
-	this.logPeriod = logPeriod;
-	this.offset = offset;
-	this.idlePeriod = idlePeriod;
-    }
-
     public PerformanceLoggingWebBroker(final String name, final double refreshPeriod,
 	    final double lifeLength, final double logPeriod, final double offset, final double idlePeriod,
-	    final List<Integer> dataCenterIds)
+	    Integer dataCenterId)
 	    throws Exception {
-	super(name, refreshPeriod, lifeLength, dataCenterIds);
+	super(name, refreshPeriod, lifeLength, dataCenterId);
 	this.logPeriod = logPeriod;
 	this.offset = offset;
 	this.idlePeriod = idlePeriod;
@@ -125,8 +116,7 @@ public class PerformanceLoggingWebBroker extends WebBroker {
 
 	CustomLog.printLine(
 		TextUtil.getTxtLine(Arrays.asList(time, vmId, percentCPU, percentIO, percentRAM),
-			HEADER_NAMES,
-			TextUtil.DEFAULT_DELIM, false));
+			HEADER_NAMES, TextUtil.DEFAULT_DELIM, false));
 
     }
 

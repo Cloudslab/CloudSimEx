@@ -54,13 +54,15 @@ public interface IGeolocationService {
      * meters.
      * 
      * @param coord1
-     *            - the latitude and longitude of the first point. Must be valid coordinates.
+     *            - the latitude and longitude of the first point. Must be valid
+     *            coordinates.
      * @param coord2
-     *            - the latitude and longitude of the second point. Must be valid coordinates.
+     *            - the latitude and longitude of the second point. Must be
+     *            valid coordinates.
      * @return the distance in meters between the two points in meters.
      */
     double distance(Double[] coord1, Double[] coord2);
-    
+
     /**
      * Returns textual representation of the extracted geographical information
      * about the IP address.
@@ -75,6 +77,19 @@ public interface IGeolocationService {
      *         could not be extracted.
      */
     String[] getMetaData(final String ip);
+
+    /**
+     * Returns an estimation of the latency between the two IPs, measured in ms.
+     * 
+     * @param ip1
+     *            - must not be null. Must be a valid ip, in the sense of the
+     *            previously described formats.
+     * @param ip2
+     *            - must not be null. Must be a valid ip, in the sense of the
+     *            previously described formats.
+     * @return an estimation of the latency between the two IPs, measured in ms.
+     */
+    double latency(String ip1, String ip2);
 
     /**
      * Returns a textual representation of the location of the ip - useful for

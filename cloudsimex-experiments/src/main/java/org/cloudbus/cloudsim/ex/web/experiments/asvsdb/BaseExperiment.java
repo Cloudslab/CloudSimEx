@@ -32,9 +32,9 @@ import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleDBBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleWebLoadBalancer;
-import org.cloudbus.cloudsim.ex.web.WebBroker;
 import org.cloudbus.cloudsim.ex.web.WebSession;
 import org.cloudbus.cloudsim.ex.web.workload.StatWorkloadGenerator;
+import org.cloudbus.cloudsim.ex.web.workload.brokers.WebBroker;
 import org.cloudbus.cloudsim.ex.web.workload.freq.CompositeValuedSet;
 import org.cloudbus.cloudsim.ex.web.workload.freq.FrequencyFunction;
 import org.cloudbus.cloudsim.ex.web.workload.freq.PeriodicStochasticFrequencyFunction;
@@ -95,10 +95,8 @@ public class BaseExperiment {
 	    Datacenter dc2 = createDatacenter("DC2");
 
 	    // Step 3: Create Brokers
-	    WebBroker brokerDC1 = new WebBroker("BrokerDC1", refreshTime, simulationLength,
-		    Arrays.asList(dc1.getId()));
-	    WebBroker brokerDC2 = new WebBroker("BrokerDC2", refreshTime, simulationLength,
-		    Arrays.asList(dc2.getId()));
+	    WebBroker brokerDC1 = new WebBroker("BrokerDC1", refreshTime, simulationLength, dc1.getId());
+	    WebBroker brokerDC2 = new WebBroker("BrokerDC2", refreshTime, simulationLength, dc2.getId());
 
 	    // Step 4: Create virtual machines
 	    HddVm dbServerVMDC1 = createVM(brokerDC1.getId());
@@ -110,11 +108,11 @@ public class BaseExperiment {
 	    // Step 5: Create load balancers for the virtual machines in the 2
 	    // datacenters
 	    ILoadBalancer balancerDC1 = new SimpleWebLoadBalancer(
-		    appServersVMDC1, new SimpleDBBalancer(dbServerVMDC1));
+		    1, "127.0.0.1", appServersVMDC1, new SimpleDBBalancer(dbServerVMDC1));
 	    brokerDC1.addLoadBalancer(balancerDC1);
 
 	    ILoadBalancer balancerDC2 = new SimpleWebLoadBalancer(
-		    appServersVMDC2, new SimpleDBBalancer(dbServerVMDC2));
+		    1, "127.0.0.1", appServersVMDC2, new SimpleDBBalancer(dbServerVMDC2));
 	    brokerDC2.addLoadBalancer(balancerDC2);
 
 	    // Step 6: Add the virtual machines fo the data centers
@@ -130,10 +128,10 @@ public class BaseExperiment {
 
 	    // Step 7: Define the workload and associate it with load balancers
 	    List<StatWorkloadGenerator> workloadDC1 = generateWorkloadsDC1();
-	    brokerDC1.addWorkloadGenerators(workloadDC1, balancerDC1.getId());
+	    brokerDC1.addWorkloadGenerators(workloadDC1, balancerDC1.getAppId());
 
 	    List<StatWorkloadGenerator> workloadDC2 = generateWorkloadsDC2();
-	    brokerDC2.addWorkloadGenerators(workloadDC2, balancerDC2.getId());
+	    brokerDC2.addWorkloadGenerators(workloadDC2, balancerDC2.getAppId());
 
 	    // Step 8: Starts the simulation
 	    CloudSim.startSimulation();

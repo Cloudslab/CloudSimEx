@@ -5,7 +5,8 @@ import java.util.List;
 import org.cloudbus.cloudsim.ex.disk.HddVm;
 
 /**
- * The load balancer of an application. Assigns sessions to servers.
+ * The load balancer of an application. Assigns sessions to servers. Each load
+ * balancer serves an application, which is identified by a application id.
  * 
  * @author nikolay.grozev
  * 
@@ -49,5 +50,19 @@ public interface ILoadBalancer {
      * @return the balancer which manages cloudlets to DB server mapping.
      */
     public IDBBalancer getDbBalancer();
+
+    /**
+     * Returns the id of the application served by this load balancer.
+     * 
+     * @return the id of the application served by this load balancer.
+     */
+    long getAppId();
+
+    /**
+     * Returns the IP address of this load balancer.
+     * 
+     * @return the IP address of this load balancer.
+     */
+    String getIp();
 
 }

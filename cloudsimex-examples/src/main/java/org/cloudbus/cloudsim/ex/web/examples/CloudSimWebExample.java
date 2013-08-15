@@ -49,9 +49,9 @@ import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleDBBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleWebLoadBalancer;
 import org.cloudbus.cloudsim.ex.web.StatGenerator;
-import org.cloudbus.cloudsim.ex.web.WebBroker;
 import org.cloudbus.cloudsim.ex.web.WebCloudlet;
 import org.cloudbus.cloudsim.ex.web.WebSession;
+import org.cloudbus.cloudsim.ex.web.workload.brokers.WebBroker;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
@@ -91,11 +91,10 @@ public class CloudSimWebExample {
 	    CloudSim.init(numBrokers, Calendar.getInstance(), trace_flag);
 
 	    // Step 2: Create Datacenters - the resource providers in CloudSim
-	    // Datacenter datacenter0 =
-	    createDatacenter("WebDataCenter");
+	    Datacenter datacenter0 = createDatacenter("WebDataCenter");
 
 	    // Step 3: Create Broker
-	    WebBroker broker = new WebBroker("Broker", 5, 10000);
+	    WebBroker broker = new WebBroker("Broker", 5, 10000, datacenter0.getId());
 
 	    // Step 4: Create virtual machines
 	    List<Vm> vmlist = new ArrayList<Vm>();
@@ -117,7 +116,7 @@ public class CloudSimWebExample {
 		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared());
 
 	    ILoadBalancer balancer = new SimpleWebLoadBalancer(
-		    Arrays.asList(appServerVM), new SimpleDBBalancer(dbServerVM));
+		    1, "127.0.0.1", Arrays.asList(appServerVM), new SimpleDBBalancer(dbServerVM));
 	    broker.addLoadBalancer(balancer);
 
 	    // add the VMs to the vmList
@@ -128,7 +127,7 @@ public class CloudSimWebExample {
 	    broker.submitVmList(vmlist);
 
 	    List<WebSession> sessions = generateRandomSessions(broker, 100);
-	    broker.submitSessions(sessions, balancer.getId());
+	    broker.submitSessions(sessions, balancer.getAppId());
 
 	    // Sixth step: Starts the simulation
 	    CloudSim.startSimulation();

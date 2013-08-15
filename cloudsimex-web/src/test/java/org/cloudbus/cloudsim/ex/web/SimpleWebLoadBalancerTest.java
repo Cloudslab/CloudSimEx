@@ -27,6 +27,7 @@ import org.cloudbus.cloudsim.ex.disk.VmDiskScheduler;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.helpers.TestUtil;
+import org.cloudbus.cloudsim.ex.web.workload.brokers.WebBroker;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
@@ -69,7 +70,7 @@ public class SimpleWebLoadBalancerTest {
 	datacenter = createDatacenter();
 
 	// Create Broker
-	broker = new WebBroker("Broker", 5, 10000, Arrays.asList(datacenter.getId()));
+	broker = new WebBroker("Broker", 5, 10000, datacenter.getId());
     }
 
     @Test
@@ -95,7 +96,7 @@ public class SimpleWebLoadBalancerTest {
 
 	// submit vm list to the broker
 	broker.submitVmList(vmlist);
-	balancer = new SimpleWebLoadBalancer(Arrays.asList(appVm1, appVm2), new SimpleDBBalancer(dbVm));
+	balancer = new SimpleWebLoadBalancer(1, "127.0.0.1", Arrays.asList(appVm1, appVm2), new SimpleDBBalancer(dbVm));
 	broker.addLoadBalancer(balancer);
 
 	// Should take > 10s
@@ -115,9 +116,9 @@ public class SimpleWebLoadBalancerTest {
 		broker.getId(), -1, 100);
 
 	// Fire it on the 5th sec
-	broker.submitSessionsAtTime(Arrays.asList(session1), balancer.getId(), 5);
+	broker.submitSessionsAtTime(Arrays.asList(session1), balancer.getAppId(), 5);
 	// Fire it on the 6th sec
-	broker.submitSessionsAtTime(Arrays.asList(session2), balancer.getId(), 6);
+	broker.submitSessionsAtTime(Arrays.asList(session2), balancer.getAppId(), 6);
 
 	CloudSim.startSimulation();
 	// List<Cloudlet> resultList = broker.getCloudletReceivedList();
@@ -152,7 +153,7 @@ public class SimpleWebLoadBalancerTest {
 
 	// submit vm list to the broker
 	broker.submitVmList(vmlist);
-	balancer = new SimpleWebLoadBalancer(Arrays.asList(appVm1, appVm2), new SimpleDBBalancer(dbVm));
+	balancer = new SimpleWebLoadBalancer(1, "127.0.0.1", Arrays.asList(appVm1, appVm2), new SimpleDBBalancer(dbVm));
 	broker.addLoadBalancer(balancer);
 
 	// Should take > 10s
@@ -180,11 +181,11 @@ public class SimpleWebLoadBalancerTest {
 		broker.getId(), -1, 100);
 
 	// Fire it on the 5th sec
-	broker.submitSessionsAtTime(Arrays.asList(session1), balancer.getId(), 5);
+	broker.submitSessionsAtTime(Arrays.asList(session1), balancer.getAppId(), 5);
 	// Fire it on the 6th sec
-	broker.submitSessionsAtTime(Arrays.asList(session2), balancer.getId(), 6);
+	broker.submitSessionsAtTime(Arrays.asList(session2), balancer.getAppId(), 6);
 	// Fire it on the 7th sec
-	broker.submitSessionsAtTime(Arrays.asList(session3), balancer.getId(), 7);
+	broker.submitSessionsAtTime(Arrays.asList(session3), balancer.getAppId(), 7);
 
 	CloudSim.startSimulation();
 	// List<Cloudlet> resultList = broker.getCloudletReceivedList();
@@ -222,7 +223,7 @@ public class SimpleWebLoadBalancerTest {
 
 	// submit vm list to the broker
 	broker.submitVmList(vmlist);
-	balancer = new SimpleWebLoadBalancer(Arrays.asList(appVm1, appVm2), new SimpleDBBalancer(dbVm));
+	balancer = new SimpleWebLoadBalancer(1, "127.0.0.1", Arrays.asList(appVm1, appVm2), new SimpleDBBalancer(dbVm));
 	broker.addLoadBalancer(balancer);
 
 	// Should take > 10s
@@ -250,11 +251,11 @@ public class SimpleWebLoadBalancerTest {
 		broker.getId(), -1, 100);
 
 	// Fire it on the 5th sec
-	broker.submitSessionsAtTime(Arrays.asList(session1), balancer.getId(), 5);
+	broker.submitSessionsAtTime(Arrays.asList(session1), balancer.getAppId(), 5);
 	// Fire it on the 6th sec
-	broker.submitSessionsAtTime(Arrays.asList(session2), balancer.getId(), 6);
+	broker.submitSessionsAtTime(Arrays.asList(session2), balancer.getAppId(), 6);
 	// Fire it on the 7th sec
-	broker.submitSessionsAtTime(Arrays.asList(session3), balancer.getId(), 7);
+	broker.submitSessionsAtTime(Arrays.asList(session3), balancer.getAppId(), 7);
 
 	CloudSim.startSimulation();
 	// List<Cloudlet> resultList = broker.getCloudletReceivedList();
@@ -292,7 +293,7 @@ public class SimpleWebLoadBalancerTest {
 
 	// submit vm list to the broker
 	broker.submitVmList(vmlist);
-	balancer = new SimpleWebLoadBalancer(Arrays.asList(appVm1, appVm2), new SimpleDBBalancer(dbVm));
+	balancer = new SimpleWebLoadBalancer(1, "127.0.0.1", Arrays.asList(appVm1, appVm2), new SimpleDBBalancer(dbVm));
 	broker.addLoadBalancer(balancer);
 
 	// Should take > 10s
@@ -312,7 +313,7 @@ public class SimpleWebLoadBalancerTest {
 		broker.getId(), -1, 100);
 
 	// Fire it on the 5th sec
-	broker.submitSessions(Arrays.asList(session1, session2), balancer.getId());
+	broker.submitSessions(Arrays.asList(session1, session2), balancer.getAppId());
 
 	CloudSim.startSimulation();
 	// List<Cloudlet> resultList = broker.getCloudletReceivedList();

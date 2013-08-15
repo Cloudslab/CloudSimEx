@@ -1,0 +1,60 @@
+package org.cloudbus.cloudsim.ex.web.workload;
+
+import java.util.List;
+import java.util.Map;
+
+import org.cloudbus.cloudsim.ex.geolocation.IPGenerator;
+import org.cloudbus.cloudsim.ex.web.WebSession;
+
+/**
+ * A workload generator, which sets the IPs of the generated sessions in
+ * accordance with a specified {@link IPGenerator}. It wraps another instance of
+ * {@link IWorkloadGenerator}, which creates the sessions, and only adds the
+ * IPs.
+ * 
+ * <br>
+ * <br>
+ * 
+ * This class is useful when you have a workload generator that does not create
+ * IPs (the wrapped generator) and you want to add random IPs to the generated
+ * sessions.
+ * 
+ * @author nikolay.grozev
+ * 
+ */
+public class RandomIPWorkloadGenerator implements IWorkloadGenerator {
+
+    private IWorkloadGenerator wrappedGenerator;
+    private IPGenerator ipGen;
+
+    /**
+     * Constr.
+     * 
+     * @param wrappedGenerator
+     *            - the wrapped generator to use. Must not be null.
+     * @param ipGen
+     *            - the IP generator to use when assigning IPs to the newly
+     *            created session. Must not be null.
+     */
+    public RandomIPWorkloadGenerator(IWorkloadGenerator wrappedGenerator, IPGenerator ipGen) {
+	super();
+	this.wrappedGenerator = wrappedGenerator;
+	this.ipGen = ipGen;
+    }
+
+    @Override
+    public Map<Double, List<WebSession>> generateSessions(double startTime, double periodLen) {
+	// Call the wrapped workload generator
+	Map<Double, List<WebSession>> result = wrappedGenerator.generateSessions(startTime, periodLen);
+
+	// Generate and set random IPs to all web sessions.
+	for (Map.Entry<Double, List<WebSession>> e : result.entrySet()) {
+	    for (WebSession sess : e.getValue()) {
+		sess.setSourceIP(ipGen.pollRandomIP());
+	    }
+	}
+
+	return result;
+    }
+
+}

@@ -35,10 +35,11 @@ import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleDBBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleWebLoadBalancer;
-import org.cloudbus.cloudsim.ex.web.WebBroker;
 import org.cloudbus.cloudsim.ex.web.WebSession;
 import org.cloudbus.cloudsim.ex.web.workload.IWorkloadGenerator;
 import org.cloudbus.cloudsim.ex.web.workload.SimpleWorkloadGenerator;
+import org.cloudbus.cloudsim.ex.web.workload.brokers.PerformanceLoggingWebBroker;
+import org.cloudbus.cloudsim.ex.web.workload.brokers.WebBroker;
 import org.cloudbus.cloudsim.ex.web.workload.sessions.GeneratorsUtil;
 import org.cloudbus.cloudsim.ex.web.workload.sessions.StatSessionGenerator;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
@@ -98,7 +99,7 @@ public class SingleDatacentre {
 	    WebBroker brokerDC1 = new PerformanceLoggingWebBroker("BrokerDC1", step, simulationLength, 0.1,
 		    0.01,
 		    5 * step,
-		    Arrays.asList(dc1.getId()));
+		    dc1.getId());
 
 	    // Step 4: Create virtual machines
 	    HddVm dbServerVMDC1 = createVM(brokerDC1.getId());
@@ -110,7 +111,7 @@ public class SingleDatacentre {
 	    // Step 5: Create load balancers for the virtual machines in the 2
 	    // datacenters
 	    ILoadBalancer balancerDC1 = new SimpleWebLoadBalancer(
-		    appServersVMDC1, new SimpleDBBalancer(dbServerVMDC1));
+		    1, "127.0.0.1", appServersVMDC1, new SimpleDBBalancer(dbServerVMDC1));
 	    brokerDC1.addLoadBalancer(balancerDC1);
 
 	    // Step 6: Add the virtual machines for the data centers
@@ -119,9 +120,9 @@ public class SingleDatacentre {
 	    vmlistDC1.addAll(balancerDC1.getDbBalancer().getVMs());
 	    brokerDC1.submitVmList(vmlistDC1);
 
-	    // Step 7: Define the workload and associate it with load balancers
+	    // Step 7: Define the workloadseed and associate it with load balancers
 	    List<? extends IWorkloadGenerator> workloadDC1 = generateWorkloadsDC1(brokerDC1.getId());
-	    brokerDC1.addWorkloadGenerators(workloadDC1, balancerDC1.getId());
+	    brokerDC1.addWorkloadGenerators(workloadDC1, balancerDC1.getAppId());
 
 	    // Step 8: Starts the simulation
 	    CloudSim.startSimulation();
@@ -153,7 +154,7 @@ public class SingleDatacentre {
 	try (InputStream asIO = new FileInputStream(RESULT_DIR + "web_cloudlets.txt");
 		InputStream dbIO = new FileInputStream(RESULT_DIR + "db_cloudlets.txt")) {
 	    StatSessionGenerator sessionGenerator = new StatSessionGenerator(GeneratorsUtil.parseStream(asIO),
-		    GeneratorsUtil.parseStream(dbIO), userId, DATA, step);
+		    GeneratorsUtil.parseStream(dbIO), userId, step, DATA);
 
 	    // return Arrays.asList(new
 	    // PeriodWorkloadGenerator(sessionGenerator, 0.1, numOfSessions));

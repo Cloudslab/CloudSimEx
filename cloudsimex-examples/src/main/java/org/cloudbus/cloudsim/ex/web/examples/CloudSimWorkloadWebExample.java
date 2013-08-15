@@ -42,9 +42,9 @@ import org.cloudbus.cloudsim.ex.util.TextUtil;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleDBBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleWebLoadBalancer;
-import org.cloudbus.cloudsim.ex.web.WebBroker;
 import org.cloudbus.cloudsim.ex.web.WebCloudlet;
 import org.cloudbus.cloudsim.ex.web.workload.StatWorkloadGenerator;
+import org.cloudbus.cloudsim.ex.web.workload.brokers.WebBroker;
 import org.cloudbus.cloudsim.ex.web.workload.freq.CompositeValuedSet;
 import org.cloudbus.cloudsim.ex.web.workload.freq.FrequencyFunction;
 import org.cloudbus.cloudsim.ex.web.workload.freq.PeriodicStochasticFrequencyFunction;
@@ -84,12 +84,11 @@ public class CloudSimWorkloadWebExample {
 	    CloudSim.init(numBrokers, Calendar.getInstance(), trace_flag);
 
 	    // Step 2: Create Datacenters - the resource providers in CloudSim
-	    // Datacenter datacenter0 =
-	    createDatacenter("WebDataCenter");
+	    Datacenter datacenter0 = createDatacenter("WebDataCenter");
 
 	    // Step 3: Create Broker
 	    int refreshTime = 5;
-	    WebBroker broker = new WebBroker("Broker", refreshTime, 24 * 3600);
+	    WebBroker broker = new WebBroker("Broker", refreshTime, 24 * 3600, datacenter0.getId());
 
 	    // Step 4: Create virtual machines
 	    List<Vm> vmlist = new ArrayList<Vm>();
@@ -113,7 +112,7 @@ public class CloudSimWorkloadWebExample {
 		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared());
 
 	    ILoadBalancer balancer = new SimpleWebLoadBalancer(
-		    Arrays.asList(appServerVM, appServerVM2), new SimpleDBBalancer(dbServerVM));
+		    1, "127.0.0.1", Arrays.asList(appServerVM, appServerVM2), new SimpleDBBalancer(dbServerVM));
 	    broker.addLoadBalancer(balancer);
 
 	    // add the VMs to the vmList
@@ -124,7 +123,7 @@ public class CloudSimWorkloadWebExample {
 	    broker.submitVmList(vmlist);
 
 	    List<StatWorkloadGenerator> workloads = generateWorkloads();
-	    broker.addWorkloadGenerators(workloads, balancer.getId());
+	    broker.addWorkloadGenerators(workloads, balancer.getAppId());
 
 	    // Sixth step: Starts the simulation
 	    CloudSim.startSimulation();

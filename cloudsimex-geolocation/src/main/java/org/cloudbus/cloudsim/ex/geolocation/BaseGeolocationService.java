@@ -73,9 +73,28 @@ public abstract class BaseGeolocationService implements IGeolocationService {
 
     @Override
     public double distance(Double[] coord1, Double[] coord2) {
-        return distance(coord1[0], coord1[1], coord2[0], coord2[1]);
+	return distance(coord1[0], coord1[1], coord2[0], coord2[1]);
     }
-    
+
+    @Override
+    public double latency(final String ip1, final String ip2) {
+	double distanceInMeters = distance(getCoordinates(ip1), getCoordinates(ip2));
+	int speedOfLigthMetPerSec = 300_000_000;
+
+	/*
+	 * Based on "Latency and the Quest for Interactivity" by Stuart Chester
+	 * and graph 1(a) from
+	 * "Modelling th Internet Delay Space Based on Geographical Locations"
+	 * by S. Kaune et al.
+	 * 
+	 * Very inaccurate when considering IPs in developing countries as
+	 * discussed by Kaune et al.
+	 */
+
+	int approxSpeedOfInetBackbone = speedOfLigthMetPerSec / 3;
+	return 1000 * distanceInMeters / approxSpeedOfInetBackbone;
+    }
+
     @Override
     public String getTxtAddress(String ip) {
 	return Joiner.on(", ").useForNull("null").join(getMetaData(ip));

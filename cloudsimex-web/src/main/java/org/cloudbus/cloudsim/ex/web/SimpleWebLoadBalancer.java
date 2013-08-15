@@ -19,6 +19,11 @@ import org.cloudbus.cloudsim.ex.util.Id;
 public class SimpleWebLoadBalancer implements ILoadBalancer {
 
     private final long id;
+
+    private final long appId;
+
+    private final String ip;
+    
     private final List<HddVm> appServers;
 
     private final IDBBalancer dbBalancer;
@@ -28,17 +33,23 @@ public class SimpleWebLoadBalancer implements ILoadBalancer {
     /**
      * Constructor.
      * 
+     * @param appId
+     *            - the id of the applications, which this load balancer is
+     *            serving.
+     * @param ip - the IP address represented in a standard Ipv4 or IPv6 dot notation.
      * @param appServers
      *            - the application servers. Must not be null.
      * @param dbBalancer
      *            - the balancer of the DB cloudlets among DB servers. Must not
      *            be null.
      */
-    public SimpleWebLoadBalancer(final List<HddVm> appServers, final IDBBalancer dbBalancer) {
+    public SimpleWebLoadBalancer(final long appId, final String ip, final List<HddVm> appServers, final IDBBalancer dbBalancer) {
 	super();
+	this.appId = appId;
 	id = Id.pollId(SimpleWebLoadBalancer.class);
 	this.appServers = appServers;
 	this.dbBalancer = dbBalancer;
+	this.ip = ip;
     }
 
     /*
@@ -51,6 +62,21 @@ public class SimpleWebLoadBalancer implements ILoadBalancer {
 	return id;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.cloudbus.cloudsim.incubator.web.ILoadBalancer#getId()
+     */
+    @Override
+    public long getAppId() {
+	return appId;
+    }
+
+    @Override
+    public String getIp() {
+        return ip;
+    }
+    
     /*
      * (non-Javadoc)
      * 

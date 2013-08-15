@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.cloudbus.cloudsim.ex.disk.HddVm;
-import org.cloudbus.cloudsim.ex.web.WebBroker;
+import org.cloudbus.cloudsim.ex.web.workload.brokers.WebBroker;
 
 /**
  * 

@@ -28,6 +28,7 @@ import org.cloudbus.cloudsim.ex.disk.VmDiskScheduler;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.helpers.TestUtil;
+import org.cloudbus.cloudsim.ex.web.workload.brokers.WebBroker;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
@@ -73,7 +74,7 @@ public class WebSession_TestCloudletsStatus_Test {
 	datacenter = createDatacenterWithSingleHostAndSingleDisk("TestDatacenter");
 
 	// Create Broker
-	broker = new WebBroker("Broker", 5, 100);
+	broker = new WebBroker("Broker", 5, 100, datacenter.getId());
 
 	// Create virtual machines
 	List<Vm> vmlist = new ArrayList<Vm>();
@@ -116,7 +117,7 @@ public class WebSession_TestCloudletsStatus_Test {
 		new CompositeGenerator<>(new IterableGenerator<>(Arrays.asList(dbCl1,
 			dbCl2)));
 
-	ILoadBalancer balancer = new SimpleWebLoadBalancer(Arrays.asList(vm1),
+	ILoadBalancer balancer = new SimpleWebLoadBalancer(1, "127.0.0.1", Arrays.asList(vm1),
 		new SimpleDBBalancer(vm2));
 	broker.addLoadBalancer(balancer);
 
@@ -125,7 +126,7 @@ public class WebSession_TestCloudletsStatus_Test {
 	// session.setAppVmId(vm1.getId());
 	// session.setDbBalancer(vm2.getId());
 
-	broker.submitSessions(Arrays.asList(session), balancer.getId());
+	broker.submitSessions(Arrays.asList(session), balancer.getAppId());
 
 	CloudSim.startSimulation();
 	List<HddCloudlet> resultList = broker.getCloudletReceivedList();

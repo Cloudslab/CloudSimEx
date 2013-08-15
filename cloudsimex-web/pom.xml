@@ -14,6 +14,11 @@
 			<artifactId>cloudsimex-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.cloudbus</groupId>
+			<artifactId>cloudsimex-geolocation</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<!-- Test Dependency -->
 		<dependency>
 			<groupId>org.cloudbus</groupId>

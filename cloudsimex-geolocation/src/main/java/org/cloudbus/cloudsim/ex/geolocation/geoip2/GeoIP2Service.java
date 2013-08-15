@@ -30,7 +30,9 @@ public class GeoIP2Service extends BaseGeolocationService implements IGeolocatio
 
     /**
      * Constructor.
-     * @param f - a valid file in the mmdb format.
+     * 
+     * @param f
+     *            - a valid file in the mmdb format.
      */
     public GeoIP2Service(final File f) {
 	super();
@@ -85,10 +87,16 @@ public class GeoIP2Service extends BaseGeolocationService implements IGeolocatio
 	}
     }
 
-    
     @Override
     public void close() throws IOException {
 	reader.close();
+    }
+
+    public static void main(String[] args) throws IOException {
+	String ip = "41.133.63.0";
+	try (GeoIP2Service service = new GeoIP2Service(new File("GeoLite2-City.mmdb"))) {
+	    System.out.println(service.getTxtAddress(ip));
+	}
     }
 
 }

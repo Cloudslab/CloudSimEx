@@ -37,10 +37,11 @@ import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleDBBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleWebLoadBalancer;
-import org.cloudbus.cloudsim.ex.web.WebBroker;
 import org.cloudbus.cloudsim.ex.web.WebSession;
 import org.cloudbus.cloudsim.ex.web.workload.IWorkloadGenerator;
 import org.cloudbus.cloudsim.ex.web.workload.StatWorkloadGenerator;
+import org.cloudbus.cloudsim.ex.web.workload.brokers.PerformanceLoggingWebBroker;
+import org.cloudbus.cloudsim.ex.web.workload.brokers.WebBroker;
 import org.cloudbus.cloudsim.ex.web.workload.freq.CompositeValuedSet;
 import org.cloudbus.cloudsim.ex.web.workload.freq.FrequencyFunction;
 import org.cloudbus.cloudsim.ex.web.workload.freq.PeriodicStochasticFrequencyFunction;
@@ -108,12 +109,12 @@ public class TwoDatacentres {
 	    WebBroker brokerDC1 = new PerformanceLoggingWebBroker("BrokerDC1", step, simulationLength, 1,
 		    0.01,
 		    5 * step,
-		    Arrays.asList(dc1.getId()));
+		    dc1.getId());
 
 	    WebBroker brokerDC2 = new PerformanceLoggingWebBroker("BrokerDC2", step, simulationLength, 1,
 		    0.01,
 		    5 * step,
-		    Arrays.asList(dc2.getId()));
+		    dc2.getId());
 
 	    // Step 4: Create virtual machines
 	    HddVm dbServerVMDC1 = createVM(brokerDC1.getId(), 10000, 10000, 512);
@@ -122,9 +123,11 @@ public class TwoDatacentres {
 	    vmScheduler1.map(dbServerVMDC1.getId(), pe1.getId());
 	    vmScheduler1.map(appServersVMDC1.get(0).getId(), pe2.getId());
 
-	    HddVm dbServerVMDC2 = createVM(brokerDC2.getId(), (int) (10000 * (2561 / 3400.0)), 7500, 1666);
+	    HddVm dbServerVMDC2 = createVM(brokerDC2.getId(),
+		    (int) (10000 * ((2666 * (100 - 3.028893) / 100) / 3400.0)), 7500, 1666);
 	    List<HddVm> appServersVMDC2 =
-		    Arrays.asList(createVM(brokerDC2.getId(), (int) (10000 * (2263 / 3400.0)), 7500, 1656));
+		    Arrays.asList(createVM(brokerDC2.getId(),
+			    (int) (10000 * ((2266 * (100 - 0.241971) / 100) / 3400.0)), 7500, 1656));
 
 	    vmScheduler2.map(dbServerVMDC2.getId(), pe3.getId());
 	    vmScheduler2.map(appServersVMDC2.get(0).getId(), pe4.getId());
@@ -132,11 +135,11 @@ public class TwoDatacentres {
 	    // Step 5: Create load balancers for the virtual machines in the 2
 	    // datacenters
 	    ILoadBalancer balancerDC1 = new SimpleWebLoadBalancer(
-		    appServersVMDC1, new SimpleDBBalancer(dbServerVMDC1));
+		    1, "127.0.0.1", appServersVMDC1, new SimpleDBBalancer(dbServerVMDC1));
 	    brokerDC1.addLoadBalancer(balancerDC1);
 
 	    ILoadBalancer balancerDC2 = new SimpleWebLoadBalancer(
-		    appServersVMDC2, new SimpleDBBalancer(dbServerVMDC2));
+		    1, "127.0.0.1", appServersVMDC2, new SimpleDBBalancer(dbServerVMDC2));
 	    brokerDC2.addLoadBalancer(balancerDC2);
 
 	    // Step 6: Add the virtual machines for the data centers
@@ -152,10 +155,10 @@ public class TwoDatacentres {
 
 	    // Step 7: Define the workload and associate it with load balancers
 	    List<? extends IWorkloadGenerator> workloadDC1 = generateWorkloadsDC(brokerDC1.getId(), 0 * HOUR, DATA1);
-	    brokerDC1.addWorkloadGenerators(workloadDC1, balancerDC1.getId());
+	    brokerDC1.addWorkloadGenerators(workloadDC1, balancerDC1.getAppId());
 
 	    List<? extends IWorkloadGenerator> workloadDC2 = generateWorkloadsDC(brokerDC2.getId(), 12 * HOUR, DATA2);
-	    brokerDC2.addWorkloadGenerators(workloadDC2, balancerDC2.getId());
+	    brokerDC2.addWorkloadGenerators(workloadDC2, balancerDC2.getAppId());
 
 	    // Step 8: Starts the simulation
 	    CloudSim.startSimulation();
@@ -212,7 +215,7 @@ public class TwoDatacentres {
 	try (InputStream asIO = new FileInputStream(RESULT_DIR + "web_cloudlets.txt");
 		InputStream dbIO = new FileInputStream(RESULT_DIR + "db_cloudlets.txt")) {
 	    StatSessionGenerator sessGen = new StatSessionGenerator(GeneratorsUtil.parseStream(asIO),
-		    GeneratorsUtil.parseStream(dbIO), userId, dataItem, step);
+		    GeneratorsUtil.parseStream(dbIO), userId, step, dataItem);
 
 	    double unit = HOUR;
 	    double periodLength = DAY;

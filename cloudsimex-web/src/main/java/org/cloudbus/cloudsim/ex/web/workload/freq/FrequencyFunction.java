@@ -2,10 +2,11 @@ package org.cloudbus.cloudsim.ex.web.workload.freq;
 
 /**
  * We are representing the generated workload as a Poisson distribution over a
- * function of time - Po(f(t)). This type represents the f(t) concept from this
+ * function of time - Po(f(t)). This class represents the f(t) concept from this
  * definition. It has one main property (the unit) and an abstract method for
  * the frequency.
  * 
+ * <br>
  * <br>
  * 
  * For example if we would like to denote that at the 100th sec after the start
