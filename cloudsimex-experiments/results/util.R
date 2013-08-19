@@ -44,6 +44,13 @@ check.date <- function(d){
   length(grep("^\\d{2}:\\d{2}:\\d{2}$", as.character(d))) != 0
 }
 
+removeGroups <- function(df, step) {
+  rowNumber <- nrow(df)
+  newSize <- trunc(rowNumber / step) + 1
+  result <- df[sapply(1:newSize, function(x) { (x-1)*step + 1}), ]
+  result[complete.cases(result), ]
+}
+
 averageSteps <- function(lst, step, stepFunc = median) {
   idx <- 1: length(lst)
   sapply(idx, lambdaAverageSteps, lst, step, stepFunc=stepFunc)
@@ -110,9 +117,11 @@ resetMar <- function() {
   par(mar = initialMar)
 }
 
-fullScreen <- function(hasTitle = F) {
-  top <- if (hasTitle) { initialMar[3] } else { 0 }
-  newMar <- c(max(initialMar[1] - 1, 0), max(initialMar[2], 0), max(0, top), max(0, initialMar[4] - 2))
+fullScreen <- function(hasTitle = F, keepLeftMargin = T, minBorder = 0) {
+  left <- if (keepLeftMargin) { initialMar[2] } else { minBorder }
+  top <- if (hasTitle) { initialMar[3] } else { minBorder }
+    
+  newMar <- c(initialMar[1], max(left, minBorder), max(top, minBorder), max(initialMar[4] - 2, minBorder))
   par(mar=newMar)
 }
 

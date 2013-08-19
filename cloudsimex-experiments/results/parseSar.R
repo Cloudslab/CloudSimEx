@@ -175,6 +175,7 @@ prepareSarFrame0 <- function(df, maxTPSOps=maxTPS, type, activeMem=NA) {
   df[,"%SessionMem"] = 100 * df[,"SessionMem"] / (df[,"KBMemory"])
   
   df[,"ActiveMem"] = abs(as.numeric(df$kbactive) - baseMem) 
+  df[,"ActiveMem"] = sapply(df[,"ActiveMem"], function(x) {if(x < 0) 0 else x } )
   df[,"ActiveMem"] = if (is.na(activeMem)) df[,"ActiveMem"] else abs(activeMem[1:nrow(df)] - baseMem)
   df[,"%ActiveMem"] = 100 * df[,"ActiveMem"] / df[,"KBMemory"]
   

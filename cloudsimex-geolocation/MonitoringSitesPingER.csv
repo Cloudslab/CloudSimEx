@@ -9,12 +9,12 @@ www.adach.ae ,adach.ae,"P.O. Box 2380 Abu Dhabi, UAE, United Arab Emirates, Midd
 www.estamer.ae ,estamer.ae,"Dubai, United Arab Emirates, Middle East (25.2644 55.3117)",ARAB.LEAGUE 
 www.adpolice.gov.ae ,adpolice.gov.ae,"Abu Dhabi, United Arab Emirates, Middle East (24.4385 54.4233)",ARAB.LEAGUE 
 www.nrf.ae ,nrf.ae,"Abu Dhabi, United Arab Emirates, Middle East (25.1033 55.1685)",ARAB.LEAGUE 
-www.mod.gov.af B ,mod.gov.af,"Kabul, Afghanistan, South Asia (34.5167 69.1833)",
+www.mod.gov.af, mod.gov.af,"Kabul, Afghanistan, South Asia (34.5167 69.1833)",
 www.multinet.af ,multinet.af,"Kabul, Afghanistan, Afghanistan, South Asia (34.5 69.17)",
 mail.neda.af ,neda.af,"Kabul, Afghanistan, Afghanistan, South Asia (34.5 69.17)",
 avp.gov.al ,avp.gov.al,"Tirane, Albania, Balkans (41.3 19.8)",EUROPE 
 www.hraparak.am ,hraparak.am,"Square Newspaper RA Yerevan, Armenia, Central Asia (40 45)",CAUCASUS 
-www.sci.am B ,sci.am,"Yerevan, Armenia, Central Asia (40.267 44.583)",CAUCASUS 
+www.sci.am, sci.am,"Yerevan, Armenia, Central Asia (40.267 44.583)",CAUCASUS 
 www.seua.am ,seua.am,"Yerevan, Armenia, Central Asia (40.1811 44.5136)",CAUCASUS 
 monitor.scarlet.an ,scarlet.an,"Curacao, Netherlands Antilles, Latin America (12.7 -68.56)",
 www-05.nexus.ao ,nexus.ao,"Luanda, Angola, Africa (-8.84 13.23)",C.AFRICA SUB.SAHARA 
@@ -29,23 +29,23 @@ mel-a-ext1.aarnet.net.au ,aarnet.net.au ,"Melbourne, Victoria, Australia, Oceani
 melspeed.intervolve.com.au ,intervolve.com.au,"Melbourne, Australia, Oceania (-37.98 145.12)",AUSTRALASIA 
 netslave1.cc.monash.edu.au ,monash.edu.au,"Victoria, Australia, Oceania (-37.82 144.97)",AUSTRALASIA 
 128.250.54.22 ,unimelb.edu.au,"Canberra, Australia, Oceania (-35.250 149.133)",
-adl-a-ext1.aarnet.net.au B ,aarnet.net.au,"Adelaide, South Australia, Australia, Oceania (-34.9233 138.5892)",AUSTRALASIA 
+adl-a-ext1.aarnet.net.au, aarnet.net.au,"Adelaide, South Australia, Australia, Oceania (-34.9233 138.5892)",AUSTRALASIA 
 syd-a-ext1.aarnet.net.au ,aarnet.net.au,"Canberra, Australia, Oceania (-33.8835 151.2011)",AUSTRALASIA 
-per-a-ext1.aarnet.net.au B ,aarnet.net.au,"Perth, Western Australia, Australia, Oceania (-31.9559 115.8595)",AUSTRALASIA 
-bne-a-ext1.aarnet.net.au B ,aarnet.net.au,"Brisbane,Queensland, Australia, Oceania (-27.4985 153.014)",AUSTRALASIA 
+per-a-ext1.aarnet.net.au, aarnet.net.au,"Perth, Western Australia, Australia, Oceania (-31.9559 115.8595)",AUSTRALASIA 
+bne-a-ext1.aarnet.net.au, aarnet.net.au,"Brisbane,Queensland, Australia, Oceania (-27.4985 153.014)",AUSTRALASIA 
 drw-a-pm1.aarnet.net.au ,aarnet.net.au,"Darwin, Northern Territories, Australia, Oceania (-12.4440 130.833)",AUSTRALASIA 
-cbr-a-ext1.aarnet.net.au B ,aarnet.net.au,"Canberra, Capital city, Australia, Oceania (-35.252 149.1343)",AUSTRALASIA 
-hba-a-pm1.aarnet.net.au B ,aarnet.net.au,"Hobart, Tasmania, Australia, Oceania (-42.905 147.325)",AUSTRALASIA 
+cbr-a-ext1.aarnet.net.au, aarnet.net.au,"Canberra, Capital city, Australia, Oceania (-35.252 149.1343)",AUSTRALASIA 
+hba-a-pm1.aarnet.net.au, aarnet.net.au,"Hobart, Tasmania, Australia, Oceania (-42.905 147.325)",AUSTRALASIA 
 nmsapps.bigair.net.au ,nmsapps.bigair.net.au,"Sydney, Australia, Oceania (-33.7 151.2)",AUSTRALASIA 
 munnari.oz.au ,munnari.oz.au,"Canberra, Australia, Oceania (-35.250 149.133)",AUSTRALASIA 
 speedtest.ivory.azstarnet.az ,ivory.azstarnet.az,"Baku, Azerbaijan, Central Asia (40.4 49.88)",CAUCASUS 
-linhost2.utic.net.ba B ,utic.net.ba,"Sarajevo, Bosnia Herzegovina, Balkans (43.85 18.383)",
-www.duet.ac.bd B ,duet.ac.bd,"Gazipur-1700, Bangladesh, Bangladesh, South Asia (24.50 92.05)",S.ASIA 
+linhost2.utic.net.ba, utic.net.ba,"Sarajevo, Bosnia Herzegovina, Balkans (43.85 18.383)",
+www.duet.ac.bd, duet.ac.bd,"Gazipur-1700, Bangladesh, Bangladesh, South Asia (24.50 92.05)",S.ASIA 
 www.ru.ac.bd ,ru.ac.bd,"Rajshahi, Bangladesh, South Asia (24.36 88.60)",S.ASIA 
 www.daffodilvarsity.edu.bd ,daffodilvarsity.edu.bd,"Shukrabad, Dhanmondi, Dhaka-1207, Bangladesh, South Asia (23.7531 90.3773)",
 ns1.priorweb.be ,priorweb.be,"Merelbeke, Belgium, Europe (51 3.75)",EUROPE 
 www.lonab.bf ,lonab.bf,"Ouagadougou, Burkina Faso, Africa (12.3702 -1.5247)",N.AFRICA SUB.SAHARA 
-www.univ-ouaga.bf M ,univ-ouaga.bf,"Ouagadougou, 03 B.P. 7021, Burkina Faso, Africa (12.377 -1.53)",N.AFRICA SUB.SAHARA W.AFRICA 
+www.univ-ouaga.bf, univ-ouaga.bf,"Ouagadougou, 03 B.P. 7021, Burkina Faso, Africa (12.377 -1.53)",N.AFRICA SUB.SAHARA W.AFRICA 
 dcc.bg ,dcc.bg,"Plovdiv, Bulgaria, Balkans (42.15 24.75)",EUROPE 
 megalan.bg ,megalan.bg,"Sofia, Bulgaria, Balkans (42.42 23.2)",EUROPE 
 www.tpn.bg ,tpn.bg,"Sofia, Bulgaria, Balkans (42.683 23.317)",EUROPE 
@@ -57,7 +57,7 @@ www.intercafe.bi ,intercafe.bi,"Intercafe, Bujumbura, Burundi, Africa (-3.3762 2
 www.tubane.bi ,tubane.bi,"26 Avenue u 18 Septembre, Bujumbura, Burundi, Africa (-3.3901 29.3602)",C.AFRICA E.AFRICA SUB.SAHARA 
 speedtest.eglue.biz ,eglue.biz,"Maribor, Slovenia, Balkans (46.63 15.39)",EUROPE MEDITERRANEAN 
 www.agetur.bj ,agetur.bj,"Cotonou, Benin, Africa (6.35 2.4333)",N.AFRICA SUB.SAHARA W.AFRICA 
-waib.gouv.bj B ,gouv.bj,"Cotonou, Benin, Africa (9.5 2.25)",N.AFRICA SUB.SAHARA W.AFRICA 
+waib.gouv.bj, gouv.bj,"Cotonou, Benin, Africa (9.5 2.25)",N.AFRICA SUB.SAHARA W.AFRICA 
 www.officedubacbenin.bj ,officedubacbenin.bj,"Cotenu, Benin, Africa (6.35 2.433)",N.AFRICA SUB.SAHARA W.AFRICA 
 www.brunet.bn ,brunet.bn,"Bandar Seri Begawan, Brunei, Brunei, S.E. Asia (4.8903 114.9422)",SE.ASIA 
 www.itb.edu.bn ,itb.edu.bn,"Bandar Seri Begawan, Brunei, S.E. Asia (4.9775 114.9003)",SE.ASIA 
@@ -65,8 +65,8 @@ www.ubd.edu.bn ,ubd.edu.bn,"Bandar Seri Begawan, Brunei, Brunei, S.E. Asia (4.97
 www.mfa.gov.bn ,mfa.gov.bn,"Prime Minister's Office, Istana Nurul Iman, Bandar Seri Begawan BA1000, Brunei, S.E. Asia (4.87 115)",SE.ASIA 
 www.voctech.org.bn ,voctech.org.bn,"Jalan Pasar Baharu, Gadong BE1318, Negara Brunei Darussalam, Brunei, S.E. Asia (4.87 115)",SE.ASIA 
 portal.ucb.edu.bo ,ucb.edu.bo,"La Paz, Bolivia, Latin America (-16.5 -68.15)",S.AMERICA 
-www.umss.edu.bo B M ,umss.edu.bo,"Cochabamba, Bolivia, Latin America (-17.43 -66.17)",S.AMERICA 
-ford.cefet-rj.br M ,cefet-rj.br,"Rio De Janeiro, Brazil, Latin America (-22.9118 -43.2241)",S.AMERICA 
+www.umss.edu.bo, umss.edu.bo,"Cochabamba, Bolivia, Latin America (-17.43 -66.17)",S.AMERICA 
+ford.cefet-rj.br, cefet-rj.br,"Rio De Janeiro, Brazil, Latin America (-22.9118 -43.2241)",S.AMERICA 
 www.agestado.com.br ,agestado.com.br,"Brasilia, Brazil, Latin America (-15.783 -47.917)",S.AMERICA 
 speedtest.bitcom.com.br ,bitcom.com.br,"Caxias do Sul, Brazil, Latin America (-28.91 -51.61)",S.AMERICA 
 www.btm.com.br ,www.btm.com.br,"Brasilia, Brazil, Latin America (-15.783 -47.917)",S.AMERICA 
@@ -81,15 +81,15 @@ www.fpf.br ,fpf.br,"Manaus, Amazonas, Brazil, Latin America (-3.06 -60.00)",S.AM
 ms01.linea.gov.br ,linea.gov.br,"Rua General Jose Cristino, 77 St. Kitts, Rio de Janeiro, RJ, Brazil, Latin America (-22.9035 -43.2096)",S.AMERICA 
 www.linea.gov.br ,linea.gov.br,"Rua General Jose Cristino, 77 St. Kitts, Rio de Janeiro, RJ, Brazil, Latin America (-22.9035 -43.2096)",S.AMERICA 
 www.embratel.net.br ,embratel.net.br,"Brasilia, Brazil, Latin America (-15.783 -47.917)",S.AMERICA 
-pinger.sprace.org.br M ,sprace.org.br,"Sao Paulo, Brazil, Latin America (-23.5242 -46.6653)",S.AMERICA 
+pinger.sprace.org.br, sprace.org.br,"Sao Paulo, Brazil, Latin America (-23.5242 -46.6653)",S.AMERICA 
 access.sprace.org.br ,sprace.org.br,"Sao Paulo, Brazil, Latin America (-23.5242 -46.6653)",S.AMERICA 
 www.registro.br ,registro.br,"Brasilia, Brazil, Latin America (-15.783 -47.917)",S.AMERICA 
-web.hepgrid.uerj.br M ,uerj.br,"Rio De Janeiro, Brazil, Latin America (-22.88 -43.28)",S.AMERICA 
+web.hepgrid.uerj.br, uerj.br,"Rio De Janeiro, Brazil, Latin America (-22.88 -43.28)",S.AMERICA 
 www.uern.br ,uern.br,"Assu, Brazil, Latin America (-5.5740 -36.9089)",S.AMERICA 
 if.ufrj.br ,ufrj.br,"Rio De Janeiro, Brazil, Latin America (-22.88 -43.28)",S.AMERICA 
-cc.if.ufrj.br M ,if.ufrj.br,"Rio De janeiro, Brazil, Latin America (-22.8598 -43.2310)",S.AMERICA 
+cc.if.ufrj.br, if.ufrj.br,"Rio De janeiro, Brazil, Latin America (-22.8598 -43.2310)",S.AMERICA 
 www.unesp.br ,unesp.br,"Sao Paulo, Brazil, Latin America (-23.5 -46.6)",S.AMERICA 
-pinger.unesp.br B M ,unesp.br,"Sao Paulo, Brazil, Latin America (-23.55 -46.63)",S.AMERICA 
+pinger.unesp.br, unesp.br,"Sao Paulo, Brazil, Latin America (-23.55 -46.63)",S.AMERICA 
 www.cob.edu.bs ,cob.edu.bs,"Nassau, Bahamas, Latin America (25.0833 -77.35)",
 www.edls.edu.bs ,edls.edu.bs,"Nassau, Bahamas, Latin America (25.0600 -77.3450)",
 www.rub.edu.bt ,rub.edu.bt,"Semtokha, Thimphu, Bhutan, Bhutan, South Asia (27.31 89.45)",
@@ -100,14 +100,14 @@ www.gov.bw ,gov.bw,"Gaborone, Botswana, Africa (-24.6464 25.9119)",S.AFRICA SUB.
 www.oag.org.bw ,oag.org.bw,"Farm Forrest Hill No.9 Lot 134, Millenium Park, Kgale Hill, Gaborone, , Botswana, Africa (-24.6919 25.8785)",S.AFRICA SUB.SAHARA 
 www.grin.by ,grin.by,"City Grodno Kupala 78a, Belarus, Europe (53.6814 23.8146)",
 www.mogbiz.by ,mogbiz.by,"Mogilev, Belarus, Europe (53.9139 30.3364)",
-www.mtec.by B ,mtec.by,"Minsk, Belarus, Europe (53.9 27.5667)",
-www.cuc.ac.cr B ,cuc.ac.c,"Avenida 7, Calle 9, Barrio El Molino , Cartago, Costa Rica, Latin America (9.87 -83.917)",
-ftp.physics.carleton.ca B ,carleton.ca,"Ottawa, ON, Canada, North America (45.41 -75.70)",
-netmon.physics.carleton.ca M ,carleton.ca,"Ottawa, ON, Canada, North America (45.42 -75.70)",
+www.mtec.by, mtec.by,"Minsk, Belarus, Europe (53.9 27.5667)",
+www.cuc.ac.cr, cuc.ac.c,"Avenida 7, Calle 9, Barrio El Molino , Cartago, Costa Rica, Latin America (9.87 -83.917)",
+ftp.physics.carleton.ca, carleton.ca,"Ottawa, ON, Canada, North America (45.41 -75.70)",
+netmon.physics.carleton.ca, carleton.ca,"Ottawa, ON, Canada, North America (45.42 -75.70)",
 surf.sno.laurentian.ca ,sno.laurentian.ca,"Toronto, Canada, North America (43.650 -79.333)",
 hep.physics.mcgill.ca ,mcgill.ca,"Montreal, Quebec, Canada, North America (45.5052 -73.5782)",N.AMERICA 
 www.triumf.ca ,triumf.ca,"Vancouver, BC, Canada, North America (49.2477 -123.2304)",N.AMERICA 
-sitka.triumf.ca B M ,triumf.ca,"Vancouver, British Columbia, Canada, North America (49.2475 -123.2308)",N.AMERICA 
+sitka.triumf.ca, triumf.ca,"Vancouver, British Columbia, Canada, North America (49.2475 -123.2308)",N.AMERICA 
 vidconf.triumf.ca ,vidconf.triumf.ca,"Vancouver, B.C., Canada, North America (49.2478 -123.2306)",
 sarcee.phys.ualberta.ca ,ualberta.ca,"Edmonton Alberta, Canada, North America (53.528 -113.526)",
 mercury.uvic.ca ,uvic.ca,"Victoria BC, Canada, North America (48.43 -123.35)",
@@ -119,24 +119,24 @@ www.microcom.cd ,microcom.cd,"4 av. Mutombo Katashi/Gombe, Kinshasa, Democratic 
 www.unikin.cd ,unikin.cd,"Kinshasa, Democratic Republic of Congo, Africa (-4.4194 15.3097)",
 ns1.unikin.cd ,unikin.cd,"Kinshasa, Democratic Republic of Congo, Africa (-4.4194 15.3097)",
 www.drtvnet.cg ,drtvnet.cg,"16, William Avenue Guynet. Centre Ville, Brazzaville., Republic of the Congo, Africa (-4.2667 15.2833)",C.AFRICA SUB.SAHARA 
-ping.cern.ch B ,cern.ch,"Geneva, Switzerland, Europe (46.23 6.07)",EUROPE 
-pinger.cern.ch M ,cern.ch,"Geneva, Switzerland, Europe (46.232496 6.045914)",EUROPE 
+ping.cern.ch, cern.ch,"Geneva, Switzerland, Europe (46.23 6.07)",EUROPE 
+pinger.cern.ch, cern.ch,"Geneva, Switzerland, Europe (46.232496 6.045914)",EUROPE 
 www.cern.ch ,cern.ch,"Geneva, Switzerland, Europe (46.232496 6.045914)",EUROPE 
-eltca1.epfl.ch B ,epfl.ch,"Lausanne, Switzerland, Europe (46.5207 6.5682)",EUROPE 
+eltca1.epfl.ch, epfl.ch,"Lausanne, Switzerland, Europe (46.5207 6.5682)",EUROPE 
 www.acf.ci ,acf.ci,"Abidjan, Ivory Coast, Africa (5.3363 -4.0278)",N.AFRICA 
 www.agriculture.gouv.ci ,agriculture.gouv.ci,"Building CAISTAB 24 25th floor 01 BP V82 Abidjan, Ivory Coast, Africa (5.3364 -4.026)",N.AFRICA 
 www.nic.ci ,nic.ci,"Abidjan, Ivory Coast, Africa (5.3411 -4.0281)",N.AFRICA 
 www.canal2temuco.cl ,canal2temuco.cl,"Coquimbo near la Serena, Chile, Latin America (-29.9534 -71.3436)",S.AMERICA 
 www.dcc.uchile.cl ,dcc.uchile.cl,"Santiago, Chile, Latin America (-33.400 -70.667)",S.AMERICA 
-www.camnet.cm B ,camnet.cm,"Yaounde, Cameroon, Africa (3.85 11.52)",C.AFRICA SUB.SAHARA 
-v-www.ihep.ac.cn M ,ihep.ac.cn,"Beijing, China, East Asia (39.93 116.4)",
+www.camnet.cm, camnet.cm,"Yaounde, Cameroon, Africa (3.85 11.52)",C.AFRICA SUB.SAHARA 
+v-www.ihep.ac.cn, ihep.ac.cn,"Beijing, China, East Asia (39.93 116.4)",
 www.ihep.ac.cn ,ihep.ac.cn,"Beijing, China, East Asia (39.92 116.43)",
-ihep.ac.cn B ,ihep.ac.cn,"Beijing, China, East Asia (39.93 116.4)",
+ihep.ac.cn, ihep.ac.cn,"Beijing, China, East Asia (39.93 116.4)",
 dns.edu.cn ,edu.cn,"Peking, China, East Asia (39.917 116.417)",
 www.ecnu.edu.cn ,ecnu.edu.cn,"Shanghai, China, East Asia (31.23 121.47)",
 www.sjtu.edu.cn ,sjtu.edu.cn,"800 Dongchuan Road, Shanghai Zip: 200240, China, East Asia (31.0178 121.4325)",
 www.tsinghua.edu.cn ,tsinghua.edu.cn,"Beijing, China, East Asia (40.0047 116.3212)",
-ps.lcg.ustc.edu.cn B ,ustc.edu.cn,"Beijing, China, East Asia (39.9 116.413)",
+ps.lcg.ustc.edu.cn, ustc.edu.cn,"Beijing, China, East Asia (39.9 116.413)",
 cad.zju.edu.cn ,zju.edu.cn,"Hangzhou, China, East Asia (30.25 120.17)",
 www.hz.zj.cn ,hz.zj.cn,"Hangzhou, China, East Asia (30.25 120.17)",
 cdcnet.uniandes.edu.co ,uniandes.edu.co,"Bogota, Colombia, Latin America (4.6 -74.08)",S.AMERICA 
@@ -152,7 +152,7 @@ ns.netsgo.com ,netsgo.com,"Seoul, Korea, Rep, East Asia (37.550 126.967)",
 speedtest.rack66.com ,rack66.com,"Brussels, Belgium, Europe (50.4 4.22)",EUROPE 
 www.singtel.com ,singtel.com,"Singapore, Singapore, S.E. Asia (1.37 103.8)",SE.ASIA 
 www.sun.com ,sun.com,"Mountain View CA, United States, North America (37.388 -122.067)",N.AMERICA 
-ns1.swiftkenya.com B ,swiftkenya.com,"Mega Plaza, Oginga Odinga St., Kisuma, Kenya, Kenya, Africa (-0.0996 34.7508)",E.AFRICA SUB.SAHARA 
+ns1.swiftkenya.com, swiftkenya.com,"Mega Plaza, Oginga Odinga St., Kisuma, Kenya, Kenya, Africa (-0.0996 34.7508)",E.AFRICA SUB.SAHARA 
 pinger.theenglishyouneed.com ,theenglishyouneed.com,"22 avenue de la division Leclerc 92320 Chatillon FRANCE, France, Europe (48.79875 2.28236)",MEDITERRANEAN 
 ns-ext.vix.com ,vix.com,"Woodside CA, United States, North America (37.428 -122.250)",N.AMERICA 
 www.cinfo.cu ,cinfo.cu.,"Ciudad de la Habana, Cuba, Latin America (23.1359 -82.3583 )",
@@ -169,7 +169,7 @@ www.muni.cz ,muni.cz,"?erotinovo naměsti 617/9, 60200 Brno-Město,, Czech Repub
 www.unyp.cz ,unyp.cz,"Prague, Czech Republic, Europe (50.0762 14.4305)",
 pc-isdn.desy.de ,desy.de,"Hamburg, Germany, Europe (53.53 9.98)",EUROPE 
 sun01a.desy.de ,desy.de,"Hamburg, Germany, Europe (53.53 9.98)",EUROPE 
-ping.desy.de M ,desy.de,"Notkestra?e 85 D-22607 Hamburg, Germany, Europe (53.5748 9.8779)",EUROPE 
+ping.desy.de, desy.de,"Notkestra?e 85 D-22607 Hamburg, Germany, Europe (53.5748 9.8779)",EUROPE 
 www.desy.de ,desy.de,"Hamburg, Germany, Europe (53.53 9.98)",EUROPE 
 rzserv2.gsi.de ,gsi.de,"Darmstadt, Germany, Europe (49.85 8.67)",EUROPE 
 www.gsi.de ,gsi.de,"Berlin, Germany, Europe (52.270 13.180)",EUROPE 
@@ -180,7 +180,7 @@ www.physik.rwth-aachen.de ,rwth-aachen.de,"Aachen, Germany, Europe (52.270 13.18
 www.ikf.physik.uni-frankfurt.de ,uni-frankfurt.de,"Frankfurt, Germany, Europe (52.270 13.180)",EUROPE 
 www.kph.uni-mainz.de ,uni-mainz.de,"Berlin, Germany, Europe (52.270 13.180)",EUROPE 
 thorin.physik.uni-mainz.de ,uni-mainz.de,"Berlin, Germany, Europe (52.270 13.180)",EUROPE 
-www.ebanksalaam.dj B ,ebanksalaam.dj,", Djibouti, Africa (11.5 43)",ARAB.LEAGUE E.AFRICA SUB.SAHARA 
+www.ebanksalaam.dj, ebanksalaam.dj,", Djibouti, Africa (11.5 43)",ARAB.LEAGUE E.AFRICA SUB.SAHARA 
 www.riesgroup.dj ,riesgroup.dj,", Djibouti, Africa (11.5 43)",ARAB.LEAGUE E.AFRICA SUB.SAHARA 
 www.nbi.dk ,nbi.dk,"Copenhagen, Denmark, Europe (55.6868 12.5719)",EUROPE 
 www.nelly.com.do ,nelly.com.do,"Santo Domingo, Dominican Republic, Latin America (18.4667 -69.9)",
@@ -188,18 +188,18 @@ www.unibe.edu.do ,unibe.edu.do,"France Ave # 129, Gazcue, Santo Domingo, Dominic
 www.geocom.do ,geocom.do,"Santiago, Dominican Republic, Latin America (19.45 -70.7)",
 www.see.gob.do ,see.gob.do,"Santiago Avenida Maximo Gomez corner, Gazcue No.02, National District, Dominican Republic., Dominican Republic, Latin America (18.4961 -69.9193)",
 www.alief.dz ,alief.dz,"Lot n?1, Gpe13, Hamiz, Dar EL Beida, Alger, Algeria, Africa (36.7128 3.2124)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
-pinger.arn.dz M ,arn.dz,"Algiers, Algeria, Africa (36.7631 3.0506)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
+pinger.arn.dz, arn.dz,"Algiers, Algeria, Africa (36.7631 3.0506)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
 www.eldjazair.net.dz ,eldjazair.net.dz,"40 Avenue Mohammedi clairbois Bir Mourad Rais Alger, Algeria, Africa (36.7361 3.0564)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
-www.univ-sba.dz B ,univ-sba.dz,"Sidi Bel Abbes, Algeria, Algeria, Africa (35.2 2.6)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
+www.univ-sba.dz, univ-sba.dz,"Sidi Bel Abbes, Algeria, Algeria, Africa (35.2 2.6)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
 www.corpam.ec ,corpam.ec,"Ambato, Ecuador, Latin America (-0.2918 -78.5246)",S.AMERICA 
 www.espe.edu.ec ,espe.edu.ec,"Latacunga, Ecuador, Latin America (-0.9331 -78.6160)",S.AMERICA 
 www.fde.ec ,fde.ec,"Guayaquil, Ecuador, Latin America (-2.2038 -79.897)",S.AMERICA 
-gye.impsat.net.ec B ,impsat.net.ec,"Quito, Ecuador, Latin America (-0.25 -78.58)",S.AMERICA 
+gye.impsat.net.ec, impsat.net.ec,"Quito, Ecuador, Latin America (-0.25 -78.58)",S.AMERICA 
 www.gi.alaska.edu ,gi.alaska.edu,"903 Koyukuk Drive, Univ. of Alaska Fairbanks, AK 99775-7320, United States, North America (64.8390 -147.7847)",N.AMERICA 
 www.uaa.alaska.edu ,uaa.alaska.edu,"U. A. A. Drive, Anchorage, Alaska, United States, North America (61.1908 -149.828)",N.AMERICA 
 www.uas.alaska.edu ,uas.alaska.edu,"Juneau, Alaska, United States, North America (58.3838 -134.6410)",N.AMERICA 
 ns1.alfred.edu ,alfred.edu,"Alfred NY, United States, North America (42.2534 -77.788)",
-pinger.alquds.edu B M ,alquds.edu,"Jerusalem, Palestine, Middle East (31.77 35.23)",ARAB.LEAGUE MEDITERRANEAN 
+pinger.alquds.edu, alquds.edu,"Jerusalem, Palestine, Middle East (31.77 35.23)",ARAB.LEAGUE MEDITERRANEAN 
 www.alquds.edu ,alquds.edu,"Abdel Hamaid Shoman Street, Beit Hanina - Jerusalem, Palestine, Middle East (31.77 35.23)",ARAB.LEAGUE MEDITERRANEAN 
 arizona.edu ,arizona.edu,"Tucson, AZ, United States, North America (32.217 -110.967)",N.AMERICA 
 www.het.brown.edu ,brown.edu,"Providence, RI, United States, North America (41.817 -71.400)",N.AMERICA 
@@ -247,16 +247,16 @@ alfalfa.pas.rochester.edu ,rochester.edu,"Rochester, NY, United States, North Am
 rockvax.rockefeller.edu ,rockefeller.edu,"New York NY, United States, North America (40.849 -73.867)",N.AMERICA 
 www.physics.rutgers.edu ,rutgers.edu,"Piscataway NJ, United States, North America (40.499 -74.399)",N.AMERICA 
 www.sdsc.edu ,sdsc.edu,"San Diego, CA, United States, North America (32.72 -117.16)",
-multivac.sdsc.edu M ,sdsc.edu,"San Diego, CA, United States, North America (32.8831 -117.238)",N.AMERICA 
+multivac.sdsc.edu, sdsc.edu,"San Diego, CA, United States, North America (32.8831 -117.238)",N.AMERICA 
 argus.stanford.edu ,stanford.edu,"Stanford, CA, United States, North America (37.428607 -122.169344)",N.AMERICA 
-pinger.stanford.edu M ,stanford.edu,"Forsythe Hall, Stanford, California, United States, North America (37.42849 -122.177496)",N.AMERICA 
+pinger.stanford.edu, stanford.edu,"Forsythe Hall, Stanford, California, United States, North America (37.42849 -122.177496)",N.AMERICA 
 glastlnx06.slac.stanford.edu ,slac.stanford.edu,"SLAC, United States, North America (37.41 -122.20)",N.AMERICA 
 nlcta10.slac.stanford.edu ,slac.stanford.edu,"2575 Sand Hill Road, Menlo Park, California, 94025, United States, North America (37.4166 -122.2014)",
 www.slac.stanford.edu ,slac.stanford.edu,"Stanford, CA, United States, North America (37.41 -122.20)",N.AMERICA 
-ping.slac.stanford.edu B ,slac.stanford.edu,"Stanford, CA, United States, North America (37.41 -122.20)",N.AMERICA 
+ping.slac.stanford.edu, slac.stanford.edu,"Stanford, CA, United States, North America (37.41 -122.20)",N.AMERICA 
 iepm-resp.slac.stanford.edu ,slac.stanford.edu,"Stanford, CA, United States, North America (37.41 -122.20)",N.AMERICA 
 www-wanmon.slac.stanford.edu ,slac.stanford.edu,"2575 Sand Hill Road, Menlo Park, California 94025, United States, North America (37.4177 -122.2035)",N.AMERICA 
-pinger.slac.stanford.edu M ,slac.stanford.edu,"2575 Sand Hill Rd., Menlo Park, California 94025, USA, United States, North America (37.4177 -122.2035)",N.AMERICA 
+pinger.slac.stanford.edu, slac.stanford.edu,"2575 Sand Hill Rd., Menlo Park, California 94025, USA, United States, North America (37.4177 -122.2035)",N.AMERICA 
 ftp.stsci.edu ,stsci.edu,"Baltimore MD, United States, North America (39.288 -76.617)",
 noc4.sysadm.suny.edu ,suny.edu,"Albany NY, United States, North America (42.650 -73.750)",
 sunysb.edu ,sunysb.edu,"Stony Brook, NY, United States, North America (40.9150 -73.1199)",N.AMERICA 
@@ -281,7 +281,7 @@ www.physics.umd.edu ,umd.edu,"College Park, MD, United States, North America (38
 atgrid.grid.umich.edu ,atgrid.grid.umich.edu,"Ann Arbor, MI, United States, North America (42.27 -83.73)",N.AMERICA 
 mnhepw.hep.umn.edu ,umn.edu,"Minneapolis, MN, United States, North America (44.98 -93.25)",N.AMERICA 
 umn.edu ,umn.edu,"Minneapolis, MN, United States, North America (44.98 -93.25)",N.AMERICA 
-www.unitec.edu B ,unitec.edu,"San Pedro Sula, Honduras, Latin America (15.43 -88.02)",
+www.unitec.edu, unitec.edu,"San Pedro Sula, Honduras, Latin America (15.43 -88.02)",
 gluino.phys.unm.edu ,unm.edu,"Albuquerque NM, United States, North America (35.08 -106.65)",N.AMERICA 
 zebu.uoregon.edu ,uoregon.edu,"Eugene, OR, United States, North America (44.05 -123.09)",N.AMERICA 
 uoregon.edu ,uoregon.edu,"Eugene, United States, North America (44.05 -123.09)",
@@ -299,18 +299,18 @@ wisc.edu ,wisc.edu,"Madison, WI, United States, North America (43.07 -89.40)",N.
 ping.cs.wisc.edu ,wisc.edu,"Madison WI, United States, North America (43.070 -89.383)",N.AMERICA 
 lobelia.physics.wisc.edu ,physics.wisc.edu,"Madison, WI, United States, North America (43.07 -89.40)",N.AMERICA 
 yale.edu ,yale.edu,"New Haven, CT, United States, North America (42.36 -71.06)",N.AMERICA 
-kadri.ut.ee B ,ut.ee,"Tartu, Estonia, Europe (58.29 26.30)",BALTICS EUROPE 
+kadri.ut.ee, ut.ee,"Tartu, Estonia, Europe (58.29 26.30)",BALTICS EUROPE 
 www.nahaltrading.com.eg ,nahaltrading.com.eg,"16 Sherif Pacha Street, Cairo, 11111 Egypt, Egypt, Africa (30.0474 31.2420)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
 www.helwan.edu.eg ,helwan.edu.eg,"helwan, Cairo, Egypt, Africa (29.8661 31.3189)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
 net.shams.edu.eg ,shams.edu.eg,"Cairo, Egypt, Egypt, Africa (30.1 31.4)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
-frcu.eun.eg B ,eun.eg,"Cairo, Egypt, Africa (30.050 31.250)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
-pinger.narss.sci.eg M ,narss.sci.eg,"23 Joseph Tito Street, El-Nozha El-Gedida (P.O. Box : 1564 Alf Maskan), Cairo. , Egypt, Africa (30.1191 31.3103)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
+frcu.eun.eg, eun.eg,"Cairo, Egypt, Africa (30.050 31.250)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
+pinger.narss.sci.eg, narss.sci.eg,"23 Joseph Tito Street, El-Nozha El-Gedida (P.O. Box : 1564 Alf Maskan), Cairo. , Egypt, Africa (30.1191 31.3103)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
 www.tfanus.com.er ,www.tfanus.com.er,"Asmara, Eritrea, Africa (5.3324 38.9262)",E.AFRICA SUB.SAHARA 
 www.tse.com.er ,tse.com.er,"Beleza Street 175, Asmara, Eritrea, Africa (15.3336 38.9351)",E.AFRICA SUB.SAHARA 
 speedtest.servihosting.es ,servihosting.es,"Elda, Spain, Europe (38.28 0.47)",EUROPE MEDITERRANEAN 
 www.uam.es ,uam.es,"Ciudad Universitaria de Cantoblanco ? 28049 Madrid, Spain, Europe (40.4 -3.68)",EUROPE MEDITERRANEAN 
 www.ecm.ub.es ,ub.es,"Facultat de Fisica, Diagonal, 647, 08028 Barcelona. Catalonia, Spain, Europe (41.28 2.07)",EUROPE MEDITERRANEAN 
-www.stmaryuniversitycollege.edu.et B ,stmarycollege.edu.et,"9.0227 38.7468, Ethiopia, Africa (9.0227 38.7468)",E.AFRICA SUB.SAHARA 
+www.stmaryuniversitycollege.edu.et, stmarycollege.edu.et,"9.0227 38.7468, Ethiopia, Africa (9.0227 38.7468)",E.AFRICA SUB.SAHARA 
 www.su.edu.et ,su.edu.et,"Samara, Afar State, Ethiopia, Africa (6.4161 38.2513)",E.AFRICA SUB.SAHARA 
 www.amharainfo.gov.et ,amharainfo.gov.et,"P.O.Box: 607, Bahir Dar, Ethiopia, Africa (11.608 37.3216)",E.AFRICA SUB.SAHARA 
 www.ppesa.gov.et ,ppesa.gov.et,", Ethiopia, Africa (8 38)",E.AFRICA SUB.SAHARA 
@@ -330,17 +330,17 @@ db.nea.fr ,nea.fr,"Paris, France, Europe (48.867 2.333)",EUROPE MEDITERRANEAN
 ns3.nic.fr ,nic.fr,"Paris, France, Europe (48.867 2.333)",EUROPE MEDITERRANEAN 
 www.cnss.ga ,cnss.ga,"Libreville, Gabon, Africa (0.3833 9.45)",SUB.SAHARA 
 www.refer.ga ,refor.ga,"BP 2105 Libreville, Gabon, Africa (0.3833 9.45)",SUB.SAHARA 
-www.tresor.ga B ,tresor.ga,"Libreville, Gabon, Africa (0.3833 9.45)",SUB.SAHARA 
+www.tresor.ga, tresor.ga,"Libreville, Gabon, Africa (0.3833 9.45)",SUB.SAHARA 
 www.hepi.edu.ge ,hepi.edu.ge,"Tbilisi, Georgia, Central Asia (41.750 44.9)",CAUCASUS 
 atlantic.com.gh ,atlantic.com.gh,"Odam House C 875 A/3 Water Road Kanda Highway Extension, Ridge / Asylum Down, Accra, Ghana, Africa (5.5557 -0.1963)",SUB.SAHARA W.AFRICA 
 www.ucc.edu.gh ,ucc.edu.gh,"Cape Coast, Ghana, Africa (5.1035 -1.2825)",SUB.SAHARA W.AFRICA 
 www.uew.edu.gh ,uew.edu.gh,"POB 25, Winneba, Ghana, Ghana, Africa (5.3375 -0.6255)",SUB.SAHARA W.AFRICA 
 www.ug.edu.gh ,ug.edu.gh,"Legon, Ghana, Africa (5.6547 -0.1903)",N.AFRICA SUB.SAHARA W.AFRICA 
-www.csir.org.gh B ,csir.org.gh,"CSIR, P.O. Box M 32,, Accra, Ghana, Africa (5.55 -0.22)",N.AFRICA SUB.SAHARA W.AFRICA 
+www.csir.org.gh, csir.org.gh,"CSIR, P.O. Box M 32,, Accra, Ghana, Africa (5.55 -0.22)",N.AFRICA SUB.SAHARA W.AFRICA 
 gibnet.gi ,gibnet.gi,"Gibraltar, Gibralter, Europe (36.133 -5.35)",EUROPE 
 www.tele.gl ,tele.gl,"Nuuk, Greenland, North America (64.1833 -51.75)",
 www.banjuldiocese.gm ,banjuldiocese.gm,"Banjul, Gambia, Africa (13.453 -16.5775)",N.AFRICA SUB.SAHARA W.AFRICA 
-mail.qanet.gm B ,qanet.gm,"Serrekunda, Gambia, Africa (13.467 -16.567)",N.AFRICA SUB.SAHARA W.AFRICA 
+mail.qanet.gm, qanet.gm,"Serrekunda, Gambia, Africa (13.467 -16.567)",N.AFRICA SUB.SAHARA W.AFRICA 
 www.afribone.net.gn ,afribone.net.gn,"Avenue de la Republique, AL Iman Building, District Boulbinet - Common Kaloum, Conakry, Guinea, Africa (9.5370 -13.6785)",C.AFRICA SUB.SAHARA W.AFRICA 
 www.eti.net.gn ,eti.net.gn,"Conakry, Guinea, Africa (9.517 13.717)",C.AFRICA SUB.SAHARA W.AFRICA 
 mailhub.scl.ameslab.gov ,ameslab.gov,"AMES IA, United States, North America (42.032 -93.617)",N.AMERICA 
@@ -356,10 +356,10 @@ stargrid01.rcf.bnl.gov ,stargrid01.rcf.bnl.gov,"Upton, NY, United States, North 
 www.sc.doe.gov ,doe.gov,"Washington DC, United States, North America (38.892 -77.017)",
 www.er.doe.gov ,doe.gov,"Washington, DC, United States, North America (38.90 -77.04)",N.AMERICA 
 mail192.er.doe.gov ,doe.gov,"Washington, DC, United States, North America (38.90 -77.04)",N.AMERICA 
-pinger.ascr.doe.gov M ,ascr.doe.gov,"Germantown, Maryland, United States, North America (39.17 -77.25)",N.AMERICA 
-fnal.fnal.gov B ,fnal.gov,"Batavia, IL, United States, North America (41.85 -88.31)",N.AMERICA 
+pinger.ascr.doe.gov, ascr.doe.gov,"Germantown, Maryland, United States, North America (39.17 -77.25)",N.AMERICA 
+fnal.fnal.gov, fnal.gov,"Batavia, IL, United States, North America (41.85 -88.31)",N.AMERICA 
 www.fnal.gov ,fnal.gov,"Batavia, IL, United States, North America (41.85 -88.31)",N.AMERICA 
-hepnrc.hep.net M ,fnal.gov,"Batavia, IL, United States, North America (41 -88)",N.AMERICA 
+hepnrc.hep.net, fnal.gov,"Batavia, IL, United States, North America (41 -88)",N.AMERICA 
 www.lanl.gov ,lanl.gov,"Los Alamos NM, United States, North America (35.73 -105.15)",N.AMERICA 
 lbl.gov ,lbl.gov,"Berkeley, CA, United States, North America (37.87 -122.27)",N.AMERICA 
 llnl.gov ,llnl.gov,"Livermore, United States, North America (37.68 -121.77)",
@@ -378,15 +378,15 @@ speedtest.ontelecoms.gr ,ontelecoms.gr,"Athens, Greece, Balkans (37.98 23.73)",E
 speedtest.tsl.gr ,tsl.gr,"Heraklion, Greece, Balkans (35.2 25.8)",EUROPE MEDITERRANEAN 
 www.uoa.gr ,uoa.gr,"Athens, Greece, Balkans (38.000 23.733)",EUROPE MEDITERRANEAN 
 www.uoi.gr ,uoi.gr,"Ionnina, Greece, Balkans (39.42 20.47)",EUROPE MEDITERRANEAN 
-fisica.usac.edu.gt B ,usac.edu.gt,"San Carlos, Guatemala, Latin America (14.6248 -90.5328)",
-pinger.cse.ust.hk M ,cse.ust.hk,"Hong Kong,Kowloon, China, East Asia (22.3361 114.2649)",
+fisica.usac.edu.gt, usac.edu.gt,"San Carlos, Guatemala, Latin America (14.6248 -90.5328)",
+pinger.cse.ust.hk, cse.ust.hk,"Hong Kong,Kowloon, China, East Asia (22.3361 114.2649)",
 speedtest.cablecolor.hn ,cablecolor.hn,"Tegucigalpa, Honduras, Latin America (14.08 -87.22)",
-www.carnet.hr B ,carnet.hr,"Croatia, Croatia, Balkans (45.817 15.933)",EUROPE MEDITERRANEAN 
+www.carnet.hr, carnet.hr,"Croatia, Croatia, Balkans (45.817 15.933)",EUROPE MEDITERRANEAN 
 www.multilink.ht ,multilink.ht,"Highway Delmas, Delmas angle 18, 1st Floor Port-au-Prince, Haiti, Haiti, Latin America (18.5393 -72.3364)",
 nic.bme.hu ,bme.hu,"Budapest, Hungary, Europe (47.43 19.25)",EUROPE 
 ludens.elte.hu ,elte.hu,"Budapest, Hungary, Europe (47.43 19.25)",EUROPE 
 speedtest2.giganet.hu ,giganet.hu,"Nyiregyhaza, Hungary, Europe (47.95 21.72)",EUROPE 
-ping.rmki.kfki.hu B ,rmki.kfki.hu,"Budapest, Hungary, Europe (47.500 19.083)",EUROPE 
+ping.rmki.kfki.hu, rmki.kfki.hu,"Budapest, Hungary, Europe (47.500 19.083)",EUROPE 
 ns2.sztaki.hu ,sztaki.hu,"Budapest, Hungary, Europe (47.43 19.25)",EUROPE 
 www.itb.ac.id ,itb.ac.id,"Jakarta, Indonesia, S.E. Asia (-6.9147 107.6098 )",
 www.ugm.ac.id ,ugm.ac.id,"Yogyakarta, Indonesia, S.E. Asia (-7.7972 110.3688)",SE.ASIA 
@@ -397,7 +397,7 @@ www.untan.ac.id ,untan.ac.id,"Pontianak, Indonesia, S.E. Asia (-0.0225 109.3303)
 www.usu.ac.id ,usu.ac.id,"Medan District Keluarahan Padang Bulan Baru, Medan Distirct, North Sumatra, Indonesia, S.E. Asia (3.6056 98.6693)",SE.ASIA 
 www.cbn.net.id ,cbn.net.id,"Senayn, Jakarta, Indonesia, S.E. Asia (-6.13 106.75)",
 datautama.net.id ,datautama.net.id,"Semarang, Indonesia, S.E. Asia (-6.9667 110.4167)",SE.ASIA 
-speedtest.sby.dnet.net.id B ,dnet.net.id,"Surabaya, Indonesia, S.E. Asia (-7.14 112.44)",SE.ASIA 
+speedtest.sby.dnet.net.id, dnet.net.id,"Surabaya, Indonesia, S.E. Asia (-7.14 112.44)",SE.ASIA 
 www.indo.net.id ,indo.net.id,"Jakarta, Indonesia, S.E. Asia (-6.13 106.75)",SE.ASIA 
 www.indosat.net.id ,indosat.net.id,"Ragunan, Jakarta, Indonesia, S.E. Asia (-6.13 106.75)",
 speedtest.airwire.ie ,airwire.ie,"Galway, Ireland, Europe (53.27 -9.04)",EUROPE 
@@ -407,12 +407,12 @@ ns1.tcd.ie ,tcd.ie,"Dublin, Ireland, Europe (53.333 -6.250)",EUROPE
 westnet.ie ,westnet.ie,"Dublin, Ireland, Europe (53.26 -6.25)",EUROPE 
 www.iucc.ac.il ,iucc.ac.il,"Haifa, Israel, Middle East (32.82 34.98)",
 www.tau.ac.il ,tau.ac.il,"Tel Aviv, Israel, Middle East (32.08 34.77)",
-www.weizmann.ac.il B ,weizmann.ac.il,"Jerusalem, Israel, Middle East (31.783 35.233)",MEDITERRANEAN 
+www.weizmann.ac.il, weizmann.ac.il,"Jerusalem, Israel, Middle East (31.783 35.233)",MEDITERRANEAN 
 gplhost.co.il ,gplhost.co.il,"Haifa, Israel, Middle East (32.99 34.79)",MEDITERRANEAN 
 www.iitk.ac.in ,www.iitk.ac.in,"Kanpur, India, South Asia (26.47 80.35)",
 www.iitkgp.ac.in ,www.iitkgp.ac.in,"Kharagpur, India, South Asia (22.51 89.14)",
-pinger.cdac.in M ,cdac.in,"Pune, India, South Asia (18.5204 73.8567)",S.ASIA 
-pinger.cdacmumbai.in B M ,cdacmumbai.in,"Mumbai, Maharashtra, India, South Asia (18.93 72.85)",S.ASIA 
+pinger.cdac.in, cdac.in,"Pune, India, South Asia (18.5204 73.8567)",S.ASIA 
+pinger.cdacmumbai.in, cdacmumbai.in,"Mumbai, Maharashtra, India, South Asia (18.93 72.85)",S.ASIA 
 speedtest.hns.net.in ,hns.net.in,"Mumbai, India, South Asia (18.96 72.82)",S.ASIA 
 mail.prl.res.in ,prl.res.in,"Navarangpura, Ahmedabad, India, South Asia (23.00 72.65)",S.ASIA 
 twmb.info ,twmb.info,"Yilan City, Taiwan, East Asia (24.74867 121.76520)",
@@ -420,17 +420,17 @@ www.moedu.gov.iq ,moedu.gov.iq,"Kirkuk, Iraq, Middle East (35.4688 44.3910)",ARA
 www.noc.gov.iq ,noc.gov.iq,"Kirkuk, Iraq, Middle East (35.4681 44.3953)",ARAB.LEAGUE 
 www.ams.ac.ir ,ams.ac.ir,"Tehran, Iran, Middle East (35.6961 51.4231)",
 www.iut.ac.ir ,iut.ac.ir,"Iran Postal code 8415683111, Isfahan, Iran, Middle East (32.6514 51.6792)",
-www.iranlng.ir B ,iranlng.ir,"No.20, Alvand St, Argentina Sq, Teheran, Iran, Middle East (35.6961 51.4231 )",
+www.iranlng.ir, iranlng.ir,"No.20, Alvand St, Argentina Sq, Teheran, Iran, Middle East (35.6961 51.4231 )",
 www.sharif.ir ,sharif.ir,"Azadi Street, Tehran, Iran, Middle East (35.7027 51.3513)",
 ping.isnic.is ,isnic.is,"Reykjavik, Iceland, Europe (64.15 -21.97)",
 ping.rhnet.is ,rhnet.is,"Iceland, Europe (64.15 -21.97)",
-pinger.ictp.it B M ,ictp.it,"Trieste, Italy, Europe (45.70749 13.716527)",EUROPE MEDITERRANEAN 
+pinger.ictp.it, ictp.it,"Trieste, Italy, Europe (45.70749 13.716527)",EUROPE MEDITERRANEAN 
 server2.infn.it ,infn.it,"Rome, Italy, Europe (41.883 12.500)",EUROPE MEDITERRANEAN 
 131.154.99.10 ,infn.it,"Rome, Italy, Europe (41.88 12.5)",
 www.infn.it ,infn.it,"Rome, Italy, Europe (41.883 12.500)",EUROPE MEDITERRANEAN 
 infn-garr.pi.infn.it ,infn.it,"Pisa, Italy, Europe (43.72 10.4)",EUROPE MEDITERRANEAN 
 cavssy.ca.infn.it ,ca.infn.it,"Rome, Italy, Europe (41.883 12.500)",EUROPE MEDITERRANEAN 
-dxcnaf.cnaf.infn.it B ,cnaf.infn.it,"Bologna, Italy, Europe (44.50 11.33)",EUROPE MEDITERRANEAN 
+dxcnaf.cnaf.infn.it, cnaf.infn.it,"Bologna, Italy, Europe (44.50 11.33)",EUROPE MEDITERRANEAN 
 alp4ct.ct.infn.it ,ct.infn.it,"Rome, Italy, Europe (41.883 12.500)",EUROPE MEDITERRANEAN 
 avaxfi.fi.infn.it ,fi.infn.it,"Rome, Italy, Europe (41.883 12.500)",EUROPE MEDITERRANEAN 
 osfserver.le.infn.it ,le.infn.it,"Rome, Italy, Europe (41.883 12.500)",EUROPE MEDITERRANEAN 
@@ -439,7 +439,7 @@ wsgs00.lngs.infn.it ,lngs.infn.it,"Rome, Italy, Europe (41.883 12.500)",EUROPE M
 lnsuni1.lns.infn.it ,lns.infn.it,"Rome, Italy, Europe (41.883 12.500)",EUROPE MEDITERRANEAN 
 mvxme1.me.infn.it ,me.infn.it,"Rome, Italy, Europe (41.883 12.500)",EUROPE MEDITERRANEAN 
 vaxmi.mi.infn.it ,mi.infn.it,"Rome, Italy, Europe (41.883 12.500)",EUROPE MEDITERRANEAN 
-dsna1.na.infn.it B ,na.infn.it,"Napoli, Italy, Europe (40.80 14.20)",EUROPE MEDITERRANEAN 
+dsna1.na.infn.it, na.infn.it,"Napoli, Italy, Europe (40.80 14.20)",EUROPE MEDITERRANEAN 
 ns1.pi.infn.it ,pi.infn.it,"Rome, Italy, Europe (41.883 12.500)",EUROPE MEDITERRANEAN 
 mvxrm1.roma1.infn.it ,roma1.infn.it,"Rome, Italy, Europe (41.88 12.50)",EUROPE MEDITERRANEAN 
 carmen.to.infn.it ,to.infn.it,"Rome, Italy, Europe (41.883 12.500)",EUROPE MEDITERRANEAN 
@@ -449,66 +449,66 @@ svr1dx.fisica.uniud.it ,fisica.uniud.it,"Udine, Italy, Europe (46.07 13.23)",EUR
 aspu.edu.jo ,aspu.edu.jo,"Amman, Jordan, Middle East (31.95 35.93)",ARAB.LEAGUE MEDITERRANEAN 
 www.cambridge.edu.jo ,cambridge.edu.jo,"Al Rabia - Abdelkareem Al Dabbas St. , Amman, Jordan, Middle East (31.9494 35.9329)",ARAB.LEAGUE MEDITERRANEAN 
 guide.just.edu.jo ,just.edu.jo,"Irbid, Jordan, Middle East (32.55 35.85)",ARAB.LEAGUE MEDITERRANEAN 
-pinger.sesame.org.jo B M ,sesame.org.jo,"Allaan, 30 30 miles NNE of Amaan, 30 miles to Alenby Bridge, Jordan, Middle East (32.1146 35.7144)",ARAB.LEAGUE MEDITERRANEAN 
+pinger.sesame.org.jo, sesame.org.jo,"Allaan, 30 30 miles NNE of Amaan, 30 miles to Alenby Bridge, Jordan, Middle East (32.1146 35.7144)",ARAB.LEAGUE MEDITERRANEAN 
 ns.osaka-u.ac.jp ,osaka-u.ac.jp,"Osaka, Japan, East Asia (34.67 135.5)",
 www.phys.s.u-tokyo.ac.jp ,u-tokyo.ac.jp,"Tokyo, Japan, East Asia (35.700 139.767)",
 www.u-tokyo.ac.jp ,u-tokyo.ac.jp,"Tokyo, Japan, East Asia (35.700 139.767)",
 hep1.c.u-tokyo.ac.jp ,u-tokyo.ac.jp,"Tokyo, Japan, East Asia (35.700 139.767)",
-www.kek.jp B ,kek.jp,"Tsukuba, Japan, East Asia (36.1545 140.0724)",
-ping.riken.jp B M ,riken.jp,"Wako-Shi, Japan, East Asia (35.700 139.767)",
+www.kek.jp, kek.jp,"Tsukuba, Japan, East Asia (36.1545 140.0724)",
+ping.riken.jp, riken.jp,"Wako-Shi, Japan, East Asia (35.700 139.767)",
 elearning.braeburn.ac.ke ,braeburn.ac.ke,"Nairobi, Kenya, Africa (-1.28 36.81)",E.AFRICA SUB.SAHARA 
 www.ku.ac.ke ,ku.ac.ke,"Nairobi, Kenya, Africa (-1.182 36.9279)",E.AFRICA SUB.SAHARA 
 library.uonbi.ac.ke ,uonbi.ac.ke,"Nairobi, Kenya, Africa (-1.28 36.8162)",E.AFRICA SUB.SAHARA 
 www.akme.kg ,Akme.kg,"Bishkek, Krygzstan, Kyrgyzstan, Central Asia (42.8731 74.6003)",
 www.ab.kg ,ab.kg,"720011, Kyrgyz Republic Bishkek Pushkin 50., Kyrgyzstan, Central Asia (42.8731 74.6003)",
 www.president.kg ,president.kg,"Bishkek, Kyrgyzstan, Central Asia (42.8731 74.6003)",
-www.camnet.com.kh B ,camnet.com.kh,"Phnom Penh, Cambodia, S.E. Asia (11.55 104.917)",SE.ASIA 
+www.camnet.com.kh, camnet.com.kh,"Phnom Penh, Cambodia, S.E. Asia (11.55 104.917)",SE.ASIA 
 www.beltei.edu.kh ,beltei.edu.kh,"Phnom Penh, Cambodia, S.E. Asia (11.5478 104.9148)",
 www.cici.edu.kh ,cici.edu.kh,"N 294CD Street 182, SangKat Teok Laork3, Khan Toulkok, Phnom Penh, Cambodia, S.E. Asia (11.5713 104.8967)",
 www.itc.edu.kh ,itc.edu.kh,"Russian Conf. Blvd. Phnom Penh, Cambodia, S.E. Asia (11.5708 104.8980)",
 www.cau.ac.kr ,cau.ac.kr,"Seoul, Korea, Rep, East Asia (37.550 126.967)",
 www.hallym.ac.kr ,hallym.ac.kr,"Gangneung, Korea, Rep, East Asia (37.76 128.90)",
 www.knu.ac.kr ,knu.ac.kr,"Daegu, Korea, Rep, East Asia (35.87 128.59)",
-main.kyungwon.ac.kr B ,kyungwon.ac.kr,"Seoul, Korea, Rep, East Asia (37.5 127)",
+main.kyungwon.ac.kr, kyungwon.ac.kr,"Seoul, Korea, Rep, East Asia (37.5 127)",
 ns.thrunet.co.kr ,thrunet.co.kr,"Seoul, Korea, Rep, East Asia (37.550 126.967)",
 ns.hana.ne.kr ,hana.ne.kr,"Seoul, Korea, Rep, East Asia (37.550 126.967)",
 ns.kornet.ne.kr ,kornet.ne.kr,"Seoul, Korea, Rep, East Asia (37.550 126.967)",
 ns.kreonet.re.kr ,kreonet.re.kr,"Seoul, Korea, Rep, East Asia (37.550 126.967)",
 www.afcp.kz ,afcp.kz,"31, Nauryzbai Batyr Street, Business Center, Almaty, Kazakhstan, Central Asia (43.2525 76.9365)",
 www.aportmall.kz ,aportmall.kz,"Raiymbek Avenue, Almaty, Kazakhstan, Central Asia (43.2505 76.8506)",
-www.kazrena.kz B ,kazrena.kz,"Satpaev St. 22, office 901, 902, Almaty, Kazakhstan, Central Asia (43.2 76.9)",
+www.kazrena.kz, kazrena.kz,"Satpaev St. 22, office 901, 902, Almaty, Kazakhstan, Central Asia (43.2 76.9)",
 www.minjust.kz ,minjust.kz,"House of Ministries, 8 Orynbor Street, Astana, Kazakhstan, Kazakhstan, Central Asia (51.1667 71.4190)",
 www.lsx.com.la ,lsx.com.la,"Vientiane, Laos, S.E. Asia (17.9667 102.6)",SE.ASIA 
 www.laopdr.gov.la ,laopdr.gov.la,"Vientiane, Laos, S.E. Asia (17.9667 102.6)",SE.ASIA 
 www.na.gov.la ,na.gov.la,"Saysetha Vientiane Capital , Laos, S.E. Asia (17.9667 102.6)",SE.ASIA 
 www.kpl.net.la ,kpl.net.la,"80 Setthathirath rd, Vientiane, Laos, S.E. Asia (17.9648 102.6069)",SE.ASIA 
 www.laotrade.org.la ,laotrade.org.la,"104/4-5 Khounboulom Road, P.O.Box : 4107 Vientiane , Laos, S.E. Asia (17.9667 102.6)",SE.ASIA 
-www.cut.edu.lb B ,cut.edu.lb,"Beirut, Lebanon, Middle East (33.8719 35.5097)",ARAB.LEAGUE MEDITERRANEAN 
+www.cut.edu.lb, cut.edu.lb,"Beirut, Lebanon, Middle East (33.8719 35.5097)",ARAB.LEAGUE MEDITERRANEAN 
 www.ic.edu.lb ,ic.edu.lb,"Beirut, Lebanon, Middle East (33.8333 35.8333)",ARAB.LEAGUE MEDITERRANEAN 
 speedtest.dsl.li ,dsl.li,"Mauren, Liechtenstein, Europe (47.22 9.53)",EUROPE 
 193.222.119.6 ,llv.li,"Vaduz, Liechtenstein, Europe (47.133 9.517)",EUROPE 
 www.ac.lk ,ac.lk,", Sri Lanka, South Asia (7 81)",
 www.ifs.ac.lk ,ifs.ac.lk,"Kandy, Sri Lanka, South Asia (7.296 80.635)",
-hunnas.learn.ac.lk M ,learn.ac.lk,"Colombo, Sri Lanka, South Asia (6.9354 79.8470)",
-namunu.learn.ac.lk B ,learn.ac.lk,"Colombo, Sri Lanka, South Asia (6.9 81)",
+hunnas.learn.ac.lk, learn.ac.lk,"Colombo, Sri Lanka, South Asia (6.9354 79.8470)",
+namunu.learn.ac.lk, learn.ac.lk,"Colombo, Sri Lanka, South Asia (6.9 81)",
 www.pgia.ac.lk ,pgia.ac.lk,"Peradeniya, Sri Lanka, South Asia (7.26 80.60)",
 www.ruh.ac.lk ,ruh.ac.lk,"Wellamdama, Matara 81000, Southern Province, Sri Lanka, Sri Lanka, South Asia (5.9478 80.5434)",
 mail.comium.com.lr ,comium.com.lr,"Monrovia, Liberia, Africa (6.311 -10.804)",N.AFRICA SUB.SAHARA W.AFRICA 
 www.lbr.gov.lr ,lbr.gov.lr,"1 Enterprise square, Front and Nelson Streets, Monrovia, Liberia, Africa (6.3193 -10.810)",SUB.SAHARA W.AFRICA 
 www.leo.co.ls ,leo.co.ls,"Maseru, Lesotho, Africa (-29.3167 27.483)",S.AFRICA SUB.SAHARA 
 www.bos.gov.ls ,www.bos.gov.ls,"Maseru, Lesotho, Africa (-29.3167 27.483)",S.AFRICA SUB.SAHARA 
-www.lesotho.gov.ls B ,lesotho.gov.ls,"Maseru, Lesotho, Africa (-29.3167 27.483)",S.AFRICA SUB.SAHARA 
+www.lesotho.gov.ls, lesotho.gov.ls,"Maseru, Lesotho, Africa (-29.3167 27.483)",S.AFRICA SUB.SAHARA 
 speedtest.kis.lt ,web0.kis.lt,"Kauno, Lithuania, Europe (54.14 23.16)",BALTICS EUROPE 
-julius.ktl.mii.lt B ,mii.lt,"Vilnius, Lithuania, Europe (54.567 25.317)",BALTICS EUROPE 
+julius.ktl.mii.lt, mii.lt,"Vilnius, Lithuania, Europe (54.567 25.317)",BALTICS EUROPE 
 ns1.restena.lu ,restena.lu,"Luxembourg City, Luxembourg, Europe (49.75 6.167)",EUROPE 
-web-a.lvdats.lv B ,web-a.lvdats.lv,"Limbazi, Latvia, Europe (57.61 24.83)",BALTICS EUROPE 
+web-a.lvdats.lv, web-a.lvdats.lv,"Limbazi, Latvia, Europe (57.61 24.83)",BALTICS EUROPE 
 www.rtu.lv ,rtu.lv,"Riga, Latvia, Europe (56.95 24.1)",BALTICS EUROPE 
 www.noclibya.com.ly ,noclibya.com.ly,"Tripoli, Libya Arab Jamahiriya, Africa (32.8863 13.1891)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
 www.doctors.ly ,doctors.ly,"Bab Ben Ghashir, Tripoli, Libya Arab Jamahiriya, Africa (32.8711 13.1935)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
 www.aerodept.edu.ly ,aerodept.edu.ly,"Tripoli, Libya Arab Jamahiriya, Africa (32.8762 13.187)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
 hn.ly ,hn.ly,"Omr Almktar, Tripoli, Libya Arab Jamahiriya, Africa (32.8896 13.1706)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
 www.libyana.ly ,libyana.ly,"beside Al-Foroseya club,Tripoli, Libya Arab Jamahiriya, Africa (32.8762 13.1875)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
-mail.lttnet.net B ,lttnet.net.ly,"Abu Seta, Near Al-Furusia, Alshutt St., Tripoli, Libya Arab Jamahiriya, Africa (32.8762 13.1875)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
+mail.lttnet.net, lttnet.net.ly,"Abu Seta, Near Al-Furusia, Alshutt St., Tripoli, Libya Arab Jamahiriya, Africa (32.8762 13.1875)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
 www.fsjesr.ac.ma ,fsjesr.ac.ma,"Avenue des Nations-Unies, Rabat, Morocco, Africa (34.0150 -6.8327)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
 www.ucd.ac.ma ,ucd.ac.ma,", Avenue Jabrane Khalil Jabrane, El Jadida, Morocco, Africa (33.2333 -8.5000)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
 www.agpe.ma ,agpe.ma,"32 Rue Soufan Larbi Bi Rami Est. Kamitra, Morocco, Africa (34.0253 -6.8361)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
@@ -522,12 +522,12 @@ www.pnae.mg ,pnae.mg,"Antananarivo, Madagascar, Africa (-18.87 47.5)",E.AFRICA S
 www.univ-mahajanga.mg ,univ-mahajanga.mg,"Mahajanga, Madagascar, Africa (-16.40 46.25)",E.AFRICA SUB.SAHARA 
 usuhs.mil ,usuhs.mil,"Bethesda, MD, United States, North America (38.98 -77.10)",N.AMERICA 
 kitka.marnet.net.mk ,marnet.net.mk,"Macedonia, Balkans (42 21.433)",EUROPE 
-www.mt.net.mk B ,mt.net.mk,"Macedonia, Balkans (42.0038 21.4522)",EUROPE 
+www.mt.net.mk, mt.net.mk,"Macedonia, Balkans (42.0038 21.4522)",EUROPE 
 www.apdf.org.ml ,adpf.org.ml,"Bamako, Mali, Africa (12.65 -8)",N.AFRICA SUB.SAHARA W.AFRICA 
 www.energy.gov.mn ,energy.gov.mn,"Government Building-2,United Nation's Street-5/2,Ulaanbaatar-15160, Mongolia, Mongolia, Central Asia (47.9239 106.9136)",
-magic.mn B ,magic.mn,"Ulaanbataa, Mongolia, Central Asia (47.55 106.53)",
+magic.mn, magic.mn,"Ulaanbataa, Mongolia, Central Asia (47.55 106.53)",
 www.adu.mr ,adu.mr,"Nouakchott, Mauritania, Africa (18.087 -15.976)",ARAB.LEAGUE N.AFRICA SUB.SAHARA W.AFRICA 
-www.afe.mr B ,afe.mr,"Nouakchott, Mauritania, Africa (18.08 -15.97)",ARAB.LEAGUE N.AFRICA SUB.SAHARA W.AFRICA 
+www.afe.mr, afe.mr,"Nouakchott, Mauritania, Africa (18.08 -15.97)",ARAB.LEAGUE N.AFRICA SUB.SAHARA W.AFRICA 
 www.bacim.mr ,bacim.mr,"Nouakchott, Mauritania, Africa (18.086 -15.975)",ARAB.LEAGUE N.AFRICA SUB.SAHARA W.AFRICA 
 www.nic.mr ,nic.mr,"B.P 5026, Nouakchott, Mauritania, Africa (18.086 -15.975)",ARAB.LEAGUE N.AFRICA SUB.SAHARA W.AFRICA 
 www.utm.ac.mu ,utm.ac.mu,"La Tour Koenig Pointe-aux-Sables, Mauritius, Africa (-20.1619 57.499)",E.AFRICA SUB.SAHARA 
@@ -539,7 +539,7 @@ www.rol.net.mv ,rol.net.mv,"Male, Maldives, South Asia (4.1667 73.5)",
 www.poly.ac.mw ,poly.ac.mw,"Chichiri, Blantyre 3, Malawi, Africa (-15.8032 35.0271)",E.AFRICA SUB.SAHARA 
 www.kcn.unima.mw ,kcn.unima.mw,"Queen Elizabeth Central Hospital, Blantyre, Malawi, Africa (-15.8027 35.0217)",E.AFRICA SUB.SAHARA 
 www.cudi.edu.mx ,cudi.edu.mx,"Manzanilla, Colimas, Mexico, Latin America (19.23 -103.72)",
-www.uia.mx B ,uia.mx,"Mexico City, Mexico, Latin America (19.42 -99.17)",
+www.uia.mx, uia.mx,"Mexico City, Mexico, Latin America (19.42 -99.17)",
 emerge.com.my ,emerge.com.my,"Pelangi Damansara, PJU 6, Persiaran Surian, 47800 Petaling Jaya, Selangor, Malaysia, S.E. Asia (3.1541 101.6032)",
 www.maxis.com.my ,maxis.com.my,"Selangor, Malaysia, S.E. Asia (3.35 101.25)",
 www.ocesb.com.my ,ocesb.com.my,"Kuala Lumpur, Malaysia, S.E. Asia (3.54 101.89)",SE.ASIA 
@@ -553,7 +553,7 @@ www.monash.edu.my ,monash.edu.my,"Petaling Jaya, Malaysia, S.E. Asia (3.1 101.62
 www.newinti.edu.my ,newinti.edu.my,"Putra, Malaysia, S.E. Asia (3.0743 101.5911)",
 www.qiup.edu.my ,qiup.edu.my,"No.227, Plaza Teh Teng Seng (Level 2), Jalan Raja Permaisuri Bainun, 30250 Ipoh Perak Darul Ridzuan, Malaysia, S.E. Asia (4.5831 101.0958)",
 www.um.edu.my ,um.edu.my,"Kuala Lumpur, Malaysia, S.E. Asia (3.1601 101.6910)",SE.ASIA 
-pinger.fsktm.um.edu.my M ,fsktm.um.edu.my,"Kuala Lumpur, Malaysia, S.E. Asia (3.1247 101.6534)",
+pinger.fsktm.um.edu.my, fsktm.um.edu.my,"Kuala Lumpur, Malaysia, S.E. Asia (3.1247 101.6534)",
 www.umk.edu.my ,umk.edu.my,"Pengkalan Chepa, Kelantan, Malaysia, S.E. Asia (6.1647 102.2829)",SE.ASIA 
 www.umt.edu.my ,umt.edu.my,"Kuala Terenggaru, Malaysia, S.E. Asia (5.4053 103.0877)",
 www.unikl.edu.my ,unikl.edu.my,"Kuala Lumpur, Malaysia, S.E. Asia (3.1143 101.6617)",
@@ -569,13 +569,13 @@ www.utp.edu.my ,utp.edu.my,"Bandar Seri Iskandar, 31750 Tronoh, Perak, Malaysia,
 www.mimos.my ,mimos.my,"Technology Park Malaysia, 57000 Kuala Lumpur,, Malaysia, S.E. Asia (3.0629 101.6912)",SE.ASIA 
 www.myren.net.my ,myren.net.my,"Entreprise Building 1, Block 3440, Jalan Teknorat 3 63000 Cyberjaya, MALAYSIA , Malaysia, S.E. Asia (2.9251 101.6574)",
 www.unimas.my ,unimas.my,"Kota Samarahan, Kuching, Sarawak, Malaysia, S.E. Asia (1.4653 110.4274)",
-pinger.unimas.my B M ,unimas.my,"Kota Samarahan, Kuching, Sarawak, Malaysia, S.E. Asia (1.4653 110.4274)",SE.ASIA 
+pinger.unimas.my, unimas.my,"Kota Samarahan, Kuching, Sarawak, Malaysia, S.E. Asia (1.4653 110.4274)",SE.ASIA 
 nav6.usm.my ,usm.my,"Penang, Malaysia, S.E. Asia (5.3548 100.3011)",
 www.utm.my ,utm.my,"Kuala Lumpur, Malaysia, S.E. Asia (1.5584 103.6384)",
-pinger.fsksm.utm.my M ,fsksm.utm.my,"Kualar Lumpur, Malaysia, S.E. Asia (1.5584 103.6384)",
+pinger.fsksm.utm.my, fsksm.utm.my,"Kualar Lumpur, Malaysia, S.E. Asia (1.5584 103.6384)",
 www.micti.co.mz ,micti.co.mz,"Maputo, Mozambique, Africa (-25.94 32.56)",E.AFRICA SUB.SAHARA 
-www.uem.mz B ,uem.mz,"Maputo, Mozambique, Africa (-25.94 32.56)",E.AFRICA SUB.SAHARA 
-www.adsl.com.na B ,adsl.com.na,"Windhoek, Namibia, Africa (-22.57 17.08)",S.AFRICA SUB.SAHARA 
+www.uem.mz, uem.mz,"Maputo, Mozambique, Africa (-25.94 32.56)",E.AFRICA SUB.SAHARA 
+www.adsl.com.na, adsl.com.na,"Windhoek, Namibia, Africa (-22.57 17.08)",S.AFRICA SUB.SAHARA 
 www.agrinamibia.com.na ,agrinamibia.com.na,"AgriHouse c/o Robert Mugabe and John Meinert Street Private Bag 13255 Windhoek, Namibia, Africa (-22.5589 17.0825)",S.AFRICA SUB.SAHARA 
 www.bidvestnamibia.com.na ,www.bidvestnamibia.com.na,"Walvis Bay, Namibia, Africa (-22.7 17.083)",S.AFRICA SUB.SAHARA 
 www.gijima.com.na ,gijima.com.na,"Windhoek, Namibia, Africa (-22.57 17.08)",S.AFRICA SUB.SAHARA 
@@ -588,9 +588,9 @@ www.ird.ne ,ird.ne,"Niamey, Niger, Africa (13.53 2.08)",N.AFRICA SUB.SAHARA W.AF
 www.sta.ne ,sta.ne,"3134 Avenue de l?Afrique, Zone Industrielle 2, Niamey, Niger, Africa (13.4885 2.1278)",SUB.SAHARA W.AFRICA 
 ns.above.net ,above.net,"San Jose CA, United States, North America (37.335 -121.867)",
 aidabg.net ,aidabg.net,"Haskovo, Bulgaria, Balkans (41.36 25.64)",EUROPE 
-aol1.albaniaonline.net B ,albaniaonline.net,"Servic, Elbasan, Albania, Balkans (41.19 20.18)",EUROPE 
+aol1.albaniaonline.net, albaniaonline.net,"Servic, Elbasan, Albania, Balkans (41.19 20.18)",EUROPE 
 gua.amnetdatos.net ,amnetdatos.net,"Guatemala City, Guatemala, Latin America (14.38 -90.33)",
-ultralog.ampath.net M ,ampath.net,"Miami, Fla., United States, North America (25.77 -80.90)",N.AMERICA 
+ultralog.ampath.net, ampath.net,"Miami, Fla., United States, North America (25.77 -80.90)",N.AMERICA 
 ai3-sfc.jp.apan.net ,jp.apan.net,"Seoul, Korea, Rep, East Asia (37.550 126.967)",
 ns.jp.apan.net ,jp.apan.net,"Tokyo, Japan, East Asia (35.67 139.75)",
 ns2.jp.apan.net ,ns2.jp.apan.net,"Seoul, Korea, Rep, East Asia (37.550 126.967)",
@@ -613,7 +613,7 @@ ns.concentric.net ,concentric.net,"CUPERTINO CA, United States, North America (3
 dmzmon0.deemz.net ,dmzmon0.deemz.net,"Batavia, IL, United States, North America (41.85 -88.31)",N.AMERICA 
 ns.digex.net ,digex.net,"GREENBELT MD, United States, North America (39.005 -76.867)",
 www.eastafricauniversity.net ,eastafricauniversity.net,"Bossaso, Somalia, Africa (11.2833 49.1667)",ARAB.LEAGUE E.AFRICA 
-pinger.es.net M ,es.net,"Berkeley, California, United States, North America (37.873 -122.267)",N.AMERICA 
+pinger.es.net, es.net,"Berkeley, California, United States, North America (37.873 -122.267)",N.AMERICA 
 www.es.net ,es.net,"BERKELEY CA, United States, North America (37.873 -122.267)",N.AMERICA 
 ns1.es.net ,es.net,"Berkeley CA, United States, North America (37.873 -122.267)",N.AMERICA 
 fin-mta.net ,fin-mta.net,"Turku, Finland, Europe (60.27 22.16)",EUROPE 
@@ -671,11 +671,11 @@ www.ioe.edu.np ,ioe.edu.np,"Kathmandu, Nepal, South Asia (27.7166 85.3166)",
 prime.edu.np ,prime.edu.np,"Naya Bazar, Khusibun, Khatmandu, Nepal, South Asia (27.45 85.20)",
 tribhuvan-university.edu.np ,tribhuvan-university.edu.np,"TU Road, Kathmandu, Nepal, South Asia (27.6794 85.2865)",
 www.most.gov.np ,most.gov.np,"Singha Durbar, Kathmandu, Nepal, South Asia (27.72 85.32)",
-www.nren.net.np B ,nren.net.np,"44 Mahakabi Marg, Dillibazar, Kathmandu, Nepal, South Asia (27.7056 85.3303)",
+www.nren.net.np, nren.net.np,"44 Mahakabi Marg, Dillibazar, Kathmandu, Nepal, South Asia (27.7056 85.3303)",
 mon01.nren.net.np ,nren.net.np,"Khatmandu, Nepal, South Asia (27.77911 85.36836)",
 www.ntc.net.np ,ntc.net.np,"Jawalakhel, Nepal, South Asia (27.67 85.32)",
 www.aic.ac.nz ,aic.ac.nz,"85 Airedale Street, Auckland 1010, New Zealand, Oceania (-36.8556 174.7651)",AUSTRALASIA 
-amp-kiwi.cs.waikato.ac.nz B ,waikato.ac.nz,"Waikato, New Zealand, Oceania (-37.7890 175.3176)",
+amp-kiwi.cs.waikato.ac.nz, waikato.ac.nz,"Waikato, New Zealand, Oceania (-37.7890 175.3176)",
 www.advsouth.co.nz ,advsouth.co.nz,"Adventure South Ltd 29 Iversen Terrace Christchurch, 8011, New Zealand, Oceania (-43.5410 172.6474)",AUSTRALASIA 
 www.hastingsdc.govt.nz ,hastingsdc.govt.nz,"Hastings District Council, Private Bag 9002, Hastings 4156, New Zealand, Oceania (-39.6499 176.8350)",AUSTRALASIA 
 speed.airnet.net.nz ,airnet.net.nz,"Napier, New Zealand, Oceania (-39.29 176.55)",AUSTRALASIA 
@@ -683,19 +683,19 @@ www.seanet.org.nz ,seanet.org.nz,"PO Box 11-057 Wellington, New Zealand, Oceania
 www.act.edu.om ,act.edu.om,"P.O. Box:191, Postal Code:314 Muladdah Musanna, Sultanate of Oman , Oman, Middle East (23.6138 58.5922)",ARAB.LEAGUE 
 www.surcollege.edu.om ,surcollege.edu.om,"P.O Box: 484 Postal Code: 411 Sur - Oman , Oman, Middle East (22.5667 59.5289)",ARAB.LEAGUE 
 om16.omantel.net.om ,omantel.net.om,"Ruwi, Masqat, Oman, Middle East (23.59 58.58)",ARAB.LEAGUE 
-pinger.acmesecurity.org M ,acmesecurity.org,"Sao Jose, Brazil, Latin America (-20.784 -49.360)",S.AMERICA 
+pinger.acmesecurity.org, acmesecurity.org,"Sao Jose, Brazil, Latin America (-20.784 -49.360)",S.AMERICA 
 aip.org ,aip.org,"WOODBURY NY, United States, North America (40.715 -73.583)",N.AMERICA 
 ftp.eso.org ,ftp.eso.org,"Bonn, Germany, Europe (50.733 7.100)",
 iaeand.iaea.org ,iaea.org,"Vienna, Austria, Europe (48.217 16.367)",EUROPE 
 www.uac.bj.refer.org ,refer.org,"Cotonou, Benin, Africa (6.4 2.52)",N.AFRICA SUB.SAHARA W.AFRICA 
-tg.refer.org B ,refer.org,"Lome, Togo, Africa (6.17 1.35)",N.AFRICA SUB.SAHARA W.AFRICA 
-www.ml.refer.org B ,refer.org,"Bamako, Mali, Africa (12.67 -7.98)",N.AFRICA SUB.SAHARA W.AFRICA 
+tg.refer.org, refer.org,"Lome, Togo, Africa (6.17 1.35)",N.AFRICA SUB.SAHARA W.AFRICA 
+www.ml.refer.org, refer.org,"Bamako, Mali, Africa (12.67 -7.98)",N.AFRICA SUB.SAHARA W.AFRICA 
 gn.refer.org ,gn.refer.org,"Conakry, Guinea, Africa (9.5092 -13.7122)",C.AFRICA N.AFRICA SUB.SAHARA W.AFRICA 
 mail.td.refer.org ,td.refer.org,"N?Djamena, Chad, Africa (11.6833 18.65)",ARAB.LEAGUE C.AFRICA SUB.SAHARA 
 snowmassserver.snowmass2001.org ,snowmass2001.org,"United States, North America (41.85 -88.31)",
 www.supercomp.org ,supercomp.org,"NYC NY, United States, North America (40.652 -73.955)",N.AMERICA 
-t2-monitor.ultralight.org M ,ultralight.org,"Pasadena, California, United States, North America (34.1383 -118.1244)",N.AMERICA 
-institutokilpatrick.edu.pa B ,www.institutokilpatrick.edu.pa,"El Dorado, Panama, Latin America (9.016 -79.55)",
+t2-monitor.ultralight.org, ultralight.org,"Pasadena, California, United States, North America (34.1383 -118.1244)",N.AMERICA 
+institutokilpatrick.edu.pa, www.institutokilpatrick.edu.pa,"El Dorado, Panama, Latin America (9.016 -79.55)",
 www.andina.com.pe ,andina.com.pe,"Alfonso Ugarte, Peru, Latin America (-7.8281 -74.8236)",S.AMERICA 
 www.caen.edu.pe ,caen.edu.pe,"Chorrillos, Peru, Latin America (-12.1614 -77.0192)",S.AMERICA 
 www.campucss.edu.pe ,campucss.edu.pe,"Lima, Peru, Latin America (-11.8499 -76.4461)",S.AMERICA 
@@ -707,70 +707,70 @@ www.accommodationpng.com.pg ,accommodationpng.com.pg,"Boroko, Papua New Guinea, 
 www.bcpng.org.pg ,bcpng.org.pg,"Konedobu, Papua New Guinea, Oceania (-9.4645 147.1591)",
 www.auf.edu.ph ,auf.edu.ph,"2009 Angeles City, Philippines, S.E. Asia (15.1450 120.5943)",
 www.swu.edu.ph ,swu.edu.ph,"Villa Aznar, Urgello St., Cebu City, Philippines, S.E. Asia (10.3021 123.8931)",
-www.usep.edu.ph B ,usep.edu.ph,"Inigo St, Davao City, Philippines, S.E. Asia (7.1 125.7)",SE.ASIA 
+www.usep.edu.ph, usep.edu.ph,"Inigo St, Davao City, Philippines, S.E. Asia (7.1 125.7)",SE.ASIA 
 www.gsis.gov.ph ,gsis.gov.ph,"Manila, Philippines, S.E. Asia (14.6091 121.0223)",SE.ASIA 
 www.immigration.gov.ph ,immigration.gov.ph,"Intramuros, Manila, Philippines, S.E. Asia (14.5908 120.9750)",SE.ASIA 
 www.manila.gov.ph ,manila.gov.ph,"Ermita, Manila, Philippines, S.E. Asia (14.5861 120.9825)",SE.ASIA 
-pinger-ncp.ncp.edu.pk M ,ncp.edu.pk ,"Islamabad, Pakistan, South Asia (33.7500 73.1650)",ISLAMABAD_REGION PERN_NON-POP S.ASIA TEST-GRP 
-pinger.aiou.edu.pk M ,aiou.edu.pk,"Islamabad, Pakistan, South Asia (33.6830 73.0538)",ISLAMABAD_REGION PERN_NON-POP S.ASIA TEST-GRP 
-airuniversity.seecs.edu.pk M ,airuniversity.edu.pk,"Islamabad, Pakistan, South Asia (33.713275 73.023525)",ISLAMABAD_REGION PERN_NON-POP S.ASIA TEST-GRP 
-aup.seecs.edu.pk M ,aup.edu.pk,"Peshawar, Pakistan, South Asia (34.0207 71.4830)",PERN_NON-POP PESHAWAR_REGION S.ASIA TEST-GRP 
-pinger.cemb.edu.pk M ,cemb.edu.pk,"Lahore, Pakistan, South Asia (31.477983 74.262919)",LAHORE_REGION PERN_NON-POP S.ASIA TEST-GRP 
-pinger.comsats.edu.pk M ,comsats.edu.pk,"Islamabad, Pakistan, South Asia (33.6518 73.1566)",S.ASIA TEST-GRP 
-pinger.giki.edu.pk M ,giki.edu.pk,"Sawabi, KPK, Pakistan, South Asia (34.06904 72.64333)",PERN_NON-POP PESHAWAR_REGION S.ASIA TEST-GRP 
+pinger-ncp.ncp.edu.pk, ncp.edu.pk ,"Islamabad, Pakistan, South Asia (33.7500 73.1650)",ISLAMABAD_REGION PERN_NON-POP S.ASIA TEST-GRP 
+pinger.aiou.edu.pk, aiou.edu.pk,"Islamabad, Pakistan, South Asia (33.6830 73.0538)",ISLAMABAD_REGION PERN_NON-POP S.ASIA TEST-GRP 
+airuniversity.seecs.edu.pk, airuniversity.edu.pk,"Islamabad, Pakistan, South Asia (33.713275 73.023525)",ISLAMABAD_REGION PERN_NON-POP S.ASIA TEST-GRP 
+aup.seecs.edu.pk, aup.edu.pk,"Peshawar, Pakistan, South Asia (34.0207 71.4830)",PERN_NON-POP PESHAWAR_REGION S.ASIA TEST-GRP 
+pinger.cemb.edu.pk, cemb.edu.pk,"Lahore, Pakistan, South Asia (31.477983 74.262919)",LAHORE_REGION PERN_NON-POP S.ASIA TEST-GRP 
+pinger.comsats.edu.pk, comsats.edu.pk,"Islamabad, Pakistan, South Asia (33.6518 73.1566)",S.ASIA TEST-GRP 
+pinger.giki.edu.pk, giki.edu.pk,"Sawabi, KPK, Pakistan, South Asia (34.06904 72.64333)",PERN_NON-POP PESHAWAR_REGION S.ASIA TEST-GRP 
 www.giki.edu.pk ,giki.edu.pk,"NWFP Topi, Pakistan, South Asia (34.0667 72.6167)",PERN_NON-POP PESHAWAR_REGION S.ASIA TEST-GRP 
 hu.seecs.edu.pk ,hu.edu.pk,"Mansehra, Khyber Pakhtunkhwa, Pakistan, South Asia (34.422494 73.245544)",PERN_NON-POP PESHAWAR_REGION S.ASIA TEST-GRP 
-pinger.iba-suk.edu.pk M ,iba.edu.pk,"Sukkur, Sindh, Pakistan, South Asia (27.726253 68.819397)",KARACHI_REGION PERN_NON-POP 
-vle.iiu.edu.pk M ,iiu.edu.pk,"Islamabad, Pakistan, South Asia (33.660139 73.027247)",ISLAMABAD_REGION PERN_NON-POP S.ASIA TEST-GRP 
-pinger.isra.edu.pk M ,isra.edu.pk,"Hyderabad, Sindh, Pakistan, South Asia (25.43475 68.380333)",KARACHI_REGION PERN_NON-POP S.ASIA TEST-GRP 
-pinger.kohat.edu.pk M ,kohat.edu.pk,"Kohat, Pakistan, South Asia (33.521825 71.446622)",PERN_NON-POP PESHAWAR_REGION S.ASIA TEST-GRP 
-pinger.lcwu.edu.pk M ,lcwu.edu.pk,"Lahore, Punjab, Pakistan, South Asia (31.544775 74.328958)",LAHORE_REGION PERN_NON-POP S.ASIA TEST-GRP 
-pinger.nca.edu.pk M ,nca.edu.pk,"Lahore, Pakistan, South Asia (31.567439 74.306972)",LAHORE_REGION PERN_NON-POP S.ASIA TEST-GRP 
-npm.neduet.edu.pk M ,neduet.edu.pk,"University Road, Karachi - 75270, Pakistan, South Asia (24.8934 67.0281)",KARACHI_REGION PERN_NON-POP S.ASIA TEST-GRP 
-pinger.lhr.nu.edu.pk M ,lhr.nu.edu.pk,"Lahore, Pakistan, South Asia (31.481042 74.303356)",LAHORE_REGION PERN_NON-POP S.ASIA TEST-GRP 
-pinger.numl.edu.pk M ,numl.edu.pk,"Islamabad, Punjab, Pakistan, South Asia (33.667246 73.050663)",ISLAMABAD_REGION PERN_NON-POP 
-pinger.nwfpuet.edu.pk M ,nwfpuet.edu.pk,"Peshawar, Pakistan, South Asia (34.0017 71.4855)",PERN_NON-POP PESHAWAR_REGION S.ASIA TEST-GRP 
-pingerkhi-cpsp.pern.edu.pk M ,pern.edu.pk,"Karachi, Sindh, Pakistan, South Asia (24.8376048 67.0588744)",KARACHI_REGION PERN_POP 
-pingerkhi.pern.edu.pk M ,pern.edu.pk,"Karachi, Sindh Pakistan, Pakistan, South Asia (24.8881778 67.065914)",KARACHI_REGION PERN_POP S.ASIA TEST-GRP 
-pinger.pern.edu.pk M ,pern.edu.pk,"Islamabad, Pakistan, South Asia (33.673317 73.054431)",ISLAMABAD_REGION PERN_POP S.ASIA TEST-GRP 
-pingerfsbd.pern.edu.pk M ,pern.edu.pk,"University of agriculture Faisalabad, Pakistan, South Asia (31.4338079 73.0689096)",PERN_POP TEST-GRP 
-pingerjms.pern.edu.pk M ,pern.edu.pk,"Jamshoro, Sindh, Pakistan, South Asia (25.4178 68.2627)",KARACHI_REGION PERN_POP S.ASIA TEST-GRP 
-pingerlhr.pern.edu.pk M ,pern.edu.pk,"HEC Regional Centre Lahore, Pakistan, South Asia (31.510717 74.352967)",LAHORE_REGION PERN_POP TEST-GRP 
-pingerqta.pern.edu.pk M ,pern.edu.pk,"Quetta, Balochistan, Pakistan, South Asia (30.269561 66.939694)",PERN_POP QUETTA_REGION S.ASIA TEST-GRP 
-pingerpwr.pern.edu.pk M ,pern.edu.pk,"Peshawar, Pakistan, South Asia (33.991158 71.442767)",PERN_POP PESHAWAR_REGION 
-pingerisl-qau.pern.edu.pk M ,pern.edu.pk,"Islamabad, Punjab, Pakistan, South Asia (33.746176 73.135705)",ISLAMABAD_REGION PERN_POP 
-pingerlhr-pu.pern.edu.pk M ,pern.edu.pk,"Lahore, Punjab, Pakistan, South Asia (31.50304 74.308098)",LAHORE_REGION PERN_POP 
-pingerkhi-uok.pern.edu.pk M ,pern.edu.pk,"Karachi, Sindh, Pakistan, South Asia (24.9400231 67.12093)",KARACHI_REGION PERN_POP 
-pingermtn.pern.edu.pk B M ,pern.edu.pk,"Multan, Punjab, Pakistan, South Asia (30.269726 71.506455)",PERN_POP S.ASIA TEST-GRP 
-pingerisl-fjwu.pern.edu.pk M ,pern.edu.pk,"Rawalpindi, Punjab, Pakistan, South Asia (33.585848 73.064719)",ISLAMABAD_REGION PERN_POP 
-pingerlhr-gcu.pern.edu.pk M ,pern.edu.pk,"Lahore, Punjab, Pakistan, South Asia (31.5747 74.3076)",LAHORE_REGION PERN_POP 
-pingerisl-air.pern.edu.pk M ,isl-air.pern.edu.pk,"Main Campus PAF Complex, Sector E-9 Islamabad, Pakistan, South Asia (33.7182 73.0605)",
-ns3.pieas.edu.pk M ,pieas.edu.pk,"Islamabad, Punjab, Pakistan, South Asia (33.6559 73.2657)",
+pinger.iba-suk.edu.pk, iba.edu.pk,"Sukkur, Sindh, Pakistan, South Asia (27.726253 68.819397)",KARACHI_REGION PERN_NON-POP 
+vle.iiu.edu.pk, iiu.edu.pk,"Islamabad, Pakistan, South Asia (33.660139 73.027247)",ISLAMABAD_REGION PERN_NON-POP S.ASIA TEST-GRP 
+pinger.isra.edu.pk, isra.edu.pk,"Hyderabad, Sindh, Pakistan, South Asia (25.43475 68.380333)",KARACHI_REGION PERN_NON-POP S.ASIA TEST-GRP 
+pinger.kohat.edu.pk, kohat.edu.pk,"Kohat, Pakistan, South Asia (33.521825 71.446622)",PERN_NON-POP PESHAWAR_REGION S.ASIA TEST-GRP 
+pinger.lcwu.edu.pk, lcwu.edu.pk,"Lahore, Punjab, Pakistan, South Asia (31.544775 74.328958)",LAHORE_REGION PERN_NON-POP S.ASIA TEST-GRP 
+pinger.nca.edu.pk, nca.edu.pk,"Lahore, Pakistan, South Asia (31.567439 74.306972)",LAHORE_REGION PERN_NON-POP S.ASIA TEST-GRP 
+npm.neduet.edu.pk, neduet.edu.pk,"University Road, Karachi - 75270, Pakistan, South Asia (24.8934 67.0281)",KARACHI_REGION PERN_NON-POP S.ASIA TEST-GRP 
+pinger.lhr.nu.edu.pk, lhr.nu.edu.pk,"Lahore, Pakistan, South Asia (31.481042 74.303356)",LAHORE_REGION PERN_NON-POP S.ASIA TEST-GRP 
+pinger.numl.edu.pk, numl.edu.pk,"Islamabad, Punjab, Pakistan, South Asia (33.667246 73.050663)",ISLAMABAD_REGION PERN_NON-POP 
+pinger.nwfpuet.edu.pk, nwfpuet.edu.pk,"Peshawar, Pakistan, South Asia (34.0017 71.4855)",PERN_NON-POP PESHAWAR_REGION S.ASIA TEST-GRP 
+pingerkhi-cpsp.pern.edu.pk, pern.edu.pk,"Karachi, Sindh, Pakistan, South Asia (24.8376048 67.0588744)",KARACHI_REGION PERN_POP 
+pingerkhi.pern.edu.pk, pern.edu.pk,"Karachi, Sindh Pakistan, Pakistan, South Asia (24.8881778 67.065914)",KARACHI_REGION PERN_POP S.ASIA TEST-GRP 
+pinger.pern.edu.pk, pern.edu.pk,"Islamabad, Pakistan, South Asia (33.673317 73.054431)",ISLAMABAD_REGION PERN_POP S.ASIA TEST-GRP 
+pingerfsbd.pern.edu.pk, pern.edu.pk,"University of agriculture Faisalabad, Pakistan, South Asia (31.4338079 73.0689096)",PERN_POP TEST-GRP 
+pingerjms.pern.edu.pk, pern.edu.pk,"Jamshoro, Sindh, Pakistan, South Asia (25.4178 68.2627)",KARACHI_REGION PERN_POP S.ASIA TEST-GRP 
+pingerlhr.pern.edu.pk, pern.edu.pk,"HEC Regional Centre Lahore, Pakistan, South Asia (31.510717 74.352967)",LAHORE_REGION PERN_POP TEST-GRP 
+pingerqta.pern.edu.pk, pern.edu.pk,"Quetta, Balochistan, Pakistan, South Asia (30.269561 66.939694)",PERN_POP QUETTA_REGION S.ASIA TEST-GRP 
+pingerpwr.pern.edu.pk, pern.edu.pk,"Peshawar, Pakistan, South Asia (33.991158 71.442767)",PERN_POP PESHAWAR_REGION 
+pingerisl-qau.pern.edu.pk, pern.edu.pk,"Islamabad, Punjab, Pakistan, South Asia (33.746176 73.135705)",ISLAMABAD_REGION PERN_POP 
+pingerlhr-pu.pern.edu.pk, pern.edu.pk,"Lahore, Punjab, Pakistan, South Asia (31.50304 74.308098)",LAHORE_REGION PERN_POP 
+pingerkhi-uok.pern.edu.pk, pern.edu.pk,"Karachi, Sindh, Pakistan, South Asia (24.9400231 67.12093)",KARACHI_REGION PERN_POP 
+pingermtn.pern.edu.pk, pern.edu.pk,"Multan, Punjab, Pakistan, South Asia (30.269726 71.506455)",PERN_POP S.ASIA TEST-GRP 
+pingerisl-fjwu.pern.edu.pk, pern.edu.pk,"Rawalpindi, Punjab, Pakistan, South Asia (33.585848 73.064719)",ISLAMABAD_REGION PERN_POP 
+pingerlhr-gcu.pern.edu.pk, pern.edu.pk,"Lahore, Punjab, Pakistan, South Asia (31.5747 74.3076)",LAHORE_REGION PERN_POP 
+pingerisl-air.pern.edu.pk, isl-air.pern.edu.pk,"Main Campus PAF Complex, Sector E-9 Islamabad, Pakistan, South Asia (33.7182 73.0605)",
+ns3.pieas.edu.pk, pieas.edu.pk,"Islamabad, Punjab, Pakistan, South Asia (33.6559 73.2657)",
 pinger-itc.pu.edu.pk ,pu.edu.pk,"Lahore, Pakistan, South Asia (31.4956 74.2942)",LAHORE_REGION PERN_NON-POP S.ASIA TEST-GRP 
-cae.seecs.edu.pk M ,seecs.edu.pk,"PAF Academy Rislapur, Pakistan, South Asia (34.0625 71.987778)",PERN_NON-POP PESHAWAR_REGION 
-duhs.seecs.edu.pk M ,seecs.edu.pk,"Karachi, Sindh, Pakistan, South Asia (24.8574 67.01106)",KARACHI_REGION PERN_NON-POP 
-sau.seecs.edu.pk M ,seecs.edu.pk,"Tandojam, Sindh, Pakistan, South Asia (25.4333 68.5573)",KARACHI_REGION PERN_NON-POP 
-nuisb.seecs.edu.pk M ,seecs.edu.pk,"Sector H-11/4 Islamabad, Pakistan, South Asia (33.655387 73.015437)",ISLAMABAD_REGION PERN_NON-POP 
-maggie1.seecs.edu.pk M ,seecs.edu.pk,"Islamabad, Pakistan, South Asia (33.642886 72.990525)",
-quest.seecs.edu.pk M ,seecs.edu.pk,"Nawabshah, Sindh, Pakistan, South Asia (26.235942 68.390089)",KARACHI_REGION PERN_NON-POP 
-buitms.seecs.edu.pk M ,seecs.edu.pk,"Takatu campus, Balaile Road,Quetta., Pakistan, South Asia (30.214317 66.993094)",PERN_NON-POP QUETTA_REGION 
+cae.seecs.edu.pk, seecs.edu.pk,"PAF Academy Rislapur, Pakistan, South Asia (34.0625 71.987778)",PERN_NON-POP PESHAWAR_REGION 
+duhs.seecs.edu.pk, seecs.edu.pk,"Karachi, Sindh, Pakistan, South Asia (24.8574 67.01106)",KARACHI_REGION PERN_NON-POP 
+sau.seecs.edu.pk, seecs.edu.pk,"Tandojam, Sindh, Pakistan, South Asia (25.4333 68.5573)",KARACHI_REGION PERN_NON-POP 
+nuisb.seecs.edu.pk, seecs.edu.pk,"Sector H-11/4 Islamabad, Pakistan, South Asia (33.655387 73.015437)",ISLAMABAD_REGION PERN_NON-POP 
+maggie1.seecs.edu.pk, seecs.edu.pk,"Islamabad, Pakistan, South Asia (33.642886 72.990525)",
+quest.seecs.edu.pk, seecs.edu.pk,"Nawabshah, Sindh, Pakistan, South Asia (26.235942 68.390089)",KARACHI_REGION PERN_NON-POP 
+buitms.seecs.edu.pk, seecs.edu.pk,"Takatu campus, Balaile Road,Quetta., Pakistan, South Asia (30.214317 66.993094)",PERN_NON-POP QUETTA_REGION 
 lse.seecs.edu.pk ,seecs.edu.pk,"Lahore, Pakistan, South Asia (31.509683 74.347606)",LAHORE_REGION PERN_NON-POP S.ASIA TEST-GRP 
-maggie2.seecs.edu.pk M ,seecs.edu.pk,"Islamabad, Pakistan, South Asia (33.642886 72.990525)",
+maggie2.seecs.edu.pk, seecs.edu.pk,"Islamabad, Pakistan, South Asia (33.642886 72.990525)",
 sbkwu.seecs.edu.pk ,seecs.edu.pk,"Quetta, Balochistan, Pakistan, South Asia (30.1915882 66.961221)",PERN_NON-POP QUETTA_REGION 
-nukhimain.seecs.edu.pk M ,seecs.edu.pk,"Karachi, Pakistan, South Asia (24.856898 67.264848)",KARACHI_REGION PERN_NON-POP 
-uaf.seecs.edu.pk M ,seecs.edu.pk,"Faisalabad, Pakistan, South Asia (31.433741 73.070476)",
-monitor.seecs.edu.pk B M ,seecs.edu.pk,"Islamabad, Pakistan, South Asia (33.642886 72.990525)",ISLAMABAD_REGION PERN_NON-POP 
-kinnaird.seecs.edu.pk M ,kinnaird.seecs.edu.pk,"93 Jail Road, Lahore, Pakistan, South Asia (31.537206 74.340678)",LAHORE_REGION PERN_NON-POP 
+nukhimain.seecs.edu.pk, seecs.edu.pk,"Karachi, Pakistan, South Asia (24.856898 67.264848)",KARACHI_REGION PERN_NON-POP 
+uaf.seecs.edu.pk, seecs.edu.pk,"Faisalabad, Pakistan, South Asia (31.433741 73.070476)",
+monitor.seecs.edu.pk, seecs.edu.pk,"Islamabad, Pakistan, South Asia (33.642886 72.990525)",ISLAMABAD_REGION PERN_NON-POP 
+kinnaird.seecs.edu.pk, kinnaird.seecs.edu.pk,"93 Jail Road, Lahore, Pakistan, South Asia (31.537206 74.340678)",LAHORE_REGION PERN_NON-POP 
 sirsyed.ssuet.edu.pk ,ssuet.edu.pk,"Karachi, Pakistan, South Asia (24.91 67.1)",KARACHI_REGION PERN_NON-POP S.ASIA TEST-GRP 
 pinger.uaar.edu.pk ,uaar.edu.pk,"Rawalpindi, Pakistan, South Asia (33.6492 73.0824)",ISLAMABAD_REGION PERN_NON-POP S.ASIA TEST-GRP 
 www.uet.edu.pk ,uet.edu.pk,"Lahore, Pakistan, South Asia (31.58 74.36)",LAHORE_REGION PERN_NON-POP S.ASIA TEST-GRP 
-pinger.uet.edu.pk M ,uet.edu.pk,"Lahore, Pakistan, South Asia (31.58 74.36)",LAHORE_REGION PERN_NON-POP S.ASIA TEST-GRP 
-pinger.uettaxila.edu.pk M ,uettaxila.edu.pk,"Taxila, Pakistan, South Asia (33.767897 72.825875)",ISLAMABAD_REGION PERN_NON-POP S.ASIA TEST-GRP 
-pinger.uob.edu.pk M ,uob.edu.pk,"Quetta, Pakistan, South Asia (30.1655 66.9908)",PERN_NON-POP QUETTA_REGION S.ASIA TEST-GRP 
-www.upesh.edu.pk M ,upesh.edu.pk,"Peshawar, Pakistan, South Asia (34.01 71.48)",
-pinger.usindh.edu.pk M ,usindh.edu.pk,"Jamshoro, Sindh, Pakistan, South Asia (25.418178 68.262133)",KARACHI_REGION PERN_NON-POP S.ASIA TEST-GRP 
+pinger.uet.edu.pk, uet.edu.pk,"Lahore, Pakistan, South Asia (31.58 74.36)",LAHORE_REGION PERN_NON-POP S.ASIA TEST-GRP 
+pinger.uettaxila.edu.pk, uettaxila.edu.pk,"Taxila, Pakistan, South Asia (33.767897 72.825875)",ISLAMABAD_REGION PERN_NON-POP S.ASIA TEST-GRP 
+pinger.uob.edu.pk, uob.edu.pk,"Quetta, Pakistan, South Asia (30.1655 66.9908)",PERN_NON-POP QUETTA_REGION S.ASIA TEST-GRP 
+www.upesh.edu.pk, upesh.edu.pk,"Peshawar, Pakistan, South Asia (34.01 71.48)",
+pinger.usindh.edu.pk, usindh.edu.pk,"Jamshoro, Sindh, Pakistan, South Asia (25.418178 68.262133)",KARACHI_REGION PERN_NON-POP S.ASIA TEST-GRP 
 pinger.ustb.edu.pk ,ustb.edu.pk,"Bannu, Pakistan, South Asia (32.9844 70.6025)",PERN_NON-POP PESHAWAR_REGION S.ASIA TEST-GRP 
-pinger.vu.edu.pk M ,vu.edu.pk,"M.A Jinnah Campus, Off Defence road, Off Raiwand RoadLahore, Pakistan, South Asia (31.40080883 74.21349138)",LAHORE_REGION PERN_NON-POP 
+pinger.vu.edu.pk, vu.edu.pk,"M.A Jinnah Campus, Off Defence road, Off Raiwand RoadLahore, Pakistan, South Asia (31.40080883 74.21349138)",LAHORE_REGION PERN_NON-POP 
 115-186-132-222.nayatel.pk ,nayatel.pk,"G-D Arcade, 73-E, Fazal-ul-Haq Road, Blue Area Islamabad ? 44000, Pakistan, South Asia (33.7168 73.0720)",
 115-186-135-82.nayatel.pk ,nayatel.pk,"G-D Arcade, 73-E, Fazal-ul-Haq Road, Blue Area Islamabad ? 44000, Pakistan, South Asia (33.7168 73.0720)",
 www.ionmed.agh.edu.pl ,ionmed.agh.edu.pl,"Krakow, Poland, Europe (50.05 19.92)",
@@ -782,17 +782,17 @@ www.psi.gov.ps ,psi.gov.ps,"Ramallah, Palestine, Middle East (31.54 35.12)",ARAB
 www.advocatus.pt ,advocatus.pt,"Lisbon, Portugal, Europe (38.7069 -9.1356)",EUROPE 
 www.antenalivre.pt ,antenalivre.pt,"Lisbon, Portugal, Europe (38.6796 -8.4622)",EUROPE 
 www.lip.pt ,lip.pt,"Lisbon, Portugal, Europe (38.733 -9.133)",EUROPE 
-www.una.py B ,una.py,"San Lorenzo, Paraguay, Latin America (-25.33 -57.53)",S.AMERICA 
+www.una.py, una.py,"San Lorenzo, Paraguay, Latin America (-25.33 -57.53)",S.AMERICA 
 speedtest.isp.qa ,isp.qa,"Doha, Qatar, Middle East (25.3 51.52)",ARAB.LEAGUE 
 webmail.izi.re ,izi.re,"Saint Denis, Reunion-French Colony, Africa (-20.87 55.47)",
 speed.alienstation.ro ,alienstation.ro,"Constanta, Romania, Balkans (44.18 28.65)",EUROPE 
 ns1.credis.ro ,credis.ro,"Bulevardul Mihail Kogalniceanu 36-46, sector 5, corp CREDIS, Bucharest, Bucharest, Romania, Balkans (44.4351 26.0801)",EUROPE 
 ftp.evoda.ro ,ftp.evoda.ro,"Bucharest, Romania, Balkans (44.25 26.06)",EUROPE 
-ns.rcub.bg.ac.rs B ,rcub.bg.ac.rs,"Serbia, Serbia and Montenegro, Balkans (44.8040 20.4798)",
+ns.rcub.bg.ac.rs, rcub.bg.ac.rs,"Serbia, Serbia and Montenegro, Balkans (44.8040 20.4798)",
 speedtest.bigtelecom.ru ,bigtelecom.ru,"Khimki, Russia, Russia (55.83 37.06)",
 www.dvo.ru ,dvo.ru,"Vladivostok, Russia, Russia (43.15 131.9)",
 www.irk.ru ,irk.ru,"Irkutsk, Russia, Russia (52.3 104.25)",
-mctest.itep.ru B ,itep.ru,"Moscow, Russia, Russia (55.750 37.583)",
+mctest.itep.ru, itep.ru,"Moscow, Russia, Russia (55.750 37.583)",
 speedtest.meganets.ru ,speedtest.meganets.ru,"Moscow, Russia, Russia (55.15 37.57)",
 ns.sinp.msu.ru ,msu.ru,"Moscow, Russia, Russia (55.750 37.583)",
 www.msu.ru ,msu.ru,"Moscow, Russia, Russia (55.75 37.7)",
@@ -803,7 +803,7 @@ www.tsc.ru ,tsc.ru,"Tomsk, Russia, Russia (56.5 85.08)",
 www.unn.ru ,unn.ru,"Nizhny Novgorod, Russia, Russia (56.33 44)",
 www.uran.ru ,uran.ru,"Ekaterinoburg, Russia, Russia (56.85 60.6)",
 www.kie.ac.rw ,kie.ac.rw,"Kigali, Rwanda, Africa (-1.93 30.07)",C.AFRICA E.AFRICA SUB.SAHARA 
-www.kist.ac.rw B ,kist.ac.rw,"Kigali, Rwanda, Africa (-1.93 30.07)",C.AFRICA E.AFRICA SUB.SAHARA 
+www.kist.ac.rw, kist.ac.rw,"Kigali, Rwanda, Africa (-1.93 30.07)",C.AFRICA E.AFRICA SUB.SAHARA 
 www.rwandaparliament.gov.rw ,rwandaparliament.gov.rw,"Rwanda, Rwanda, Africa (-2.00 30.00)",C.AFRICA E.AFRICA SUB.SAHARA 
 speedtest.sahara.com.sa ,speedtest.sahara.com.sa,"Khobar, Saudi Arabia, Middle East (26.58 50.03)",ARAB.LEAGUE 
 www.kku.edu.sa ,kku.edu.sa,"Abha, Saudi Arabia, Middle East (18.22 42.5)",ARAB.LEAGUE 
@@ -816,17 +816,17 @@ hon-prepaid-173-173.telekom.net.sb ,telekom.net.sb,"Honiara, Solomon Islands, Oc
 www.mcss.sc ,mcss.sc,"Victoria, Seychelles, Africa (-4.6167 55.45)",E.AFRICA SUB.SAHARA 
 ust.edu.sd ,www.ust.edu.sd,"Khartum, Sudan, Africa (15.5881 32.5342)",ARAB.LEAGUE E.AFRICA N.AFRICA SUB.SAHARA 
 www.mof.gov.sd ,mof.gov.sd,"Khartoum, Sudan, Africa (15.5881 32.5342)",ARAB.LEAGUE E.AFRICA N.AFRICA SUB.SAHARA 
-pp2.it.su.se B ,su.se,"Stockholm, Sweden, Europe (59.33 18.05)",EUROPE 
+pp2.it.su.se, su.se,"Stockholm, Sweden, Europe (59.33 18.05)",EUROPE 
 speedtest.tmnet.se ,tmnet.se,"Malmo, Sweden, Europe (55.35 13.52)",EUROPE 
 speedtest.com.sg ,speedtest.com.sg,"Singapore, Singapore, S.E. Asia (1.17 103.51)",SE.ASIA 
 www.nus.edu.sg ,nus.edu.sg,"Singapore, Singapore, S.E. Asia (1.2941 103.7811)",SE.ASIA 
 leonis.nus.edu.sg ,leonis.nus.edu.sg,"Singapore, Singapore, S.E. Asia (1.283 103.850)",
 singaporetech.edu.sg ,singaporetech.edu.sg,"EFG Bank Building 25 North Bridge Road #03-01 Singapore 179104., Singapore, S.E. Asia (1.2901 103.8497)",
-www.singaren.net.sg B ,singaren.net.sg,"Singapore, Singapore, S.E. Asia (1.283 103.850)",
+www.singaren.net.sg, singaren.net.sg,"Singapore, Singapore, S.E. Asia (1.283 103.850)",
 bowlingzveza.si ,bowlingzveza.si,"Regentova cesta 351000, Ljubljana , Slovenia, Balkans (46.5547 15.6467)",EUROPE MEDITERRANEAN 
 ccp.si ,ccp.si,"Ljubljana, Slovenia, Balkans (46.05 14.5)",EUROPE MEDITERRANEAN 
-www.uni-mb.si B ,uni-mb.si,"Maribor, Slovenia, Balkans (46.36 15.40)",EUROPE MEDITERRANEAN 
-ba.sanet.sk B ,sanet.sk,"Bratislava, Slovak Republic, Europe (48.200 16.550)",EUROPE 
+www.uni-mb.si, uni-mb.si,"Maribor, Slovenia, Balkans (46.36 15.40)",EUROPE MEDITERRANEAN 
+ba.sanet.sk, sanet.sk,"Bratislava, Slovak Republic, Europe (48.200 16.550)",EUROPE 
 www.aio.upjs.sk ,aio.upjs.sk,"Srobarova, 041 80 Kosice, Slovak Republic, Europe (48.7167 21.25)",EUROPE 
 mail.africell.sl ,africell.sl,"Sierra Leone, Sierra Leone, Africa (8.5 -11.5)",N.AFRICA SUB.SAHARA W.AFRICA 
 www.sierratel.sl ,sierratel.sl,"Freetown, Sierra Leone, Africa (8.4841 -13.2287)",N.AFRICA SUB.SAHARA W.AFRICA 
@@ -834,16 +834,16 @@ www.absrsm.sm ,absrsm.sm,"San Marino, San Marino, Europe (43.767 12.417)",
 www.carisp.sm ,carisp.sm,"San Marino, San Marino, Europe (43.9333 12.4667)",
 www.aser.sn ,aser.sn,"Dakar, Senegal, Africa (14.75 -17.333)",SUB.SAHARA W.AFRICA 
 www.cms.sn ,cms.sn,"Dakar, Senegal, Africa (14.75 -17.333)",SUB.SAHARA W.AFRICA 
-www.college.edu.sn B ,college.edu.sn,"Dakar, Senegal, Africa (14.6707 -17.4381)",N.AFRICA SUB.SAHARA W.AFRICA 
+www.college.edu.sn, college.edu.sn,"Dakar, Senegal, Africa (14.6707 -17.4381)",N.AFRICA SUB.SAHARA W.AFRICA 
 www.esmt.sn ,esmt.sn,"Dakar, Senegal, Africa (14.75 -17.333)",SUB.SAHARA W.AFRICA 
 www.refer.sn ,refer.sn,"Cheikh Anta Diop University of Dakar, West Corniche West Corniche, Dakar, Senegal, Africa (14.750 -17.3333)",N.AFRICA SUB.SAHARA W.AFRICA 
 wwwinfo.jinr.ru ,dubna.su,"141980, Dubna, Moscow Region, Russia, Russia (55.750 37.583)",
 www.ihep.su ,ihep.su,"Moscow, Russia, Russia (55.750 37.583)",
-rainbow.inp.nsk.su B M ,nsk.su,"Novosibirsk, Russia, Russia (54.8482 83.1125)",
+rainbow.inp.nsk.su, nsk.su,"Novosibirsk, Russia, Russia (54.8482 83.1125)",
 ns.cybercentro.com.sv ,cybercentro.com.sv,"San Salvador, El Salvador, Latin America (13.67 -89.17)",
 www.uca.edu.sv ,uca.edu.sv,"San Salvador, El Salvador, Latin America (13.67 -89.17)",
 ns.conacyt.gob.sv ,conacyt.gob.sv,"San Salvador, El Salvador, Latin America (13.67 -89.17)",
-cir.red.sv B ,red.sv,"San Salvador, El Salvador, Latin America (13.67 -89.17)",
+cir.red.sv, red.sv,"San Salvador, El Salvador, Latin America (13.67 -89.17)",
 www.iust.edu.sy ,iust.edu.sy,"Al-Sanamayn, Daraa, Syria, Syria, Middle East (33.0721 36.1769)",ARAB.LEAGUE MEDITERRANEAN 
 www.tishreen.edu.sy ,tishreen.edu.sy,"Latakia, Syria, Middle East (35.5210 35.8075)",ARAB.LEAGUE MEDITERRANEAN 
 www.inet.sy ,inet.sy,"Al-Mohajreen, Damascus, Syria P.O.Box 3523 , Syria, Middle East (33.5 36.3)",ARAB.LEAGUE MEDITERRANEAN 
@@ -853,7 +853,7 @@ www.realbroadband.co.sz ,realbroadband.co.sz,"Mbabane, Swaziland, Africa (-26.31
 www.acat.org.sz ,acat.org.sz,"Mbabane, Swaziland, Africa (-26.3167 31.133)",S.AFRICA SUB.SAHARA 
 www.ub.tg ,ub.tg,"Lome, Togo, Africa (6.13 1.22)",N.AFRICA SUB.SAHARA W.AFRICA 
 www.ait.ac.th ,ait.ac.th,"P.O. Box 4, Klong Luang, Pathumthani 12120, Thailand, Thailand, S.E. Asia (13.969 100.62)",SE.ASIA 
-ongkot.kmutt.ac.th B ,kmutt.ac.th,"Thonburi, Bangkok, Thailand, S.E. Asia (13.681 100.74)",SE.ASIA 
+ongkot.kmutt.ac.th, kmutt.ac.th,"Thonburi, Bangkok, Thailand, S.E. Asia (13.681 100.74)",SE.ASIA 
 www.ku.ac.th ,ku.ac.th,"Bangkok, Thailand, S.E. Asia (13.8475 100.5620)",SE.ASIA 
 www.mju.ac.th ,mju.ac.th,"Maejo University , Thailand, S.E. Asia (18.8983 99.0133)",SE.ASIA 
 www.rsu.ac.th ,rsu.ac.th,"Rangsit, Thailand, S.E. Asia (14.0167 100.73)",SE.ASIA 
@@ -867,32 +867,32 @@ www.turkmenistan.gov.tm ,turkmenistan.gov.tm,"Ashgabat, Turkmenistan, Central As
 www.agriportail.tn ,agriportail.tn,"Tunis, Tunisia, Africa (36.818 10.1660)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
 www.bte.com.tn ,bte.com.tn,"Tunis, Tunisia, Africa (36.818 10.1660)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
 www.fmci.ens.tn ,fmci.ens.tn,"FMCI Quartier Montplaisir Rue 8300 1002 Tunis, Tunisia, Africa (36.8028 10.1797)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
-mail.gnet.tn B ,gnet.tn,"Tunis, Tunisia, Africa (36.84 10.22)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
+mail.gnet.tn, gnet.tn,"Tunis, Tunisia, Africa (36.84 10.22)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
 www.emploi.nat.tn ,emploi.nat.tn,"Tunis, Tunisia, Africa (36.818 10.1660)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
 www.ccis.org.tn ,ccis.org.tn,"Sfax, Tunisia, Africa (34.7452 10.7613)",ARAB.LEAGUE MEDITERRANEAN N.AFRICA NORTH_AFRICA 
 www.cayirova.ber.tr ,cayirova.ber.tr,"Cayirova, Turkey, Middle East (40.8533 29.8815)",MEDITERRANEAN 
 www.akcansa.com.tr ,akcansa.com.tr,"Istanbul, Turkey, Middle East (41.0053 28.977)",MEDITERRANEAN 
 www.alihan.com.tr ,alihan.com.tr,"Istanbul, Turkey, Middle East (41.0053 28.977)",MEDITERRANEAN 
 www.argon.com.tr ,argon.com.tr,"Istanbul, Turkey, Middle East (41.0053 28.977)",MEDITERRANEAN 
-www.anadolu.edu.tr B ,anadolu.edu.tr,"Eskisehir, Turkey, Middle East (39.77 30.5)",
+www.anadolu.edu.tr, anadolu.edu.tr,"Eskisehir, Turkey, Middle East (39.77 30.5)",
 www.bis.k12.tr ,bis.k12.tr,"Istanbul, Turkey, Middle East (41.0053 28.977)",MEDITERRANEAN 
 www.ictp.tv ,ictp.tv,"Trieste, Italy, Europe (45.70749 13.716527)",EUROPE MEDITERRANEAN 
 192.83.196.111 ,TANetBackbone-MOE.edu.tw,"Taipei, Taiwan, East Asia (25.000 121.400)",
 140.109.18.50 ,sinica.edu.tw,"Taipei, Taiwan, East Asia (25.000 121.400)",
-pinger.nchc.org.tw M ,nchc.org.tw,"Hsinchu, Hsinchu Science Park, Taiwan, East Asia (24.805 120.971)",
+pinger.nchc.org.tw, nchc.org.tw,"Hsinchu, Hsinchu Science Park, Taiwan, East Asia (24.805 120.971)",
 www.muchs.ac.tz ,muchs.ac.tz,"Dar es Salaam, Tanzania, Africa (-6.8079 39.2734)",E.AFRICA SUB.SAHARA 
 www.out.ac.tz ,out.ac.tz,"Dar es Salaam, Tanzania, Africa (-6.7640 39.2707)",E.AFRICA SUB.SAHARA 
-www.udsm.ac.tz B ,udsm.ac.tz,"Dar es Salaam, Tanzania, Africa (-6.7640 39.2707)",E.AFRICA SUB.SAHARA 
+www.udsm.ac.tz, udsm.ac.tz,"Dar es Salaam, Tanzania, Africa (-6.7640 39.2707)",E.AFRICA SUB.SAHARA 
 www.6telecoms.co.tz ,6telecoms.co.tz,"Six Telecoms Company Limited 5th Floor, Barclays House Ohio Street, Dar es Salaam, Tanzania, Africa (-6.8133 39.2893)",E.AFRICA SUB.SAHARA 
 www.acet.or.tz ,acet.or.tz,"Dar Es Salam, Tanzania, Africa (-6.8 39.28)",E.AFRICA SUB.SAHARA 
 www.ternet.or.tz ,ternet.or.tz,"P.O. Box 95062, Dar es Salaam, Tanzania. , Tanzania, Africa (-6.8 39.2833)",E.AFRICA SUB.SAHARA 
-mail.kipt.kharkov.ua B ,kharkov.ua,"Kharkov, Ukraine, Europe (50 36.25)",
+mail.kipt.kharkov.ua, kharkov.ua,"Kharkov, Ukraine, Europe (50 36.25)",
 ns.kiev.ua ,kiev.ua,"Kiev, Ukraine, Europe (50.500 30.467)",
 speedtest.dc.utel.ua ,utel.ua,"Kiev, Ukraine, Europe (50.43 30.52)",
 mail2.starcom.co.ug ,starcom.co.ug,"Infocom, Plot 2, Clement Hill Road, Kampala, Uganda, Africa (0.32 32.58)",E.AFRICA SUB.SAHARA 
 www.utl.co.ug ,utl.co.ug,"Kampala, Uganda, Africa (0.19 32.25)",E.AFRICA SUB.SAHARA 
 www.phy.bris.ac.uk ,bris.ac.uk,"Bristol, United Kingdom, Europe (51.4591 -2.6021)",EUROPE 
-icfamon.dl.ac.uk M ,dl.ac.uk,"Warrington, United Kingdom, Europe (53.3431 -2.6407)",EUROPE 
+icfamon.dl.ac.uk, dl.ac.uk,"Warrington, United Kingdom, Europe (53.3431 -2.6407)",EUROPE 
 www.ed.ac.uk ,ed.ac.uk,"Edinburgh, Scotland, United Kingdom, Europe (55.9477 -3.1867)",
 130.209.4.16 ,gla.ac.uk,"London, United Kingdom, Europe (51.500 -0.167)",
 www.ncl.ac.uk ,ncl.ac.uk,"Newcastle, NE1 7RU, United Kingdom, United Kingdom, Europe (54.9803 -1.6157)",
@@ -902,11 +902,11 @@ gppnm.gridpp.rl.ac.uk ,rl.ac.uk,"Abingdon, United Kingdom, Europe (51.75 -1.25)"
 csflinux.rl.ac.uk ,rl.ac.uk,"London, United Kingdom, Europe (51.500 -0.167)",EUROPE 
 www.rl.ac.uk ,rl.ac.uk,"Abingdon, United Kingdom, Europe (51.75 -1.25)",EUROPE 
 heptel.rl.ac.uk ,rl.ac.uk,"Abingdon, United Kingdom, Europe (51.75 -1.25)",EUROPE 
-icfamon.rl.ac.uk M ,rl.ac.uk,"Abingdon, United Kingdom, Europe (51.5722 -1.3099)",EUROPE 
+icfamon.rl.ac.uk, rl.ac.uk,"Abingdon, United Kingdom, Europe (51.5722 -1.3099)",EUROPE 
 speedtest.bbmax.co.uk ,bbmax.co.uk,"London, United Kingdom, Europe (51.3 0.07)",EUROPE 
 ns.demon.co.uk ,demon.co.uk,"London, United Kingdom, Europe (51.500 -0.167)",EUROPE 
 mail.fcien.edu.uy ,fcien.edu.uy,"Montevideo, Uruguay, Latin America (-34.86 -56.17)",S.AMERICA 
-www.fisica.edu.uy B ,fisica.edu.uy,"Montevideo, Uruguay, Latin America (-34.917 -56.167)",S.AMERICA 
+www.fisica.edu.uy, fisica.edu.uy,"Montevideo, Uruguay, Latin America (-34.917 -56.167)",S.AMERICA 
 ns.fq.edu.uy ,fq.edu.uy,"Montevideo, Uruguay, Latin America (-34.56 -56.11)",S.AMERICA 
 gt-medicionesuy.rau.edu.uy ,rau.edu.uy,"Montevideo, Uruguay, Latin America (-34.883 -56.183)",S.AMERICA 
 www.amcham.uz ,amcham.uz,"Tashkent, Uzbekistan, Central Asia (41.2667 69.2167)",
@@ -915,7 +915,7 @@ spdtst.doda.uz ,doda.uz,"Tashkent, Uzbekistan, Central Asia (41.16 69.13)",
 www.minzdrav.uz ,minzdrav.uz,"Tashkent, Uzbekistan, Central Asia (41.2667 69.2167)",
 win17.b2web.com.ve ,win17.b2web.com.ve,"Caracas, Venezuela, Latin America (10.4910 -66.9021)",S.AMERICA 
 www.cst.edu.ve ,cst.edu.ve,"Lecheria, Puerto La Cruz, Estado Anzoategui, Venezuela, Latin America (10.2 -64.7)",S.AMERICA 
-www.cuc.edu.ve B ,cuc.edu.ve,"Caracas, Venezuela, Latin America (10.5 -66.92)",S.AMERICA 
+www.cuc.edu.ve, cuc.edu.ve,"Caracas, Venezuela, Latin America (10.5 -66.92)",S.AMERICA 
 www.corpozulia.gov.ve ,corpozulia.gov.ve,"Corpozulia, Venezuela, Latin America (10.2188 -72.0175)",S.AMERICA 
 www.inia.gov.ve ,inia.gov.ve,"Maracay, Venezuela, Latin America (10.2446 -67.5937)",S.AMERICA 
 www.hut.edu.vn ,hut.edu.vn,"Hanoi, Vietnam, S.E. Asia (21.01 105.52)",SE.ASIA 
@@ -931,12 +931,12 @@ www.nmmu.ac.za ,nmmu.ac.za,"Port Elizabeth, South Africa, Africa (-33.9667 25.58
 www.nwu.ac.za ,nwu.ac.za,"Potchefstroom, South Africa, Africa (-26.71 27.1)",S.AFRICA SUB.SAHARA 
 www.ru.ac.za ,ru.ac.za,"Grahamstown, South Africa, Africa (-33.30 26.51)",S.AFRICA SUB.SAHARA 
 sagrid.ac.za ,sagrid.ac.za,", South Africa, Africa (-29.16 26.2)",S.AFRICA SUB.SAHARA 
-brunsvigia.tenet.ac.za B M ,tenet.ac.za,"Rondebosch, South Africa, Africa (-33.92 18.42)",S.AFRICA SUB.SAHARA 
+brunsvigia.tenet.ac.za, tenet.ac.za,"Rondebosch, South Africa, Africa (-33.92 18.42)",S.AFRICA SUB.SAHARA 
 196.21.45.139 ,bontany.uwc.ac.za,"Cape Town, South Africa, Africa (-33.92 18.41)",S.AFRICA SUB.SAHARA 
 www.csir.co.za ,csir.co.za,"Pretoria, South Africa, Africa (-25.43 28.11)",S.AFRICA SUB.SAHARA 
 www.museumsnc.co.za ,museumsnc.co.za,"Kimberley, South Africa, Africa (-33.55 18.22)",S.AFRICA SUB.SAHARA 
 speedtest.techconcepts.co.za ,techconcepts.co.za,"Johannesburg, South Africa, Africa (-26.08 27.54)",S.AFRICA SUB.SAHARA 
-www.aisha.ac.zm B ,aisha.ac.zm,"Ngombe, Lusaka, Zambia, Africa (-15.417 28.283)",E.AFRICA SUB.SAHARA 
+www.aisha.ac.zm, aisha.ac.zm,"Ngombe, Lusaka, Zambia, Africa (-15.417 28.283)",E.AFRICA SUB.SAHARA 
 www.zedmobile.co.zm ,zedmobile.co.zm,"Kitwe, Zambia, Africa (-12.8167 28.2)",E.AFRICA SUB.SAHARA 
 www.afyamzuri.org.zm ,afyamzuri.org.zm,"Mazabuka, Zambia, Africa (-15.8667 27.7667)",E.AFRICA SUB.SAHARA 
 www.lechwe.sch.zm ,lechwe.sch.zm,"Cnr Namwala Avenue/Kuomboka Drive Parklands, Kitwe, Zambia, Africa (-12.817 28.2)",E.AFRICA SUB.SAHARA 

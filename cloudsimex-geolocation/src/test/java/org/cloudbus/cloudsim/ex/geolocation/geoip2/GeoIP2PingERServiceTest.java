@@ -5,19 +5,27 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 
-import org.cloudbus.cloudsim.ex.geolocation.geoip2.GeoIP2Service;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.helpers.TestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class GeoIP2ServiceTest {
+public class GeoIP2PingERServiceTest {
 
     private static final String MELBOURNE_IP = "128.250.180.0";
     private static final String SYDNEY_IP = "203.27.21.0";
     private static final String NEW_YORK_IP = "74.221.217.130";
     private static final String LONDON_IP = "192.165.213.0";
+    private static final String RIO_DE_JANEIRO_IP = "187.67.119.0";
+    private static final String SAN_FRANCISCO_IP = "208.82.236.0";
+    private static final String TOKYO_IP = "122.215.66.0";
+    private static final String SINGAPORE_IP = "27.34.176.0";
+    private static final String LA_IP = "142.91.79.0";
+    private static final String ORLEANDO_IP = "142.91.79.0";
+    private static final String MADRID_IP = "217.126.128.0";
+    private static final String HONG_KONG_IP = "14.0.128.0";
+    private static final String SANTIAGO_IP = "190.96.64.0";
     private static final String CAPE_TOWN_IP = "41.133.63.0";
 
     private static final double DISTANCE_SYDNEY_NEW_YORK_KM = 15990;
@@ -27,17 +35,19 @@ public class GeoIP2ServiceTest {
 
     private static final int DISTANCE_COMPARISON_DELTA_KM = 20;
 
-    private static GeoIP2Service service;
+    private static GeoIP2PingERService service;
 
     @BeforeClass
     public static void setUp() throws Exception {
 	CustomLog.configLogger(TestUtil.LOG_PROPS);
-	service = new GeoIP2Service(new File("GeoLite2-City.mmdb"));
+	service = new GeoIP2PingERService(new File("GeoLite2-City.mmdb"), new File("PingTablePingER.tsv"),
+		new File("MonitoringSitesPingER.csv"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testFailedServiceCreation() throws IOException {
-	try (GeoIP2Service geoService = new GeoIP2Service(new File("./nonexisting"))) {
+	try (GeoIP2PingERService geoService = new GeoIP2PingERService(new File("./nonexisting"),
+		new File("PingTablePingER.tsv"), new File("MonitoringSitesPingER.csv"))) {
 	    // pass
 	}
     }
@@ -131,12 +141,31 @@ public class GeoIP2ServiceTest {
     // 74
     @Test
     public void testLatencies() {
-	//Expected latencties are taken from http://www.dotcom-monitor.com/WebTools/network_latency.aspx
-	double delta = 20;
-	assertEquals(74, service.latency(LONDON_IP, NEW_YORK_IP), delta);
-//	assertEquals(481, service.latency(CAPE_TOWN_IP, SYDNEY_IP), delta);
-//	assertEquals(169, service.latency(CAPE_TOWN_IP, LONDON_IP), delta);
-//	assertEquals(238, service.latency(SYDNEY_IP, NEW_YORK_IP), delta);
+	// Expected latencties are taken from
+	// http://www.dotcom-monitor.com/WebTools/network_latency.aspx
+	// and
+	// http://ipnetwork.bgtmo.ip.att.net/pws/global_network_avgs.html
+	//
+	double delta = 30;
+
+	//In the same region
+	assertEquals(68.08, service.latency(LA_IP, NEW_YORK_IP), delta);
+	assertEquals(34.79, service.latency(ORLEANDO_IP, NEW_YORK_IP), delta);
+	assertEquals(30.39, service.latency(MADRID_IP, LONDON_IP), delta);
+	assertEquals(117.13, service.latency(HONG_KONG_IP, SYDNEY_IP), delta);
+	assertEquals(77.28, service.latency(SINGAPORE_IP, TOKYO_IP), delta);
+	assertEquals(56.98, service.latency(SANTIAGO_IP, RIO_DE_JANEIRO_IP), delta);
+	
+
+	//Across regions
+	assertEquals(75.07, service.latency(LONDON_IP, NEW_YORK_IP), delta);
+	assertEquals(110.28, service.latency(RIO_DE_JANEIRO_IP, NEW_YORK_IP), delta);
+	assertEquals(97.33, service.latency(TOKYO_IP, SAN_FRANCISCO_IP), delta);
+	
+//	assertEquals(242.88, service.latency(TOKYO_IP, LONDON_IP), delta);
+//	assertEquals(242.88, service.latency(LA_IP, SINGAPORE_IP), delta);
+	
+	
     }
 
     @AfterClass

@@ -31,13 +31,14 @@ public class GeoIP2IPGeneratorTest {
     private static double IPS_IN_COUNTRY_CODES = NUM_AU_IPS_IN_TEST + NUM_CN_IPS_IN_TEST + NUM_JP_IPS_IN_TEST;
 
     private static GeoIP2IPGenerator generator;
-    private static GeoIP2Service service;
+    private static GeoIP2PingERService service;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
 	CustomLog.configLogger(TestUtil.LOG_PROPS);
 	generator = new GeoIP2IPGenerator(COUNTRY_CODES, TEST_FILE, TestUtil.SEED);
-	service = new GeoIP2Service(new File("GeoLite2-City.mmdb"));
+	service = new GeoIP2PingERService(new File("GeoLite2-City.mmdb"), new File("PingTablePingER.tsv"), new File(
+		"MonitoringSitesPingER.csv"));
     }
 
     @Test

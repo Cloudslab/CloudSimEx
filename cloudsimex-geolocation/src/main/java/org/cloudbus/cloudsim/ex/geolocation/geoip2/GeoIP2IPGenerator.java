@@ -96,8 +96,7 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
 	ranges.clear();
 	sumOfRangesLengths = 0;
 
-	try (BufferedReader reader = new BufferedReader(new FileReader(
-		originalFile))) {
+	try (BufferedReader reader = new BufferedReader(new FileReader(originalFile))) {
 	    // Read the file line by line
 	    String line = null;
 	    while ((line = reader.readLine()) != null) {

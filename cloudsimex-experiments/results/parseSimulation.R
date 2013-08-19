@@ -151,20 +151,37 @@ compareUtilisation <- function(forWorkload = "All", property="percentCPU", type,
   
 }
 
-plotComparisonSimExecPerfBulk <- function(forWorkload, type, vmId, property="percentCPU", step = 10, stepFunc = mean, filePattern, maxY=NA, layoutMatrix=NA) {
+plotComparisonSimExecPerfBulk <- function(forWorkload, type, vmId, property="percentCPU", step = 10, stepFunc = mean, filePattern,
+                                          maxY=NA, layoutMatrix=NA, layoutWidths = c(), layoutHeigths = c(), maxX=NA, lwdVal = 3) {
   concatNames <- paste(forWorkload, collapse = '-')
   commonFile <- if (is.na(filePattern)) NA else paste0(subDir, "/", filePattern, "_", property, "_",  concatNames, ".pdf" )
   if (!is.na(layoutMatrix)) {
     openGraphsDevice(commonFile)
-    layout(layoutMatrix)
+    layout(layoutMatrix, widths = layoutWidths, heights = layoutHeigths, respect=T)
+    
+    fullScreen(hasTitle = T, keepLeftMargin = F, minBorder = 0)
+    plot(0, 100, ylim=c(0, 200), xlim=c(0, 100), type = 'n', axes = FALSE, xlab = '', ylab = '', main = "")
+    legend(0, 200, c("Simulation", "Execution"),
+           col = c("red", "black"), lty = c(1, 2), cex=0.7)
   }
   
+  plotLableOnY = T
+  plotLegendFlag = is.na(layoutMatrix)
+  titleFlag = !is.na(layoutMatrix)
+  xLableIdx = trunc(length(forWorkload) / 2)
+  i = 0
   for(w in forWorkload) {
     fileName <- if (!is.na(layoutMatrix) || is.na(filePattern)) NA else paste0(subDir, "/", filePattern, "_", property, "_",  w, ".pdf" )
     #if(is.na(fileName) || file.exists(fileName)) {
-      plotComparisonSimExecPerf(w, type=type, vmId=vmId, property=property, step=step, stepFunc=stepFunc, file = fileName, maxY=maxY)
+    
+      plotComparisonSimExecPerf(w, type=type, vmId=vmId, property=property, step=step, stepFunc=stepFunc, file = fileName, maxY=maxY,
+                                plotXLable = (xLableIdx == i), plotYLable = plotLableOnY, plotLegend = plotLegendFlag,
+                                titleFlag = titleFlag, yaxtFlag = plotLableOnY, maxX=1400, lwdVal = lwdVal)
+      plotLableOnY = if (!is.na(layoutMatrix)) F else plotLableOnY
+      i <- i + 1
     #}
   }
+  
   
   if (!is.na(layoutMatrix)) {
     closeDevice(commonFile)
@@ -172,19 +189,30 @@ plotComparisonSimExecPerfBulk <- function(forWorkload, type, vmId, property="per
 }
 
 plotComparisonSimExecPerf <- function(forWorkload, type, vmId, property="percentCPU", step = 5, stepFunc = stepFuncDefault, maxY = NA, preparePlot = T,
-                                      file = NA, titleFlag=F, plotLegend=T){
+                                      file = NA, titleFlag=F, plotLegend=T, plotYLable=T, plotXLable=T, yaxtFlag=T, maxX=NA, lwdVal = 3) {
 
   sarFile <- paste0(subDir, "/", type, "_server_", forWorkload)
   simFile = paste0(subDir, "/", "performance_sessions_", forWorkload, ".csv")
   
   if(file.exists(sarFile) && file.exists(simFile)){
-    propertiesToNames <- c("percentCPU" = "CPU", "percentRAM" = "RAM", "percentIO" = "Disk IO")
+    propertiesToNames <- c("percentCPU" = "CPU", "percentRAM" = "RAM", "percentIO" = "Disk ")
     
     baseLineFile <- paste0(subDir, "/", type, "_server_", baseLineSize)
     baseLineFrame <- parseSar(baseLineFile)
     
     sarFrame <- prepareSarFrame(parseSar(sarFile), baseLineFrame)
     sarFrame <- renameSarColToSim(sarFrame)
+    
+    ##### ##### #####
+    if("percentIO" %in% names(sarFrame)) {
+      msrStep <- sarFrame$time[2] - sarFrame$time[1]
+      actualStep <- 3 #step / (msrStep * 5)
+    
+      sarFrame$percentIO = sapply(sarFrame$percentIO, function(x) {if (x > 100) 100 else x  } )
+      sarFrame$percentIO = averageSteps(sarFrame$percentIO, actualStep, stepFunc)
+    }
+    ##### ##### #####
+    
     simFrame <- parseSimulationPerformanceResults(forWorkload, vmId, step, stepFunc)
     
     if(property == "percentRAM") {
@@ -196,7 +224,7 @@ plotComparisonSimExecPerf <- function(forWorkload, type, vmId, property="percent
     }
     
     minTime <- min(min(sarFrame$time),  min(simFrame$time))
-    maxTime <- min(getSessionLastTimeByWorkload(forWorkload),  max(simFrame$time))
+    maxTime <- if(is.na(maxX))  min(getSessionLastTimeByWorkload(forWorkload),  max(simFrame$time)) else maxX
     
     msrStep <- simFrame$time[2] - simFrame$time[1]
     step <- step / msrStep
@@ -205,18 +233,27 @@ plotComparisonSimExecPerf <- function(forWorkload, type, vmId, property="percent
     maxProp <- if (is.na(maxY)) 100 else maxY
   
     openGraphsDevice(file)
-    fullScreen(hasTitle=titleFlag)
+    fullScreen(hasTitle=titleFlag, keepLeftMargin = yaxtFlag, minBorder = 0.5)
     
     if (preparePlot) {
-      yLable = paste0("% ", propertiesToNames[property], " utilisation")
+      yLable = if(plotYLable) paste0("% ", propertiesToNames[property], " utilisation") else ""
+      xLable = if(plotXLable) "Time in seconds" else "" 
       title = if(titleFlag) paste0(forWorkload, " sessions") else " "
       
-      plot(minProp, minTime, ylim=c(minProp, maxProp), xlim=c(minTime, maxTime), type = "n", main = title,
-         xlab = "Time in seconds",
-         ylab = yLable)
+      if (yaxtFlag) {
+        plot(minProp, minTime, ylim=c(minProp, maxProp), xlim=c(minTime, maxTime), type = "n", main = title,
+          cex.main=0.9,
+          xlab = xLable,
+          ylab = yLable)
+      } else {
+        plot(minProp, minTime, ylim=c(minProp, maxProp), xlim=c(minTime, maxTime), type = "n", main = title,
+             cex.main=0.9,
+             xlab = xLable,
+             ylab = yLable, yaxt = 'n')
+      }
     }
     
-    lines(simFrame[,property]~simFrame$time,  type="l", lwd=3, lty = 1, pch = 18, col="red")
+    lines(simFrame[,property]~simFrame$time,  type="l", lwd=lwdVal, lty = 1, pch = 18, col="red")
     lines(sarFrame[,property]~sarFrame$time,  type="l", lty = 3, pch = 19, col="black")
     
     if (plotLegend) {
@@ -235,8 +272,98 @@ plotComparisonSimExecPerf <- function(forWorkload, type, vmId, property="percent
 }
 
 
-plotExp2SimPerf <- function(simFile, vmIds, property="percentCPU", step = 1, stepFunc = mean, maxY = NA,
-                            file = NA, title="AS CPU utilisation in DC1 & DC2 at simulation time") {
+plotWorkload <- function(file = NA) {
+  dc1Freqs <- createFreqsDF()
+  dc2Freqs <- createFreqsDF(offset = 12)
+  print(dc1Freqs)
+  print(dc2Freqs)
+  
+  openGraphsDevice(file)
+  
+  layoutMatrix <- matrix(c(1), 1, 1, byrow = TRUE)
+  layoutWidths=c(4.5)
+  layoutHeigths=c(3.2)
+  layout(layoutMatrix, widths = layoutWidths, heights = layoutHeigths, respect=T)
+  
+  fullScreen(hasTitle=F)
+  
+  plot(0, 0, ylim=c(0, 15 + max(max(dc1Freqs$freq), max(dc2Freqs$freq))), xlim=c(0, 24), type = "n", main = NA,
+       xlab = "Time after experiment's start",
+       ylab = "Average Session Arrivals",
+       xaxt='n',
+       cex.main=0.9)
+  
+  lines(dc1Freqs$freq~dc1Freqs$time,  type="l", lwd=1, lty = 1, pch = 18, col="black")
+  lines(dc2Freqs$freq~dc2Freqs$time,  type="l", lwd=1, lty = 2, pch = 18, col="red")
+  
+  xDelta <- 3
+  xpos <- seq(0, 24, by=xDelta)
+  labels <- sapply(xpos, function(x){paste0(x, 'h')})
+  axis(side=1, at=xpos, labels=labels)
+  
+  legend(0, 115, c("DC1", "DC2"),
+         col = c("black","red"), lty = c(1,2), cex=0.7)
+  closeDevice(file)
+}
+
+createFreqsDF <- function (offset = 0) {
+  freqs <- data.frame(time = c( 0,  6,  6,  7,  7,  10,  10,  14,  14,  17,  17,  18,  18,  24),
+                      freq = c(10, 10, 30, 30, 50,  50, 100, 100,  50,  50,  30,  30,  10,  10))
+  freqs$time <- sapply(freqs$time, function(x) {if(offset == 0) x else (x + offset) %% 24})
+  freqs <- freqs[order(freqs$time),]
+  
+  delta = 0.01
+  for(i in 1:(nrow(freqs) - 1)) {
+    print(freqs[i, 1] == freqs[i+1, 1])
+    print(freqs[i, 1])
+    print(freqs[i+1, 1])
+    if (freqs[i, 1] == freqs[i+1, 1]) {
+      freqs[i, 1] = freqs[i, 1] - delta
+      freqs[i+1, 1] = freqs[i+1, 1] + delta
+    } 
+  }
+  
+  if(!0 %in% freqs$time) {
+    freqs[nrow(freqs) + 1, ] = c(0, freqs[1, 2])
+  }
+  if(! 24 %in% freqs$time) {
+    freqs[nrow(freqs) + 1, ] = c(24, freqs[nrow(freqs), 2])
+  }
+  
+  freqs[order(freqs$time),]
+}
+
+
+
+plotExp2SimPerfBulk <- function() {
+  commonFile <- paste0(subDir, "/UtilisationExp2Simulation.pdf")
+  layoutMatrix <- matrix(c(1, 2, 3, 4), 1, 4, byrow = TRUE)
+  layoutWidths=c(1, 4.3, 3.5, 3.5)
+  layoutHeigths=c(5.2, 5.2, 5.2, 5.2)
+  
+  openGraphsDevice(commonFile)
+  
+  layout(layoutMatrix, widths = layoutWidths, heights = layoutHeigths, respect=T)
+  
+  fullScreen(hasTitle = T, keepLeftMargin = F, minBorder = 0)
+  plot(0, 100, ylim=c(0, 200), xlim=c(0, 100), type = 'n', axes = FALSE, xlab = '', ylab = '', main = "")
+  legend(0, 200, c("DC1", "DC2"), col = c("black", "red"), lty = c(1, 5), cex=0.7)
+  
+  step = 300
+  maxY = 10
+  simFile = paste0(subDir, "/performance_sessions_DC1_2.csv")
+  plotExp2SimPerf(simFile=simFile, vmIds=c(2,4), property="percentCPU", yLable = "% Utilisation", keepYLable = T,
+                  step = step, stepFunc = mean, maxY = maxY, title="AS Server, CPU", plotXLable = F, plotLegend = F)
+  plotExp2SimPerf(simFile=simFile, vmIds=c(1,3), property="percentCPU", keepYLable = F,
+                  step = step, stepFunc = mean, maxY = maxY, title="DB Server, CPU", plotXLable = T, plotLegend = F, yLable = NA)
+  plotExp2SimPerf(simFile=simFile, vmIds=c(1,3), property="percentIO", keepYLable = F,
+                  step = step, stepFunc = mean, maxY = maxY, title="DB Server, Disk", plotXLable = F, plotLegend = F, yLable = NA)
+  
+  closeDevice(commonFile)
+}
+
+plotExp2SimPerf <- function(simFile, vmIds, property="percentCPU", step = 1, stepFunc = mean, maxY = NA, keepYLable = T, yLable = NA,
+                            file = NA, title="AS CPU utilisation in DC1 & DC2 at simulation time", plotXLable = F, plotLegend = T) {
   propertiesToNames <- c("percentCPU" = "CPU", "percentRAM" = "RAM", "percentIO" = "Disk IO")
 
   minTime <- 0
@@ -245,20 +372,31 @@ plotExp2SimPerf <- function(simFile, vmIds, property="percentCPU", step = 1, ste
   minProp <- 0
   maxProp <- if (is.na(maxY)) 100 else maxY
   
-  yLable = paste0("% ", propertiesToNames[property], " utilisation")
+  yLable = if (is.na(yLable)) paste0("% ", propertiesToNames[property], " utilisation") else yLable
   
   openGraphsDevice(file)
-  fullScreen(hasTitle=F)
+  fullScreen(hasTitle=!is.na(title), minBorder=0.5, keepLeftMargin=keepYLable)
   
-  plot(minProp, minTime, ylim=c(minProp, maxProp), xlim=c(minTime, maxTime), type = "n", main = "",
-       xlab = "Time after simulation's start",
+  if (keepYLable) {
+    plot(minProp, minTime, ylim=c(minProp, maxProp), xlim=c(minTime, maxTime), type = "n", main = title,
+       xlab = if(plotXLable) "Time after simulation's start" else NA,
        ylab = yLable,
        xaxt='n',
        cex.main=0.9)
+  } else {
+    plot(minProp, minTime, ylim=c(minProp, maxProp), xlim=c(minTime, maxTime), type = "n", main = title,
+         xlab = if(plotXLable) "Time after simulation's start" else NA,
+         ylab = yLable,
+         xaxt='n',
+         yaxt = 'n',
+         cex.main=0.9)
+  }
+  
   xDelta <- 3600 * 3
   xpos <- seq(0, maxTime, by=xDelta)
-  print(maxTime)
-  axis(side=1, at=xpos, labels= sapply(xpos, function(x){toDateString(x)}))
+  labels <- sapply(xpos, function(x){toDateString(x)})
+  labels[length(labels)] <- "24h"
+  axis(side=1, at=xpos, labels=labels)
   
   ltys = c(1, 2)
   colors = c("black", "red")
@@ -280,9 +418,10 @@ plotExp2SimPerf <- function(simFile, vmIds, property="percentCPU", step = 1, ste
     i <- i + 1
   }
   
-  legend(0, maxY, c("DC1", "DC2"),
+  if (plotLegend) {
+    legend(0, maxY, c("DC1", "DC2"),
          col = colors, lty = ltys, cex=0.7)
-  
+  }
   resetMar()
   closeDevice(file)
   

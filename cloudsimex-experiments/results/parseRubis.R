@@ -103,6 +103,110 @@ prepareSessionDataForType <- function(type, size = 50, step = 5, ram = 512, cpu 
               quote=FALSE) 
 }
 
+plotComparisonOfPropsBulk <- function(forWorkload, filePattern = "CMPUtil", step = 90, layoutHeigths=c(11.5, 11.5, 11.5),
+                                      layoutMatrix=matrix(c(1, 2, 3), 1, 3, byrow = TRUE), layoutWidths=c(3.1, 10, 9)) {
+  
+  concatNames <- paste(forWorkload, collapse = '-')
+  commonFile <- if (is.na(filePattern)) NA else paste0(subDir, "/", filePattern, "_", concatNames, ".pdf" )
+  if (!is.na(layoutMatrix)) {
+    openGraphsDevice(commonFile)
+    layout(layoutMatrix, widths = layoutWidths, heights = layoutHeigths, respect=T)
+    
+    fullScreen(hasTitle = T, keepLeftMargin = F, minBorder = 0)
+    plot(0, 100, ylim=c(0, 100), xlim=c(0, 100), type = 'n', axes = FALSE, xlab = '', ylab = '', main = "")
+    legend(0, 100, c("AS server, CPU", "DB server, CPU", "DB server, Disk"),
+           cex=0.7, col=c("red", "blue", "black"), pch=22:24, lty=c(1, 1, 1))
+  }
+  
+  plotLableOnY = T
+  plotLegendFlag = is.na(layoutMatrix)
+  titleFlag = !is.na(layoutMatrix)
+  xLableIdx = trunc((length(forWorkload) - 1) / 2)
+  i = 0
+  for(w in forWorkload) {
+    fileName <- if (!is.na(layoutMatrix) || is.na(filePattern)) NA else paste0(subDir, "/", filePattern, "_", property, "_",  w, ".pdf" )
+    #if(is.na(fileName) || file.exists(fileName)) {
+    
+    plotComparisonOfProperties(w, step=step, file = fileName, maxY=100,
+                              plotXLable = (xLableIdx == i), plotYLable = plotLableOnY, plotLegend = plotLegendFlag,
+                               plotTitle = titleFlag)
+    plotLableOnY = if (!is.na(layoutMatrix)) F else plotLableOnY
+    i <- i + 1
+    #}
+  }
+  
+  
+  if (!is.na(layoutMatrix)) {
+    closeDevice(commonFile)
+  }
+}
+
+plotComparisonOfProperties <- function(workload = 100, file = NA, maxX = NA, step = 15, maxY = 100,
+                                       plotTitle = F, plotXLable = T, plotYLable=T, plotLegend = T) {
+  webBaseLineFile <- paste0(subDir, "/", "web", "_server_", baseLineSize)
+  dbBaseLineFile <- paste0(subDir, "/", "db", "_server_", baseLineSize)
+
+  webFile = paste0(subDir,"/", "web","_server_", workload)
+  dbFile = paste0(subDir,"/", "db","_server_", workload)
+  
+  webBaseLineFrame <- parseSar(webBaseLineFile)
+  dbBaseLineFrame <- parseSar(dbBaseLineFile)
+  
+  webFrame = prepareSarFrame(parseSar(webFile), webBaseLineFrame)
+  dbFrame = prepareSarFrame(parseSar(dbFile), dbBaseLineFrame)
+  
+  sessionFile <- paste0(subDir, "/sessions_", workload, ".txt")
+  maxTime <- if(is.na(maxX)) getSessionLastTime(sessionFile) else maxX
+  
+  openGraphsDevice(file)
+  fullScreen(hasTitle=plotTitle, keepLeftMargin = plotYLable, minBorder = 0.6)
+  
+  title <- if (plotTitle) paste(workload, "sessions") else ""
+  yLable = if(plotYLable) "% Utilisation" else ""
+  xLable = if(plotXLable) "Time in seconds" else ""
+  
+  if (plotYLable) {
+    plot(0, 0, ylim=c(0, maxY), xlim=c(0, maxTime), type = "n", main = title,
+       cex.main=0.9,         
+       xlab = xLable,
+       ylab = yLable)
+  } else {
+    plot(0, 0, ylim=c(0, maxY), xlim=c(0, maxTime), type = "n", main = title,
+         cex.main=0.9,
+         xlab = xLable,
+         ylab = yLable, yaxt = 'n')    
+  }
+  
+  data <- list(c("webFrame", "%CPUUtil", "red", 22), 
+               c("dbFrame", "%CPUUtil", "blue", 23),
+               c("dbFrame", "%tps", "black", 24))
+  for (l in  data) {
+    frame <- if (l[1] == "webFrame") webFrame else dbFrame
+    property = l[2]
+    color = l[3]
+    pch = as.numeric(l[4])
+        
+    msrStep <- frame$time[2] - frame$time[1]
+    actualStep <- step #step / (msrStep * 5)
+    
+    frame[, property] = sapply(frame[, property], function(x) {if (x > 100) 100 else x} )
+    frame[, property] = averageSteps(frame[, property], actualStep, stepFunc = mean)
+    frame = removeGroups(frame, actualStep)
+    
+    #print(frame[1:20, c("Time", property)])
+    
+    lines(frame[, property]~frame$Time,  type="b", col=color, lty = 1, pch = pch, cex = 0.8)
+  }
+  
+  if(plotLegend) {
+    legend(0, maxY, c("AS server - % CPU utulisation", "DB server - % CPU utulisation", "DB server - % Disk utulisation"),
+         cex=0.7, col=c("red", "blue", "black"), pch=22:24, lty=c(1, 1, 1))
+  }
+  
+  resetMar()
+  closeDevice(file)
+}
+
 # Plots the utilisation of different properties
 # Typical proerties - %memused, "%CPUUtil", UsedMem, tps
 plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend = T, forWorkload = "All", maxY = NA, file = NA, hasTitle=T, useLineTypes=NA, maxX=NA) {
@@ -126,7 +230,21 @@ plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend 
   
   baseLineFrame <- parseSar(baseLineFile)
   
-  frames <- lapply(benchFiles, function(f){prepareSarFrame(parseSar(f), baseLineFrame)})
+  frameLambda <- function(f){
+    res = prepareSarFrame(parseSar(f), baseLineFrame)
+    ##### ##### #####
+    if(property == "%tps") {
+      msrStep <- res$time[2] - res$time[1]
+      actualStep <- 3 #step / (msrStep * 5)
+      
+      res[, property] = sapply(res[, property], function(x) {if (x > 100) 100 else x  } )
+      res[, property] = averageSteps(res[, property], actualStep, stepFunc = mean)
+    }
+    ##### ##### #####
+    res
+  }
+  
+  frames <- lapply(benchFiles, frameLambda)
   minTime <- min(sapply(frames, function(fr) {min(fr$Time)} ) )
   maxTime <- if(is.na(maxX)) max(sapply(sessionFiles, function(f) {getSessionLastTime(f)} ) ) else maxX
   
@@ -171,7 +289,9 @@ plotComparison <- function(type, property="%CPUUtil", useColors = T, plotLegend 
 
 plotExp2 <- function(type = "db", property="%CPUUtil", mesFileSuffix, maxY=100, maxX=NA) {
   mesFile <- paste0(subDir,"/", type, mesFileSuffix);
-  mesFrame <- prepareSarFrame0(parseSar(mesFile), type)
+  check <- grep(".*_ec2_.*", mesFileSuffix)
+  maxTPSOps <- if (length(check) > 0 && check > 0) maxTPSEC2 else maxTPS
+  mesFrame <- prepareSarFrame0(parseSar(mesFile), type=type, maxTPSOps = maxTPSOps)
   
   maxTime <- if(is.na(maxX)) max(mesFrame$Time) else maxX 
   plot(0, 0, ylim=c(0, maxY), xlim=c(0, maxTime),   type = "n", main = "Exec",
