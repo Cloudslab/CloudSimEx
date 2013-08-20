@@ -43,7 +43,7 @@ public abstract class BaseIPGenerator implements IPGenerator {
     public String pollRandomIP(final IGeolocationService service, final int attempts) {
 	for (int i = 0; i < attempts || attempts == -1; i++){
 	    String ip = pollRandomIP();
-	    if(getCountryCodes().contains(service.getMetaData(ip)[3])) {
+	    if(getCountryCodes().contains(service.getMetaData(ip).getCountryIsoCode())) {
 		return ip;
 	    }
 	}

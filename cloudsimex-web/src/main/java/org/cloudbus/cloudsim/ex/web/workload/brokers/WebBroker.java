@@ -48,6 +48,8 @@ public class WebBroker extends DatacenterBroker {
     private final List<WebSession> canceledSessions = new ArrayList<>();
 
     private final List<PresetEvent> presetEvents = new ArrayList<>();
+    /** Mapping of application Ids to entry points. */
+    private final Map<Long, EntryPoint> entryPoins = new HashMap<>();
 
     /**
      * By default CloudSim's brokers use all available datacenters. So we need
@@ -148,13 +150,22 @@ public class WebBroker extends DatacenterBroker {
 	super.processEvent(ev);
     }
 
+    public void submitSessions(final List<WebSession> webSessions, final long appId) {
+	if (entryPoins.containsKey(appId)) {
+	    EntryPoint entryPoint = entryPoins.get(appId);
+	    entryPoint.dispatchSessions(webSessions, appId);
+	} else {
+	    submitSessionsDirectly(webSessions, appId);
+	}
+    }
+
     /**
      * Submits new web sessions to this broker.
      * 
      * @param webSessions
      *            - the new web sessions.
      */
-    public void submitSessions(final List<WebSession> webSessions, final long appId) {
+    /* pack access */void submitSessionsDirectly(final List<WebSession> webSessions, final long appId) {
 	if (!CloudSim.running()) {
 	    submitSessionsAtTime(webSessions, appId, 0);
 	} else {

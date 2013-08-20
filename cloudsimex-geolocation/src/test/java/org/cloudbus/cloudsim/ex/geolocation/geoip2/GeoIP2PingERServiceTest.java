@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 
+import org.cloudbus.cloudsim.ex.geolocation.IPMetadata;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.helpers.TestUtil;
 import org.junit.AfterClass;
@@ -25,8 +26,8 @@ public class GeoIP2PingERServiceTest {
     private static final String ORLEANDO_IP = "142.91.79.0";
     private static final String MADRID_IP = "217.126.128.0";
     private static final String HONG_KONG_IP = "14.0.128.0";
-    private static final String SANTIAGO_IP = "190.96.64.0";
-    private static final String CAPE_TOWN_IP = "41.133.63.0";
+    // private static final String SANTIAGO_IP = "190.96.64.0";
+    // private static final String CAPE_TOWN_IP = "41.133.63.0";
 
     private static final double DISTANCE_SYDNEY_NEW_YORK_KM = 15990;
     private static final double DISTANCE_SYDNEY_MELBOURNE_KM = 712.35;
@@ -64,14 +65,14 @@ public class GeoIP2PingERServiceTest {
 
     @Test
     public void testGetMelborneIPData() {
-	String[] result = service.getMetaData(MELBOURNE_IP);
-	assertEquals("Oceania", result[0]);
-	assertEquals("OC", result[1]);
-	assertEquals("Australia", result[2]);
-	assertEquals("AU", result[3]);
-	assertEquals("Melbourne", result[4]);
-	assertEquals(-37.8139, Double.parseDouble(result[6]), 0.01);
-	assertEquals(144.9634, Double.parseDouble(result[7]), 0.01);
+	IPMetadata result = service.getMetaData(MELBOURNE_IP);
+	assertEquals("Oceania", result.getContinentName());
+	assertEquals("OC", result.getContinentCode());
+	assertEquals("Australia", result.getCountryName());
+	assertEquals("AU", result.getCountryIsoCode());
+	assertEquals("Melbourne", result.getCityName());
+	assertEquals(-37.8139, result.getLatitude(), 0.01);
+	assertEquals(144.9634, result.getLongitude(), 0.01);
 
 	Double[] coords = service.getCoordinates(MELBOURNE_IP);
 	assertEquals(-37.8139, coords[0], 0.01);
@@ -80,14 +81,14 @@ public class GeoIP2PingERServiceTest {
 
     @Test
     public void testGetNewYorkIPData() {
-	String[] result = service.getMetaData(NEW_YORK_IP);
-	assertEquals("North America", result[0]);
-	assertEquals("NA", result[1]);
-	assertEquals("United States", result[2]);
-	assertEquals("US", result[3]);
-	assertEquals("New York", result[4]);
-	assertEquals(40.7143, Double.parseDouble(result[6]), 0.01);
-	assertEquals(-74.006, Double.parseDouble(result[7]), 0.01);
+	IPMetadata result = service.getMetaData(NEW_YORK_IP);
+	assertEquals("North America", result.getContinentName());
+	assertEquals("NA", result.getContinentCode());
+	assertEquals("United States", result.getCountryName());
+	assertEquals("US", result.getCountryIsoCode());
+	assertEquals("New York", result.getCityName());
+	assertEquals(40.7143, result.getLatitude(), 0.01);
+	assertEquals(-74.006, result.getLongitude(), 0.01);
 
 	Double[] coords = service.getCoordinates(NEW_YORK_IP);
 	assertEquals(40.7143, coords[0], 0.01);
@@ -141,31 +142,30 @@ public class GeoIP2PingERServiceTest {
     // 74
     @Test
     public void testLatencies() {
-	// Expected latencties are taken from
-	// http://www.dotcom-monitor.com/WebTools/network_latency.aspx
-	// and
+	// Expected latencies are taken from
+	//
 	// http://ipnetwork.bgtmo.ip.att.net/pws/global_network_avgs.html
 	//
-	double delta = 30;
+	double delta = 25;
 
-	//In the same region
+	// In the same region
 	assertEquals(68.08, service.latency(LA_IP, NEW_YORK_IP), delta);
 	assertEquals(34.79, service.latency(ORLEANDO_IP, NEW_YORK_IP), delta);
 	assertEquals(30.39, service.latency(MADRID_IP, LONDON_IP), delta);
 	assertEquals(117.13, service.latency(HONG_KONG_IP, SYDNEY_IP), delta);
 	assertEquals(77.28, service.latency(SINGAPORE_IP, TOKYO_IP), delta);
-	assertEquals(56.98, service.latency(SANTIAGO_IP, RIO_DE_JANEIRO_IP), delta);
-	
 
-	//Across regions
+	// // Across regions
 	assertEquals(75.07, service.latency(LONDON_IP, NEW_YORK_IP), delta);
 	assertEquals(110.28, service.latency(RIO_DE_JANEIRO_IP, NEW_YORK_IP), delta);
 	assertEquals(97.33, service.latency(TOKYO_IP, SAN_FRANCISCO_IP), delta);
-	
-//	assertEquals(242.88, service.latency(TOKYO_IP, LONDON_IP), delta);
-//	assertEquals(242.88, service.latency(LA_IP, SINGAPORE_IP), delta);
-	
-	
+
+	//
+	// For some reason the data about transpacific latencies in PingER and
+	// the above URL disagree! That's why the following tests fail.
+	//
+	// assertEquals(242.88, service.latency(TOKYO_IP, LONDON_IP), delta);
+	// assertEquals(242.88, service.latency(LA_IP, SINGAPORE_IP), delta);
     }
 
     @AfterClass

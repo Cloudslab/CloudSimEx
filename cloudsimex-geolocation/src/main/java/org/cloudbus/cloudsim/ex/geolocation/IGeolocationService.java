@@ -64,19 +64,17 @@ public interface IGeolocationService {
     double distance(Double[] coord1, Double[] coord2);
 
     /**
-     * Returns textual representation of the extracted geographical information
-     * about the IP address.
+     * Returns the extracted geographical information about the IP address.
      * 
      * @param ip
      *            - the ip to estimate the geolocation for. Must not be null.
      *            Must be a valid ip, in the sense of the previously described
      *            formats.
-     * @return an array with the following values [Continent, Continent_Code,
-     *         Country, Country_IsoCode, City, Postal_Code, Latitude,
-     *         Longitude]. Any of these values can be null in case the data
-     *         could not be extracted.
+     * @return the extracted geographical information about the IP address. Any
+     *         of properties can be null in case the data could not be
+     *         extracted. Null can be returned if no metadata is extracted.
      */
-    String[] getMetaData(final String ip);
+    IPMetadata getMetaData(final String ip);
 
     /**
      * Returns an estimation of the latency between the two IPs, measured in ms.

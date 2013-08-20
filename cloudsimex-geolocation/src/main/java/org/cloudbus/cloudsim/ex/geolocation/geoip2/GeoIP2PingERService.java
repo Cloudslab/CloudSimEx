@@ -22,10 +22,12 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cloudbus.cloudsim.ex.geolocation.BaseGeolocationService;
 import org.cloudbus.cloudsim.ex.geolocation.IGeolocationService;
+import org.cloudbus.cloudsim.ex.geolocation.IPMetadata;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 
 import au.com.bytecode.opencsv.CSVReader;
 
+import com.google.common.collect.MinMaxPriorityQueue;
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.City;
@@ -48,11 +50,20 @@ import com.maxmind.geoip2.model.City;
  */
 public class GeoIP2PingERService extends BaseGeolocationService implements IGeolocationService, Closeable {
 
+    // TODO Extract these TSV/CSV constants elsewhere as they can be reused ...
+    /** The separator in the tsv file. */
+    private static final char TSV_SEP = '\t';
+    /** The separator in the csv file. */
+    private static final char CSV_SEP = ',';
+    /** The quote symbol in the csv and tsv file. */
+    private static final char QUOTE_SYMBOL = '\"';
     /**
      * A latency threshold, below which the latency is considered to be 0, which
      * is unacceptably low.
      */
     private static final double LATENCY_EPSILON = 0.001;
+    /** Number of approximations to use when estimating a latency. */
+    private static final int NUM_APPROX_FOR_LATENCY_ESTIMATION = 3;
     /** A pattern for a string representing a decimal double number. */
     private static final String DOUBLE_GROUP_PATTERN = "(\\-?\\d+(\\.\\d+)?)";
     /** A regular expression for strings of the format (latitude longitude). */
@@ -105,7 +116,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
     private void parseInterNodePings(final BufferedReader pings) throws IOException {
 	latencyTable.clear();
 	Set<String> unknownNodes = new LinkedHashSet<>();
-	try (CSVReader csv = new CSVReader(pings, '\t', '\"')) {
+	try (CSVReader csv = new CSVReader(pings, TSV_SEP, QUOTE_SYMBOL)) {
 	    // Skip header line
 	    String[] lineElems = csv.readNext();
 	    while ((lineElems = csv.readNext()) != null) {
@@ -126,22 +137,22 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 		    }
 		}
 
-		Double latency = latency(measurements);
+		Double latency = averageLatency(measurements);
 		if (!this.nodesTable.containsKey(monitoringNode)) {
 		    unknownNodes.add(monitoringNode);
 		} else if (!this.nodesTable.containsKey(remoteNode)) {
-		    unknownNodes.add(monitoringNode);
+		    unknownNodes.add(remoteNode);
 		} else if (latency != null) {
 		    latencyTable.put(ImmutablePair.of(monitoringNode, remoteNode), latency);
 		}
 	    }
 	}
-	CustomLog.print("The definitions of the following nodes are missing." + unknownNodes.toString());
+	CustomLog.print(Level.FINE, "The definitions of the following nodes are missing." + unknownNodes.toString());
     }
 
     private void parseNodesDefitions(final BufferedReader defs) throws IOException {
 	nodesTable.clear();
-	try (CSVReader csv = new CSVReader(defs, ',', '\"')) {
+	try (CSVReader csv = new CSVReader(defs, CSV_SEP, QUOTE_SYMBOL)) {
 	    // Skip header line
 	    String[] lineElems = csv.readNext();
 	    while ((lineElems = csv.readNext()) != null) {
@@ -161,7 +172,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 	}
     }
 
-    private static Double latency(final List<Double> measurements) {
+    private static Double averageLatency(final List<Double> measurements) {
 	double sum = 0;
 	int count = 0;
 	for (Double d : measurements) {
@@ -193,68 +204,18 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
     }
 
     @Override
-    public double latency(final String ip1, final String ip2) {
-	final Double[] reqCoord1 = getCoordinates(ip1);
-	final Double[] reqCoord2 = getCoordinates(ip2);
-
-	double bestDistance = Double.POSITIVE_INFINITY;
-	double bestLatency = 0;
-	Double[] bestCoord1 = null;
-	Double[] bestCoord2 = null;
-	String[] bestNodesName = null;
-
-	for (Map.Entry<Pair<String, String>, Double> el : latencyTable.entrySet()) {
-	    Double[] nodeCoord1 = nodesTable.get(el.getKey().getLeft());
-	    Double[] nodeCoord2 = nodesTable.get(el.getKey().getRight());
-
-	    if (nodeCoord1 == null || nodeCoord2 == null) {
-		continue;
-	    }
-
-	    double distance1 = distance(reqCoord1, nodeCoord1);
-	    double distance2 = distance(reqCoord2, nodeCoord2);
-	    double distanceSum = distance1 + distance2;
-
-	    double distance1Inverse = distance(reqCoord1, nodeCoord2);
-	    double distance2Inverse = distance(reqCoord2, nodeCoord1);
-	    double distanceSumInverse = distance1Inverse + distance2Inverse;
-
-	    if (distanceSum < distanceSumInverse && distance1 + distance2 < bestDistance) {
-		bestDistance = distance1 + distance2;
-		bestLatency = el.getValue();
-		bestNodesName = new String[] { el.getKey().getLeft(), el.getKey().getRight() };
-		bestCoord1 = nodeCoord1;
-		bestCoord2 = nodeCoord2;
-	    } else if (distance1Inverse + distance2Inverse < bestDistance) {
-		bestDistance = distance1Inverse + distance2Inverse;
-		bestLatency = el.getValue();
-		bestNodesName = new String[] { el.getKey().getLeft(), el.getKey().getRight() };
-		bestCoord1 = nodeCoord2;
-		bestCoord2 = nodeCoord1;
-	    }
-	}
-
-	CustomLog.print("Used coordinates for latency estimation: " +
-		getLocationMapUrl(bestCoord1) + "\n" + getLocationMapUrl(bestCoord2));
-	CustomLog.print("Used nodes for latency estimation: " +
-		bestNodesName[0] + "," + bestNodesName[1]);
-
-	return bestLatency;
-    }
-
-    @Override
-    public String[] getMetaData(final String ip) {
+    public IPMetadata getMetaData(final String ip) {
 	City city;
 	try {
 	    city = reader.city(InetAddress.getByName(ip));
-	    return new String[] { city.getContinent().getName(),
+	    return new IPMetadata(city.getContinent().getName(),
 		    city.getContinent().getCode(),
 		    city.getCountry().getName(),
 		    city.getCountry().getIsoCode(),
 		    city.getCity().getName(),
 		    city.getPostal().getCode(),
-		    Double.toString(city.getLocation().getLatitude()),
-		    Double.toString(city.getLocation().getLongitude()) };
+		    city.getLocation().getLatitude(),
+		    city.getLocation().getLongitude());
 	} catch (UnknownHostException e) {
 	    String msg = "Invalid IP: " + Objects.toString(ip);
 	    CustomLog.logError(Level.SEVERE, msg, e);
@@ -262,13 +223,168 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 	} catch (IOException | GeoIp2Exception e) {
 	    String msg = "Could not locate IP: " + Objects.toString(ip) + ", because: " + e.getMessage();
 	    CustomLog.logError(Level.INFO, msg, e);
-	    return new String[8];
+	    return null;
 	}
     }
 
     @Override
     public void close() throws IOException {
 	reader.close();
+    }
+
+    @Override
+    public double latency(final String ip1, final String ip2) {
+
+	// Set up the heap...
+	@SuppressWarnings("rawtypes")
+	MinMaxPriorityQueue.Builder builderRaw = MinMaxPriorityQueue.maximumSize(NUM_APPROX_FOR_LATENCY_ESTIMATION);
+	@SuppressWarnings({ "unchecked" })
+	MinMaxPriorityQueue.Builder<PingERLatencyEntry> builder = builderRaw;
+	builder.expectedSize(NUM_APPROX_FOR_LATENCY_ESTIMATION);
+
+	// We keep all latencies within a priority queue with a fixed size N. At
+	// the end we compute the average of the best N elements, which are kept
+	// in the queue.
+	MinMaxPriorityQueue<PingERLatencyEntry> heap = builder.create();
+
+	// The coordinates of the requested IPs
+	final Double[] reqCoord1 = getCoordinates(ip1);
+	final Double[] reqCoord2 = getCoordinates(ip2);
+
+	// Loop through the latencies and put them in the priority queue.
+	for (Map.Entry<Pair<String, String>, Double> el : latencyTable.entrySet()) {
+	    // The coordinates and names of the two nodes of the latency entry.
+	    String node1 = el.getKey().getLeft();
+	    String node2 = el.getKey().getRight();
+	    Double[] nodeCoord1 = nodesTable.get(node1);
+	    Double[] nodeCoord2 = nodesTable.get(node2);
+	    double latency = el.getValue();
+
+	    // If the nodes are missing from the table of nodes'
+	    // definitions - skip
+	    if (nodeCoord1 == null || nodeCoord2 == null) {
+		continue;
+	    }
+
+	    // Compute the sum of the difference between the nodes
+	    // and requested locations
+	    double distance1 = distance(reqCoord1, nodeCoord1);
+	    double distance2 = distance(reqCoord2, nodeCoord2);
+	    double distanceSum = distance1 + distance2;
+
+	    // Now do it inversely ...
+	    double distance1Inverse = distance(reqCoord1, nodeCoord2);
+	    double distance2Inverse = distance(reqCoord2, nodeCoord1);
+	    double distanceSumInverse = distance1Inverse + distance2Inverse;
+
+	    // Update the heap/queue...
+	    PingERLatencyEntry qEntry = null;
+	    if (distanceSum < distanceSumInverse) {
+		qEntry = new PingERLatencyEntry(node1, nodeCoord1, node2, nodeCoord2, distanceSum, latency);
+	    } else {
+		qEntry = new PingERLatencyEntry(node1, nodeCoord2, node2, nodeCoord1, distanceSumInverse, latency);
+	    }
+	    updateHeap(heap, qEntry);
+	}
+
+	CustomLog.printLine(Level.FINE, "");
+	double result = weigthedAverage(heap);
+	CustomLog.print(Level.FINE, String.format("Latency betweeen %s and %s is %.2f", ip1, ip2, result));
+
+	return result;
+    }
+
+    public double weigthedAverage(final MinMaxPriorityQueue<PingERLatencyEntry> heap) {
+	double sumLatencies = 0;
+	double weigthedCount = 0;
+	double bestDistance = heap.peekFirst().accumDistance;
+	while (!heap.isEmpty()) {
+	    PingERLatencyEntry e = heap.pollFirst();
+	    double eWeigthedCount = bestDistance / e.accumDistance;
+	    weigthedCount += eWeigthedCount;
+	    sumLatencies += e.latency * eWeigthedCount;
+	    CustomLog.print(Level.FINE,
+		    String.format("Used nodes %s, %s; Accum Distance %.2f, Latency %.2f, Weigth %.2f ",
+			    e.node1, e.node2, e.accumDistance / 1000, e.latency, eWeigthedCount));
+	}
+	return sumLatencies / weigthedCount;
+    }
+
+    /**
+     * Adds the new entry to the heap, only if there is no other entry with less
+     * distance to the requested point and having a common node. If in the heap
+     * there is an element with a common node and greater distance, it is
+     * replaced with the new entry.
+     * 
+     * <br>
+     * <br>
+     * 
+     * The main idea of this method is maintain "diversity", in terms of the
+     * used nodes in the heap.
+     * 
+     * @param heap
+     *            - the heap.
+     * @param qEntry
+     *            - the new entry.
+     */
+    public void updateHeap(final MinMaxPriorityQueue<PingERLatencyEntry> heap, final PingERLatencyEntry qEntry) {
+	List<PingERLatencyEntry> elemsWithMatchingNodes = new ArrayList<>();
+	for (PingERLatencyEntry e : heap) {
+	    if (qEntry.node1.equals(e.node1) || qEntry.node1.equals(e.node2) ||
+		    qEntry.node2.equals(e.node1) || qEntry.node2.equals(e.node2)) {
+		elemsWithMatchingNodes.add(e);
+	    }
+	}
+
+	if (elemsWithMatchingNodes.isEmpty()) {
+	    heap.offer(qEntry);
+	} else {
+	    boolean replaceMatches = true;
+	    for (PingERLatencyEntry m : elemsWithMatchingNodes) {
+		if (m.accumDistance < qEntry.accumDistance) {
+		    replaceMatches = false;
+		    break;
+		}
+	    }
+
+	    if (replaceMatches) {
+		heap.removeAll(elemsWithMatchingNodes);
+		heap.offer(qEntry);
+	    }
+	}
+    }
+
+    private static class PingERLatencyEntry implements Comparable<PingERLatencyEntry> {
+
+	public PingERLatencyEntry(final String node1, final Double[] coord1,
+		final String node2, final Double[] coord2, final double distance, final double latency) {
+	    super();
+	    this.node1 = node1;
+	    this.coord1 = coord1;
+	    this.node2 = node2;
+	    this.coord2 = coord2;
+	    this.accumDistance = distance;
+	    this.latency = latency;
+	}
+
+	final String node1;
+	final Double[] coord1;
+	final String node2;
+	final Double[] coord2;
+	final double accumDistance;
+	final double latency;
+
+	@Override
+	public int compareTo(PingERLatencyEntry o) {
+	    return Double.valueOf(accumDistance).compareTo(o.accumDistance);
+	}
+
+	@Override
+	public String toString() {
+	    return String.format(
+		    "Node1: %s, (%.2f, %.2f), Node2: %s, (%.2f, %.2f), Accum Distance: $.2f, Latency: %.2f",
+		    node1, coord1[0], coord1[1], node2, coord2[0], coord2[1], accumDistance, latency);
+	}
     }
 
     public static void main(String[] args) throws IOException {

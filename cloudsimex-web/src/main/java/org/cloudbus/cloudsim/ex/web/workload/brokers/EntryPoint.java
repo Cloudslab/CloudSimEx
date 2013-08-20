@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-
-import javax.annotation.Nullable;
+import java.util.Map;
 
 import org.cloudbus.cloudsim.ex.geolocation.IGeolocationService;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
@@ -29,6 +28,8 @@ public class EntryPoint {
 	}
     };
 
+    private static final double latencySLA = 100;
+
     private final List<WebBroker> brokers = new ArrayList<>();
     private final IGeolocationService geoService;
 
@@ -37,18 +38,53 @@ public class EntryPoint {
 	this.geoService = geoService;
     }
 
+    /**
+     * Dispatches the sessions to the appropriate broker/cloud
+     * 
+     * @param webSessions
+     * @param appId
+     */
     public void dispatchSessions(final List<WebSession> webSessions, final long appId) {
-
 	Collections.sort(brokers, null);
-	Maps.asMap(new LinkedHashSet<>(brokers), EMPTY_LIST_FUNCTION);
 
-	for (WebBroker broker : brokers) {
-	    ILoadBalancer balancer = broker.getLoadBalancers().get(appId);
-	    if (balancer != null) {
-		String ip = balancer.getIp();
-		
+	Map<WebBroker, List<WebSession>> assignments = Maps.asMap(new LinkedHashSet<>(brokers), EMPTY_LIST_FUNCTION);
+
+	// Decide which broker/cloud will serve each session - populate the
+	// assignments table accordingly
+	for (WebSession sess : webSessions) {
+	    List<WebBroker> eligibleBrokers = filterBrokers(brokers, sess, appId);
+
+	    WebBroker selectedBroker = null;
+	    for (WebBroker eligibleBroker : eligibleBrokers) {
+		ILoadBalancer balancer = eligibleBroker.getLoadBalancers().get(appId);
+		if (balancer != null) {
+		    selectedBroker = eligibleBroker;
+		    String ip = balancer.getIp();
+		    String clientIP = sess.getSourceIP();
+		    if (geoService.latency(ip, clientIP) < latencySLA) {
+			break;
+		    }
+		}
+	    }
+
+	    if (selectedBroker == null) {
+		// TODO Deny service
+	    } else {
+		assignments.get(selectedBroker).add(sess);
 	    }
 	}
+	
+	// Submit the sessions to the selected brokers/clouds
+	for (Map.Entry<WebBroker, List<WebSession>> entry : assignments.entrySet()) {
+	    WebBroker broker = entry.getKey();
+	    List<WebSession> sessions = entry.getValue();
+	    broker.submitSessionsDirectly(sessions, appId);
+	}
+    }
+
+    private List<WebBroker> filterBrokers(final List<WebBroker> brokers2, final WebSession sess, final long appId) {
+	// TODO Auto-generated method stub
+	return null;
     }
 
 }

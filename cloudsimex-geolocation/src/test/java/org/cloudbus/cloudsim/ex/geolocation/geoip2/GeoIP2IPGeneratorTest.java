@@ -52,7 +52,7 @@ public class GeoIP2IPGeneratorTest {
 	}
 	for (int i = 0; i < TEST_SIZE; i++) {
 	    String ip = generator.pollRandomIP(service, -1);
-	    String code = service.getMetaData(ip)[3];
+	    String code = service.getMetaData(ip).getCountryIsoCode();
 	    if (COUNTRY_CODES.contains(code)) {
 		counts.put(code, counts.get(code) + 1);
 	    } else {

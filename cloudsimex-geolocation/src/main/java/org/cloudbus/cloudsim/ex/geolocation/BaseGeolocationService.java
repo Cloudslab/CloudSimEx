@@ -1,6 +1,6 @@
 package org.cloudbus.cloudsim.ex.geolocation;
 
-import com.google.common.base.Joiner;
+import java.util.Objects;
 
 /**
  * Implements common functionalities of the geolocation services, regardless of
@@ -97,7 +97,7 @@ public abstract class BaseGeolocationService implements IGeolocationService {
 
     @Override
     public String getTxtAddress(String ip) {
-	return Joiner.on(", ").useForNull("null").join(getMetaData(ip));
+	return Objects.toString(getMetaData(ip));
     }
 
     @Override

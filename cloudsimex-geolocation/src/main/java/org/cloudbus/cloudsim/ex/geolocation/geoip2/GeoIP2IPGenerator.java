@@ -16,9 +16,7 @@ import org.cloudbus.cloudsim.ex.geolocation.IPGenerator;
 import org.cloudbus.cloudsim.ex.geolocation.IPUtil;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 
-import com.google.common.base.CharMatcher;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
+import au.com.bytecode.opencsv.CSVReader;
 
 /**
  * An IP generator that generates IPv4 IPs, based on the IP ranges specified in
@@ -29,6 +27,11 @@ import com.google.common.collect.Lists;
  */
 public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
 
+    // TODO Extract these CSV constants elsewhere as they can be reused ...
+    /** The separator in the csv file. */
+    private static final char CSV_SEP = ',';
+    /** The quote symbol in the csv and tsv file. */
+    private static final char QUOTE_SYMBOL = '\"';
     /** All ranges specified in the file. */
     private final List<IPRange> ranges = new ArrayList<>();
     /**
@@ -96,21 +99,15 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
 	ranges.clear();
 	sumOfRangesLengths = 0;
 
-	try (BufferedReader reader = new BufferedReader(new FileReader(originalFile))) {
+	try (BufferedReader reader = new BufferedReader(new FileReader(originalFile));
+		CSVReader csv = new CSVReader(reader, CSV_SEP, QUOTE_SYMBOL)) {
 	    // Read the file line by line
-	    String line = null;
-	    while ((line = reader.readLine()) != null) {
-		Iterable<String> lineElementsIterable =
-			Splitter.on(",")
-				.trimResults(CharMatcher.WHITESPACE.or(CharMatcher.is('\"')))
-				.split(line);
-
-		List<String> lineElements = Lists.newArrayList(lineElementsIterable);
-
-		String countryCode = lineElements.get(4);
+	    String[] lineElems = csv.readNext();
+	    while ((lineElems = csv.readNext()) != null) {
+		String countryCode = lineElems[4];
 		if (getCountryCodes().contains(countryCode)) {
-		    int from = (int) Long.parseLong(lineElements.get(2));
-		    int to = (int) Long.parseLong(lineElements.get(3));
+		    int from = (int) Long.parseLong(lineElems[2]);
+		    int to = (int) Long.parseLong(lineElems[3]);
 		    accum += to - from;
 		    ranges.add(new IPRange(from, to));
 		    accumRangeLengths.add(accum);
