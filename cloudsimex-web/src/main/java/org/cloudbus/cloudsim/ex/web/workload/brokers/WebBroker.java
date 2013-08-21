@@ -153,7 +153,7 @@ public class WebBroker extends DatacenterBroker {
     public void submitSessions(final List<WebSession> webSessions, final long appId) {
 	if (entryPoins.containsKey(appId)) {
 	    EntryPoint entryPoint = entryPoins.get(appId);
-	    entryPoint.dispatchSessions(webSessions, appId);
+	    entryPoint.dispatchSessions(webSessions);
 	} else {
 	    submitSessionsDirectly(webSessions, appId);
 	}
@@ -237,6 +237,37 @@ public class WebBroker extends DatacenterBroker {
     public void addLoadBalancer(final ILoadBalancer balancer) {
 	loadBalancers.put(balancer.getAppId(), balancer);
 	loadBalancersToGenerators.put(balancer.getAppId(), new ArrayList<IWorkloadGenerator>());
+    }
+
+    /**
+     * Associates this broker with an entry point, which can distribute the
+     * incoming workload to multiple borkers/clouds.
+     * 
+     * @param entryPoint
+     *            - the entry point. Must not be null.
+     */
+    public void addEntryPoint(final EntryPoint entryPoint) {
+	EntryPoint currEP = entryPoins.get(entryPoint.getAppId());
+	if (entryPoint != entryPoins.get(entryPoint.getAppId())) {
+	    entryPoins.put(entryPoint.getAppId(), entryPoint);
+	    entryPoint.registerBroker(this);
+	    if (currEP != null) {
+		currEP.deregisterBroker(this);
+	    }
+	}
+    }
+
+    /**
+     * Dis-associates the entry point and this broker/data centre.
+     * 
+     * @param entryPoint
+     *            - the entry point. Must not be null.
+     */
+    public void removeEntryPoint(final EntryPoint entryPoint) {
+	if (entryPoint == entryPoins.get(entryPoint.getAppId())) {
+	    entryPoins.remove(entryPoint.getAppId());
+	    entryPoint.deregisterBroker(this);
+	}
     }
 
     /**
@@ -407,4 +438,5 @@ public class WebBroker extends DatacenterBroker {
 	    return delay;
 	}
     }
+
 }

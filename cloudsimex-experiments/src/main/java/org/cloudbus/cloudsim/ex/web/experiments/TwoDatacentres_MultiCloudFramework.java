@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,6 +39,7 @@ import org.cloudbus.cloudsim.ex.disk.VmDiskScheduler;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
+import org.cloudbus.cloudsim.ex.web.RandomListGenerator;
 import org.cloudbus.cloudsim.ex.web.SimpleDBBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleWebLoadBalancer;
 import org.cloudbus.cloudsim.ex.web.WebSession;
@@ -57,7 +57,6 @@ import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 /**
  * 
@@ -216,12 +215,20 @@ public class TwoDatacentres_MultiCloudFramework {
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 7: Define the workload and associate it with load balancers
 	    List<? extends IWorkloadGenerator> workloadEuro =
-		    generateWorkloadsDC(brokerEuroGoogle.getId(), 0 * HOUR, EURO_DATA_ITEMS);
+		    generateWorkloadsDC(
+			    brokerEuroGoogle.getId(),
+			    0 * HOUR,
+			    ImmutableMap.<String[], Double> of(new String[] { "US" }, 1.0, new String[] { "EU" }, 10.0),
+			    EURO_DATA_ITEMS);
 	    brokerEuroGoogle.addWorkloadGenerators(workloadEuro, balancerEuroGoogle.getAppId());
 
 	    List<? extends IWorkloadGenerator> workloadUS =
-		    generateWorkloadsDC(brokerEuroEC2.getId(), 12 * HOUR, US_DATA_ITEMS);
-	    brokerEuroEC2.addWorkloadGenerators(workloadUS, balancerEuroEC2.getAppId());
+		    generateWorkloadsDC(
+			    brokerUSGoogle.getId(),
+			    12 * HOUR,
+			    ImmutableMap.<String[], Double> of(new String[] { "US" }, 10.0, new String[] { "EU" }, 1.0),
+			    US_DATA_ITEMS);
+	    brokerUSGoogle.addWorkloadGenerators(workloadUS, balancerEuroEC2.getAppId());
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 8: Starts the simulation
@@ -255,7 +262,7 @@ public class TwoDatacentres_MultiCloudFramework {
     }
 
     protected List<? extends IWorkloadGenerator> generateWorkloadsDC(final int userId, final double nullPoint,
-	    final DataItem... data) {
+	    final Map<String[], Double> valuesAndFreqs, final DataItem... data) {
 	String[] periods = new String[] {
 		String.format("[%d,%d] m=10  std=1", HOURS[0], HOURS[6]),
 		String.format("(%d,%d] m=30  std=2", HOURS[6], HOURS[7]),
@@ -264,15 +271,15 @@ public class TwoDatacentres_MultiCloudFramework {
 		String.format("(%d,%d] m=50  std=3", HOURS[14], HOURS[17]),
 		String.format("(%d,%d] m=30  std=2", HOURS[17], HOURS[18]),
 		String.format("(%d,%d] m=10  std=1", HOURS[18], HOURS[24]) };
-	return generateWorkload(userId, nullPoint, periods, data);
+	return generateWorkload(userId, nullPoint, periods, valuesAndFreqs, data);
     }
 
     protected List<? extends IWorkloadGenerator> generateWorkload(final int userId, final double nullPoint,
-	    final String[] periods, final DataItem[] data) {
+	    final String[] periods, final Map<String[], Double> valuesAndFreqs, final DataItem[] data) {
 	try (InputStream asIO = new FileInputStream(DEF_DIR + "web_cloudlets.txt");
 		InputStream dbIO = new FileInputStream(DEF_DIR + "db_cloudlets.txt")) {
 	    StatSessionGenerator sessGen = new StatSessionGenerator(GeneratorsUtil.parseStream(asIO),
-		    GeneratorsUtil.parseStream(dbIO), userId, step, data);
+		    GeneratorsUtil.parseStream(dbIO), userId, step, new RandomListGenerator<>(valuesAndFreqs), data);
 
 	    double unit = HOUR;
 	    double periodLength = DAY;

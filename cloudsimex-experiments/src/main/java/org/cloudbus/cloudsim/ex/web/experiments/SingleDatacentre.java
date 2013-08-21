@@ -32,6 +32,7 @@ import org.cloudbus.cloudsim.ex.disk.HddVm;
 import org.cloudbus.cloudsim.ex.disk.VmDiskScheduler;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.Id;
+import org.cloudbus.cloudsim.ex.web.ConstGenerator;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleDBBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleWebLoadBalancer;
@@ -154,7 +155,7 @@ public class SingleDatacentre {
 	try (InputStream asIO = new FileInputStream(RESULT_DIR + "web_cloudlets.txt");
 		InputStream dbIO = new FileInputStream(RESULT_DIR + "db_cloudlets.txt")) {
 	    StatSessionGenerator sessionGenerator = new StatSessionGenerator(GeneratorsUtil.parseStream(asIO),
-		    GeneratorsUtil.parseStream(dbIO), userId, step, DATA);
+		    GeneratorsUtil.parseStream(dbIO), userId, step, new ConstGenerator<String[]>(new String[]{}), DATA);
 
 	    // return Arrays.asList(new
 	    // PeriodWorkloadGenerator(sessionGenerator, 0.1, numOfSessions));

@@ -19,17 +19,19 @@ public class StatSessionGenerator implements ISessionGenerator {
     private final Map<String, List<Double>> dbSessionParams;
     private final int userId;
     private final double idealLength;
+    private final IGenerator<String[]> metadataGenerator;
     private final DataItem[] data;
 
     private Random dataRandomiser = new Random();
 
     public StatSessionGenerator(final Map<String, List<Double>> asSessionParams,
 	    final Map<String, List<Double>> dbSessionParams,
-	    final int userId, final int step, final DataItem... data) {
+	    final int userId, final int step, final IGenerator<String[]> metadataGenerator, final DataItem... data) {
 	super();
 	this.asSessionParams = asSessionParams;
 	this.dbSessionParams = dbSessionParams;
 	this.userId = userId;
+	this.metadataGenerator = metadataGenerator;
 	this.data = data;
 
 	this.idealLength = Math.max(Collections.max(asSessionParams.get("Time")),
@@ -38,8 +40,9 @@ public class StatSessionGenerator implements ISessionGenerator {
 
     public StatSessionGenerator(final Map<String, List<Double>> asSessionParams,
 	    final Map<String, List<Double>> dbSessionParams,
-	    final int userId, final int step, final long seed, final DataItem... data) {
-	this(asSessionParams, dbSessionParams, userId, step, data);
+	    final int userId, final int step, final long seed, final IGenerator<String[]> metadataGenerator,
+	    final DataItem... data) {
+	this(asSessionParams, dbSessionParams, userId, step, metadataGenerator, data);
 	dataRandomiser.setSeed(seed);
     }
 
@@ -57,7 +60,8 @@ public class StatSessionGenerator implements ISessionGenerator {
 		dbServerCloudLets,
 		userId,
 		cloudletsNumber,
-		time + idealLength);
+		time + idealLength,
+		metadataGenerator.poll());
     }
 
     private DataItem pollRandomDataItem() {

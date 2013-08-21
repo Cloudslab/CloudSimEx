@@ -21,7 +21,7 @@ public interface ILoadBalancer {
     public long getId();
 
     /**
-     * Assigns the specified sessions to an applicaiton and a DB servers.
+     * Assigns the specified sessions to an application and a DB servers.
      * 
      * @param sessions
      *            - the sessions to assign. If the session is already assigned

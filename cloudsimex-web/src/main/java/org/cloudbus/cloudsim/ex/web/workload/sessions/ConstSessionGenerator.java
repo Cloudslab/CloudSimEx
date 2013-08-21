@@ -30,6 +30,8 @@ public class ConstSessionGenerator implements ISessionGenerator {
     private final double duration;
     private int numberOfCloudlets = 0;
 
+    private final String[] metadata;
+
     private final DataItem data;
     private final boolean modifiesData;
 
@@ -53,10 +55,12 @@ public class ConstSessionGenerator implements ISessionGenerator {
      *            infinity.
      * @param data
      *            - the data used by the database cloudlets.
+     * @param metadata
+     *            - the metadata of the generated session.
      */
     public ConstSessionGenerator(final long asCloudletLength, final int asRam, final long dbCloudletLength,
-	    final int dbRam,
-	    final long dbCloudletIOLength, final double duration, final int numberOfCloudlets, final boolean modifiesData, final DataItem data) {
+	    final int dbRam, final long dbCloudletIOLength, final double duration, final int numberOfCloudlets,
+	    final boolean modifiesData, final DataItem data, final String... metadata) {
 	super();
 	this.asCloudletLength = asCloudletLength;
 	this.asRam = asRam;
@@ -67,6 +71,7 @@ public class ConstSessionGenerator implements ISessionGenerator {
 	this.numberOfCloudlets = numberOfCloudlets;
 	this.modifiesData = modifiesData;
 	this.data = data;
+	this.metadata = metadata;
     }
 
     /**
@@ -84,11 +89,13 @@ public class ConstSessionGenerator implements ISessionGenerator {
      *            - the IO ram of the generated app server cloudlets.
      * @param data
      *            - the data used by the database cloudlets.
+     * @param metadata
+     *            - the metadata of the generated session.
      */
     public ConstSessionGenerator(final long asCloudletLength, final int asRam, final long dbCloudletLength,
-	    final int dbRam,
-	    final long dbCloudletIOLength, final boolean modifiesData, final DataItem data) {
-	this(asCloudletLength, asRam, dbCloudletLength, dbRam, dbCloudletIOLength, -1, -1, modifiesData, data);
+	    final int dbRam, final long dbCloudletIOLength, final boolean modifiesData, final DataItem data,
+	    final String... metadata) {
+	this(asCloudletLength, asRam, dbCloudletLength, dbRam, dbCloudletIOLength, -1, -1, modifiesData, data, metadata);
     }
 
     /*
@@ -113,13 +120,13 @@ public class ConstSessionGenerator implements ISessionGenerator {
 	dbGenerators.put(StatGenerator.CLOUDLET_RAM, new ConstantGenerator<Double>((double) dbRam));
 	dbGenerators.put(StatGenerator.CLOUDLET_IO, new ConstantGenerator<Double>((double) dbCloudletIOLength));
 	dbGenerators.put(StatGenerator.CLOUDLET_MODIFIES_DATA,
-		new ConstantGenerator<Integer>(modifiesData? 1 : 0));
+		new ConstantGenerator<Integer>(modifiesData ? 1 : 0));
 
 	CompositeGenerator<? extends WebCloudlet> dbServerCloudLets =
 		new CompositeGenerator<>(new StatGenerator(dbGenerators, startTime, endTime, data));
 
-		return new WebSession(appServerCloudLets, dbServerCloudLets, -1,
-			numberOfCloudlets, time + duration);
+	return new WebSession(appServerCloudLets, dbServerCloudLets, -1,
+		numberOfCloudlets, time + duration, metadata);
     }
 
 }

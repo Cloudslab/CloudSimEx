@@ -34,6 +34,7 @@ import org.cloudbus.cloudsim.ex.disk.HddVm;
 import org.cloudbus.cloudsim.ex.disk.VmDiskScheduler;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.Id;
+import org.cloudbus.cloudsim.ex.web.ConstGenerator;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleDBBalancer;
 import org.cloudbus.cloudsim.ex.web.SimpleWebLoadBalancer;
@@ -215,7 +216,8 @@ public class TwoDatacentres {
 	try (InputStream asIO = new FileInputStream(RESULT_DIR + "web_cloudlets.txt");
 		InputStream dbIO = new FileInputStream(RESULT_DIR + "db_cloudlets.txt")) {
 	    StatSessionGenerator sessGen = new StatSessionGenerator(GeneratorsUtil.parseStream(asIO),
-		    GeneratorsUtil.parseStream(dbIO), userId, step, dataItem);
+		    GeneratorsUtil.parseStream(dbIO), userId, step, new ConstGenerator<String[]>(new String[] {}),
+		    dataItem);
 
 	    double unit = HOUR;
 	    double periodLength = DAY;

@@ -60,7 +60,9 @@ public class WebSession {
     private Double startTime;
 
     private String sourceIP;
+    private String serverIP;
 
+    private final String[] metadata;
     private final int sessionId;
 
     /**
@@ -75,12 +77,15 @@ public class WebSession {
      * @param userId
      *            - the use id. A valid user id must be set either through a
      *            constructor or the set method, before this instance is used.
+     * @param metadata
+     *            - various metadata of the session.
      */
     public WebSession(final IGenerator<? extends WebCloudlet> appServerCloudLets,
 	    final IGenerator<? extends Collection<? extends WebCloudlet>> dbServerCloudLets,
 	    final int userId,
 	    final int numberOfCloudlets,
-	    final double idealEnd) {
+	    final double idealEnd,
+	    final String... metadata) {
 	super();
 	sessionId = Id.pollId(getClass());
 
@@ -90,6 +95,7 @@ public class WebSession {
 
 	this.cloudletsLeft = numberOfCloudlets;
 	this.idealEnd = idealEnd;
+	this.metadata = metadata;
     }
 
     /**
@@ -113,6 +119,38 @@ public class WebSession {
      */
     public void setSourceIP(final String sourceIP) {
 	this.sourceIP = sourceIP;
+    }
+
+    /**
+     * Returns the server IP of the session. If null - the server IP is unknown.
+     * 
+     * @return the server IP of the session or null if unknown. The returned
+     *         value is either null or a string in the standard dot form for
+     *         IPv4 or IPv6 addresses.
+     */
+    public String getServerIP() {
+	return serverIP;
+    }
+
+    /**
+     * Sets the server IP of the session. If null - the server is considered
+     * unknown.
+     * 
+     * @param serverIP
+     *            - the new server IP to set. Either null or a string in the
+     *            standard dot form for IPv4 or IPv6 addresses.
+     */
+    public void setServerIP(final String serverIP) {
+	this.serverIP = serverIP;
+    }
+
+    /**
+     * Returns the metadata of this session.
+     * 
+     * @return the metadata of this session.
+     */
+    public String[] getMetadata() {
+	return metadata;
     }
 
     public int getUserId() {

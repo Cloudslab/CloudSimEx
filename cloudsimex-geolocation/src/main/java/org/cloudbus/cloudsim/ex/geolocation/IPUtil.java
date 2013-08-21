@@ -17,7 +17,7 @@ public class IPUtil {
      * @return the canonical String representation of the provided in
      *         representation.
      */
-    public static String convertIPv4(int ip) {
+    public static String convertIPv4(final int ip) {
 	int lastByteMask = 0b11111111;
 	int i1 = ip >>> 24;
 	int i2 = ip >> 16 & lastByteMask;
