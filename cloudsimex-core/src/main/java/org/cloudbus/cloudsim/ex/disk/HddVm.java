@@ -6,9 +6,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.cloudbus.cloudsim.Pe;
-import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.ex.VmSchedulerMapVmsToPes;
 import org.cloudbus.cloudsim.ex.util.Id;
+import org.cloudbus.cloudsim.ex.vm.VMex;
 
 /**
  * A virtual machine with a harddisk. Unlike the other CloudSim implementations
@@ -18,7 +18,7 @@ import org.cloudbus.cloudsim.ex.util.Id;
  * @author nikolay.grozev
  * 
  */
-public class HddVm extends Vm {
+public class HddVm extends VMex {
 
     /** The IO MIPS. */
     private double ioMips;

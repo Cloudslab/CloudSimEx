@@ -370,7 +370,7 @@ public class TwoDatacentres_MultiCloudFramework {
 	long storage = 1000000; // host storage
 	int bw = 10000;
 
-	VmSchedulerMapVmsToPes vmScheduler = new VmSchedulerMapVmsToPes<Pe>(peList) {
+	VmSchedulerMapVmsToPes<Pe> vmScheduler = new VmSchedulerMapVmsToPes<Pe>(peList) {
 
 	    @Override
 	    protected VmScheduler createSchedulerFroPe(final Pe pe) {

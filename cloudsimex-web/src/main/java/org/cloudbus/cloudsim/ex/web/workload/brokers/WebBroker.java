@@ -41,8 +41,8 @@ public class WebBroker extends DatacenterBroker {
     private final double stepPeriod;
     private final double lifeLength;
 
-    private final Map<Long, ILoadBalancer> loadBalancers = new HashMap<>();
-    private final Map<Long, List<IWorkloadGenerator>> loadBalancersToGenerators = new HashMap<>();
+    private final Map<Long, ILoadBalancer> appsToLoadBalancers = new HashMap<>();
+    private final Map<Long, List<IWorkloadGenerator>> appsToGenerators = new HashMap<>();
 
     private final LinkedHashMap<Integer, WebSession> servedSessions = new LinkedHashMap<>();
     private final List<WebSession> canceledSessions = new ArrayList<>();
@@ -116,7 +116,7 @@ public class WebBroker extends DatacenterBroker {
      * @return the load balancers of this broker.
      */
     public Map<Long, ILoadBalancer> getLoadBalancers() {
-	return loadBalancers;
+	return appsToLoadBalancers;
     }
 
     public double getStepPeriod() {
@@ -170,7 +170,7 @@ public class WebBroker extends DatacenterBroker {
 	    submitSessionsAtTime(webSessions, appId, 0);
 	} else {
 	    List<WebSession> copyWebSessions = new ArrayList<>(webSessions);
-	    loadBalancers.get(appId).assignToServers(
+	    appsToLoadBalancers.get(appId).assignToServers(
 		    copyWebSessions.toArray(new WebSession[copyWebSessions.size()]));
 
 	    for (ListIterator<WebSession> iter = copyWebSessions.listIterator(); iter.hasNext();) {
@@ -235,8 +235,8 @@ public class WebBroker extends DatacenterBroker {
      *            - the balancer to add. Must not be null.
      */
     public void addLoadBalancer(final ILoadBalancer balancer) {
-	loadBalancers.put(balancer.getAppId(), balancer);
-	loadBalancersToGenerators.put(balancer.getAppId(), new ArrayList<IWorkloadGenerator>());
+	appsToLoadBalancers.put(balancer.getAppId(), balancer);
+	appsToGenerators.put(balancer.getAppId(), new ArrayList<IWorkloadGenerator>());
     }
 
     /**
@@ -280,7 +280,7 @@ public class WebBroker extends DatacenterBroker {
      *            registered before this method is called.
      */
     public void addWorkloadGenerators(final List<? extends IWorkloadGenerator> workloads, final long loadBalancerId) {
-	loadBalancersToGenerators.get(loadBalancerId).addAll(workloads);
+	appsToGenerators.get(loadBalancerId).addAll(workloads);
     }
 
     /*
@@ -314,7 +314,7 @@ public class WebBroker extends DatacenterBroker {
 
     private void generateWorkload() {
 	double currTime = CloudSim.clock();
-	for (Map.Entry<Long, List<IWorkloadGenerator>> balancersToWorkloadGens : loadBalancersToGenerators.entrySet()) {
+	for (Map.Entry<Long, List<IWorkloadGenerator>> balancersToWorkloadGens : appsToGenerators.entrySet()) {
 	    long balancerId = balancersToWorkloadGens.getKey();
 	    for (IWorkloadGenerator gen : balancersToWorkloadGens.getValue()) {
 		Map<Double, List<WebSession>> timeToSessions = gen.generateSessions(currTime, stepPeriod);
