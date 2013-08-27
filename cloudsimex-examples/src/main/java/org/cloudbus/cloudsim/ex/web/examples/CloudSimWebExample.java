@@ -34,6 +34,7 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeShared;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.ex.DatacenterBrokerEX;
 import org.cloudbus.cloudsim.ex.disk.DataItem;
 import org.cloudbus.cloudsim.ex.disk.HddCloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.ex.disk.HddDataCenter;
@@ -149,7 +150,7 @@ public class CloudSimWebExample {
 	}
     }
 
-    private static List<WebSession> generateRandomSessions(final WebBroker broker,
+    private static List<WebSession> generateRandomSessions(final DatacenterBrokerEX broker,
 	    final int sessionNum) {
 	// Create Random Generators
 	Random rng = new MersenneTwisterRNG();

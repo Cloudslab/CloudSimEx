@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.cloudbus.cloudsim.ex.DatacenterBrokerEX;
 import org.cloudbus.cloudsim.ex.disk.HddVm;
-import org.cloudbus.cloudsim.ex.web.workload.brokers.WebBroker;
 
 /**
  * 
@@ -34,7 +34,7 @@ public class ExperimentWithHeavierDBAndMoreDB extends ExperimentWithHeavierDB {
     }
 
     @Override
-    protected List<HddVm> createApplicationServerVMS(final WebBroker brokerDC1) {
+    protected List<HddVm> createApplicationServerVMS(final DatacenterBrokerEX brokerDC1) {
 	return Arrays.asList(createVM(brokerDC1.getId()), createVM(brokerDC1.getId()), createVM(brokerDC1.getId()));
     }
 

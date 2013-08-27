@@ -42,7 +42,6 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
     protected HddDataCenter datacenter;
     protected DatacenterBroker broker;
     protected HddVm vm1;
-    protected HddVm vm2;
     protected DataItem dataItem1;
 
     private static final int HOST_MIPS = 1000;
@@ -78,8 +77,6 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 
 	// create two VMs
 	vm1 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
-	vm2 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
 
 	// add the VMs to the vmList

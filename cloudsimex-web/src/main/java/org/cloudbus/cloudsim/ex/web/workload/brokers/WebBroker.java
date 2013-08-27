@@ -9,12 +9,12 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import org.cloudbus.cloudsim.Cloudlet;
-import org.cloudbus.cloudsim.DatacenterBroker;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.ex.DatacenterBrokerEX;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.WebCloudlet;
@@ -30,24 +30,21 @@ import org.cloudbus.cloudsim.ex.web.workload.IWorkloadGenerator;
  * @author nikolay.grozev
  * 
  */
-public class WebBroker extends DatacenterBroker {
+public class WebBroker extends DatacenterBrokerEX {
 
-    // FIXME find a better way to get an unused tag instead of hardcoding 123456
-    protected static final int TIMER_TAG = 123456;
+    // FIXME find a better way to get an unused tag instead of hardcoding 1234567
+    protected static final int TIMER_TAG = 1234567;
     protected static final int SUBMIT_SESSION_TAG = TIMER_TAG + 1;
     protected static final int UPDATE_SESSION_TAG = SUBMIT_SESSION_TAG + 1;
 
     private boolean isTimerRunning = false;
     private final double stepPeriod;
-    private final double lifeLength;
-
     private final Map<Long, ILoadBalancer> appsToLoadBalancers = new HashMap<>();
     private final Map<Long, List<IWorkloadGenerator>> appsToGenerators = new HashMap<>();
 
     private final LinkedHashMap<Integer, WebSession> servedSessions = new LinkedHashMap<>();
     private final List<WebSession> canceledSessions = new ArrayList<>();
 
-    private final List<PresetEvent> presetEvents = new ArrayList<>();
     /** Mapping of application Ids to entry points. */
     private final Map<Long, EntryPoint> entryPoins = new HashMap<>();
 
@@ -76,9 +73,8 @@ public class WebBroker extends DatacenterBroker {
      */
     public WebBroker(final String name, final double refreshPeriod, final double lifeLength, final int dataCenterId)
 	    throws Exception {
-	super(name);
+	super(name, lifeLength);
 	this.stepPeriod = refreshPeriod;
-	this.lifeLength = lifeLength;
 	this.dataCenterId = dataCenterId;
     }
 
@@ -123,28 +119,11 @@ public class WebBroker extends DatacenterBroker {
 	return stepPeriod;
     }
 
-    public double getLifeLength() {
-	return lifeLength;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.cloudbus.cloudsim.DatacenterBroker#processEvent(org.cloudbus.cloudsim
-     * .core.SimEvent)
-     */
     @Override
     public void processEvent(final SimEvent ev) {
 	if (!isTimerRunning) {
 	    isTimerRunning = true;
 	    sendNow(getId(), TIMER_TAG);
-
-	    for (ListIterator<PresetEvent> iter = presetEvents.listIterator(); iter.hasNext();) {
-		PresetEvent event = iter.next();
-		send(event.getId(), event.getDelay(), event.getTag(), event.getData());
-		iter.remove();
-	    }
 	}
 
 	super.processEvent(ev);
@@ -224,7 +203,7 @@ public class WebBroker extends DatacenterBroker {
 	if (isTimerRunning) {
 	    send(getId(), delay, SUBMIT_SESSION_TAG, data);
 	} else {
-	    presetEvents.add(new PresetEvent(getId(), SUBMIT_SESSION_TAG, data, delay));
+	    presetEvent(getId(), SUBMIT_SESSION_TAG, data, delay);
 	}
     }
 
@@ -295,7 +274,7 @@ public class WebBroker extends DatacenterBroker {
     protected void processOtherEvent(final SimEvent ev) {
 	switch (ev.getTag()) {
 	    case TIMER_TAG:
-		if (CloudSim.clock() < lifeLength) {
+		if (CloudSim.clock() < getLifeLength()) {
 		    send(getId(), stepPeriod, TIMER_TAG);
 		    generateWorkload();
 		}
@@ -365,13 +344,10 @@ public class WebBroker extends DatacenterBroker {
      */
     @Override
     protected void processCloudletReturn(final SimEvent ev) {
+	super.processCloudletReturn(ev);
 	Cloudlet cloudlet = (Cloudlet) ev.getData();
-	if (CloudSim.clock() >= lifeLength) {
+	if (CloudSim.clock() < getLifeLength()) {
 	    // kill the broker only if its life length is over/expired
-	    super.processCloudletReturn(ev);
-	} else {
-	    getCloudletReceivedList().add(cloudlet);
-	    cloudletsSubmitted--;
 	    if (cloudlet instanceof WebCloudlet) {
 		updateSessions(((WebCloudlet) cloudlet).getSessionId());
 	    }
@@ -397,45 +373,6 @@ public class WebBroker extends DatacenterBroker {
 
 	for (Integer datacenterId : getDatacenterIdsList()) {
 	    sendNow(datacenterId, CloudSimTags.RESOURCE_CHARACTERISTICS, getId());
-	}
-    }
-
-    /**
-     * CloudSim does not execute events that are fired before the simulation has
-     * started. Thus we need to buffer them and then refire when the simulation
-     * starts.
-     * 
-     * @author nikolay.grozev
-     * 
-     */
-    private static class PresetEvent {
-	private final int id;
-	private final int tag;
-	private final Object data;
-	private final double delay;
-
-	public PresetEvent(final int id, final int tag, final Object data, final double delay) {
-	    super();
-	    this.id = id;
-	    this.tag = tag;
-	    this.data = data;
-	    this.delay = delay;
-	}
-
-	public int getId() {
-	    return id;
-	}
-
-	public int getTag() {
-	    return tag;
-	}
-
-	public Object getData() {
-	    return data;
-	}
-
-	public double getDelay() {
-	    return delay;
 	}
     }
 

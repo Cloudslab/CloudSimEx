@@ -22,6 +22,7 @@ import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmScheduler;
 import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.ex.DatacenterBrokerEX;
 import org.cloudbus.cloudsim.ex.VmSchedulerMapVmsToPes;
 import org.cloudbus.cloudsim.ex.disk.DataItem;
 import org.cloudbus.cloudsim.ex.disk.HddCloudletSchedulerTimeShared;
@@ -172,7 +173,7 @@ public class SingleDatacentre {
 	return null;
     }
 
-    private List<HddVm> createApplicationServerVMS(final WebBroker brokerDC1) {
+    private List<HddVm> createApplicationServerVMS(final DatacenterBrokerEX brokerDC1) {
 	return Arrays.asList(createVM(brokerDC1.getId()));
     }
 

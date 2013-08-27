@@ -21,6 +21,7 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.ex.DatacenterBrokerEX;
 import org.cloudbus.cloudsim.ex.disk.DataItem;
 import org.cloudbus.cloudsim.ex.disk.HddCloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.ex.disk.HddDataCenter;
@@ -154,7 +155,7 @@ public class BaseExperiment {
 		+ " seconds");
     }
 
-    protected List<HddVm> createApplicationServerVMS(final WebBroker brokerDC1) {
+    protected List<HddVm> createApplicationServerVMS(final DatacenterBrokerEX brokerDC1) {
 	return Arrays.asList(createVM(brokerDC1.getId()), createVM(brokerDC1.getId()));
     }
 

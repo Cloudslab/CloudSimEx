@@ -5,7 +5,9 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
 
 /**
- * An extension of the base cloudsim VM.
+ * An extension of the base cloudsim VM, adding information about:
+ * creation/submission, starting/booting and termination times; the VM status
+ * and metadata.
  * 
  * @author nikolay.grozev
  * 
@@ -13,14 +15,17 @@ import org.cloudbus.cloudsim.core.CloudSim;
 public class VMex extends Vm {
 
     private VMStatus status;
+    private final String[] metadata;
 
-    private double submissionTime = -1;
-    private double startTime = -1;
-    private double endTime = -1;
+    private double submissionTime;
+    private double startTime;
+    private double endTime;
 
-    public VMex(int id, int userId, double mips, int numberOfPes, int ram, long bw, long size, String vmm,
-	    CloudletScheduler cloudletScheduler) {
+    public VMex(final int id, final int userId, final double mips, final int numberOfPes, final int ram, final long bw,
+	    final long size, final String vmm,
+	    final CloudletScheduler cloudletScheduler, final String... metadata) {
 	super(id, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
+	this.metadata = metadata;
     }
 
     // Unfortunately the super class already has a boolean property if the VM is
@@ -146,22 +151,35 @@ public class VMex extends Vm {
 	this.endTime = endTime;
     }
 
-    
     /**
-     * Returns the duration for which this VM has been functional (after booting).
-     * @return the duration for which this VM has been functional (after booting).
+     * Returns the duration for which this VM has been functional (after
+     * booting).
+     * 
+     * @return the duration for which this VM has been functional (after
+     *         booting).
      */
     public double getTimeAfterBooting() {
 	double endTime = getEndTime() < 0 ? CloudSim.clock() : getEndTime();
 	return endTime - startTime;
     }
-    
+
     /**
      * Returns the duration for which this VM has existed (after its creation).
+     * 
      * @return the duration for which this VM has existed (after its creation).
      */
     public double getTimeAfterSubmission() {
 	double endTime = getEndTime() < 0 ? CloudSim.clock() : getEndTime();
 	return endTime - submissionTime;
     }
+
+    /**
+     * Returns the metadata of this VM.
+     * 
+     * @return the metadata of this VM.
+     */
+    public String[] getMetadata() {
+	return metadata;
+    }
+
 }
