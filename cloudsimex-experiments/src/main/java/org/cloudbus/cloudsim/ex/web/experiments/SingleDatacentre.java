@@ -1,6 +1,6 @@
 package org.cloudbus.cloudsim.ex.web.experiments;
 
-import static org.cloudbus.cloudsim.ex.web.experiments.ExperimentsUtil.DAY;
+import static org.cloudbus.cloudsim.Consts.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;

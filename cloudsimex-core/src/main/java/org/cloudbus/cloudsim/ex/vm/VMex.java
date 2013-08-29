@@ -15,7 +15,7 @@ import org.cloudbus.cloudsim.core.CloudSim;
 public class VMex extends Vm {
 
     private VMStatus status;
-    private final String[] metadata;
+    private final VMMetadata metadata;
 
     private double submissionTime;
     private double startTime;
@@ -23,7 +23,14 @@ public class VMex extends Vm {
 
     public VMex(final int id, final int userId, final double mips, final int numberOfPes, final int ram, final long bw,
 	    final long size, final String vmm,
-	    final CloudletScheduler cloudletScheduler, final String... metadata) {
+	    final CloudletScheduler cloudletScheduler) {
+	this(id, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, new VMMetadata());
+	
+    }
+    
+    public VMex(final int id, final int userId, final double mips, final int numberOfPes, final int ram, final long bw,
+	    final long size, final String vmm,
+	    final CloudletScheduler cloudletScheduler, final VMMetadata metadata) {
 	super(id, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
 	this.metadata = metadata;
     }
@@ -76,13 +83,13 @@ public class VMex extends Vm {
     public void setStatus(final VMStatus status) {
 	switch (status) {
 	    case INITIALISING:
-		setSubmissionTime(CloudSim.clock());
+		setSubmissionTime(getCurrentTime());
 		break;
 	    case RUNNING:
-		setStartTime(CloudSim.clock());
+		setStartTime(getCurrentTime());
 		break;
 	    case TERMINATED:
-		setEndTime(CloudSim.clock());
+		setEndTime(getCurrentTime());
 		break;
 	    default:
 		throw new IllegalArgumentException("Unknown status " + status.name());
@@ -91,6 +98,7 @@ public class VMex extends Vm {
 	this.status = status;
 	super.setBeingInstantiated(VMStatus.INITIALISING == status);
     }
+
 
     /**
      * Sets the submission time (time of creation before booting) of the VM.
@@ -159,7 +167,7 @@ public class VMex extends Vm {
      *         booting).
      */
     public double getTimeAfterBooting() {
-	double endTime = getEndTime() < 0 ? CloudSim.clock() : getEndTime();
+	double endTime = getEndTime() < 0 ? getCurrentTime() : getEndTime();
 	return endTime - startTime;
     }
 
@@ -169,7 +177,7 @@ public class VMex extends Vm {
      * @return the duration for which this VM has existed (after its creation).
      */
     public double getTimeAfterSubmission() {
-	double endTime = getEndTime() < 0 ? CloudSim.clock() : getEndTime();
+	double endTime = getEndTime() < 0 ? getCurrentTime() : getEndTime();
 	return endTime - submissionTime;
     }
 
@@ -178,8 +186,16 @@ public class VMex extends Vm {
      * 
      * @return the metadata of this VM.
      */
-    public String[] getMetadata() {
+    public VMMetadata getMetadata() {
 	return metadata;
     }
 
+    /**
+     * Returns the current simulation time. Can be overridden for test purposes.
+     * 
+     * @return the current simulation time.
+     */
+    protected double getCurrentTime() {
+	return CloudSim.clock();
+    }
 }

@@ -11,6 +11,7 @@ import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.VmAllocationPolicy;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.ex.DatacenterEX;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 
 /**
@@ -22,7 +23,7 @@ import org.cloudbus.cloudsim.ex.util.CustomLog;
  * @author nikolay.grozev
  * 
  */
-public class HddDataCenter extends Datacenter {
+public class HddDataCenter extends DatacenterEX {
 
     /**
      * Constr.

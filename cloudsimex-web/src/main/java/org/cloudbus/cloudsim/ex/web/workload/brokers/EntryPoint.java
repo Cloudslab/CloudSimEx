@@ -18,7 +18,7 @@ import com.google.common.collect.Maps;
  * Represents an entry point for an application, which uses multiple clouds
  * (Multi-Cloud). Each entry point is associated with a list of web brokers,
  * representing the different cloud data centres. The entry point receives
- * workloads (web sessions) and forwards it accordingly to the registered web
+ * workloads (web sessions) and forwards them accordingly to the registered web
  * brokers.
  * 
  * @author nikolay.grozev

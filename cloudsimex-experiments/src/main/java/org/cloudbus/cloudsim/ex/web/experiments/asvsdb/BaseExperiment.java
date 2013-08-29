@@ -1,7 +1,6 @@
 package org.cloudbus.cloudsim.ex.web.experiments.asvsdb;
 
-import static org.cloudbus.cloudsim.ex.web.experiments.ExperimentsUtil.DAY;
-import static org.cloudbus.cloudsim.ex.web.experiments.ExperimentsUtil.HOUR;
+import static org.cloudbus.cloudsim.Consts.*;
 import static org.cloudbus.cloudsim.ex.web.experiments.ExperimentsUtil.HOURS;
 import static org.cloudbus.cloudsim.ex.web.experiments.ExperimentsUtil.parseExperimentParameters;
 

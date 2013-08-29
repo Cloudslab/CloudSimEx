@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 import org.cloudbus.cloudsim.ex.util.CustomLog;
+import static org.cloudbus.cloudsim.Consts.*;
 
 /**
  * 
@@ -15,9 +16,7 @@ import org.cloudbus.cloudsim.ex.util.CustomLog;
  */
 public class ExperimentsUtil {
 
-    public static final int MINUTE = 60;
-    public static final int HOUR = 60 * MINUTE;
-    public static final int DAY = 24 * HOUR;
+
     public static final Integer[] HOURS = new Integer[25];
 
     static {

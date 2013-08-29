@@ -13,18 +13,7 @@ import org.cloudbus.cloudsim.Vm;
  * @author nikolay.grozev
  * 
  */
-public interface IVmBillingPolicy<V extends Vm> {
-
-    /** Constant for *nix OS-es. */
-    public static final String LINUX = "Linux/Unix";
-    /** Constant for Windows OS-es. */
-    public static final String WINDOWS = "Windows";
-    /** One minute time. */
-    public static int MINUTE = 60;
-    /** One hour time. */
-    public static int HOUR = 60 * MINUTE;
-    /** One day time. */
-    public static int DAY = 24 * HOUR;
+public interface IVmBillingPolicy {
 
     /**
      * Returns the cost for the specified vms.
@@ -33,6 +22,14 @@ public interface IVmBillingPolicy<V extends Vm> {
      *            - the vms to bill. Must not be empty
      * @return the cost for the specified vms.
      */
-    public BigDecimal bill(final List<V> vms);
+    public BigDecimal bill(final List<Vm> vms);
+
+    /**
+     * Returns the next charging time.
+     * 
+     * @return the next charging time or -1 if the charge time could not be
+     *         estimated.
+     */
+    public double nexChargeTime(final Vm vm);
 
 }

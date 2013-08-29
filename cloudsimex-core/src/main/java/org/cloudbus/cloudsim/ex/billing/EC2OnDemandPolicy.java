@@ -1,9 +1,13 @@
 package org.cloudbus.cloudsim.ex.billing;
 
+import static org.cloudbus.cloudsim.Consts.HOUR;
+
 import java.math.BigDecimal;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.ex.vm.VMStatus;
 import org.cloudbus.cloudsim.ex.vm.VMex;
 
 /**
@@ -30,10 +34,22 @@ public class EC2OnDemandPolicy extends BaseCustomerVmBillingPolicy {
     public BigDecimal billSingleVm(final VMex vm) {
 	double timeAfterBoot = vm.getTimeAfterBooting();
 	int chargeCount = (int) timeAfterBoot / HOUR + 1;
-	if(timeAfterBoot == (int)timeAfterBoot && (int)timeAfterBoot % HOUR ==0 ) {
+	if (timeAfterBoot == (int) timeAfterBoot && (int) timeAfterBoot % HOUR == 0) {
 	    chargeCount = (int) timeAfterBoot / HOUR;
 	}
-	
+
 	return prices.get(keyOf(vm)).multiply(BigDecimal.valueOf(chargeCount));
     }
+
+    @Override
+    public double nexChargeTime(final Vm vm) {
+	double result = -1;
+	if (vm instanceof VMex && ((VMex) vm).getStatus() == VMStatus.RUNNING) {
+	    VMex vmex = (VMex) vm;
+	    double elapsedTime = getCurrentTime() - vmex.getStartTime();
+	    result = vmex.getStartTime() + HOUR * ((int) (elapsedTime / HOUR) + 1);
+	}
+	return result;
+    }
+
 }

@@ -51,8 +51,10 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      */
     private List<PresetEvent> presetEvents = new ArrayList<>();
 
+    /** If this broker has started receiving and responding to events. */
     private boolean hasStarted = false;
     private final double lifeLength;
+    private IVmBillingPolicy vmBillingPolicy = null;
 
     /**
      * Constr.
@@ -69,6 +71,26 @@ public class DatacenterBrokerEX extends DatacenterBroker {
     public DatacenterBrokerEX(final String name, final double lifeLength) throws Exception {
 	super(name);
 	this.lifeLength = lifeLength;
+    }
+
+    /**
+     * Returns the billing policy, used by this broker.
+     * 
+     * @return the billing policy, used by this broker.
+     */
+    public IVmBillingPolicy getVMBillingPolicy() {
+	return vmBillingPolicy;
+    }
+
+    /**
+     * Sets the billing policy, used by this broker.
+     * 
+     * @param vmBillingPolicy
+     *            - the new billing policy. If null - billing will be
+     *            unavailable.
+     */
+    public void setVMBillingPolicy(IVmBillingPolicy vmBillingPolicy) {
+	this.vmBillingPolicy = vmBillingPolicy;
     }
 
     /**
@@ -133,7 +155,23 @@ public class DatacenterBrokerEX extends DatacenterBroker {
 		send(getId(), getLifeLength(), BROKER_DESTROY_ITSELF_NOW, null);
 	    }
 	}
-	super.processEvent(ev);
+
+	switch (ev.getTag()) {
+	    case CloudSimTags.VM_CREATE_ACK:
+		int[] data = (int[]) ev.getData();
+		int vmId = data[1];
+
+		Vm vm = VmList.getById(getVmList(), vmId);
+		if (vm.isBeingInstantiated()) {
+		    vm.setBeingInstantiated(false);
+		}
+		processVmCreate(ev);
+		break;
+
+	    default:
+		super.processEvent(ev);
+		break;
+	}
     }
 
     @Override
@@ -238,6 +276,7 @@ public class DatacenterBrokerEX extends DatacenterBroker {
 		break;
 	    case BROKER_CLOUDLETS_NOW:
 		submitCloudletList((List<Cloudlet>) ev.getData());
+		submitCloudlets();
 		break;
 	    case BROKER_DESTROY_ITSELF_NOW:
 		closeDownBroker();
@@ -354,15 +393,16 @@ public class DatacenterBrokerEX extends DatacenterBroker {
     /**
      * Bills the specified data centres with the specified policy. If no data
      * centres are specified - then all data centres billed.
+     * <strong>NOTE:</strong> Before calling this method, you should set the
+     * billing policy.
      * 
-     * @param policy
-     *            - the policy to use. Must not be null.
      * @param datacenterIds
      *            - the ids of the data centres.
      * @return the incurred debt.
+     * @throws NullPointerException
+     *             - if the billing policy has not been set.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public BigDecimal bill(final IVmBillingPolicy<? extends Vm> policy, final Integer... datacenterIds) {
+    public BigDecimal bill(final Integer... datacenterIds) {
 	Set<Integer> dcIds = new HashSet<>(Arrays.asList(datacenterIds));
 	List<Vm> toBill = new ArrayList<>();
 
@@ -372,7 +412,7 @@ public class DatacenterBrokerEX extends DatacenterBroker {
 	    }
 	}
 
-	return ((IVmBillingPolicy) policy).bill(toBill);
+	return vmBillingPolicy.bill(toBill);
     }
 
     /**

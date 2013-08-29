@@ -17,7 +17,6 @@ public class VMStatusTest {
 	assertFalse(VMStatus.RUNNING.isValidNextState(VMStatus.RUNNING));
 	assertFalse(VMStatus.TERMINATED.isValidNextState(VMStatus.INITIALISING));
 	assertFalse(VMStatus.TERMINATED.isValidNextState(VMStatus.RUNNING));
-	
     }
 
 }

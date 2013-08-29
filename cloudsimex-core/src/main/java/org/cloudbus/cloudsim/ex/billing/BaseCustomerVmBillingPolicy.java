@@ -6,18 +6,19 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.vm.VMex;
 
 /**
  * Implements a policy for billing a customer's vms. Simply sums the bills for
- * all VMs. <strong>NOTE:</strong> This implementation assumes that the metadata
- * of the VM is in the form [vm-type, OS], where vm-type is the type of the VM,
- * and OS is the operating system.
+ * all VMs.
  * 
  * @author nikolay.grozev
  * 
  */
-public abstract class BaseCustomerVmBillingPolicy implements IVmBillingPolicy<VMex> {
+public abstract class BaseCustomerVmBillingPolicy implements IVmBillingPolicy {
 
     protected final Map<Pair<String, String>, BigDecimal> prices;
 
@@ -34,11 +35,16 @@ public abstract class BaseCustomerVmBillingPolicy implements IVmBillingPolicy<VM
     }
 
     @Override
-    public BigDecimal bill(final List<VMex> vms) {
+    public BigDecimal bill(final List<Vm> vms) {
 	BigDecimal result = BigDecimal.ZERO;
-	for (VMex vm : vms) {
-	    if (shouldBillVm(vm)) {
-		result = result.add(billSingleVm(vm));
+	for (Vm vm : vms) {
+	    if (vm instanceof VMex) {
+		VMex vmEx = (VMex) vm;
+		if (shouldBillVm(vmEx)) {
+		    result = result.add(billSingleVm(vmEx));
+		}
+	    } else {
+		CustomLog.print("Unable to bill VM" + vm.getId() + " as it is not of type " + VMex.class.getName());
 	    }
 	}
 	return result;
@@ -65,9 +71,18 @@ public abstract class BaseCustomerVmBillingPolicy implements IVmBillingPolicy<VM
      */
     public abstract BigDecimal billSingleVm(final VMex vm);
 
-    protected static ImmutablePair<String, String> keyOf(final VMex vm) {
-	if (vm.getMetadata() != null && vm.getMetadata().length >= 2) {
-	    return ImmutablePair.of(vm.getMetadata()[0], vm.getMetadata()[1]);
+    /**
+     * Returns the current simulation time. Can be overridden for test purposes.
+     * 
+     * @return the current simulation time.
+     */
+    protected double getCurrentTime() {
+	return CloudSim.clock();
+    }
+
+    public static ImmutablePair<String, String> keyOf(final VMex vm) {
+	if (vm.getMetadata() != null) {
+	    return ImmutablePair.of(vm.getMetadata().getType(), vm.getMetadata().getOS());
 	}
 	return null;
     }

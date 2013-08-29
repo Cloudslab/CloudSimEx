@@ -1,26 +1,19 @@
 package org.cloudbus.cloudsim.ex;
 
-import static java.math.BigDecimal.valueOf;
-import static org.apache.commons.lang3.tuple.ImmutablePair.of;
-import static org.cloudbus.cloudsim.ex.billing.IVmBillingPolicy.LINUX;
 import static org.junit.Assert.assertEquals;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.ex.billing.EC2OnDemandPolicy;
-import org.cloudbus.cloudsim.ex.billing.IVmBillingPolicy;
-import org.cloudbus.cloudsim.ex.vm.VMex;
+import org.cloudbus.cloudsim.ex.delay.ConstantVMBootDelay;
+import org.cloudbus.cloudsim.ex.delay.IVMBootDelayDistribution;
+import org.cloudbus.cloudsim.ex.vm.VMStatus;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.google.common.collect.ImmutableMap;
 
 public class DatacenterBrokerEXTest extends BaseDatacenterBrokerTest {
 
@@ -28,7 +21,7 @@ public class DatacenterBrokerEXTest extends BaseDatacenterBrokerTest {
     public void setUp() throws Exception {
 	super.setUp();
     }
-    
+
     @Test
     public void testTwoVmOneFail() {
 	int cloudletDuration = 100;
@@ -150,5 +143,58 @@ public class DatacenterBrokerEXTest extends BaseDatacenterBrokerTest {
 	}
     }
 
+    @Test
+    public void testBootTime() {
+	double delay = 10;
+	IVMBootDelayDistribution delayDistribution = new ConstantVMBootDelay(delay);
+	datacenter.setDelayDistribution(delayDistribution);
+
+	int killTime1 = 30;
+	int killTime2 = 55;
+	
+	int cloudlet1and2_Duration = 50;
+	int cloudlet3_Duration = (int)(killTime1 - delay) / 2;
+
+	Cloudlet cloudlet1 = createCloudlet(cloudlet1and2_Duration);
+	Cloudlet cloudlet2 = createCloudlet(cloudlet1and2_Duration);
+	Cloudlet cloudlet3 = createCloudlet(cloudlet3_Duration);
+	cloudlet1.setUserId(broker.getId());
+	cloudlet2.setUserId(broker.getId());
+	cloudlet3.setUserId(broker.getId());
+
+	cloudlet1.setVmId(vm1.getId());
+	cloudlet2.setVmId(vm2.getId());
+	cloudlet3.setVmId(vm1.getId());
+	broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2, cloudlet3));
+	broker.destroyVMsAfter(Arrays.asList(vm1), killTime1);
+	broker.destroyVMsAfter(Arrays.asList(vm2), killTime2);
+
+	CloudSim.startSimulation();
+//	List<Cloudlet> resultList = broker.getCloudletReceivedList();
+	CloudSim.stopSimulation();
+
+	assertEquals(VMStatus.TERMINATED, vm1.getStatus());
+	assertEquals(0, vm1.getSubmissionTime(), 0.01);
+	assertEquals(delay, vm1.getStartTime(), 0.01);
+	assertEquals(killTime1, vm1.getEndTime(), 0.01);
+
+	assertEquals(VMStatus.TERMINATED, vm2.getStatus());
+	assertEquals(0, vm2.getSubmissionTime(), 0.01);
+	assertEquals(delay, vm2.getStartTime(), 0.01);
+	assertEquals(killTime2, vm2.getEndTime(), 0.01);
+
+	// The cloudlet must have failed... as we killed the VM before it is
+	// done
+	assertEquals(Cloudlet.FAILED_RESOURCE_UNAVAILABLE, cloudlet1.getCloudletStatus());
+
+	// The cloudlet must have succeeded... as the VM boot time took time ...
+	assertEquals(Cloudlet.FAILED_RESOURCE_UNAVAILABLE, cloudlet2.getCloudletStatus());
+
+	// The cloudlet must have succeeded... as we killed the VM after its end
+	assertEquals(Cloudlet.SUCCESS, cloudlet3.getCloudletStatus());
+	// We execute 2 cloudlets together on the same VM...
+	double expectedEnd = vm1.getStartTime() + 2 * cloudlet3_Duration;
+	assertEquals(expectedEnd, cloudlet3.getFinishTime(), 0.01);
+    }
 
 }

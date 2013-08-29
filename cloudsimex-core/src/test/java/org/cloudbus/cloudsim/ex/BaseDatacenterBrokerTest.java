@@ -1,5 +1,9 @@
 package org.cloudbus.cloudsim.ex;
 
+import static org.cloudbus.cloudsim.Consts.DAY;
+import static org.cloudbus.cloudsim.Consts.HOUR;
+import static org.cloudbus.cloudsim.Consts.MINUTE;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -7,7 +11,6 @@ import java.util.List;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
-import org.cloudbus.cloudsim.Datacenter;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Pe;
@@ -18,10 +21,10 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeShared;
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.ex.billing.IVmBillingPolicy;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.helpers.TestUtil;
+import org.cloudbus.cloudsim.ex.vm.VMex;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
@@ -33,8 +36,7 @@ import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
  */
 public abstract class BaseDatacenterBrokerTest {
 
-    protected static final int SIM_LENGTH =
-	    IVmBillingPolicy.DAY + IVmBillingPolicy.HOUR / 2 + IVmBillingPolicy.MINUTE / 3;
+    protected static final int SIM_LENGTH = DAY + HOUR / 2 + MINUTE / 3;
     
     protected static final int HOST_MIPS = 1000;
     protected static final int HOST_RAM = 2048;
@@ -46,10 +48,10 @@ public abstract class BaseDatacenterBrokerTest {
     protected static final int VM_RAM = 512;
     protected static final long VM_BW = 1000;
 
-    protected Datacenter datacenter;
+    protected DatacenterEX datacenter;
     protected DatacenterBrokerEX broker;
-    protected Vm vm1;
-    protected Vm vm2;
+    protected VMex vm1;
+    protected VMex vm2;
 
     public BaseDatacenterBrokerTest() {
 	super();
@@ -97,14 +99,15 @@ public abstract class BaseDatacenterBrokerTest {
 	return result;
     }
 
-    protected Vm createVM() {
+    protected VMex createVM() {
 	int pesNumber = 1; // number of cpus
 	String vmm = "Xen"; // VMM name
-	return new Vm(Id.pollId(Vm.class), broker.getId(), VM_MIPS, pesNumber,
+
+	return new VMex(Id.pollId(Vm.class), broker.getId(), VM_MIPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new CloudletSchedulerTimeShared());
     }
 
-    private Datacenter createDatacenterWithSingleHostAndSingleDisk(final String name) {
+    protected DatacenterEX createDatacenterWithSingleHostAndSingleDisk(final String name) {
 	List<Host> hostList = new ArrayList<Host>();
 	List<Pe> peList = new ArrayList<>();
 
@@ -127,9 +130,9 @@ public abstract class BaseDatacenterBrokerTest {
 		arch, os, vmm, hostList, time_zone, cost, costPerMem,
 		costPerStorage, costPerBw);
 
-	Datacenter datacenter = null;
+	DatacenterEX datacenter = null;
 	try {
-	    datacenter = new Datacenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
+	    datacenter = new DatacenterEX(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
