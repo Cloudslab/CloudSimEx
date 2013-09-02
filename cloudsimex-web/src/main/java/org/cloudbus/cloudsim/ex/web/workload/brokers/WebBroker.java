@@ -14,7 +14,7 @@ import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
-import org.cloudbus.cloudsim.ex.DatacenterBrokerEX;
+import org.cloudbus.cloudsim.ex.MonitoringBorkerEX;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.WebCloudlet;
@@ -30,7 +30,7 @@ import org.cloudbus.cloudsim.ex.web.workload.IWorkloadGenerator;
  * @author nikolay.grozev
  * 
  */
-public class WebBroker extends DatacenterBrokerEX {
+public class WebBroker extends MonitoringBorkerEX {
 
     // FIXME find a better way to get an unused tag instead of hardcoding 1234567
     protected static final int TIMER_TAG = 1234567;
@@ -71,13 +71,35 @@ public class WebBroker extends DatacenterBrokerEX {
      *             - if something goes wrong. See the documentation of the super
      *             class.
      */
-    public WebBroker(final String name, final double refreshPeriod, final double lifeLength, final int dataCenterId)
+    public WebBroker(final String name, final double refreshPeriod, final double lifeLength, final double monitoringPeriod, final int dataCenterId)
 	    throws Exception {
-	super(name, lifeLength);
+	super(name, lifeLength, monitoringPeriod);
 	this.stepPeriod = refreshPeriod;
 	this.dataCenterId = dataCenterId;
     }
 
+    /**
+     * Creates a new web broker.
+     * 
+     * @param name
+     *            - the name of the broker.
+     * @param refreshPeriod
+     *            - the period of polling web sessions for new cloudlets.
+     * @param lifeLength
+     *            - the length of the simulation.
+     * @param dataCenterIds
+     *            - the ids of the datacenters this broker operates with. If
+     *            null all present data centers are used.
+     * 
+     * @throws Exception
+     *             - if something goes wrong. See the documentation of the super
+     *             class.
+     */
+    public WebBroker(final String name, final double refreshPeriod, final double lifeLength, final int dataCenterId)
+	    throws Exception {
+	this(name, refreshPeriod, lifeLength, -1, dataCenterId);
+    }
+    
     /**
      * Returns the id of the datacentre that this web broker handles.
      * 

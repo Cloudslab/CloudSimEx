@@ -18,6 +18,7 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.ex.DatacenterEX;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.helpers.TestUtil;
@@ -36,7 +37,7 @@ public class HddCloudletSchedulerTimeShared_MultipleCPUsMultipleDisks_Test {
 
     private static final double DELTA = 0.01;
 
-    protected HddDataCenter datacenter;
+    protected DatacenterEX datacenter;
     protected DatacenterBroker broker;
     protected HddVm vm1;
     protected HddVm vm2;
@@ -89,11 +90,11 @@ public class HddCloudletSchedulerTimeShared_MultipleCPUsMultipleDisks_Test {
 	// create 3 VMs. Vm1 has access to both hdds. Vm2 and Vm3 access only
 	// disk 1 and 2 respectively
 	vm1 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 	vm2 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), disk1.getId());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[]{disk1.getId()});
 	vm3 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), disk2.getId());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[]{disk2.getId()});
 
 	// add the VMs to the vmList
 	vmlist.add(vm1);
@@ -153,7 +154,7 @@ public class HddCloudletSchedulerTimeShared_MultipleCPUsMultipleDisks_Test {
 	assertEquals(4, cloudletExecTime4, DELTA);
     }
 
-    private static HddDataCenter createDatacenterWithSingleHostAndTwoDisks(final String name) {
+    private static DatacenterEX createDatacenterWithSingleHostAndTwoDisks(final String name) {
 	List<Host> hostList = new ArrayList<Host>();
 
 	List<Pe> peList = new ArrayList<>();
@@ -182,7 +183,7 @@ public class HddCloudletSchedulerTimeShared_MultipleCPUsMultipleDisks_Test {
 		arch, os, vmm, hostList, time_zone, cost, costPerMem,
 		costPerStorage, costPerBw);
 
-	HddDataCenter datacenter = null;
+	DatacenterEX datacenter = null;
 	try {
 	    datacenter = new HddDataCenter(name, characteristics,
 		    new VmAllocationPolicySimple(hostList), storageList, 0);

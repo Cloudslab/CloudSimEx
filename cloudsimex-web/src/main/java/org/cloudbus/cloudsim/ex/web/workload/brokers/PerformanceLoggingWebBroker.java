@@ -3,6 +3,7 @@ package org.cloudbus.cloudsim.ex.web.workload.brokers;
 import java.util.Arrays;
 import java.util.List;
 
+import org.cloudbus.cloudsim.ResCloudlet;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.ex.disk.HddResCloudlet;
@@ -122,7 +123,7 @@ public class PerformanceLoggingWebBroker extends WebBroker {
 
     private static double evaluateCPUUtilization(final HddVm vm) {
 	double sumExecCloudLets = 0;
-	for (HddResCloudlet cloudlet : vm.getCloudletScheduler().getCloudletExecList()) {
+	for (ResCloudlet cloudlet : vm.getCloudletScheduler().getCloudletExecList()) {
 	    sumExecCloudLets += cloudlet.getCloudletLength();
 	}
 	double vmMips = vm.getMips() * vm.getNumberOfPes();
@@ -131,7 +132,7 @@ public class PerformanceLoggingWebBroker extends WebBroker {
 
     private static double evaluateIOUtilization(final HddVm vm) {
 	double sumExecCloudLets = 0;
-	for (HddResCloudlet cloudlet : vm.getCloudletScheduler().getCloudletExecList()) {
+	for (HddResCloudlet cloudlet : vm.getCloudletScheduler().<HddResCloudlet>getCloudletExecList()) {
 	    sumExecCloudLets += cloudlet.getCloudlet().getCloudletIOLength();
 	}
 	double vmIOMips = vm.getIoMips();
@@ -140,7 +141,7 @@ public class PerformanceLoggingWebBroker extends WebBroker {
 
     private static double evaluateRAMUtilization(final HddVm vm) {
 	double sumExecCloudLets = 0;
-	for (HddResCloudlet cloudlet : vm.getCloudletScheduler().getCloudletExecList()) {
+	for (HddResCloudlet cloudlet : vm.getCloudletScheduler().<HddResCloudlet>getCloudletExecList()) {
 	    sumExecCloudLets += cloudlet.getCloudlet().getRam();
 	}
 	double vmRam = vm.getRam();

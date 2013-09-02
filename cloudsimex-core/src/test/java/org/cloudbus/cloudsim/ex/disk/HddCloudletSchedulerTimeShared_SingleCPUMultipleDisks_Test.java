@@ -18,6 +18,7 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.ex.DatacenterEX;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.helpers.TestUtil;
@@ -38,7 +39,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUMultipleDisks_Test {
 
     private static final double DELTA = 0.01;
 
-    protected HddDataCenter datacenter;
+    protected DatacenterEX datacenter;
     protected DatacenterBroker broker;
     protected HddVm vm1;
     protected HddVm vm2;
@@ -308,7 +309,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUMultipleDisks_Test {
 	broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2, cloudlet3, cloudlet4));
     }
 
-    private static HddDataCenter createDatacenterWithSingleHostAndTwoDisks(final String name) {
+    private static DatacenterEX createDatacenterWithSingleHostAndTwoDisks(final String name) {
 	List<Host> hostList = new ArrayList<Host>();
 
 	List<Pe> peList = new ArrayList<>();
@@ -336,7 +337,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUMultipleDisks_Test {
 		arch, os, vmm, hostList, time_zone, cost, costPerMem,
 		costPerStorage, costPerBw);
 
-	HddDataCenter datacenter = null;
+	DatacenterEX datacenter = null;
 	try {
 	    datacenter = new HddDataCenter(name, characteristics,
 		    new VmAllocationPolicySimple(hostList), storageList, 0);

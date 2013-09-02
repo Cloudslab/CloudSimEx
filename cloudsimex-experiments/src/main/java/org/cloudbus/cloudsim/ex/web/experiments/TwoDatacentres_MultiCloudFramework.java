@@ -306,7 +306,7 @@ public class TwoDatacentres_MultiCloudFramework {
 	    String vmm = "Xen"; // VMM name
 
 	    HddVm hdedVm = new HddVm(brokerId, mips, ioMips, pesNumber,
-		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared());
+		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 	    hddVMs.add(hdedVm);
 	}
 	return hddVMs;

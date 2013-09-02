@@ -170,7 +170,7 @@ public class BaseExperiment {
 
 	// create two VMs
 	HddVm appServerVM = new HddVm(brokerId, mips, ioMips, pesNumber,
-		ram, bw, size, vmm, new HddCloudletSchedulerTimeShared());
+		ram, bw, size, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 	return appServerVM;
     }
 

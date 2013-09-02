@@ -17,6 +17,7 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeShared;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.ex.DatacenterEX;
 import org.cloudbus.cloudsim.ex.disk.DataItem;
 import org.cloudbus.cloudsim.ex.disk.HddCloudlet;
 import org.cloudbus.cloudsim.ex.disk.HddCloudletSchedulerTimeShared;
@@ -45,7 +46,7 @@ public class WebSession_TestCloudletsStatus_Test {
     private static final int ITEM_SIZE = 5;
     private static final double DELTA = 0.01;
 
-    protected HddDataCenter datacenter;
+    protected DatacenterEX datacenter;
     protected WebBroker broker;
     protected HddVm vm1;
     protected HddVm vm2;
@@ -84,9 +85,9 @@ public class WebSession_TestCloudletsStatus_Test {
 
 	// create two VMs
 	vm1 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 	vm2 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
 	// add the VMs to the vmList
 	vmlist.add(vm1);
@@ -151,7 +152,7 @@ public class WebSession_TestCloudletsStatus_Test {
 	assertTrue(asCl2Len < dbCl2Len);
     }
 
-    private HddDataCenter createDatacenterWithSingleHostAndSingleDisk(final String name) {
+    private DatacenterEX createDatacenterWithSingleHostAndSingleDisk(final String name) {
 	List<Host> hostList = new ArrayList<Host>();
 
 	List<Pe> peList = new ArrayList<>();
@@ -179,7 +180,7 @@ public class WebSession_TestCloudletsStatus_Test {
 		arch, os, vmm, hostList, time_zone, cost, costPerMem,
 		costPerStorage, costPerBw);
 
-	HddDataCenter datacenter = null;
+	DatacenterEX datacenter = null;
 	try {
 	    datacenter = new HddDataCenter(name, characteristics,
 		    new VmAllocationPolicySimple(hostList), storageList, 0);

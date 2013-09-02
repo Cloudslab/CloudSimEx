@@ -17,6 +17,7 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeShared;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.ex.DatacenterEX;
 import org.cloudbus.cloudsim.ex.disk.DataItem;
 import org.cloudbus.cloudsim.ex.disk.HddCloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.ex.disk.HddDataCenter;
@@ -41,7 +42,7 @@ import org.junit.Test;
  */
 public class SimpleWebLoadBalancerTest {
 
-    protected HddDataCenter datacenter;
+    protected DatacenterEX datacenter;
     protected WebBroker broker;
     protected ILoadBalancer balancer;
 
@@ -83,11 +84,11 @@ public class SimpleWebLoadBalancerTest {
 
 	// create two VMs
 	HddVm appVm1 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 	HddVm appVm2 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 	HddVm dbVm = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
 	// add the VMs to the vmList
 	vmlist.add(appVm1);
@@ -140,11 +141,11 @@ public class SimpleWebLoadBalancerTest {
 
 	// create two VMs
 	HddVm appVm1 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 	HddVm appVm2 = new HddVm(broker.getId(), VM_MIPS * 2, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 	HddVm dbVm = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
 	// add the VMs to the vmList
 	vmlist.add(appVm1);
@@ -210,11 +211,11 @@ public class SimpleWebLoadBalancerTest {
 
 	// create two VMs
 	HddVm appVm1 = new HddVm(broker.getId(), VM_MIPS * 2, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 	HddVm appVm2 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 	HddVm dbVm = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
 	// add the VMs to the vmList
 	vmlist.add(appVm1);
@@ -280,11 +281,11 @@ public class SimpleWebLoadBalancerTest {
 
 	// create two VMs
 	HddVm appVm1 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 	HddVm appVm2 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 	HddVm dbVm = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
 	// add the VMs to the vmList
 	vmlist.add(appVm1);
@@ -325,7 +326,7 @@ public class SimpleWebLoadBalancerTest {
 	assertEquals(session1.getDbBalancer(), session2.getDbBalancer());
     }
 
-    private static HddDataCenter createDatacenter() {
+    private static DatacenterEX createDatacenter() {
 	List<Host> hostList = new ArrayList<Host>();
 
 	List<Pe> peList = new ArrayList<>();
@@ -352,7 +353,7 @@ public class SimpleWebLoadBalancerTest {
 		arch, os, vmm, hostList, time_zone, cost, costPerMem,
 		costPerStorage, costPerBw);
 
-	HddDataCenter datacenter = null;
+	DatacenterEX datacenter = null;
 	try {
 	    datacenter = new HddDataCenter("TestDatacenter", characteristics,
 		    new VmAllocationPolicySimple(hostList), storageList, 0);

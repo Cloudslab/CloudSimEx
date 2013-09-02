@@ -36,8 +36,8 @@ public class DatacenterBrokerEX extends DatacenterBroker {
     // FIXME find a better way to get an unused tag instead of hardcoding 123456
     protected static final int BROKER_DESTROY_ITSELF_NOW = 123456;
     protected static final int BROKER_DESTROY_VMS_NOW = BROKER_DESTROY_ITSELF_NOW + 1;
-    protected static final int BROKER_SUBMIT_VMS_NOW = BROKER_DESTROY_VMS_NOW + 1;
-    protected static final int BROKER_CLOUDLETS_NOW = BROKER_SUBMIT_VMS_NOW + 1;
+    protected static final int BROKER_SUBMIT_VMS_NOW = BROKER_DESTROY_ITSELF_NOW + 2;
+    protected static final int BROKER_CLOUDLETS_NOW = BROKER_DESTROY_ITSELF_NOW + 3;
 
     /** Number of VM destructions requested. */
     private int vmDestructsRequested = 0;
@@ -52,8 +52,15 @@ public class DatacenterBrokerEX extends DatacenterBroker {
     private List<PresetEvent> presetEvents = new ArrayList<>();
 
     /** If this broker has started receiving and responding to events. */
-    private boolean hasStarted = false;
+    private boolean started = false;
+
+    /**
+     * How lond we should keep this broker alive. If negative - the broker is
+     * killed when no more cloudlets are left.
+     */
     private final double lifeLength;
+
+    /** Billing policy. */
     private IVmBillingPolicy vmBillingPolicy = null;
 
     /**
@@ -139,10 +146,19 @@ public class DatacenterBrokerEX extends DatacenterBroker {
 	vmDestructsAcks++;
     }
 
+    /**
+     * Returns if this broker has started to respond to events.
+     * 
+     * @return if this broker has started to respond to events.
+     */
+    protected boolean isStarted() {
+	return started;
+    }
+
     @Override
     public void processEvent(SimEvent ev) {
-	if (!hasStarted) {
-	    hasStarted = true;
+	if (!started) {
+	    started = true;
 
 	    for (ListIterator<PresetEvent> iter = presetEvents.listIterator(); iter.hasNext();) {
 		PresetEvent event = iter.next();
@@ -181,8 +197,18 @@ public class DatacenterBrokerEX extends DatacenterBroker {
 	    // Will kill the broker if there are no more cloudlets.
 	    super.processCloudletReturn(ev);
 	} else {
+
 	    getCloudletReceivedList().add(cloudlet);
+	    Log.printLine(CloudSim.clock() + ": " + getName() + ": Cloudlet " + cloudlet.getCloudletId()
+		    + " received");
 	    cloudletsSubmitted--;
+
+	    if (getCloudletList().size() > 0 && cloudletsSubmitted == 0) {
+		// all the cloudlets sent finished. It means that some bount
+		// cloudlet is waiting its VM be created
+		clearDatacenters();
+		createVmsInDatacenter(0);
+	    }
 	}
     }
 
@@ -215,7 +241,7 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      * @param delay
      */
     public void createVmsAfter(List<? extends Vm> vms, double delay) {
-	if (hasStarted) {
+	if (started) {
 	    send(getId(), delay, BROKER_SUBMIT_VMS_NOW, vms);
 	} else {
 	    presetEvent(getId(), BROKER_SUBMIT_VMS_NOW, vms, delay);
@@ -232,7 +258,7 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      *            - the period to wait for.
      */
     public void destroyVMsAfter(final List<? extends Vm> vms, double delay) {
-	if (hasStarted) {
+	if (started) {
 	    send(getId(), delay, BROKER_DESTROY_VMS_NOW, vms);
 	} else {
 	    presetEvent(getId(), BROKER_DESTROY_VMS_NOW, vms, delay);
@@ -249,7 +275,7 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      *            - the delay.
      */
     public void submitCloudletList(List<Cloudlet> cloudlets, double delay) {
-	if (hasStarted) {
+	if (started) {
 	    send(getId(), delay, BROKER_CLOUDLETS_NOW, cloudlets);
 	} else {
 	    presetEvent(getId(), BROKER_CLOUDLETS_NOW, cloudlets, delay);

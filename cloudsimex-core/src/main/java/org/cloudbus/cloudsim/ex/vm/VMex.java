@@ -25,9 +25,9 @@ public class VMex extends Vm {
 	    final long size, final String vmm,
 	    final CloudletScheduler cloudletScheduler) {
 	this(id, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, new VMMetadata());
-	
+
     }
-    
+
     public VMex(final int id, final int userId, final double mips, final int numberOfPes, final int ram, final long bw,
 	    final long size, final String vmm,
 	    final CloudletScheduler cloudletScheduler, final VMMetadata metadata) {
@@ -98,7 +98,6 @@ public class VMex extends Vm {
 	this.status = status;
 	super.setBeingInstantiated(VMStatus.INITIALISING == status);
     }
-
 
     /**
      * Sets the submission time (time of creation before booting) of the VM.
@@ -191,7 +190,8 @@ public class VMex extends Vm {
     }
 
     /**
-     * Returns the current simulation time. Can be overridden for test purposes.
+     * Returns the current simulation time. Can be overridden for test purposes,
+     * as CloudSim.clock() can not be mocked.
      * 
      * @return the current simulation time.
      */

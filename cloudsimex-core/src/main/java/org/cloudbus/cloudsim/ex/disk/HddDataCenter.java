@@ -91,26 +91,21 @@ public class HddDataCenter extends DatacenterEX {
 	}
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.cloudbus.cloudsim.Datacenter#checkCloudletCompletion()
-     */
     @Override
     protected void checkCloudletCompletion() {
-	super.checkCloudletCompletion();
-
-	// Return the failed cloudlets as well.
-	for (Host host : getVmAllocationPolicy().getHostList()) {
-	    for (HddVm vm : ((HddHost) host).getVmList()) {
-		while (vm.getCloudletScheduler().isFailedCloudlets()) {
-		    Cloudlet cl = vm.getCloudletScheduler().getNextFailedCloudlet();
-		    if (cl != null) {
-			sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN, cl);
-		    }
-		}
-	    }
-	}
+        super.checkCloudletCompletion();
+    
+        // Return the failed cloudlets as well.
+        for (Host host : getVmAllocationPolicy().getHostList()) {
+            for (HddVm vm : ((HddHost) host).getVmList()) {
+        	while (vm.getCloudletScheduler().isFailedCloudlets()) {
+        	    Cloudlet cl = vm.getCloudletScheduler().getNextFailedCloudlet();
+        	    if (cl != null) {
+        		sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN, cl);
+        	    }
+        	}
+            }
+        }
     }
-
+    
 }

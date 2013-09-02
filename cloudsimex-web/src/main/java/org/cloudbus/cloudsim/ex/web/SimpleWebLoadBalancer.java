@@ -143,7 +143,7 @@ public class SimpleWebLoadBalancer implements ILoadBalancer {
 
     private static double evaluateUtilization(final HddVm vm) {
 	double sumExecCloudLets = 0;
-	for (HddResCloudlet cloudlet : vm.getCloudletScheduler().getCloudletExecList()) {
+	for (HddResCloudlet cloudlet : vm.getCloudletScheduler().<HddResCloudlet>getCloudletExecList()) {
 	    sumExecCloudLets += cloudlet.getCloudletLength();
 	}
 	double vmMips = vm.getMips() * vm.getNumberOfPes();

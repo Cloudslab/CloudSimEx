@@ -104,12 +104,12 @@ public class CloudSimWorkloadWebExample {
 
 	    // create two VMs
 	    HddVm appServerVM = new HddVm(broker.getId(), mips, ioMips, pesNumber,
-		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared());
+		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 	    HddVm appServerVM2 = new HddVm(broker.getId(), mips, ioMips, pesNumber,
-		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared());
+		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
 	    HddVm dbServerVM = new HddVm(broker.getId(), mips, ioMips, pesNumber,
-		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared());
+		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
 	    ILoadBalancer balancer = new SimpleWebLoadBalancer(
 		    1, "127.0.0.1", Arrays.asList(appServerVM, appServerVM2), new SimpleDBBalancer(dbServerVM));

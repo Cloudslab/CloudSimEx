@@ -20,6 +20,7 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeShared;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.ex.DatacenterEX;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.helpers.TestUtil;
@@ -39,7 +40,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
     private static final int ITEM_SIZE = 5;
     private static final double DELTA = 0.01;
 
-    protected HddDataCenter datacenter;
+    protected DatacenterEX datacenter;
     protected DatacenterBroker broker;
     protected HddVm vm1;
     protected DataItem dataItem1;
@@ -77,7 +78,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 
 	// create two VMs
 	vm1 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared());
+		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
 	// add the VMs to the vmList
 	vmlist.add(vm1);
@@ -342,7 +343,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 	assertEquals(Math.max(timesMips, timesIOMIPS), cloudletExecTime, DELTA);
     }
 
-    private HddDataCenter createDatacenterWithSingleHostAndSingleDisk(final String name) {
+    private DatacenterEX createDatacenterWithSingleHostAndSingleDisk(final String name) {
 	List<Host> hostList = new ArrayList<Host>();
 
 	List<Pe> peList = new ArrayList<>();
@@ -370,7 +371,7 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
 		arch, os, vmm, hostList, time_zone, cost, costPerMem,
 		costPerStorage, costPerBw);
 
-	HddDataCenter datacenter = null;
+	DatacenterEX datacenter = null;
 	try {
 	    datacenter = new HddDataCenter(name, characteristics,
 		    new VmAllocationPolicySimple(hostList), storageList, 0);

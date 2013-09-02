@@ -68,7 +68,7 @@ public abstract class BaseDatacenterBrokerTest {
 	datacenter = createDatacenterWithSingleHostAndSingleDisk("TestDatacenter");
 
 	// Create Broker
-	broker = new DatacenterBrokerEX("Broker", SIM_LENGTH);
+	broker = createBroker();
 
 	// Create virtual machines
 	List<Vm> vmlist = new ArrayList<Vm>();
@@ -85,13 +85,17 @@ public abstract class BaseDatacenterBrokerTest {
 	broker.submitVmList(vmlist);
     }
 
-    public Cloudlet createCloudlet(final double cloudletDuration) {
+    protected DatacenterBrokerEX createBroker() throws Exception {
+	return new DatacenterBrokerEX("Broker", SIM_LENGTH);
+    }
+
+    protected Cloudlet createCloudlet(final double cloudletDuration) {
 	UtilizationModel utilizationModel = new UtilizationModelFull();
 	return new Cloudlet(Id.pollId(Cloudlet.class), (int) (VM_MIPS * cloudletDuration),
 		1, 0, 0, utilizationModel, utilizationModel, utilizationModel);
     }
 
-    public List<Vm> createVms(final int vmNum) {
+    protected List<Vm> createVms(final int vmNum) {
 	List<Vm> result = new ArrayList<>();
 	for (int i = 0; i < vmNum; i++) {
 	    result.add(createVM());

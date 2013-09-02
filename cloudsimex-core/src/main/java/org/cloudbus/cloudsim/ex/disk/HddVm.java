@@ -8,7 +8,7 @@ import java.util.List;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.ex.VmSchedulerMapVmsToPes;
 import org.cloudbus.cloudsim.ex.util.Id;
-import org.cloudbus.cloudsim.ex.vm.VMex;
+import org.cloudbus.cloudsim.ex.vm.MonitoredVMex;
 
 /**
  * A virtual machine with a harddisk. Unlike the other CloudSim implementations
@@ -18,12 +18,50 @@ import org.cloudbus.cloudsim.ex.vm.VMex;
  * @author nikolay.grozev
  * 
  */
-public class HddVm extends VMex {
+public class HddVm extends MonitoredVMex {
 
     /** The IO MIPS. */
     private double ioMips;
     private final LinkedHashSet<Integer> hdds = new LinkedHashSet<>();
     private boolean outOfMemory = false;
+
+    /**
+     * Constr.
+     * 
+     * @param userId
+     *            - see parent class.
+     * @param mips
+     *            - see parent class.
+     * @param numberOfPes
+     *            - see parent class.
+     * @param ram
+     *            - see parent class.
+     * @param bw
+     *            - see parent class.
+     * @param size
+     *            - see parent class.
+     * @param vmm
+     *            - see parent class.
+     * @param cloudletScheduler
+     *            - the scheduler that will schedule the disk and CPU operations
+     *            among cloudlets.
+     * @param summaryPeriodLength
+     *            - the summary period for performance measurement.
+     * @param hddIds
+     *            - a list of ids of the harddisks that this VM has access to.
+     *            If empty the VM has access to all disks of the host, which i
+     *            hosting it at a given time.
+     */
+    public HddVm(final int userId, final double mips, final double ioMips, final int numberOfPes, final int ram,
+	    final long bw, final long size, final String vmm,
+	    final HddCloudletSchedulerTimeShared cloudletScheduler, final double summaryPeriodLength,
+	    final Integer[] hddIds) {
+	super(Id.pollId(HddVm.class), userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler,
+		summaryPeriodLength);
+	this.ioMips = ioMips;
+	this.hdds.addAll(Arrays.asList(hddIds));
+	cloudletScheduler.setVm(this);
+    }
 
     /**
      * Constr.
@@ -52,8 +90,8 @@ public class HddVm extends VMex {
      */
     public HddVm(final int userId, final double mips, final double ioMips, final int numberOfPes, final int ram,
 	    final long bw, final long size, final String vmm,
-	    final HddCloudletSchedulerTimeShared cloudletScheduler, final Integer... hddIds) {
-	super(Id.pollId(HddVm.class), userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
+	    final HddCloudletSchedulerTimeShared cloudletScheduler, final Integer[] hddIds) {
+	super(Id.pollId(HddVm.class), userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, 5);
 	this.ioMips = ioMips;
 	this.hdds.addAll(Arrays.asList(hddIds));
 	cloudletScheduler.setVm(this);
