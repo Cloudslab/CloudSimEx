@@ -7,7 +7,6 @@ import java.util.ListIterator;
 
 import org.cloudbus.cloudsim.ex.disk.HddResCloudlet;
 import org.cloudbus.cloudsim.ex.disk.HddVm;
-import org.cloudbus.cloudsim.ex.util.Id;
 
 /**
  * Implements simple load balancing - sessions are assigned to the least busy
@@ -16,17 +15,7 @@ import org.cloudbus.cloudsim.ex.util.Id;
  * @author nikolay.grozev
  * 
  */
-public class SimpleWebLoadBalancer implements ILoadBalancer {
-
-    private final long id;
-
-    private final long appId;
-
-    private final String ip;
-    
-    private final List<HddVm> appServers;
-
-    private final IDBBalancer dbBalancer;
+public class SimpleWebLoadBalancer extends BaseWebLoadBalancer implements ILoadBalancer {
 
     private long startPositionWhenEqual = 0;
 
@@ -44,58 +33,9 @@ public class SimpleWebLoadBalancer implements ILoadBalancer {
      *            be null.
      */
     public SimpleWebLoadBalancer(final long appId, final String ip, final List<HddVm> appServers, final IDBBalancer dbBalancer) {
-	super();
-	this.appId = appId;
-	id = Id.pollId(SimpleWebLoadBalancer.class);
-	this.appServers = appServers;
-	this.dbBalancer = dbBalancer;
-	this.ip = ip;
+	super(appId, ip, appServers, dbBalancer);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.cloudbus.cloudsim.incubator.web.ILoadBalancer#getId()
-     */
-    @Override
-    public long getId() {
-	return id;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.cloudbus.cloudsim.incubator.web.ILoadBalancer#getId()
-     */
-    @Override
-    public long getAppId() {
-	return appId;
-    }
-
-    @Override
-    public String getIp() {
-        return ip;
-    }
-    
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.cloudbus.cloudsim.incubator.web.ILoadBalancer#registerAppServer(org
-     * .cloudbus.cloudsim.incubator.web.extensions.HddVm)
-     */
-    @Override
-    public void registerAppServer(final HddVm vm) {
-	appServers.add(vm);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.cloudbus.cloudsim.incubator.web.ILoadBalancer#assignToServers(org
-     * .cloudbus.cloudsim.incubator.web.WebSession)
-     */
     @Override
     public void assignToServers(final WebSession... sessions) {
 	// Filter all sessions without an assigned application server
@@ -148,15 +88,5 @@ public class SimpleWebLoadBalancer implements ILoadBalancer {
 	}
 	double vmMips = vm.getMips() * vm.getNumberOfPes();
 	return sumExecCloudLets / vmMips;
-    }
-
-    @Override
-    public List<HddVm> getAppServers() {
-	return appServers;
-    }
-
-    @Override
-    public IDBBalancer getDbBalancer() {
-	return dbBalancer;
     }
 }

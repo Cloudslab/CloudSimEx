@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 
 import org.cloudbus.cloudsim.Cloudlet;
@@ -32,7 +31,8 @@ import org.cloudbus.cloudsim.ex.web.workload.IWorkloadGenerator;
  */
 public class WebBroker extends MonitoringBorkerEX {
 
-    // FIXME find a better way to get an unused tag instead of hardcoding 1234567
+    // FIXME find a better way to get an unused tag instead of hardcoding
+    // 1234567
     protected static final int TIMER_TAG = 1234567;
     protected static final int SUBMIT_SESSION_TAG = TIMER_TAG + 1;
     protected static final int UPDATE_SESSION_TAG = SUBMIT_SESSION_TAG + 1;
@@ -47,6 +47,8 @@ public class WebBroker extends MonitoringBorkerEX {
 
     /** Mapping of application Ids to entry points. */
     private final Map<Long, EntryPoint> entryPoins = new HashMap<>();
+
+    private String[] metadata;
 
     /**
      * By default CloudSim's brokers use all available datacenters. So we need
@@ -71,11 +73,13 @@ public class WebBroker extends MonitoringBorkerEX {
      *             - if something goes wrong. See the documentation of the super
      *             class.
      */
-    public WebBroker(final String name, final double refreshPeriod, final double lifeLength, final double monitoringPeriod, final int dataCenterId)
+    public WebBroker(final String name, final double refreshPeriod, final double lifeLength,
+	    final double monitoringPeriod, final int dataCenterId, final String... metadata)
 	    throws Exception {
 	super(name, lifeLength, monitoringPeriod);
 	this.stepPeriod = refreshPeriod;
 	this.dataCenterId = dataCenterId;
+	this.metadata = metadata;
     }
 
     /**
@@ -99,7 +103,7 @@ public class WebBroker extends MonitoringBorkerEX {
 	    throws Exception {
 	this(name, refreshPeriod, lifeLength, -1, dataCenterId);
     }
-    
+
     /**
      * Returns the id of the datacentre that this web broker handles.
      * 
@@ -117,6 +121,10 @@ public class WebBroker extends MonitoringBorkerEX {
      */
     public List<WebSession> getCanceledSessions() {
 	return canceledSessions;
+    }
+
+    public String[] getMetadata() {
+        return metadata;
     }
 
     /**
@@ -170,15 +178,11 @@ public class WebBroker extends MonitoringBorkerEX {
 	if (!CloudSim.running()) {
 	    submitSessionsAtTime(webSessions, appId, 0);
 	} else {
-	    List<WebSession> copyWebSessions = new ArrayList<>(webSessions);
-	    appsToLoadBalancers.get(appId).assignToServers(
-		    copyWebSessions.toArray(new WebSession[copyWebSessions.size()]));
+	    for (WebSession session : webSessions) {
+		appsToLoadBalancers.get(appId).assignToServers(session);
 
-	    for (ListIterator<WebSession> iter = copyWebSessions.listIterator(); iter.hasNext();) {
-		WebSession session = iter.next();
 		// If the load balancer could not assign it...
 		if (session.getAppVmId() == null || session.getDbBalancer() == null) {
-		    iter.remove();
 		    canceledSessions.add(session);
 		    CustomLog.printf("Session could not be served and is canceled. Session id:%d",
 			    session.getSessionId());
@@ -192,20 +196,18 @@ public class WebBroker extends MonitoringBorkerEX {
 			session.setIdealEnd(session.getIdealEnd() + stepPeriod);
 			session.notifyOfTime(CloudSim.clock() + stepPeriod);
 		    }
+
+		    servedSessions.put(session.getSessionId(), session);
+
+		    // Start the session or schedule it if its VMs are not
+		    // initiated.
+		    if (session.areVirtualMachinesReady()) {
+			updateSessions(session.getSessionId());
+		    } else {
+			send(getId(), stepPeriod, UPDATE_SESSION_TAG, session.getSessionId());
+		    }
 		}
 		session.setUserId(getId());
-	    }
-
-	    for (WebSession sess : copyWebSessions) {
-		servedSessions.put(sess.getSessionId(), sess);
-
-		// Start the session or schedule it if its VMs are not
-		// initiated.
-		if (sess.areVirtualMachinesReady()) {
-		    updateSessions(sess.getSessionId());
-		} else {
-		    send(getId(), stepPeriod, UPDATE_SESSION_TAG, sess.getSessionId());
-		}
 	    }
 	}
     }

@@ -2,12 +2,14 @@ package org.cloudbus.cloudsim.ex.web.workload.brokers;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
 import org.cloudbus.cloudsim.ex.geolocation.IGeolocationService;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
+import org.cloudbus.cloudsim.ex.vm.MonitoredVMex;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.WebSession;
 
@@ -32,6 +34,7 @@ public class EntryPoint {
 	    return new ArrayList<>();
 	}
     };
+    private static final Comparator<WebBroker> COST_COMPARATOR = new CloudPriceComparator();
 
     private final List<WebSession> canceledSessions = new ArrayList<>();
     private final List<WebBroker> brokers = new ArrayList<>();
@@ -109,6 +112,7 @@ public class EntryPoint {
 	// assignments table accordingly
 	for (WebSession sess : webSessions) {
 	    List<WebBroker> eligibleBrokers = filterBrokers(brokers, sess, appId);
+	    Collections.sort(eligibleBrokers, COST_COMPARATOR);
 
 	    WebBroker selectedBroker = null;
 	    for (WebBroker eligibleBroker : eligibleBrokers) {
@@ -141,8 +145,27 @@ public class EntryPoint {
     }
 
     private List<WebBroker> filterBrokers(final List<WebBroker> brokers2, final WebSession sess, final long appId) {
-	// TODO Auto-generated method stub
-	return null;
+	List<WebBroker> eligibleBrokers = new ArrayList<>();
+	for (WebBroker b : brokers2) {
+	    if (sess.getMetadata() != null && sess.getMetadata().length > 0 &&
+		    b.getMetadata() != null && b.getMetadata().length > 0 &&
+		    sess.getMetadata()[0].equals(b.getMetadata()[0])) {
+		eligibleBrokers.add(b);
+	    }
+	}
+	return eligibleBrokers;
     }
 
+    private static class CloudPriceComparator implements Comparator<WebBroker> {
+
+	@Override
+	public int compare(final WebBroker b1, final WebBroker b2) {
+	    b1.getVMBillingPolicy();
+	    b2.getVMBillingPolicy();
+	    
+	    return 0;
+	}
+
+    }
+    
 }
