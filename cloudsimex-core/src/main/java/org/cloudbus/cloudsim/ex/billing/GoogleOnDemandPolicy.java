@@ -59,4 +59,5 @@ public class GoogleOnDemandPolicy extends BaseCustomerVmBillingPolicy {
 	}
 	return result;
     }
+
 }

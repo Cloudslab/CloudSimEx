@@ -1,5 +1,6 @@
 package org.cloudbus.cloudsim.ex.web.workload.brokers;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -9,7 +10,6 @@ import java.util.Map;
 
 import org.cloudbus.cloudsim.ex.geolocation.IGeolocationService;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
-import org.cloudbus.cloudsim.ex.vm.MonitoredVMex;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.WebSession;
 
@@ -34,7 +34,7 @@ public class EntryPoint {
 	    return new ArrayList<>();
 	}
     };
-    private static final Comparator<WebBroker> COST_COMPARATOR = new CloudPriceComparator();
+    private final Comparator<WebBroker> costComparator;
 
     private final List<WebSession> canceledSessions = new ArrayList<>();
     private final List<WebBroker> brokers = new ArrayList<>();
@@ -58,6 +58,8 @@ public class EntryPoint {
 	this.geoService = geoService;
 	this.appId = appId;
 	this.latencySLA = latencySLA;
+
+	costComparator = new CloudPriceComparator(appId);
     }
 
     /**
@@ -112,17 +114,23 @@ public class EntryPoint {
 	// assignments table accordingly
 	for (WebSession sess : webSessions) {
 	    List<WebBroker> eligibleBrokers = filterBrokers(brokers, sess, appId);
-	    Collections.sort(eligibleBrokers, COST_COMPARATOR);
+	    Collections.sort(eligibleBrokers, costComparator);
 
 	    WebBroker selectedBroker = null;
+	    double bestLatencySoFar = Double.MAX_VALUE;
 	    for (WebBroker eligibleBroker : eligibleBrokers) {
 		ILoadBalancer balancer = eligibleBroker.getLoadBalancers().get(appId);
 		if (balancer != null) {
-		    selectedBroker = eligibleBroker;
 		    String ip = balancer.getIp();
 		    String clientIP = sess.getSourceIP();
-		    if (geoService.latency(ip, clientIP) < latencySLA) {
+		    double latency = geoService.latency(ip, clientIP);
+
+		    if (latency < latencySLA) {
+			selectedBroker = eligibleBroker;
 			break;
+		    } else if (bestLatencySoFar > latency) {
+			selectedBroker = eligibleBroker;
+			bestLatencySoFar = latency;
 		    }
 		}
 	    }
@@ -157,15 +165,22 @@ public class EntryPoint {
     }
 
     private static class CloudPriceComparator implements Comparator<WebBroker> {
+	private long appId;
+
+	public CloudPriceComparator(final long appId) {
+	    super();
+	    this.appId = appId;
+	}
 
 	@Override
 	public int compare(final WebBroker b1, final WebBroker b2) {
-	    b1.getVMBillingPolicy();
-	    b2.getVMBillingPolicy();
-	    
-	    return 0;
-	}
+	    ILoadBalancer lb1 = b1.getLoadBalancers().get(appId);
+	    ILoadBalancer lb2 = b2.getLoadBalancers().get(appId);
 
+	    BigDecimal cost1 = b1.getVMBillingPolicy().normalisedCostPerMinute(lb1.getAppServers().get(0));
+	    BigDecimal cost2 = b2.getVMBillingPolicy().normalisedCostPerMinute(lb2.getAppServers().get(0));
+
+	    return cost1.compareTo(cost2);
+	}
     }
-    
 }

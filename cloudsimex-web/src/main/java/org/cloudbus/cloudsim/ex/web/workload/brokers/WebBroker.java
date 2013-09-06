@@ -32,8 +32,7 @@ import org.cloudbus.cloudsim.ex.web.workload.IWorkloadGenerator;
 public class WebBroker extends MonitoringBorkerEX {
 
     // FIXME find a better way to get an unused tag instead of hardcoding
-    // 1234567
-    protected static final int TIMER_TAG = 1234567;
+    protected static final int TIMER_TAG = BROKER_MEASURE_UTIL_NOW + 20;
     protected static final int SUBMIT_SESSION_TAG = TIMER_TAG + 1;
     protected static final int UPDATE_SESSION_TAG = SUBMIT_SESSION_TAG + 1;
 
@@ -124,7 +123,7 @@ public class WebBroker extends MonitoringBorkerEX {
     }
 
     public String[] getMetadata() {
-        return metadata;
+	return metadata;
     }
 
     /**

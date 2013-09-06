@@ -86,4 +86,18 @@ public abstract class BaseCustomerVmBillingPolicy implements IVmBillingPolicy {
 	}
 	return null;
     }
+
+    @Override
+    public BigDecimal normalisedCostPerMinute(final Vm vm) {
+	BigDecimal result = BigDecimal.valueOf(-1);
+	if (vm instanceof VMex) {
+	    Pair<String, String> key = keyOf((VMex) vm);
+	    try {
+		result = prices.containsKey(key) ? prices.get(key).divide(BigDecimal.valueOf(60d)) : result;
+	    } catch (ArithmeticException ex) {
+		result = prices.containsKey(key) ? BigDecimal.valueOf(prices.get(key).doubleValue() / 60d) : result;
+	    }
+	}
+	return result;
+    }
 }

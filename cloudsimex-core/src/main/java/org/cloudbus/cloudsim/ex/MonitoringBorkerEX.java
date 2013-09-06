@@ -1,5 +1,6 @@
 package org.cloudbus.cloudsim.ex;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,12 @@ import org.cloudbus.cloudsim.ex.vm.MonitoredVMex;
  * the utilisation of vms of type {@link MonitoredVMex}. VMs of other types are
  * processed as usual, and their utilisation is not measured.
  * 
+ * <br>
+ * <br>
+ * 
+ * Additionally the broker performs autoscaling periodically in accordance with
+ * the specified {@link IAutoscalingPolicy}.
+ * 
  * @author nikolay.grozev
  * 
  */
@@ -29,8 +36,10 @@ public class MonitoringBorkerEX extends DatacenterBrokerEX {
 
     /** The time of the first measurement. */
     private final double offset = Math.min(0.1, CloudSim.getMinTimeBetweenEvents());
-    /** The period between subsequent measurements. */
+    /** The period between subsequent VM utilisation measurements. */
     private final double monitoringPeriod;
+
+    private final List<IAutoscalingPolicy> autoscalingPolicies = new ArrayList<>();
 
     /**
      * A map, whose entries are in the format [time, Map[vm-id, Array[cpu-util,
@@ -58,6 +67,17 @@ public class MonitoringBorkerEX extends DatacenterBrokerEX {
 	super(name, lifeLength);
 	this.monitoringPeriod = monitoringPeriod <= 0 ? -1 :
 		Math.max(monitoringPeriod, CloudSim.getMinTimeBetweenEvents());
+    }
+
+    /**
+     * Adds a new autoscaling policy, which is executed upon each new VM
+     * utilisation measurment.
+     * 
+     * @param policy
+     *            - the new policy to add. Must not be null.
+     */
+    public void addAutoScalingPlicy(final IAutoscalingPolicy policy) {
+	autoscalingPolicies.add(policy);
     }
 
     /**
@@ -110,6 +130,7 @@ public class MonitoringBorkerEX extends DatacenterBrokerEX {
 	    case BROKER_MEASURE_UTIL_NOW:
 		if (CloudSim.clock() <= getLifeLength()) {
 		    measureUtil();
+		    autoscale();
 		    send(getId(), monitoringPeriod, BROKER_MEASURE_UTIL_NOW);
 		}
 		break;
@@ -124,6 +145,12 @@ public class MonitoringBorkerEX extends DatacenterBrokerEX {
 	    default:
 		super.processOtherEvent(ev);
 		break;
+	}
+    }
+
+    private void autoscale() {
+	for (IAutoscalingPolicy policy : autoscalingPolicies) {
+	    policy.scale(this);
 	}
     }
 
@@ -188,49 +215,5 @@ public class MonitoringBorkerEX extends DatacenterBrokerEX {
 		Math.min(1, vmRam == 0 ? 0 : sumRAMCloudLets / vmRam),
 		Math.min(1, expectedWorkloadIODuration / monitoringPeriod)
 	};
-
     }
-    //
-    // protected double evaluateCPUUtilization(final Vm vm) {
-    // double sumExecCloudLets = 0;
-    // for (ResCloudlet cloudlet :
-    // vm.getCloudletScheduler().getCloudletExecList()) {
-    // sumExecCloudLets += cloudlet.getCloudletLength();
-    // }
-    // double vmMips = vm.getMips() * vm.getNumberOfPes();
-    // double expectedWorkloadDuration = (sumExecCloudLets / vmMips);
-    // return Math.min(1, monitoringPeriod <= 0 ? 0 : expectedWorkloadDuration /
-    // monitoringPeriod);
-    // }
-    //
-    // protected double evaluateIOUtilization(final Vm vm) {
-    // double sumExecCloudLets = 0;
-    // double vmIOMips = 1;
-    // if (vm instanceof HddVm) {
-    // HddVm hddVM = (HddVm) vm;
-    // for (HddResCloudlet cloudlet :
-    // hddVM.getCloudletScheduler().<HddResCloudlet> getCloudletExecList()) {
-    // sumExecCloudLets += cloudlet.getCloudlet().getCloudletIOLength();
-    // }
-    // vmIOMips = hddVM.getIoMips();
-    // }
-    // double expectedWorkloadDuration = (sumExecCloudLets / vmIOMips);
-    // return Math.min(1, monitoringPeriod <= 0 ? 0 : expectedWorkloadDuration /
-    // monitoringPeriod);
-    // }
-    //
-    // protected static double evaluateRAMUtilization(final Vm vm) {
-    // double sumExecCloudLets = 0;
-    // double vmRam = 0;
-    // if (vm instanceof HddVm) {
-    // HddVm hddVM = (HddVm) vm;
-    // for (HddResCloudlet cloudlet :
-    // hddVM.getCloudletScheduler().<HddResCloudlet> getCloudletExecList()) {
-    // sumExecCloudLets += cloudlet.getCloudlet().getRam();
-    // }
-    // vmRam = vm.getRam();
-    // }
-    // return Math.min(1, vmRam == 0 ? 0 : sumExecCloudLets / vmRam);
-    // }
-
 }

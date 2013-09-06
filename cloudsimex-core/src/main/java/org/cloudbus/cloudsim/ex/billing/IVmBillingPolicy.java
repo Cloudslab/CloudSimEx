@@ -27,9 +27,21 @@ public interface IVmBillingPolicy {
     /**
      * Returns the next charging time.
      * 
+     * @param vm
+     *            - the VM to check for. Must not be null;
      * @return the next charging time or -1 if the charge time could not be
      *         estimated.
      */
     public double nexChargeTime(final Vm vm);
+
+    /**
+     * Returns a normalised cost of the VM for 1 minute. This operation is
+     * optional.
+     * 
+     * @param vm
+     *            - the VM to check for. Must not be null;
+     * @return a normalised cost of the VM for 1 minute.
+     */
+    public BigDecimal normalisedCostPerMinute(final Vm vm);
 
 }

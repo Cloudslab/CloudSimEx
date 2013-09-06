@@ -216,6 +216,26 @@ public class GoogleOnDemandPolicyTest extends BaseDatacenterBrokerTest {
 	assertEquals(expectedBill, bill.doubleValue(), 0.01);
     }
     
+    @Test
+    public void testNormalisedCostPerMinute() {
+	vm1.getMetadata().setType("n1-standard-1-d");
+	vm1.getMetadata().setOS(NIX_OS);
+	vm2.getMetadata().setType("n1-standard-2-d");
+	vm2.getMetadata().setOS(NIX_OS);
+
+	double d1PricePerHour = 0.132;
+	double d2PricePerHour = 0.265;
+
+	ImmutableMap<Pair<String, String>, BigDecimal> prices =
+		ImmutableMap.<Pair<String, String>, BigDecimal> builder()
+			.put(of("n1-standard-1-d", NIX_OS), valueOf(d1PricePerHour))
+			.put(of("n1-standard-2-d", NIX_OS), valueOf(d2PricePerHour))
+			.build();
+	IVmBillingPolicy policy = new GoogleOnDemandPolicy(prices);
+	assertEquals(d1PricePerHour / 60, policy.normalisedCostPerMinute(vm1).doubleValue(), 0.01);
+	assertEquals(d2PricePerHour / 60, policy.normalisedCostPerMinute(vm2).doubleValue(), 0.01);
+    }
+    
 
     @Test
     public void testNexChargeTime() {

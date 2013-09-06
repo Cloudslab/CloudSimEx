@@ -200,6 +200,26 @@ public class EC2OnDemandPolicyTest extends BaseDatacenterBrokerTest {
     }
 
     @Test
+    public void testNormalisedCostPerMinute() {
+	vm1.getMetadata().setType("m1.small");
+	vm1.getMetadata().setOS(NIX_OS);
+	vm2.getMetadata().setType("m1.medium");
+	vm2.getMetadata().setOS(NIX_OS);
+
+	double smallPrice = 0.065;
+	double medPrice = 0.130;
+
+	ImmutableMap<Pair<String, String>, BigDecimal> prices =
+		ImmutableMap.<Pair<String, String>, BigDecimal> builder()
+			.put(of("m1.small", NIX_OS), valueOf(smallPrice))
+			.put(of("m1.medium", NIX_OS), valueOf(medPrice))
+			.build();
+	IVmBillingPolicy policy = new EC2OnDemandPolicy(prices);
+	assertEquals(smallPrice / 60, policy.normalisedCostPerMinute(vm1).doubleValue(), 0.01);
+	assertEquals(medPrice / 60, policy.normalisedCostPerMinute(vm2).doubleValue(), 0.01);
+    }
+    
+    @Test
     public void testNexChargeTime() {
 	final Queue<Double> vmTimes = new LinkedList<>(Arrays.asList(0d, 30d * MINUTE, 100d * MINUTE));
 	VMex vmMock = new VMex(Id.pollId(Vm.class), broker.getId(), VM_MIPS, 1,
