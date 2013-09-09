@@ -32,17 +32,17 @@ import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 /**
  * 
  * @author nikolay.grozev
- *
+ * 
  */
 public abstract class BaseDatacenterBrokerTest {
 
     protected static final int SIM_LENGTH = DAY + HOUR / 2 + MINUTE / 3;
-    
+
     protected static final int HOST_MIPS = 1000;
     protected static final int HOST_RAM = 2048;
     protected static final long HOST_STORAGE = 1000000;
     protected static final int HOST_BW = 10000;
-    
+
     protected static final int VM_MIPS = 250;
     protected static final long VM_SIZE = 10000;
     protected static final int VM_RAM = 512;
@@ -107,8 +107,8 @@ public abstract class BaseDatacenterBrokerTest {
 	int pesNumber = 1; // number of cpus
 	String vmm = "Xen"; // VMM name
 
-	return new VMex(Id.pollId(Vm.class), broker.getId(), VM_MIPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new CloudletSchedulerTimeShared());
+	return new VMex(broker.getId(), VM_MIPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
+		new CloudletSchedulerTimeShared());
     }
 
     protected DatacenterEX createDatacenterWithSingleHostAndSingleDisk(final String name) {

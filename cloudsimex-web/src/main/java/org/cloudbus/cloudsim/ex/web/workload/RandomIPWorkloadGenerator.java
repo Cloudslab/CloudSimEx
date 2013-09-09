@@ -3,6 +3,7 @@ package org.cloudbus.cloudsim.ex.web.workload;
 import java.util.List;
 import java.util.Map;
 
+import org.cloudbus.cloudsim.ex.geolocation.IGeolocationService;
 import org.cloudbus.cloudsim.ex.geolocation.IPGenerator;
 import org.cloudbus.cloudsim.ex.web.WebSession;
 
@@ -26,6 +27,9 @@ public class RandomIPWorkloadGenerator implements IWorkloadGenerator {
 
     private IWorkloadGenerator wrappedGenerator;
     private IPGenerator ipGen;
+    private IGeolocationService geoService;
+
+    private static final int ATTEMPTS = 10;
 
     /**
      * Constr.
@@ -35,11 +39,15 @@ public class RandomIPWorkloadGenerator implements IWorkloadGenerator {
      * @param ipGen
      *            - the IP generator to use when assigning IPs to the newly
      *            created session. Must not be null.
+     * @param geoService
+     *            - a geolocation service. Must not be null.
      */
-    public RandomIPWorkloadGenerator(IWorkloadGenerator wrappedGenerator, IPGenerator ipGen) {
+    public RandomIPWorkloadGenerator(final IWorkloadGenerator wrappedGenerator, final IPGenerator ipGen,
+	    final IGeolocationService geoService) {
 	super();
 	this.wrappedGenerator = wrappedGenerator;
 	this.ipGen = ipGen;
+	this.geoService = geoService;
     }
 
     @Override
@@ -50,7 +58,7 @@ public class RandomIPWorkloadGenerator implements IWorkloadGenerator {
 	// Generate and set random IPs to all web sessions.
 	for (Map.Entry<Double, List<WebSession>> e : result.entrySet()) {
 	    for (WebSession sess : e.getValue()) {
-		sess.setSourceIP(ipGen.pollRandomIP());
+		sess.setSourceIP(ipGen.pollRandomIP(geoService, ATTEMPTS));
 	    }
 	}
 

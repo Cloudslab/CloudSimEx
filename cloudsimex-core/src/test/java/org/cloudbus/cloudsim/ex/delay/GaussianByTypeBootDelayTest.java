@@ -54,7 +54,7 @@ public class GaussianByTypeBootDelayTest {
 	double delta = 0.1;
 	DescriptiveStatistics stat = new DescriptiveStatistics();
 
-	VMex vmex = new VMex(1, 2, 3, 4, 5, 6, 7, "vmm", null);
+	VMex vmex = new VMex(2, 3, 4, 5, 6, 7, "vmm", null);
 
 	// Test the return of the default value
 	vmex.getMetadata().setType("hs1.8xlarge");

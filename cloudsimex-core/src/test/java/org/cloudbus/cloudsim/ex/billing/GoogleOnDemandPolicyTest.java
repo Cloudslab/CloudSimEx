@@ -15,11 +15,9 @@ import java.util.Queue;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
-import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.ex.BaseDatacenterBrokerTest;
 import org.cloudbus.cloudsim.ex.delay.ConstantVMBootDelay;
-import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.vm.VMStatus;
 import org.cloudbus.cloudsim.ex.vm.VMex;
 import org.junit.Before;
@@ -215,7 +213,7 @@ public class GoogleOnDemandPolicyTest extends BaseDatacenterBrokerTest {
 
 	assertEquals(expectedBill, bill.doubleValue(), 0.01);
     }
-    
+
     @Test
     public void testNormalisedCostPerMinute() {
 	vm1.getMetadata().setType("n1-standard-1-d");
@@ -235,19 +233,17 @@ public class GoogleOnDemandPolicyTest extends BaseDatacenterBrokerTest {
 	assertEquals(d1PricePerHour / 60, policy.normalisedCostPerMinute(vm1).doubleValue(), 0.01);
 	assertEquals(d2PricePerHour / 60, policy.normalisedCostPerMinute(vm2).doubleValue(), 0.01);
     }
-    
 
     @Test
     public void testNexChargeTime() {
 	final Queue<Double> vmTimes = new LinkedList<>(Arrays.asList(0d, 30d * MINUTE, 100d * MINUTE));
-	VMex vmMock = new VMex(Id.pollId(Vm.class), broker.getId(), VM_MIPS, 1,
-		VM_RAM, VM_BW, VM_SIZE, "Test", new CloudletSchedulerTimeShared()) {
+	VMex vmMock = new VMex(broker.getId(), VM_MIPS, 1, VM_RAM, VM_BW, VM_SIZE, "Test",
+		new CloudletSchedulerTimeShared()) {
 	    @Override
 	    protected double getCurrentTime() {
 		return vmTimes.poll();
 	    }
 	};
-
 
 	final Queue<Double> policyTimes =
 		new LinkedList<>(Arrays.asList(35d * MINUTE + 1, 60d * MINUTE + 1, 91d * MINUTE + 1, 101d * MINUTE + 1));
@@ -260,24 +256,24 @@ public class GoogleOnDemandPolicyTest extends BaseDatacenterBrokerTest {
 
 	// Asks when the VM is still in init phase
 	assertEquals(-1d, policyMock.nexChargeTime(vmMock), 0.01);
-	
+
 	// Sets the RUNNING status 30min after start
 	vmMock.setStatus(VMStatus.RUNNING);
-	
+
 	// Asks 35 mins after start - the VM is now running
 	assertEquals(40d * MINUTE, policyMock.nexChargeTime(vmMock), 0.01);
-	
+
 	// Asks 60 mins after start - the VM is now running
 	assertEquals(61d * MINUTE, policyMock.nexChargeTime(vmMock), 0.01);
 
 	// Asks 91 mins after start - the VM is now running
 	assertEquals(92d * MINUTE, policyMock.nexChargeTime(vmMock), 0.01);
-	
+
 	// Sets the TERMINATED status 100min after start
 	vmMock.setStatus(VMStatus.TERMINATED);
 
 	// Asks 101 mins after start - the VM is now stopped
 	assertEquals(-1d, policyMock.nexChargeTime(vmMock), 0.01);
     }
-    
+
 }

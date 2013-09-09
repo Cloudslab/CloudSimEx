@@ -103,8 +103,8 @@ public interface IGeolocationService {
     String getTxtAddress(final String ip);
 
     /**
-     * Optional method for debug purposes. Returns a url to map, displaying the
-     * position of the coordinates.
+     * Optional method for debug purposes. Returns a url to a map, displaying
+     * the position of the coordinates.
      * 
      * @param coordinates
      *            - the coordinates to display.

@@ -5,10 +5,11 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.ex.VmSchedulerMapVmsToPes;
-import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.vm.MonitoredVMex;
+import org.cloudbus.cloudsim.ex.vm.VMMetadata;
 
 /**
  * A virtual machine with a harddisk. Unlike the other CloudSim implementations
@@ -56,8 +57,19 @@ public class HddVm extends MonitoredVMex {
 	    final long bw, final long size, final String vmm,
 	    final HddCloudletSchedulerTimeShared cloudletScheduler, final double summaryPeriodLength,
 	    final Integer[] hddIds) {
-	super(Id.pollId(HddVm.class), userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler,
-		summaryPeriodLength);
+	super(userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, summaryPeriodLength);
+	this.ioMips = ioMips;
+	this.hdds.addAll(Arrays.asList(hddIds));
+	cloudletScheduler.setVm(this);
+    }
+
+    public HddVm(final int userId, final double mips, final double ioMips, final int numberOfPes, final int ram,
+	    final long bw, final long size, final String vmm,
+	    final HddCloudletSchedulerTimeShared cloudletScheduler,
+	    final VMMetadata metadata,
+	    final double summaryPeriodLength,
+	    final Integer[] hddIds) {
+	super(userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, metadata, summaryPeriodLength);
 	this.ioMips = ioMips;
 	this.hdds.addAll(Arrays.asList(hddIds));
 	cloudletScheduler.setVm(this);
@@ -85,13 +97,24 @@ public class HddVm extends MonitoredVMex {
      *            among cloudlets.
      * @param hddIds
      *            - a list of ids of the harddisks that this VM has access to.
-     *            If empty the VM has access to all disks of the host, which i
+     *            If empty the VM has access to all disks of the host, which is
      *            hosting it at a given time.
      */
     public HddVm(final int userId, final double mips, final double ioMips, final int numberOfPes, final int ram,
 	    final long bw, final long size, final String vmm,
 	    final HddCloudletSchedulerTimeShared cloudletScheduler, final Integer[] hddIds) {
-	super(Id.pollId(HddVm.class), userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, 5);
+	super(userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, 5);
+	this.ioMips = ioMips;
+	this.hdds.addAll(Arrays.asList(hddIds));
+	cloudletScheduler.setVm(this);
+    }
+
+    public HddVm(final int userId, final double mips, final double ioMips, final int numberOfPes, final int ram,
+	    final long bw, final long size, final String vmm,
+	    final HddCloudletSchedulerTimeShared cloudletScheduler,
+	    final VMMetadata metadata,
+	    final Integer[] hddIds) {
+	super(userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, metadata, 5);
 	this.ioMips = ioMips;
 	this.hdds.addAll(Arrays.asList(hddIds));
 	cloudletScheduler.setVm(this);
@@ -232,6 +255,20 @@ public class HddVm extends MonitoredVMex {
     @Override
     public HddHost getHost() {
 	return (HddHost) super.getHost();
+    }
+
+    @Override
+    public HddVm clone(final CloudletScheduler scheduler) {
+	if (!getClass().equals(HddVm.class)) {
+	    throw new IllegalStateException("The operation is undefined for subclass: " + getClass().getCanonicalName());
+	}
+
+	HddVm result = new HddVm(getUserId(), getMips(), getIoMips(), getNumberOfPes(), getRam(), getBw(),
+		getSize(), getVmm(), (HddCloudletSchedulerTimeShared) scheduler,
+		getMetadata().clone(),
+		getSummaryPeriodLength(),
+		getHddsIds().toArray(new Integer[1]));
+	return result;
     }
 
 }

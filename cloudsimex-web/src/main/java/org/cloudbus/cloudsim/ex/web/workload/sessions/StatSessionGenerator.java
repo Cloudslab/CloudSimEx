@@ -1,5 +1,6 @@
 package org.cloudbus.cloudsim.ex.web.workload.sessions;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -56,12 +57,13 @@ public class StatSessionGenerator implements ISessionGenerator {
 		new StatGenerator(GeneratorsUtil.toGenerators(dbSessionParams), dataItem));
 
 	int cloudletsNumber = asSessionParams.get(asSessionParams.keySet().toArray()[0]).size();
+	String[] meta = metadataGenerator.poll();
 	return new WebSession(appServerCloudLets,
 		dbServerCloudLets,
 		userId,
 		cloudletsNumber,
 		time + idealLength,
-		metadataGenerator.poll());
+		Arrays.copyOf(meta, meta.length));
     }
 
     private DataItem pollRandomDataItem() {

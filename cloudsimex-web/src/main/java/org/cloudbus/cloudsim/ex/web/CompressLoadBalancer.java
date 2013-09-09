@@ -52,7 +52,7 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 	}
 
 	for (WebSession session : noAppServSessions) {
-	    List<HddVm> vms = new ArrayList<>(appServers);
+	    List<HddVm> vms = new ArrayList<>(getRunningAppServers());
 	    Collections.sort(vms, CPU_UTIL_INVERSE_CMP);
 
 	    HddVm bestVm = vms.get(vms.size() - 1);

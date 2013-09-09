@@ -84,7 +84,7 @@ public abstract class BaseGeolocationService implements IGeolocationService {
 	/*
 	 * Based on "Latency and the Quest for Interactivity" by Stuart Chester
 	 * and graph 1(a) from
-	 * "Modelling th Internet Delay Space Based on Geographical Locations"
+	 * "Modelling the Internet Delay Space Based on Geographical Locations"
 	 * by S. Kaune et al.
 	 * 
 	 * Very inaccurate when considering IPs in developing countries as

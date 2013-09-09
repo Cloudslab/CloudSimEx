@@ -45,6 +45,15 @@ public interface ILoadBalancer {
     public List<HddVm> getAppServers();
 
     /**
+     * Returns the list of all currently running app servers managed by this
+     * load balancer.
+     * 
+     * @return the list of all currently running app servers managed by this
+     *         load balancer.
+     */
+    List<HddVm> getRunningAppServers();
+
+    /**
      * Returns the balancer which manages cloudlets to DB server mapping.
      * 
      * @return the balancer which manages cloudlets to DB server mapping.
@@ -56,13 +65,13 @@ public interface ILoadBalancer {
      * 
      * @return the id of the application served by this load balancer.
      */
-    long getAppId();
+    public long getAppId();
 
     /**
      * Returns the IP address of this load balancer.
      * 
      * @return the IP address of this load balancer.
      */
-    String getIp();
+    public String getIp();
 
 }

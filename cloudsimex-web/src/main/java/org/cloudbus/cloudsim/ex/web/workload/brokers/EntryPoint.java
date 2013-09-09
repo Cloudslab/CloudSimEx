@@ -105,7 +105,7 @@ public class EntryPoint {
      *            - the web sessions to dispatch. Must not be null.
      */
     public void dispatchSessions(final List<WebSession> webSessions) {
-	Collections.sort(brokers, null);
+	Collections.sort(brokers, costComparator);
 
 	// A table of assignments of web sessions to brokers/clouds.
 	Map<WebBroker, List<WebSession>> assignments = Maps.asMap(new LinkedHashSet<>(brokers), EMPTY_LIST_FUNCTION);

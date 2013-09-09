@@ -32,16 +32,17 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
     private static final char CSV_SEP = ',';
     /** The quote symbol in the csv and tsv file. */
     private static final char QUOTE_SYMBOL = '\"';
+
+    /** The CSV file in the GeoLite2 format. */
+    private File originalFile;
     /** All ranges specified in the file. */
     private final List<IPRange> ranges = new ArrayList<>();
     /**
-     * A list with the same size as {@link GeoIP2IPGenerator.ranges}. Each
-     * element i in this list contains the sums of the lengths of the ranges in
+     * A list with the same size as {@link GeoIP2IPGenerator.ranges}. Each i-th
+     * element in this list contains the sums of the lengths of the ranges in
      * ranges[0:i].
      */
     private final List<Long> accumRangeLengths = new ArrayList<>();
-    /** The CSV file in the GeoLite2 format. */
-    private File originalFile;
     /** A sum of the lengths of all ranges in the CSV file. */
     private long sumOfRangesLengths = 0;
 
@@ -55,8 +56,7 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
      * @param seed
      *            - a seed if we need to get the same behavior again and again.
      */
-    public GeoIP2IPGenerator(final Set<String> countryCodes, final File f,
-	    final long seed) {
+    public GeoIP2IPGenerator(final Set<String> countryCodes, final File f, final long seed) {
 	super(countryCodes, seed);
 	originalFile = f;
 	parseFile();
@@ -116,7 +116,7 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
 	    sumOfRangesLengths = accum;
 	} catch (IOException e) {
 	    ranges.clear();
-	    String msg = "File: " + Objects.toString(originalFile)
+	    String msg = "File: " + Objects.toString(originalFile.getAbsoluteFile())
 		    + " could not be found or read properly. Message: " + e.getMessage();
 	    CustomLog.logError(Level.SEVERE, msg, e);
 	    throw new IllegalArgumentException(msg, e);

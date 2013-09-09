@@ -391,7 +391,7 @@ public class CustomLog {
 	 */
 	public static void logError(final Level level, final String message,
 			final Throwable exc) {
-		LOGGER.log(level, "", exc);
+		LOGGER.log(level, message, exc);
 	}
 
 	/**

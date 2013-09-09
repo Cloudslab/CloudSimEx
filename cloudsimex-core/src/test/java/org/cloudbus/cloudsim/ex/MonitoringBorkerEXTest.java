@@ -1,6 +1,7 @@
 package org.cloudbus.cloudsim.ex;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -8,9 +9,7 @@ import java.util.Map;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
-import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.vm.MonitoredVMex;
 import org.junit.Before;
 import org.junit.Test;
@@ -210,8 +209,8 @@ public class MonitoringBorkerEXTest extends BaseDatacenterBrokerTest {
 	int pesNumber = 1; // number of cpus
 	String vmm = "Xen"; // VMM name
 
-	return new MonitoredVMex(Id.pollId(Vm.class), broker.getId(), VM_MIPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new CloudletSchedulerTimeShared(), SUMMARY_PERIOD_LEN);
+	return new MonitoredVMex(broker.getId(), VM_MIPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
+		new CloudletSchedulerTimeShared(), SUMMARY_PERIOD_LEN);
     }
 
     @Override

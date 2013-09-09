@@ -1,9 +1,11 @@
 package org.cloudbus.cloudsim.ex.web;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.cloudbus.cloudsim.ex.disk.HddVm;
 import org.cloudbus.cloudsim.ex.util.Id;
+import org.cloudbus.cloudsim.ex.vm.VMStatus;
 
 /**
  * Common functionality of load balancers.
@@ -69,6 +71,17 @@ public abstract class BaseWebLoadBalancer implements ILoadBalancer {
 	return appServers;
     }
 
+    @Override
+    public List<HddVm> getRunningAppServers() {
+	List<HddVm> result = new ArrayList<>();
+	for(HddVm vm : getAppServers()) {
+	    if(vm.getStatus() == VMStatus.RUNNING) {
+		result.add(vm);
+	    }
+	}
+	return result;
+    }
+    
     @Override
     public IDBBalancer getDbBalancer() {
 	return dbBalancer;

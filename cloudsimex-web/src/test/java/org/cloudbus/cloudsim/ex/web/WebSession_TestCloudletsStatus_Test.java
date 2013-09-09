@@ -127,7 +127,8 @@ public class WebSession_TestCloudletsStatus_Test {
 	// session.setAppVmId(vm1.getId());
 	// session.setDbBalancer(vm2.getId());
 
-	broker.submitSessions(Arrays.asList(session), balancer.getAppId());
+	double delay = 1; // Give time for the VM to boot...
+	broker.submitSessionsAtTime(Arrays.asList(session), balancer.getAppId(), delay);
 
 	CloudSim.startSimulation();
 	List<HddCloudlet> resultList = broker.getCloudletReceivedList();

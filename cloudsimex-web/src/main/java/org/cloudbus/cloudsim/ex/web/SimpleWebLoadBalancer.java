@@ -51,7 +51,7 @@ public class SimpleWebLoadBalancer extends BaseWebLoadBalancer implements ILoadB
 	// Get the VMs which are utilized the least
 	List<HddVm> bestVms = new ArrayList<>();
 	double bestUtilization = Double.MAX_VALUE;
-	for (HddVm vm : appServers) {
+	for (HddVm vm : getRunningAppServers()) {
 	    double vmUtilization = evaluateUtilization(vm);
 	    if (!vm.isOutOfMemory()) {
 		if (vmUtilization < bestUtilization) {

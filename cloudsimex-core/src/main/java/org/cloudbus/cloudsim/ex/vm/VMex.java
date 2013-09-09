@@ -3,6 +3,7 @@ package org.cloudbus.cloudsim.ex.vm;
 import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.ex.util.Id;
 
 /**
  * An extension of the base cloudsim VM, adding information about:
@@ -21,17 +22,17 @@ public class VMex extends Vm {
     private double startTime;
     private double endTime;
 
-    public VMex(final int id, final int userId, final double mips, final int numberOfPes, final int ram, final long bw,
+    public VMex(final int userId, final double mips, final int numberOfPes, final int ram, final long bw,
 	    final long size, final String vmm,
 	    final CloudletScheduler cloudletScheduler) {
-	this(id, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, new VMMetadata());
+	this(userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, new VMMetadata());
 
     }
 
-    public VMex(final int id, final int userId, final double mips, final int numberOfPes, final int ram, final long bw,
+    public VMex(final int userId, final double mips, final int numberOfPes, final int ram, final long bw,
 	    final long size, final String vmm,
 	    final CloudletScheduler cloudletScheduler, final VMMetadata metadata) {
-	super(id, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
+	super(Id.pollId(Vm.class), userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
 	this.metadata = metadata;
     }
 
@@ -197,5 +198,25 @@ public class VMex extends Vm {
      */
     protected double getCurrentTime() {
 	return CloudSim.clock();
+    }
+
+    /**
+     * Makes a deep copy of this VM. The only properties which are not copied
+     * are the id, the scheduler, the status, and the submission/start/end
+     * times. The id of the resulting VM is uniquely generated and the scheduler
+     * is provided as a parameter.
+     * 
+     * @param scheduler
+     *            - must not be null. Must be a valid scheduler.
+     * @return a deep copy of this VM.
+     */
+    public VMex clone(final CloudletScheduler scheduler) {
+	if (!getClass().equals(VMex.class)) {
+	    throw new IllegalStateException("The operation is undefined for subclass: " + getClass().getCanonicalName());
+	}
+
+	VMex result = new VMex(getUserId(), getMips(), getNumberOfPes(), getRam(), getBw(), getSize(), getVmm(),
+		scheduler, getMetadata().clone());
+	return result;
     }
 }

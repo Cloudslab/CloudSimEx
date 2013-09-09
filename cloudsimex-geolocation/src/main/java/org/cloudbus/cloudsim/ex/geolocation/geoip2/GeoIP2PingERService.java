@@ -198,7 +198,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 	    throw new IllegalArgumentException("Invalid IP", e);
 	} catch (IOException | GeoIp2Exception e) {
 	    String msg = "Could not locate IP: " + Objects.toString(ip) + ", because " + e.getMessage();
-	    CustomLog.logError(Level.INFO, msg, e);
+	    CustomLog.logError(Level.SEVERE, msg, e);
 	    return new Double[] { null, null };
 	}
     }
@@ -218,7 +218,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 		    city.getLocation().getLongitude());
 	} catch (UnknownHostException e) {
 	    String msg = "Invalid IP: " + Objects.toString(ip);
-	    CustomLog.logError(Level.SEVERE, msg, e);
+	    CustomLog.logError(Level.INFO, msg, e);
 	    throw new IllegalArgumentException("Invalid IP", e);
 	} catch (IOException | GeoIp2Exception e) {
 	    String msg = "Could not locate IP: " + Objects.toString(ip) + ", because: " + e.getMessage();
@@ -319,7 +319,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
      * <br>
      * <br>
      * 
-     * The main idea of this method is maintain "diversity", in terms of the
+     * The main idea of this method is to maintain "diversity", in terms of the
      * used nodes in the heap.
      * 
      * @param heap
@@ -388,7 +388,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
     }
 
     public static void main(String[] args) throws IOException {
-	String ip = "190.96.64.0";
+	String ip = "144.168.168.128";
 	try (GeoIP2PingERService service = new GeoIP2PingERService(new File("GeoLite2-City.mmdb"),
 		new File("PingTablePingER.tsv"),
 		new File("MonitoringSitesPingER.csv"))) {

@@ -314,7 +314,8 @@ public class SimpleWebLoadBalancerTest {
 		broker.getId(), -1, 100);
 
 	// Fire it on the 5th sec
-	broker.submitSessions(Arrays.asList(session1, session2), balancer.getAppId());
+	double delay = 1; // Give time for the VM to boot...
+	broker.submitSessionsAtTime(Arrays.asList(session1, session2), balancer.getAppId(), delay);
 
 	CloudSim.startSimulation();
 	// List<Cloudlet> resultList = broker.getCloudletReceivedList();

@@ -23,17 +23,22 @@ public class MonitoredVMex extends VMex {
     final private Map<Double, double[]> performanceObservations = new LinkedHashMap<>();
     private final double summaryPeriodLength;
 
-    public MonitoredVMex(final int id, final int userId, final double mips, final int numberOfPes, int ram,
-	    final long bw, final long size, final String vmm, final CloudletScheduler cloudletScheduler, final double summaryPeriodLength) {
-	super(id, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
+    public MonitoredVMex(final int userId, final double mips, final int numberOfPes, int ram,
+	    final long bw, final long size, final String vmm, final CloudletScheduler cloudletScheduler,
+	    final double summaryPeriodLength) {
+	super(userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
 	this.summaryPeriodLength = summaryPeriodLength;
     }
 
-    public MonitoredVMex(final int id, final int userId, final double mips, final int numberOfPes, final int ram,
+    public MonitoredVMex(final int userId, final double mips, final int numberOfPes, final int ram,
 	    final long bw, final long size, final String vmm, final CloudletScheduler cloudletScheduler,
 	    final VMMetadata metadata, final double summaryPeriodLength) {
-	super(id, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, metadata);
+	super(userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, metadata);
 	this.summaryPeriodLength = summaryPeriodLength;
+    }
+
+    protected double getSummaryPeriodLength() {
+	return summaryPeriodLength;
     }
 
     /**
@@ -54,16 +59,18 @@ public class MonitoredVMex extends VMex {
 	    cleanupOldData(currTime);
 	}
     }
+
     /**
      * Notifies this VM of its utilisation.
      * 
-     * @param util - in the form [cpuUtil, ramUtil, diskUtil].
+     * @param util
+     *            - in the form [cpuUtil, ramUtil, diskUtil].
      */
     public void updatePerformance(final double[] util) {
 	if (summaryPeriodLength >= 0) {
 	    double currTime = getCurrentTime();
 	    performanceObservations.put(currTime, util);
-	    
+
 	    cleanupOldData(currTime);
 	}
     }
@@ -132,5 +139,17 @@ public class MonitoredVMex extends VMex {
 	for (Double time : toRemove) {
 	    performanceObservations.remove(time);
 	}
+    }
+
+    @Override
+    public MonitoredVMex clone(final CloudletScheduler scheduler) {
+	if (!getClass().equals(MonitoredVMex.class)) {
+	    throw new IllegalStateException("The operation is undefined for subclass: " + getClass().getCanonicalName());
+	}
+
+	MonitoredVMex result = new MonitoredVMex(getUserId(), getMips(), getNumberOfPes(), getRam(), getBw(),
+		getSize(),
+		getVmm(), scheduler, getMetadata().clone(), getSummaryPeriodLength());
+	return result;
     }
 }

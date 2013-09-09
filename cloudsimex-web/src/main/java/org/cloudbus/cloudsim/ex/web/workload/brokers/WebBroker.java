@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
@@ -183,8 +184,8 @@ public class WebBroker extends MonitoringBorkerEX {
 		// If the load balancer could not assign it...
 		if (session.getAppVmId() == null || session.getDbBalancer() == null) {
 		    canceledSessions.add(session);
-		    CustomLog.printf("Session could not be served and is canceled. Session id:%d",
-			    session.getSessionId());
+		    CustomLog.printf(Level.SEVERE,
+			    "Session could not be served and is canceled. Session id:%d", session.getSessionId());
 		} else {
 		    // Let the session prepare the first cloudlets
 		    if (session.areVirtualMachinesReady()) {
