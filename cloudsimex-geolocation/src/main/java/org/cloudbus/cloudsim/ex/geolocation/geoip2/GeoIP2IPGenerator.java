@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -95,6 +96,9 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
     }
 
     private void parseFile() {
+	CustomLog.printf(Level.FINER, "Creating an IP generator from %s for countries %s",
+		originalFile.getAbsolutePath(), Arrays.toString(getCountryCodes().toArray()));
+
 	long accum = 0;
 	ranges.clear();
 	sumOfRangesLengths = 0;
@@ -102,6 +106,7 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
 	try (BufferedReader reader = new BufferedReader(new FileReader(originalFile));
 		CSVReader csv = new CSVReader(reader, CSV_SEP, QUOTE_SYMBOL)) {
 	    // Read the file line by line
+	    int lineCount = 0;
 	    String[] lineElems = csv.readNext();
 	    while ((lineElems = csv.readNext()) != null) {
 		String countryCode = lineElems[4];
@@ -112,7 +117,14 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
 		    ranges.add(new IPRange(from, to));
 		    accumRangeLengths.add(accum);
 		}
+		if (++lineCount % 10000 == 0) {
+		    CustomLog.printf(Level.FINER, "%d lines processed from %s",
+			    lineCount, originalFile.getAbsolutePath());
+		}
 	    }
+	    CustomLog.printf(Level.FINER, "IP generator from %s for countries %s has %d IP ranges",
+		    originalFile.getAbsolutePath(), Arrays.toString(getCountryCodes().toArray()), ranges.size());
+
 	    sumOfRangesLengths = accum;
 	} catch (IOException e) {
 	    ranges.clear();

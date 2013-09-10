@@ -89,11 +89,14 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
      */
     public GeoIP2PingERService(final File geoIP2DB, final File pingErRTTFile, final File pingerMonitoringSitesFile) {
 	super();
+	CustomLog.printf(Level.FINER, "Creating an GeoLocation service from %s, %s, %s",
+		geoIP2DB.getAbsolutePath(),
+		pingErRTTFile.getAbsolutePath(),
+		pingerMonitoringSitesFile.getAbsolutePath());
 	try {
 	    reader = new DatabaseReader(geoIP2DB);
 
 	    parsePingER(pingErRTTFile, pingerMonitoringSitesFile);
-
 	} catch (IOException e) {
 	    String msg = "Invalid file: " + Objects.toString(geoIP2DB) + " Error details:" + e.getMessage();
 	    CustomLog.logError(Level.SEVERE, msg, e);
@@ -119,6 +122,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 	try (CSVReader csv = new CSVReader(pings, TSV_SEP, QUOTE_SYMBOL)) {
 	    // Skip header line
 	    String[] lineElems = csv.readNext();
+	    int lineCount = 0;
 	    while ((lineElems = csv.readNext()) != null) {
 		List<Double> measurements = new ArrayList<>();
 		String monitoringNode = null;
@@ -145,9 +149,14 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 		} else if (latency != null) {
 		    latencyTable.put(ImmutablePair.of(monitoringNode, remoteNode), latency);
 		}
+
+		if (++lineCount % 1000 == 0) {
+		    CustomLog.printf(Level.FINER, "%d ping measurments definitions parsed", lineCount);
+		}
 	    }
 	}
-	CustomLog.print(Level.FINE, "The definitions of the following nodes are missing." + unknownNodes.toString());
+	CustomLog.printf(Level.FINER, "Total %d ping measurments definitions parsed", latencyTable.size());
+	CustomLog.print(Level.FINER, "The definitions of the following nodes are missing." + unknownNodes.toString());
     }
 
     private void parseNodesDefitions(final BufferedReader defs) throws IOException {
@@ -155,6 +164,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 	try (CSVReader csv = new CSVReader(defs, CSV_SEP, QUOTE_SYMBOL)) {
 	    // Skip header line
 	    String[] lineElems = csv.readNext();
+	    int lineCount = 0;
 	    while ((lineElems = csv.readNext()) != null) {
 		String node = lineElems[0].trim();
 		String location = lineElems[2].trim();
@@ -168,7 +178,12 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 		    nodesTable.clear();
 		    throw new IllegalArgumentException("Could not extract the geo location from \"" + location + "\"");
 		}
+		if (++lineCount % 100 == 0) {
+		    CustomLog.printf(Level.FINER, "%d node definitions parsed", lineCount);
+		}
 	    }
+
+	    CustomLog.printf(Level.FINER, "Total %d node definitions parsed", nodesTable.size());
 	}
     }
 
@@ -198,7 +213,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 	    throw new IllegalArgumentException("Invalid IP", e);
 	} catch (IOException | GeoIp2Exception e) {
 	    String msg = "Could not locate IP: " + Objects.toString(ip) + ", because " + e.getMessage();
-	    CustomLog.logError(Level.SEVERE, msg, e);
+	    CustomLog.logError(Level.FINER, msg, e);
 	    return new Double[] { null, null };
 	}
     }
@@ -287,9 +302,9 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 	    updateHeap(heap, qEntry);
 	}
 
-	CustomLog.printLine(Level.FINE, "");
+	CustomLog.printLine(Level.FINEST, "");
 	double result = weigthedAverage(heap);
-	CustomLog.print(Level.FINE, String.format("Latency betweeen %s and %s is %.2f", ip1, ip2, result));
+	CustomLog.print(Level.FINEST, String.format("Latency betweeen %s and %s is %.2f", ip1, ip2, result));
 
 	return result;
     }
@@ -303,7 +318,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 	    double eWeigthedCount = bestDistance / e.accumDistance;
 	    weigthedCount += eWeigthedCount;
 	    sumLatencies += e.latency * eWeigthedCount;
-	    CustomLog.print(Level.FINE,
+	    CustomLog.print(Level.FINEST,
 		    String.format("Used nodes %s, %s; Accum Distance %.2f, Latency %.2f, Weigth %.2f ",
 			    e.node1, e.node2, e.accumDistance / 1000, e.latency, eWeigthedCount));
 	}

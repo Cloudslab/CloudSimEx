@@ -187,6 +187,7 @@ public class WebBroker extends MonitoringBorkerEX {
 		    CustomLog.printf(Level.SEVERE,
 			    "Session could not be served and is canceled. Session id:%d", session.getSessionId());
 		} else {
+		    session.setUserId(getId());
 		    // Let the session prepare the first cloudlets
 		    if (session.areVirtualMachinesReady()) {
 			session.notifyOfTime(CloudSim.clock());
@@ -207,7 +208,6 @@ public class WebBroker extends MonitoringBorkerEX {
 			send(getId(), stepPeriod, UPDATE_SESSION_TAG, session.getSessionId());
 		    }
 		}
-		session.setUserId(getId());
 	    }
 	}
     }
@@ -310,6 +310,7 @@ public class WebBroker extends MonitoringBorkerEX {
 	    case UPDATE_SESSION_TAG:
 		Integer sessId = (Integer) ev.getData();
 		updateSessions(sessId);
+		break;
 	    default:
 		super.processOtherEvent(ev);
 	}
@@ -346,6 +347,11 @@ public class WebBroker extends MonitoringBorkerEX {
 		WebSession.StepCloudlets webCloudlets = sess.pollCloudlets(currTime);
 
 		if (webCloudlets != null) {
+		    
+		    if(webCloudlets.asCloudlet.getUserId() != sess.getUserId() || sess.getUserId() != getId()) {
+			throw new IllegalStateException();
+		    }
+		    
 		    getCloudletList().add(webCloudlets.asCloudlet);
 		    getCloudletList().addAll(webCloudlets.dbCloudlets);
 		    submitCloudlets();

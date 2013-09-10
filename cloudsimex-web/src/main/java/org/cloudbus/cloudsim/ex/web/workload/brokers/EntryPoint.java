@@ -4,17 +4,15 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.cloudbus.cloudsim.ex.disk.HddVm;
 import org.cloudbus.cloudsim.ex.geolocation.IGeolocationService;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.WebSession;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Maps;
 
 /**
  * Represents an entry point for an application, which uses multiple clouds
@@ -28,12 +26,6 @@ import com.google.common.collect.Maps;
  */
 public class EntryPoint {
 
-    private static final Function<WebBroker, List<WebSession>> EMPTY_LIST_FUNCTION = new Function<WebBroker, List<WebSession>>() {
-	@Override
-	public List<WebSession> apply(final WebBroker input) {
-	    return new ArrayList<>();
-	}
-    };
     private final Comparator<WebBroker> costComparator;
 
     private final List<WebSession> canceledSessions = new ArrayList<>();
@@ -108,7 +100,10 @@ public class EntryPoint {
 	Collections.sort(brokers, costComparator);
 
 	// A table of assignments of web sessions to brokers/clouds.
-	Map<WebBroker, List<WebSession>> assignments = Maps.asMap(new LinkedHashSet<>(brokers), EMPTY_LIST_FUNCTION);
+	Map<WebBroker, List<WebSession>> assignments = new HashMap<>();
+	for (WebBroker broker : brokers) {
+	    assignments.put(broker, new ArrayList<WebSession>());
+	}
 
 	// Decide which broker/cloud will serve each session - populate the
 	// assignments table accordingly

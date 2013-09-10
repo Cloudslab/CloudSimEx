@@ -16,14 +16,14 @@ import org.cloudbus.cloudsim.ex.web.WebSession;
 
 public class StatSessionGenerator implements ISessionGenerator {
 
-    private final Map<String, List<Double>> asSessionParams;
-    private final Map<String, List<Double>> dbSessionParams;
-    private final int userId;
-    private final double idealLength;
-    private final IGenerator<String[]> metadataGenerator;
-    private final DataItem[] data;
+    protected final Map<String, List<Double>> asSessionParams;
+    protected final Map<String, List<Double>> dbSessionParams;
+    protected final int userId;
+    protected final double idealLength;
+    protected final IGenerator<String[]> metadataGenerator;
+    protected final DataItem[] data;
 
-    private Random dataRandomiser = new Random();
+    protected Random dataRandomiser = new Random();
 
     public StatSessionGenerator(final Map<String, List<Double>> asSessionParams,
 	    final Map<String, List<Double>> dbSessionParams,
@@ -49,7 +49,7 @@ public class StatSessionGenerator implements ISessionGenerator {
 
     @Override
     public WebSession generateSessionAt(final double time) {
-	DataItem dataItem = pollRandomDataItem();
+	DataItem dataItem = pollRandomDataItem(data, dataRandomiser);
 
 	final IGenerator<? extends WebCloudlet> appServerCloudLets = new StatGenerator(
 		GeneratorsUtil.toGenerators(asSessionParams), dataItem);
@@ -66,7 +66,7 @@ public class StatSessionGenerator implements ISessionGenerator {
 		Arrays.copyOf(meta, meta.length));
     }
 
-    private DataItem pollRandomDataItem() {
+    protected static DataItem pollRandomDataItem(final DataItem[] data, final Random dataRandomiser) {
 	DataItem dataItem = null;
 	if (data == null || data.length == 0) {
 	    dataItem = null;
