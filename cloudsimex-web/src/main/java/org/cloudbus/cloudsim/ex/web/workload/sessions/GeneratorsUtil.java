@@ -37,6 +37,10 @@ public class GeneratorsUtil {
 
     public static Map<String, List<Double>> parseStream(final InputStream in) throws IOException {
 	BufferedReader br = new BufferedReader(new InputStreamReader(in));
+	return parseReader(br);
+    }
+
+    public static Map<String, List<Double>> parseReader(final BufferedReader br) throws IOException {
 	String line = br.readLine();
 	List<String> headers = new ArrayList<>();
 	for (String s : line.replaceAll("\"", "").replace("\\s+", "").split(",")) {
@@ -59,5 +63,12 @@ public class GeneratorsUtil {
 	}
 	return values;
     }
-
+    
+    public static Map<String, List<Double>> cloneDefs(Map<String, List<Double>> defs) {
+	Map<String, List<Double>> values = new HashMap<String, List<Double>>();
+	for(Map.Entry<String, List<Double>> e : defs.entrySet()) {
+	    values.put(e.getKey(), new ArrayList<>(e.getValue()));
+	}
+	return values;
+    }
 }

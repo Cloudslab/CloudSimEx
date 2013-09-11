@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -439,6 +440,11 @@ public class DatacenterBrokerEX extends DatacenterBroker {
 	}
 
 	return vmBillingPolicy.bill(toBill);
+    }
+
+    @Override
+    public String toString() {
+	return String.format("Broker(%s, %d)", Objects.toString(getName(), "N/A"), getId());
     }
 
     /**

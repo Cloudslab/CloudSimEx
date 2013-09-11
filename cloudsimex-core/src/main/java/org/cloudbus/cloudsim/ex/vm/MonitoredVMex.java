@@ -116,7 +116,7 @@ public class MonitoredVMex extends VMex {
     private double[] getAveragedPerformance(final double currTime) {
 	cleanupOldData(currTime);
 	double[] result = new double[] { 0, 0, 0 };
-	if (summaryPeriodLength >= 0) {
+	if (summaryPeriodLength >= 0 && !performanceObservations.isEmpty()) {
 	    for (Map.Entry<Double, double[]> entry : performanceObservations.entrySet()) {
 		for (int i = 0; i < result.length; i++) {
 		    result[i] += entry.getValue()[i];

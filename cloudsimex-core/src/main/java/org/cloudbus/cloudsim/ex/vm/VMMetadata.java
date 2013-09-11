@@ -64,7 +64,7 @@ public class VMMetadata implements Cloneable {
 	    throw new IllegalStateException("The operation is undefined for subclass: " + getClass().getCanonicalName());
 	}
 	VMMetadata result = new VMMetadata();
-	for (Field f : getClass().getFields()) {
+	for (Field f : getClass().getDeclaredFields()) {
 	    try {
 		// TODO take care of copying collections/arrays
 		f.set(result, f.get(this));

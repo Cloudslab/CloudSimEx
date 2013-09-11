@@ -31,7 +31,6 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
     private double triggerRAM;
     private int n;
 
-    
     public CompressedAutoscalingPolicy(long appId, double triggerCPU, double triggerRAM, int n) {
 	super();
 	this.appId = appId;
@@ -47,7 +46,8 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 	    ILoadBalancer loadBalancer = webBroker.getLoadBalancers().get(appId);
 	    Map<Integer, Integer> asToNumSess = constructASToNumberOfSessionsTable(webBroker);
 
-	    boolean allOverloaded = true;
+	    int numOverloaded = 0;
+	    int numAS = loadBalancer.getAppServers().size();
 	    List<HddVm> freeVms = new ArrayList<>();
 
 	    // Inspect the status of all AS VMs
@@ -56,12 +56,13 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 		double vmRAM = vm.getRAMUtil();
 		if (!asToNumSess.containsKey(vm.getId())) {
 		    freeVms.add(vm);
-		} else if (vmCPU < triggerCPU || vmRAM < triggerRAM) {
-		    allOverloaded = false;
+		} else if (vmCPU >= triggerCPU && vmRAM >= triggerRAM) {
+		    numOverloaded++;
 		}
 	    }
 
 	    int numFree = freeVms.size();
+	    boolean allOverloaded = numOverloaded + numFree == numAS && numOverloaded > 0;
 
 	    if (numFree <= n) { // Provision more VMs..
 		int numVmsToStart = 0;
@@ -97,12 +98,14 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
     }
 
     private void startASVms(WebBroker webBroker, ILoadBalancer loadBalancer, int numVmsToStart) {
-	List<HddVm> newVMs = new ArrayList<>();
-	for(int i = 0; i < numVmsToStart; i++) {
-	    HddVm newASServer = loadBalancer.getAppServers().get(0).clone(new HddCloudletSchedulerTimeShared());
-	    loadBalancer.registerAppServer(newASServer);
+	if (numVmsToStart > 0) {
+	    List<HddVm> newVMs = new ArrayList<>();
+	    for (int i = 0; i < numVmsToStart; i++) {
+		HddVm newASServer = loadBalancer.getAppServers().get(0).clone(new HddCloudletSchedulerTimeShared());
+		loadBalancer.registerAppServer(newASServer);
+	    }
+	    webBroker.createVmsAfter(newVMs, 0);
 	}
-	webBroker.createVmsAfter(newVMs, 0);
     }
 
     private Map<Integer, Integer> constructASToNumberOfSessionsTable(final WebBroker broker) {

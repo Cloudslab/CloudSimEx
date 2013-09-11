@@ -1,5 +1,7 @@
 package org.cloudbus.cloudsim.ex.vm;
 
+import java.util.EnumSet;
+
 import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
@@ -188,6 +190,19 @@ public class VMex extends Vm {
      */
     public VMMetadata getMetadata() {
 	return metadata;
+    }
+
+    /**
+     * If the VM is finished returns its lifetime period. Otherwise - 0;
+     * 
+     * @return if the VM is finished returns its lifetime period. Otherwise - 0;
+     */
+    public double getLifeDuration() {
+	if (!EnumSet.of(VMStatus.INITIALISING, VMStatus.RUNNING).contains(getStatus())) {
+	    return getEndTime() - getStartTime();
+	} else {
+	    return 0;
+	}
     }
 
     /**

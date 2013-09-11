@@ -76,7 +76,7 @@ public class MonitoringBorkerEX extends DatacenterBrokerEX {
      * @param policy
      *            - the new policy to add. Must not be null.
      */
-    public void addAutoScalingPlicy(final IAutoscalingPolicy policy) {
+    public void addAutoScalingPolicy(final IAutoscalingPolicy policy) {
 	autoscalingPolicies.add(policy);
     }
 

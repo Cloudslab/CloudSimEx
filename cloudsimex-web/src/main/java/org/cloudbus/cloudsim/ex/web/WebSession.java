@@ -41,7 +41,7 @@ import org.cloudbus.cloudsim.ex.util.Textualize;
  * 
  */
 @Textualize(properties = { "SessionId", "AppVmId", "DbVmId", "ReadableStartTime", "StartTime", "FinishTime",
-	"IdealEnd", "Delay", "Complete" })
+	"IdealEnd", "Delay", "Complete", "SourceIP",  "ServerIP"})
 public class WebSession {
 
     private final IGenerator<? extends WebCloudlet> appServerCloudLets;

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.cloudbus.cloudsim.Consts;
 import org.cloudbus.cloudsim.Datacenter;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
 import org.cloudbus.cloudsim.Host;
@@ -34,6 +35,7 @@ import org.cloudbus.cloudsim.ex.billing.GoogleOnDemandPolicy;
 import org.cloudbus.cloudsim.ex.billing.IVmBillingPolicy;
 import org.cloudbus.cloudsim.ex.delay.ExampleGaussianDelaysPerType;
 import org.cloudbus.cloudsim.ex.delay.GaussianByTypeBootDelay;
+import org.cloudbus.cloudsim.ex.delay.IVMBootDelayDistribution;
 import org.cloudbus.cloudsim.ex.disk.DataItem;
 import org.cloudbus.cloudsim.ex.disk.HddCloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.ex.disk.HddDataCenter;
@@ -45,6 +47,7 @@ import org.cloudbus.cloudsim.ex.geolocation.geoip2.GeoIP2IPGenerator;
 import org.cloudbus.cloudsim.ex.geolocation.geoip2.GeoIP2PingERService;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.Id;
+import org.cloudbus.cloudsim.ex.vm.VMMetadata;
 import org.cloudbus.cloudsim.ex.web.CompositeGenerator;
 import org.cloudbus.cloudsim.ex.web.IGenerator;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
@@ -57,6 +60,7 @@ import org.cloudbus.cloudsim.ex.web.WebSession;
 import org.cloudbus.cloudsim.ex.web.workload.IWorkloadGenerator;
 import org.cloudbus.cloudsim.ex.web.workload.RandomIPWorkloadGenerator;
 import org.cloudbus.cloudsim.ex.web.workload.StatWorkloadGenerator;
+import org.cloudbus.cloudsim.ex.web.workload.brokers.CompressedAutoscalingPolicy;
 import org.cloudbus.cloudsim.ex.web.workload.brokers.EntryPoint;
 import org.cloudbus.cloudsim.ex.web.workload.brokers.WebBroker;
 import org.cloudbus.cloudsim.ex.web.workload.freq.CompositeValuedSet;
@@ -107,7 +111,7 @@ public class TwoDatacentres_MultiCloudFramework {
 
     protected int simulationLength = DAY + HOUR / 2;
     protected int step = 60;
-    protected double monitoringPeriod = 0.1;
+    protected double monitoringPeriod = 1;
     protected String experimentName = "Multi-Cloud Framework Experiment";
 
     private static final DataItem DATA_EURO1 = new DataItem(5);
@@ -168,36 +172,47 @@ public class TwoDatacentres_MultiCloudFramework {
 	    int hardwareMips = (int) (10000 * 3.4);
 	    int hardwareMiops = 7500;
 	    int hardwareRam = 2048 * 4;
-	    Datacenter dcEuroGoogle = createDC("EuroDataCenter1", EURO_DATA_ITEMS, hardwareMips,
-		    hardwareMiops, hardwareRam);
-	    Datacenter dcEuroEC2 = createDC("EuroDataCenter2", EURO_DATA_ITEMS, hardwareMips,
-		    hardwareMiops, hardwareRam);
+	    Datacenter dcEuroGoogle = createDC("Euro-Google", EURO_DATA_ITEMS, hardwareMips,
+		    hardwareMiops, hardwareRam,
+		    new GaussianByTypeBootDelay(ExampleGaussianDelaysPerType.EC2_BOOT_TIMES));
+	    Datacenter dcEuroEC2 = createDC("Euro-EC2", EURO_DATA_ITEMS, hardwareMips,
+		    hardwareMiops, hardwareRam,
+		    new GaussianByTypeBootDelay(ExampleGaussianDelaysPerType.EC2_BOOT_TIMES));
 
-	    Datacenter dcUSGoogle = createDC("USDataCenter1", US_DATA_ITEMS, hardwareMips, hardwareMiops, hardwareRam);
-	    Datacenter dcUSEC2 = createDC("USDataCenter2", US_DATA_ITEMS, hardwareMips, hardwareMiops, hardwareRam);
+	    Datacenter dcUSGoogle = createDC("US-Google", US_DATA_ITEMS, hardwareMips, hardwareMiops, hardwareRam,
+		    new GaussianByTypeBootDelay(ExampleGaussianDelaysPerType.EC2_BOOT_TIMES));
+	    Datacenter dcUSEC2 = createDC("US-EC2", US_DATA_ITEMS, hardwareMips, hardwareMiops, hardwareRam,
+		    new GaussianByTypeBootDelay(ExampleGaussianDelaysPerType.EC2_BOOT_TIMES));
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 3: Create Brokers and set the appropriate billing policies
 	    System.err.println("Step 3: Creating Brokers....");
+	    double triggerCPU = 0.9;
+	    double triggerRAM = 0.9;
+	    int n = 1;
 
 	    IVmBillingPolicy googleEUBilling = new GoogleOnDemandPolicy(ExamplePrices.GOOGLE_NIX_OS_PRICES_EUROPE);
 	    WebBroker brokerEuroGoogle = new WebBroker("Euro-Google", step, simulationLength, monitoringPeriod,
 		    dcEuroGoogle.getId(), "EU");
+	    brokerEuroGoogle.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, triggerCPU, triggerRAM, n));
 	    brokerEuroGoogle.setVMBillingPolicy(googleEUBilling);
 
 	    IVmBillingPolicy ec2EUBilling = new EC2OnDemandPolicy(ExamplePrices.EC2_NIX_OS_PRICES_IRELAND);
 	    WebBroker brokerEuroEC2 = new WebBroker("Euro-EC2", step, simulationLength, monitoringPeriod,
 		    dcEuroEC2.getId(), "EU");
+	    brokerEuroEC2.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, triggerCPU, triggerRAM, n));
 	    brokerEuroEC2.setVMBillingPolicy(ec2EUBilling);
 
 	    IVmBillingPolicy googleUSBilling = new GoogleOnDemandPolicy(ExamplePrices.GOOGLE_NIX_OS_PRICES_US);
 	    WebBroker brokerUSGoogle = new WebBroker("US-Google", step, simulationLength, monitoringPeriod,
 		    dcUSGoogle.getId(), "US");
+	    brokerUSGoogle.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, triggerCPU, triggerRAM, n));
 	    brokerUSGoogle.setVMBillingPolicy(googleUSBilling);
 
 	    IVmBillingPolicy ec2USBilling = new EC2OnDemandPolicy(ExamplePrices.EC2_NIX_OS_PRICES_VIRGINIA);
 	    WebBroker brokerUSEC2 = new WebBroker("US-EC2", step, simulationLength, monitoringPeriod,
 		    dcUSEC2.getId(), "US");
+	    brokerUSEC2.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, triggerCPU, triggerRAM, n));
 	    brokerUSEC2.setVMBillingPolicy(ec2USBilling);
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
@@ -214,17 +229,29 @@ public class TwoDatacentres_MultiCloudFramework {
 	    System.err.println("Step 5: Setting up entry points....");
 	    int numDBs = 3;
 	    int numApp = 1;
-	    List<HddVm> appServersEuroGoogle = createVMs(brokerEuroGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numApp);
-	    List<HddVm> dbServersEuroGoogle = createVMs(brokerEuroGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numDBs);
+	    VMMetadata ec2Meta = new VMMetadata();
+	    ec2Meta.setOS(Consts.NIX_OS);
+	    ec2Meta.setType("m1.small");
+	    VMMetadata googleMeta = new VMMetadata();
+	    googleMeta.setOS(Consts.NIX_OS);
+	    googleMeta.setType("n1-standard-1-d");
 
-	    List<HddVm> appServersEuroEC2 = createVMs(brokerEuroEC2.getId(), MIPS_AS_VM_EC2, 7500, 1666, numApp);
-	    List<HddVm> dbServersEuroEC2 = createVMs(brokerEuroEC2.getId(), MIPS_DB_VM_EC2, 7500, 1666, numDBs);
+	    List<HddVm> appServersEuroGoogle = createVMs(brokerEuroGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numApp,
+		    googleMeta);
+	    List<HddVm> dbServersEuroGoogle = createVMs(brokerEuroGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numDBs,
+		    googleMeta);
 
-	    List<HddVm> appServersUSGoogle = createVMs(brokerUSGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numApp);
-	    List<HddVm> dbServersUSGoogle = createVMs(brokerUSGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numDBs);
+	    List<HddVm> appServersEuroEC2 = createVMs(brokerEuroEC2.getId(), MIPS_AS_VM_EC2, 7500, 1666, numApp,
+		    ec2Meta);
+	    List<HddVm> dbServersEuroEC2 = createVMs(brokerEuroEC2.getId(), MIPS_DB_VM_EC2, 7500, 1666, numDBs, ec2Meta);
 
-	    List<HddVm> appServersUSEC2 = createVMs(brokerUSEC2.getId(), MIPS_AS_VM_EC2, 7500, 1666, numApp);
-	    List<HddVm> dbServersUSEC2 = createVMs(brokerUSEC2.getId(), MIPS_DB_VM_EC2, 7500, 1656, numDBs);
+	    List<HddVm> appServersUSGoogle = createVMs(brokerUSGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numApp,
+		    googleMeta);
+	    List<HddVm> dbServersUSGoogle = createVMs(brokerUSGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numDBs,
+		    googleMeta);
+
+	    List<HddVm> appServersUSEC2 = createVMs(brokerUSEC2.getId(), MIPS_AS_VM_EC2, 7500, 1666, numApp, ec2Meta);
+	    List<HddVm> dbServersUSEC2 = createVMs(brokerUSEC2.getId(), MIPS_DB_VM_EC2, 7500, 1656, numDBs, ec2Meta);
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 6: Create load balancers
@@ -268,31 +295,40 @@ public class TwoDatacentres_MultiCloudFramework {
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 8: Define the workload and associate it with load balancers
 	    System.err.println("Step 8: Define workload....");
-	    double f = 5;
+
+	    Map<String, List<Double>> asDefs;
+	    Map<String, List<Double>> dbDefs;
+	    try (InputStream asIO = new FileInputStream(DEF_DIR + "web_cloudlets.txt");
+		    InputStream dbIO = new FileInputStream(DEF_DIR + "db_cloudlets.txt")) {
+		asDefs = GeneratorsUtil.parseStream(asIO);
+		dbDefs = GeneratorsUtil.parseStream(dbIO);
+	    }
+
+	    double f = 100;
 	    IWorkloadGenerator workloadEuroGoogle = generateWorkload(
 		    brokerEuroGoogle.getId(),
 		    0 * HOUR,
 		    ImmutableMap.<String[], Double> of(new String[] { "US" }, 1.0, new String[] { "EU" }, 10.0),
-		    euroIPGen, f);
+		    euroIPGen, f, asDefs, dbDefs);
 	    brokerEuroGoogle.addWorkloadGenerators(Arrays.asList(workloadEuroGoogle), balancerEuroGoogle.getAppId());
 	    IWorkloadGenerator workloadEuroEC2 = generateWorkload(
 		    brokerEuroEC2.getId(),
 		    0 * HOUR,
 		    ImmutableMap.<String[], Double> of(new String[] { "US" }, 1.0, new String[] { "EU" }, 10.0),
-		    euroIPGen, f);
+		    euroIPGen, f, asDefs, dbDefs);
 	    brokerEuroEC2.addWorkloadGenerators(Arrays.asList(workloadEuroEC2), balancerEuroGoogle.getAppId());
 
 	    IWorkloadGenerator workloadUSGoogle = generateWorkload(
 		    brokerUSGoogle.getId(),
 		    12 * HOUR,
 		    ImmutableMap.<String[], Double> of(new String[] { "US" }, 10.0, new String[] { "EU" }, 1.0),
-		    usIPGen, f);
+		    usIPGen, f, asDefs, dbDefs);
 	    brokerUSGoogle.addWorkloadGenerators(Arrays.asList(workloadUSGoogle), balancerEuroEC2.getAppId());
 	    IWorkloadGenerator workloadUSEC2 = generateWorkload(
 		    brokerUSEC2.getId(),
 		    12 * HOUR,
 		    ImmutableMap.<String[], Double> of(new String[] { "US" }, 10.0, new String[] { "EU" }, 1.0),
-		    usIPGen, f);
+		    usIPGen, f, asDefs, dbDefs);
 	    brokerUSEC2.addWorkloadGenerators(Arrays.asList(workloadUSEC2), balancerEuroEC2.getAppId());
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
@@ -316,17 +352,35 @@ public class TwoDatacentres_MultiCloudFramework {
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 10 : stop the simulation and print the results
 	    CloudSim.stopSimulation();
-	    CustomLog.redirectToFile(RESULT_DIR + "BrokerEuroGoogle.csv");
+	    CustomLog.redirectToFile(RESULT_DIR + "Sessions-EuroGoogle.csv");
 	    CustomLog.printResults(WebSession.class, brokerEuroGoogle.getServedSessions());
 
-	    CustomLog.redirectToFile(RESULT_DIR + "BrokerEuroEC2.csv");
+	    CustomLog.redirectToFile(RESULT_DIR + "Sessions-BrokerEuroEC2.csv");
 	    CustomLog.printResults(WebSession.class, brokerEuroEC2.getServedSessions());
 
-	    CustomLog.redirectToFile(RESULT_DIR + "BrokerUSGoogle.csv");
+	    CustomLog.redirectToFile(RESULT_DIR + "Sessions-BrokerUSGoogle.csv");
 	    CustomLog.printResults(WebSession.class, brokerUSGoogle.getServedSessions());
 
-	    CustomLog.redirectToFile(RESULT_DIR + "BrokerUSEC2.csv");
+	    CustomLog.redirectToFile(RESULT_DIR + "Sessions-BrokerUSEC2.csv");
 	    CustomLog.printResults(WebSession.class, brokerUSEC2.getServedSessions());
+	    
+	    // Print VMs
+	    String[] vmProperties = new String[]{"Id", "Status", "SubmissionTime",  "StartTime", "EndTime", "LifeDuration"};
+	    CustomLog.redirectToFile(RESULT_DIR + "VM-EuroGoogle.csv");
+	    CustomLog.printResults(HddVm.class, vmProperties, brokerEuroGoogle.getVmList());
+	    CustomLog.print(brokerEuroGoogle.bill());
+	    
+	    CustomLog.redirectToFile(RESULT_DIR + "VM-EuroEC2.csv");
+	    CustomLog.printResults(HddVm.class, vmProperties, brokerEuroEC2.getVmList());
+	    CustomLog.print(brokerEuroEC2.bill());
+	    
+	    CustomLog.redirectToFile(RESULT_DIR + "VM-USGoogle.csv");
+	    CustomLog.printResults(HddVm.class, vmProperties, brokerUSGoogle.getVmList());
+	    CustomLog.print(brokerUSGoogle.bill());
+
+	    CustomLog.redirectToFile(RESULT_DIR + "VM-USEC2.csv");
+	    CustomLog.printResults(HddVm.class, vmProperties, brokerUSEC2.getVmList());
+	    CustomLog.print(brokerUSEC2.bill());
 
 	    System.err.println();
 	    System.err.println(experimentName + ": Simulation is finished!");
@@ -339,7 +393,8 @@ public class TwoDatacentres_MultiCloudFramework {
     }
 
     protected IWorkloadGenerator generateWorkload(final int userId, final double nullPoint,
-	    final Map<String[], Double> valuesAndFreqs, GeoIP2IPGenerator ipGen, double f) {
+	    final Map<String[], Double> valuesAndFreqs, GeoIP2IPGenerator ipGen, double f,
+	    Map<String, List<Double>> asDefs, Map<String, List<Double>> dbDefs) {
 	String[] periods = new String[] {
 		String.format("[%d,%d] m=%f  std=%f", HOURS[0], HOURS[6], 10d * f, 1d),
 		String.format("(%d,%d] m=%f  std=%f", HOURS[6], HOURS[7], 30d * f, 2d),
@@ -348,33 +403,29 @@ public class TwoDatacentres_MultiCloudFramework {
 		String.format("(%d,%d] m=%f  std=%f", HOURS[14], HOURS[17], 50d * f, 3d),
 		String.format("(%d,%d] m=%f  std=%f", HOURS[17], HOURS[18], 30d * f, 2d),
 		String.format("(%d,%d] m=%f  std=%f", HOURS[18], HOURS[24], 10d * f, 1d) };
-	return generateWorkload(userId, nullPoint, periods, valuesAndFreqs, ipGen);
+	return generateWorkload(userId, nullPoint, periods, valuesAndFreqs, ipGen, asDefs, dbDefs);
     }
 
     protected IWorkloadGenerator generateWorkload(final int userId, final double nullPoint,
-	    final String[] periods, final Map<String[], Double> valuesAndFreqs, GeoIP2IPGenerator ipGen) {
+	    final String[] periods, final Map<String[], Double> valuesAndFreqs, GeoIP2IPGenerator ipGen,
+	    Map<String, List<Double>> asDefs, Map<String, List<Double>> dbDefs) {
 	System.err.println("		Start workload generation....");
-	try (InputStream asIO = new FileInputStream(DEF_DIR + "web_cloudlets.txt");
-		InputStream dbIO = new FileInputStream(DEF_DIR + "db_cloudlets.txt")) {
-	    StatSessionGenerator sessGen = new SynchDataStatGenerator(GeneratorsUtil.parseStream(asIO),
-		    GeneratorsUtil.parseStream(dbIO), userId, step, new RandomListGenerator<>(valuesAndFreqs));
+	StatSessionGenerator sessGen = new SynchDataStatGenerator(GeneratorsUtil.cloneDefs(asDefs),
+		GeneratorsUtil.cloneDefs(dbDefs), userId, step, new RandomListGenerator<>(valuesAndFreqs));
 
-	    double unit = HOUR;
-	    double periodLength = DAY;
+	double unit = HOUR;
+	double periodLength = DAY;
 
-	    FrequencyFunction freqFun = new PeriodicStochasticFrequencyFunction(unit, periodLength, nullPoint,
-		    CompositeValuedSet.createCompositeValuedSet(periods));
+	FrequencyFunction freqFun = new PeriodicStochasticFrequencyFunction(unit, periodLength, nullPoint,
+		CompositeValuedSet.createCompositeValuedSet(periods));
 
-	    System.err.println("		End of workload generation");
+	System.err.println("		End of workload generation");
 
-	    return new RandomIPWorkloadGenerator(new StatWorkloadGenerator(freqFun, sessGen), ipGen, geoService);
-	} catch (IOException e) {
-	    e.printStackTrace();
-	}
-	return null;
+	return new RandomIPWorkloadGenerator(new StatWorkloadGenerator(freqFun, sessGen), ipGen, geoService);
     }
 
-    private List<HddVm> createVMs(final int brokerId, final int mips, final int ioMips, final int ram, int numberOfVms) {
+    private List<HddVm> createVMs(final int brokerId, final int mips, final int ioMips, final int ram, int numberOfVms,
+	    VMMetadata meta) {
 	List<HddVm> hddVMs = new ArrayList<>();
 	for (int i = 0; i < numberOfVms; i++) {
 	    // VM description
@@ -387,7 +438,7 @@ public class TwoDatacentres_MultiCloudFramework {
 	    String vmm = "Xen"; // VMM name
 
 	    HddVm hddVm = new HddVm(brokerId, mips, ioMips, pesNumber,
-		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
+		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared(), meta.clone(), new Integer[0]);
 	    hddVMs.add(hddVm);
 	}
 	return hddVMs;
@@ -398,7 +449,7 @@ public class TwoDatacentres_MultiCloudFramework {
      */
     // mips = (int) (10000 * 3.4), miops = 7500, ram = 2048*4
     private Datacenter createDC(final String name, final DataItem[] dataItems, final int mips, final int miops,
-	    final int ramInMb) {
+	    final int ramInMb, IVMBootDelayDistribution delay) {
 	List<Host> hostList = new ArrayList<Host>();
 
 	for (int i = 0; i < 100; i++) {
@@ -406,12 +457,13 @@ public class TwoDatacentres_MultiCloudFramework {
 	    hostList.add(host);
 	}
 
-	Datacenter datacenter = createDCWithHosts(name, hostList);
+	Datacenter datacenter = createDCWithHosts(name, hostList, delay);
 
 	return datacenter;
     }
 
-    private static Datacenter createDCWithHosts(final String name, final List<Host> hostList) {
+    private static Datacenter createDCWithHosts(final String name, final List<Host> hostList,
+	    IVMBootDelayDistribution delay) {
 	String arch = "x86"; // system architecture
 	String os = "Linux"; // operating system
 	String vmm = "Xen";
@@ -431,8 +483,7 @@ public class TwoDatacentres_MultiCloudFramework {
 	Datacenter datacenter = null;
 	try {
 	    datacenter = new HddDataCenter(name, characteristics,
-		    new VmAllocationPolicySimple(hostList), storageList, 0,
-		    new GaussianByTypeBootDelay(ExampleGaussianDelaysPerType.EC2_BOOT_TIMES));
+		    new VmAllocationPolicySimple(hostList), storageList, 0, delay);
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}

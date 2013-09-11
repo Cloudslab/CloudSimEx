@@ -1,6 +1,7 @@
 package org.cloudbus.cloudsim.ex;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.cloudbus.cloudsim.Datacenter;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
@@ -37,13 +38,13 @@ public class DatacenterEX extends Datacenter {
 	super(name, characteristics, vmAllocationPolicy, storageList, schedulingInterval);
 	this.delayDistribution = delayDistribution;
     }
-    
+
     public IVMBootDelayDistribution getDelayDistribution() {
-        return delayDistribution;
+	return delayDistribution;
     }
 
     public void setDelayDistribution(IVMBootDelayDistribution delayDistribution) {
-        this.delayDistribution = delayDistribution;
+	this.delayDistribution = delayDistribution;
     }
 
     @Override
@@ -82,7 +83,7 @@ public class DatacenterEX extends Datacenter {
 
 	if (result) {
 	    send(getId(), delay, DATACENTER_BOOT_VM_TAG, vm);
-	    
+
 	    getVmList().add(vm);
 
 	    // if (vm.isBeingInstantiated()) {
@@ -95,5 +96,8 @@ public class DatacenterEX extends Datacenter {
 
     }
 
-
+    @Override
+    public String toString() {
+	return String.format("DC(%s,%d)", Objects.toString(getName(), "N/A"), getId());
+    }
 }
