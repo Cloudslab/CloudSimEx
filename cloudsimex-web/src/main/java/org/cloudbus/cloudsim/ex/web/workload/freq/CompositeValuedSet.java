@@ -3,6 +3,8 @@ package org.cloudbus.cloudsim.ex.web.workload.freq;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.uncommons.maths.random.SeedGenerator;
+
 /**
  * A set consisting of smaller finite continuous intervals, associated with
  * normal distributions.
@@ -64,7 +66,7 @@ public class CompositeValuedSet {
      * @return a new instance based on the specified textual representations.
      */
     public static CompositeValuedSet createCompositeValuedSet(String... intervals) {
-	return createCompositeValuedSet(null, intervals);
+	return createCompositeValuedSet((byte[]) null, intervals);
     }
 
     /**
@@ -80,6 +82,23 @@ public class CompositeValuedSet {
 	List<FiniteValuedInterval> subIntervals = new ArrayList<>();
 	for (String i : intervals) {
 	    subIntervals.add(FiniteValuedInterval.createInterval(i, seed));
+	}
+	return new CompositeValuedSet(subIntervals);
+    }
+
+    /**
+     * Creates a new instance based on the specified textual representations.
+     * 
+     * @param seedGen
+     *            - the seed generator to use.
+     * @param intervals
+     *            - the intervals' texts.
+     * @return a new instance based on the specified textual representations.
+     */
+    public static CompositeValuedSet createCompositeValuedSet(SeedGenerator seedGen, String... intervals) {
+	List<FiniteValuedInterval> subIntervals = new ArrayList<>();
+	for (String i : intervals) {
+	    subIntervals.add(FiniteValuedInterval.createInterval(i, seedGen));
 	}
 	return new CompositeValuedSet(subIntervals);
     }

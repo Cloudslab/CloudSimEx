@@ -12,6 +12,8 @@ import org.cloudbus.cloudsim.ex.web.workload.sessions.ISessionGenerator;
 import org.uncommons.maths.number.NumberGenerator;
 import org.uncommons.maths.random.MersenneTwisterRNG;
 import org.uncommons.maths.random.PoissonGenerator;
+import org.uncommons.maths.random.SeedException;
+import org.uncommons.maths.random.SeedGenerator;
 
 /**
  * Represents a timed factory for sessions of a given type. Defines the workload
@@ -40,11 +42,23 @@ public class StatWorkloadGenerator implements IWorkloadGenerator {
      *            - generator for sessions.
      */
     public StatWorkloadGenerator(final byte[] seed, final FrequencyFunction freqFun, final ISessionGenerator sessGen) {
-	super();
-	this.freqFun = freqFun;
-	this.sessGen = sessGen;
+	this(null, seed, freqFun, sessGen);
+    }
 
-	rng = seed == null ? new MersenneTwisterRNG() : new MersenneTwisterRNG(seed);
+    /**
+     * Constructor.
+     * 
+     * @param seedGen
+     *            - the seed generator for the used Poisson distribution or null
+     *            the default seed genertor seed is used. Must not be null.
+     * @param freqFun
+     *            - the frequency function for the Poisson distribution. Must
+     *            not be null.
+     * @param sessGen
+     *            - generator for sessions.
+     */
+    public StatWorkloadGenerator(SeedGenerator seedGen, final FrequencyFunction freqFun, final ISessionGenerator sessGen) {
+	this(seedGen, null, freqFun, sessGen);
     }
 
     /**
@@ -56,7 +70,27 @@ public class StatWorkloadGenerator implements IWorkloadGenerator {
      *            - generator for sessions.
      */
     public StatWorkloadGenerator(final FrequencyFunction freqFun, final ISessionGenerator sessGen) {
-	this(null, freqFun, sessGen);
+	this(null, null, freqFun, sessGen);
+    }
+
+    private StatWorkloadGenerator(SeedGenerator seedGen, final byte[] seed, final FrequencyFunction freqFun,
+	    final ISessionGenerator sessGen) {
+	super();
+	this.freqFun = freqFun;
+	this.sessGen = sessGen;
+
+	Random newRNG = null;
+	if (seed == null) {
+	    try {
+		newRNG = seedGen == null ? new MersenneTwisterRNG() : new MersenneTwisterRNG(seedGen);
+	    } catch (SeedException e) {
+		newRNG = new MersenneTwisterRNG();
+	    }
+
+	} else {
+	    newRNG = new MersenneTwisterRNG(seed);
+	}
+	rng = newRNG;
     }
 
     /**

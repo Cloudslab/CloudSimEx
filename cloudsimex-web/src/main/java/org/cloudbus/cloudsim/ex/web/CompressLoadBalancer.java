@@ -6,8 +6,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.logging.Level;
 
 import org.cloudbus.cloudsim.ex.disk.HddVm;
+import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.vm.MonitoredVMex;
 
 /**
@@ -26,12 +28,15 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 
     /**
      * Const.
+     * 
      * @param appId
      * @param ip
      * @param appServers
      * @param dbBalancer
-     * @param cpuThreshold - the CPU threshold. Must be in the interval [0, 1].
-     * @param ramThreshold - the RAM threshold. Must be in the interval [0, 1].
+     * @param cpuThreshold
+     *            - the CPU threshold. Must be in the interval [0, 1].
+     * @param ramThreshold
+     *            - the RAM threshold. Must be in the interval [0, 1].
      */
     public CompressLoadBalancer(final long appId, final String ip, final List<HddVm> appServers,
 	    final IDBBalancer dbBalancer, double cpuThreshold, double ramThreshold) {
@@ -51,24 +56,40 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 	    }
 	}
 
-	for (WebSession session : noAppServSessions) {
-	    List<HddVm> vms = new ArrayList<>(getRunningAppServers());
-	    Collections.sort(vms, CPU_UTIL_INVERSE_CMP);
-
-	    HddVm bestVm = vms.get(vms.size() - 1);
-	    for (HddVm vm : vms) {
-		if (vm.getCPUUtil() < cpuThreshold && vm.getRAMUtil() < ramThreshold && !vm.isOutOfMemory()) {
-		    bestVm = vm;
+	List<HddVm> runingVMs = getRunningAppServers();
+	// No running AS servers - log an error
+	if (runingVMs.isEmpty()) {
+	    for (WebSession session : noAppServSessions) {
+		if (getAppServers().isEmpty()) {
+		    CustomLog.printf(Level.SEVERE,
+			    "Session %d cannot be scheduled, as there are not AS servers",
+			    session.getSessionId());
+		} else {
+		    CustomLog.printf(Level.SEVERE,
+			    "Session %d cannot be scheduled, as all AS servers are either booting or terminated",
+			    session.getSessionId());
 		}
 	    }
+	} else {// Assign to one of the running VMs
+	    for (WebSession session : noAppServSessions) {
+		List<HddVm> vms = new ArrayList<>(runingVMs);
+		Collections.sort(vms, CPU_UTIL_INVERSE_CMP);
 
-	    session.setAppVmId(bestVm.getId());
-	}
+		HddVm bestVm = vms.get(vms.size() - 1);
+		for (HddVm vm : vms) {
+		    if (vm.getCPUUtil() < cpuThreshold && vm.getRAMUtil() < ramThreshold && !vm.isOutOfMemory()) {
+			bestVm = vm;
+		    }
+		}
 
-	// Set the DB VM
-	for (WebSession session : sessions) {
-	    if (session.getDbBalancer() == null) {
-		session.setDbBalancer(getDbBalancer());
+		session.setAppVmId(bestVm.getId());
+	    }
+
+	    // Set the DB VM
+	    for (WebSession session : sessions) {
+		if (session.getDbBalancer() == null) {
+		    session.setDbBalancer(getDbBalancer());
+		}
 	    }
 	}
     }

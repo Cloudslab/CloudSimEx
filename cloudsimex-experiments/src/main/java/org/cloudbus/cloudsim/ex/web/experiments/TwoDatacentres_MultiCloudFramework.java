@@ -49,11 +49,11 @@ import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.vm.VMMetadata;
 import org.cloudbus.cloudsim.ex.web.CompositeGenerator;
+import org.cloudbus.cloudsim.ex.web.CompressLoadBalancer;
 import org.cloudbus.cloudsim.ex.web.IGenerator;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.RandomListGenerator;
 import org.cloudbus.cloudsim.ex.web.SimpleDBBalancer;
-import org.cloudbus.cloudsim.ex.web.SimpleWebLoadBalancer;
 import org.cloudbus.cloudsim.ex.web.StatGenerator;
 import org.cloudbus.cloudsim.ex.web.WebCloudlet;
 import org.cloudbus.cloudsim.ex.web.WebSession;
@@ -71,6 +71,8 @@ import org.cloudbus.cloudsim.ex.web.workload.sessions.StatSessionGenerator;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
+import org.uncommons.maths.random.SecureRandomSeedGenerator;
+import org.uncommons.maths.random.SeedGenerator;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -82,6 +84,8 @@ import com.google.common.collect.ImmutableMap;
 public class TwoDatacentres_MultiCloudFramework {
 
     private static final int LATENCY_SLA = 40;
+
+    private static SeedGenerator SEED_GEN = new SecureRandomSeedGenerator();
 
     private static final Set<String> EURO_CODES = Collections.unmodifiableSet(new LinkedHashSet<>(
 	    Arrays.asList("BE", "FR", "AT", "BG", "IT", "PL", "CZ", "CY", "PT", "DK", "LV", "RO", "DE",
@@ -144,9 +148,9 @@ public class TwoDatacentres_MultiCloudFramework {
     public final void runExperimemt() throws SecurityException, IOException {
 	long simulationStart = System.currentTimeMillis();
 
-	CustomLog.redirectToFile(RESULT_DIR + "log.txt");
+	// CustomLog.redirectToFile(RESULT_DIR + "log.txt");
 
-	System.err.println("Step 0: Initialising IP services....");
+	CustomLog.print("Step 0: Initialising IP services....");
 	euroIPGen = new GeoIP2IPGenerator(EURO_CODES,
 		new File(GEO_RESOURCE_PATH + "GeoIPCountryWhois.csv"));
 	usIPGen = new GeoIP2IPGenerator(US_CODES,
@@ -159,7 +163,7 @@ public class TwoDatacentres_MultiCloudFramework {
 	try {
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step1: Initialize the CloudSim package.
-	    System.err.println("Step 1: Initialising CloudSIm....");
+	    CustomLog.print("Step 1: Initialising CloudSIm....");
 
 	    int numBrokers = 4; // number of brokers to use
 	    boolean trace_flag = false;
@@ -167,28 +171,28 @@ public class TwoDatacentres_MultiCloudFramework {
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 2: Create Datacenters
-	    System.err.println("Step 2: Creating Data Centres....");
+	    CustomLog.print("Step 2: Creating Data Centres....");
 
 	    int hardwareMips = (int) (10000 * 3.4);
 	    int hardwareMiops = 7500;
 	    int hardwareRam = 2048 * 4;
 	    Datacenter dcEuroGoogle = createDC("Euro-Google", EURO_DATA_ITEMS, hardwareMips,
 		    hardwareMiops, hardwareRam,
-		    new GaussianByTypeBootDelay(ExampleGaussianDelaysPerType.EC2_BOOT_TIMES));
+		    new GaussianByTypeBootDelay(ExampleGaussianDelaysPerType.EC2_BOOT_TIMES, SEED_GEN));
 	    Datacenter dcEuroEC2 = createDC("Euro-EC2", EURO_DATA_ITEMS, hardwareMips,
 		    hardwareMiops, hardwareRam,
-		    new GaussianByTypeBootDelay(ExampleGaussianDelaysPerType.EC2_BOOT_TIMES));
+		    new GaussianByTypeBootDelay(ExampleGaussianDelaysPerType.EC2_BOOT_TIMES, SEED_GEN));
 
 	    Datacenter dcUSGoogle = createDC("US-Google", US_DATA_ITEMS, hardwareMips, hardwareMiops, hardwareRam,
-		    new GaussianByTypeBootDelay(ExampleGaussianDelaysPerType.EC2_BOOT_TIMES));
+		    new GaussianByTypeBootDelay(ExampleGaussianDelaysPerType.EC2_BOOT_TIMES, SEED_GEN));
 	    Datacenter dcUSEC2 = createDC("US-EC2", US_DATA_ITEMS, hardwareMips, hardwareMiops, hardwareRam,
-		    new GaussianByTypeBootDelay(ExampleGaussianDelaysPerType.EC2_BOOT_TIMES));
+		    new GaussianByTypeBootDelay(ExampleGaussianDelaysPerType.EC2_BOOT_TIMES, SEED_GEN));
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 3: Create Brokers and set the appropriate billing policies
-	    System.err.println("Step 3: Creating Brokers....");
-	    double triggerCPU = 0.9;
-	    double triggerRAM = 0.9;
+	    CustomLog.print("Step 3: Creating Brokers and billing policies....");
+	    double triggerCPU = 0.8;
+	    double triggerRAM = 0.8;
 	    int n = 1;
 
 	    IVmBillingPolicy googleEUBilling = new GoogleOnDemandPolicy(ExamplePrices.GOOGLE_NIX_OS_PRICES_EUROPE);
@@ -217,7 +221,7 @@ public class TwoDatacentres_MultiCloudFramework {
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 4: Set up the entry point
-	    System.err.println("Step 4: Setting up entry points....");
+	    CustomLog.print("Step 4: Setting up entry points....");
 
 	    EntryPoint entryPoint = new EntryPoint(geoService, 1, LATENCY_SLA);
 	    for (WebBroker broker : new WebBroker[] { brokerEuroGoogle, brokerEuroEC2, brokerUSGoogle, brokerUSEC2 }) {
@@ -226,7 +230,7 @@ public class TwoDatacentres_MultiCloudFramework {
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 5: Create virtual machines
-	    System.err.println("Step 5: Setting up entry points....");
+	    CustomLog.print("Step 5: Setting up VMs....");
 	    int numDBs = 3;
 	    int numApp = 1;
 	    VMMetadata ec2Meta = new VMMetadata();
@@ -255,27 +259,33 @@ public class TwoDatacentres_MultiCloudFramework {
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 6: Create load balancers
-	    System.err.println("Step 6: Setting up load balancers....");
+	    CustomLog.print("Step 6: Setting up load balancers....");
+	    double cpuThreshold = 0.8;
+	    double ramThreshold = 0.8;
 
-	    ILoadBalancer balancerEuroGoogle = new SimpleWebLoadBalancer(
-		    1, HAMINA_FINLAND_IP, appServersEuroGoogle, new SimpleDBBalancer(dbServersEuroGoogle));
+	    ILoadBalancer balancerEuroGoogle = new CompressLoadBalancer(
+		    1, HAMINA_FINLAND_IP, appServersEuroGoogle, new SimpleDBBalancer(dbServersEuroGoogle),
+		    cpuThreshold, ramThreshold);
 	    brokerEuroGoogle.addLoadBalancer(balancerEuroGoogle);
 
-	    ILoadBalancer balancerEuroEC2 = new SimpleWebLoadBalancer(
-		    1, DUBLIN_IP, appServersEuroEC2, new SimpleDBBalancer(dbServersEuroEC2));
+	    ILoadBalancer balancerEuroEC2 = new CompressLoadBalancer(
+		    1, DUBLIN_IP, appServersEuroEC2, new SimpleDBBalancer(dbServersEuroEC2),
+		    cpuThreshold, ramThreshold);
 	    brokerEuroEC2.addLoadBalancer(balancerEuroEC2);
 
-	    ILoadBalancer balancerUSGoogle = new SimpleWebLoadBalancer(
-		    1, DALAS_IP, appServersUSGoogle, new SimpleDBBalancer(dbServersUSGoogle));
+	    ILoadBalancer balancerUSGoogle = new CompressLoadBalancer(
+		    1, DALAS_IP, appServersUSGoogle, new SimpleDBBalancer(dbServersUSGoogle),
+		    cpuThreshold, ramThreshold);
 	    brokerUSGoogle.addLoadBalancer(balancerUSGoogle);
 
-	    ILoadBalancer balancerUSEC2 = new SimpleWebLoadBalancer(
-		    1, NEW_YORK_IP, appServersUSEC2, new SimpleDBBalancer(dbServersUSEC2));
+	    ILoadBalancer balancerUSEC2 = new CompressLoadBalancer(
+		    1, NEW_YORK_IP, appServersUSEC2, new SimpleDBBalancer(dbServersUSEC2),
+		    cpuThreshold, ramThreshold);
 	    brokerUSEC2.addLoadBalancer(balancerUSEC2);
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 7: Add the virtual machines for the data centers
-	    System.err.println("Step 7: Add VMs to the data centres....");
+	    CustomLog.print("Step 7: Add VMs to the data centres....");
 
 	    ImmutableMap<ILoadBalancer, WebBroker> balancersToBrokers = ImmutableMap
 		    .<ILoadBalancer, WebBroker> builder()
@@ -294,46 +304,38 @@ public class TwoDatacentres_MultiCloudFramework {
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 8: Define the workload and associate it with load balancers
-	    System.err.println("Step 8: Define workload....");
+	    CustomLog.print("Step 8: Define workload....");
 
-	    Map<String, List<Double>> asDefs;
-	    Map<String, List<Double>> dbDefs;
-	    try (InputStream asIO = new FileInputStream(DEF_DIR + "web_cloudlets.txt");
-		    InputStream dbIO = new FileInputStream(DEF_DIR + "db_cloudlets.txt")) {
-		asDefs = GeneratorsUtil.parseStream(asIO);
-		dbDefs = GeneratorsUtil.parseStream(dbIO);
-	    }
-
-	    double f = 100;
+	    double f = 0.1;
 	    IWorkloadGenerator workloadEuroGoogle = generateWorkload(
 		    brokerEuroGoogle.getId(),
 		    0 * HOUR,
 		    ImmutableMap.<String[], Double> of(new String[] { "US" }, 1.0, new String[] { "EU" }, 10.0),
-		    euroIPGen, f, asDefs, dbDefs);
+		    euroIPGen, f);
 	    brokerEuroGoogle.addWorkloadGenerators(Arrays.asList(workloadEuroGoogle), balancerEuroGoogle.getAppId());
 	    IWorkloadGenerator workloadEuroEC2 = generateWorkload(
 		    brokerEuroEC2.getId(),
 		    0 * HOUR,
 		    ImmutableMap.<String[], Double> of(new String[] { "US" }, 1.0, new String[] { "EU" }, 10.0),
-		    euroIPGen, f, asDefs, dbDefs);
+		    euroIPGen, f);
 	    brokerEuroEC2.addWorkloadGenerators(Arrays.asList(workloadEuroEC2), balancerEuroGoogle.getAppId());
 
 	    IWorkloadGenerator workloadUSGoogle = generateWorkload(
 		    brokerUSGoogle.getId(),
 		    12 * HOUR,
 		    ImmutableMap.<String[], Double> of(new String[] { "US" }, 10.0, new String[] { "EU" }, 1.0),
-		    usIPGen, f, asDefs, dbDefs);
+		    usIPGen, f);
 	    brokerUSGoogle.addWorkloadGenerators(Arrays.asList(workloadUSGoogle), balancerEuroEC2.getAppId());
 	    IWorkloadGenerator workloadUSEC2 = generateWorkload(
 		    brokerUSEC2.getId(),
 		    12 * HOUR,
 		    ImmutableMap.<String[], Double> of(new String[] { "US" }, 10.0, new String[] { "EU" }, 1.0),
-		    usIPGen, f, asDefs, dbDefs);
+		    usIPGen, f);
 	    brokerUSEC2.addWorkloadGenerators(Arrays.asList(workloadUSEC2), balancerEuroEC2.getAppId());
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 9: Starts the simulation
-	    System.err.println("Step 9: Start simulation....");
+	    CustomLog.print("Step 9: Start simulation....");
 
 	    CloudSim.startSimulation();
 
@@ -363,17 +365,18 @@ public class TwoDatacentres_MultiCloudFramework {
 
 	    CustomLog.redirectToFile(RESULT_DIR + "Sessions-BrokerUSEC2.csv");
 	    CustomLog.printResults(WebSession.class, brokerUSEC2.getServedSessions());
-	    
+
 	    // Print VMs
-	    String[] vmProperties = new String[]{"Id", "Status", "SubmissionTime",  "StartTime", "EndTime", "LifeDuration"};
+	    String[] vmProperties = new String[] { "Id", "Status", "SubmissionTime", "StartTime", "EndTime",
+		    "LifeDuration" };
 	    CustomLog.redirectToFile(RESULT_DIR + "VM-EuroGoogle.csv");
 	    CustomLog.printResults(HddVm.class, vmProperties, brokerEuroGoogle.getVmList());
 	    CustomLog.print(brokerEuroGoogle.bill());
-	    
+
 	    CustomLog.redirectToFile(RESULT_DIR + "VM-EuroEC2.csv");
 	    CustomLog.printResults(HddVm.class, vmProperties, brokerEuroEC2.getVmList());
 	    CustomLog.print(brokerEuroEC2.bill());
-	    
+
 	    CustomLog.redirectToFile(RESULT_DIR + "VM-USGoogle.csv");
 	    CustomLog.printResults(HddVm.class, vmProperties, brokerUSGoogle.getVmList());
 	    CustomLog.print(brokerUSGoogle.bill());
@@ -393,8 +396,7 @@ public class TwoDatacentres_MultiCloudFramework {
     }
 
     protected IWorkloadGenerator generateWorkload(final int userId, final double nullPoint,
-	    final Map<String[], Double> valuesAndFreqs, GeoIP2IPGenerator ipGen, double f,
-	    Map<String, List<Double>> asDefs, Map<String, List<Double>> dbDefs) {
+	    final Map<String[], Double> valuesAndFreqs, GeoIP2IPGenerator ipGen, double f) {
 	String[] periods = new String[] {
 		String.format("[%d,%d] m=%f  std=%f", HOURS[0], HOURS[6], 10d * f, 1d),
 		String.format("(%d,%d] m=%f  std=%f", HOURS[6], HOURS[7], 30d * f, 2d),
@@ -403,25 +405,32 @@ public class TwoDatacentres_MultiCloudFramework {
 		String.format("(%d,%d] m=%f  std=%f", HOURS[14], HOURS[17], 50d * f, 3d),
 		String.format("(%d,%d] m=%f  std=%f", HOURS[17], HOURS[18], 30d * f, 2d),
 		String.format("(%d,%d] m=%f  std=%f", HOURS[18], HOURS[24], 10d * f, 1d) };
-	return generateWorkload(userId, nullPoint, periods, valuesAndFreqs, ipGen, asDefs, dbDefs);
+	return generateWorkload(userId, nullPoint, periods, valuesAndFreqs, ipGen);
     }
 
     protected IWorkloadGenerator generateWorkload(final int userId, final double nullPoint,
-	    final String[] periods, final Map<String[], Double> valuesAndFreqs, GeoIP2IPGenerator ipGen,
-	    Map<String, List<Double>> asDefs, Map<String, List<Double>> dbDefs) {
-	System.err.println("		Start workload generation....");
-	StatSessionGenerator sessGen = new SynchDataStatGenerator(GeneratorsUtil.cloneDefs(asDefs),
-		GeneratorsUtil.cloneDefs(dbDefs), userId, step, new RandomListGenerator<>(valuesAndFreqs));
+	    final String[] periods, final Map<String[], Double> valuesAndFreqs, GeoIP2IPGenerator ipGen) {
 
-	double unit = HOUR;
-	double periodLength = DAY;
+	Map<String, List<Double>> asDefs;
+	Map<String, List<Double>> dbDefs;
+	try (InputStream asIO = new FileInputStream(DEF_DIR + "web_cloudlets.txt");
+		InputStream dbIO = new FileInputStream(DEF_DIR + "db_cloudlets.txt")) {
+	    asDefs = GeneratorsUtil.parseStream(asIO);
+	    dbDefs = GeneratorsUtil.parseStream(dbIO);
+	    StatSessionGenerator sessGen = new SynchDataStatGenerator(GeneratorsUtil.cloneDefs(asDefs),
+		    GeneratorsUtil.cloneDefs(dbDefs), userId, step, new RandomListGenerator<>(valuesAndFreqs));
 
-	FrequencyFunction freqFun = new PeriodicStochasticFrequencyFunction(unit, periodLength, nullPoint,
-		CompositeValuedSet.createCompositeValuedSet(periods));
+	    double unit = HOUR;
+	    double periodLength = DAY;
 
-	System.err.println("		End of workload generation");
+	    FrequencyFunction freqFun = new PeriodicStochasticFrequencyFunction(unit, periodLength, nullPoint,
+		    CompositeValuedSet.createCompositeValuedSet(SEED_GEN, periods));
 
-	return new RandomIPWorkloadGenerator(new StatWorkloadGenerator(freqFun, sessGen), ipGen, geoService);
+	    return new RandomIPWorkloadGenerator(new StatWorkloadGenerator(SEED_GEN, freqFun, sessGen),
+		    ipGen, geoService);
+	} catch (IOException e) {
+	    throw new RuntimeException(e);
+	}
     }
 
     private List<HddVm> createVMs(final int brokerId, final int mips, final int ioMips, final int ram, int numberOfVms,

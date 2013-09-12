@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 
 import org.uncommons.maths.random.GaussianGenerator;
 import org.uncommons.maths.random.MersenneTwisterRNG;
+import org.uncommons.maths.random.SeedException;
+import org.uncommons.maths.random.SeedGenerator;
 
 /**
  * A finite interval of values with an associated normal distribution or a
@@ -49,22 +51,32 @@ public class FiniteValuedInterval {
      */
     public FiniteValuedInterval(double start, boolean startIncluded, double end, boolean endIncluded, double mean,
 	    double stDev, byte[] seed) {
-	super();
-	if (start > end) {
-	    throw new IllegalArgumentException("The start of an interval should be smaller than the end.");
-	}
+	this(start, startIncluded, end, endIncluded, mean, stDev, seed, null);
+    }
 
-	this.start = start;
-	this.startIncluded = startIncluded;
-	this.end = end;
-	this.endIncluded = endIncluded;
-
-	if (stDev > 0) {
-	    Random rng = seed == null ? new MersenneTwisterRNG() : new MersenneTwisterRNG(seed);
-	    generator = new GaussianGenerator(mean, stDev, rng);
-	} else {
-	    value = mean;
-	}
+    /**
+     * Constr.
+     * 
+     * @param start
+     *            - the start of the interval.
+     * @param startIncluded
+     *            - whether the start is included in the interval.
+     * @param end
+     *            - the end of the interval. Must be greater than the start.
+     * @param endIncluded
+     *            - if the end is included in the interval.
+     * @param mean
+     *            - the mean of the generated values.
+     * @param stDev
+     *            - the standard deviation. If 0, then only constants with value
+     *            mean are generated.
+     * @param seedGen
+     *            - the seed generator. If null or erronous a default seed gen
+     *            is used.
+     */
+    public FiniteValuedInterval(double start, boolean startIncluded, double end, boolean endIncluded, double mean,
+	    double stDev, SeedGenerator seedGen) {
+	this(start, startIncluded, end, endIncluded, mean, stDev, null, seedGen);
     }
 
     /**
@@ -88,7 +100,37 @@ public class FiniteValuedInterval {
      */
     public FiniteValuedInterval(double start, boolean startIncluded, double end, boolean endIncluded, double mean,
 	    double stDev) {
-	this(start, startIncluded, end, endIncluded, mean, stDev, null);
+	this(start, startIncluded, end, endIncluded, mean, stDev, (byte[])null);
+    }
+
+    private FiniteValuedInterval(double start, boolean startIncluded, double end, boolean endIncluded, double mean,
+	    double stDev, byte[] seed, SeedGenerator seedGen) {
+	super();
+	if (start > end) {
+	    throw new IllegalArgumentException("The start of an interval should be smaller than the end.");
+	}
+
+	this.start = start;
+	this.startIncluded = startIncluded;
+	this.end = end;
+	this.endIncluded = endIncluded;
+
+	if (stDev > 0) {
+	    Random rng = null;
+	    if (seed == null) {
+		try {
+		    rng = seedGen == null ? new MersenneTwisterRNG() : new MersenneTwisterRNG(seedGen);
+		} catch (SeedException e) {
+		    rng = new MersenneTwisterRNG();
+		}
+	    } else {
+		rng = new MersenneTwisterRNG(seed);
+	    }
+
+	    generator = new GaussianGenerator(mean, stDev, rng);
+	} else {
+	    value = mean;
+	}
     }
 
     /**
@@ -119,20 +161,42 @@ public class FiniteValuedInterval {
 
     /**
      * Creates a new interval from it's textual representation.
-     * @param interval - the txt of the interval.
+     * 
+     * @param interval
+     *            - the txt of the interval.
      * @return a new interval from it's textual representation.
      */
     public static FiniteValuedInterval createInterval(String interval) {
-	return createInterval(interval, null);
+	return createInterval(interval, null, null);
     }
 
     /**
      * Creates a new interval from it's textual representation.
-     * @param interval - the txt of the interval.
-     * @param seed - the seed of the new interval
+     * 
+     * @param interval
+     *            - the txt of the interval.
+     * @param seed
+     *            - the seed of the new interval
      * @return a new interval from it's textual representation.
      */
     public static FiniteValuedInterval createInterval(String interval, byte[] seed) {
+	return createInterval(interval, seed, null);
+    }
+
+    /**
+     * Creates a new interval from it's textual representation.
+     * 
+     * @param interval
+     *            - the txt of the interval.
+     * @param seedGen
+     *            - the seed generator for the new interval.
+     * @return a new interval from it's textual representation.
+     */
+    public static FiniteValuedInterval createInterval(String interval, SeedGenerator seedGen) {
+	return createInterval(interval, null, seedGen);
+    }
+    
+    private static FiniteValuedInterval createInterval(String interval, byte[] seed, SeedGenerator seedGen) {
 	String cleanedInterval = interval.replaceAll("\\s*", "");
 	Matcher matcher = INTERVAL_PATTERN.matcher(cleanedInterval);
 	matcher.matches();
@@ -145,12 +209,13 @@ public class FiniteValuedInterval {
 	double mean = Double.parseDouble(matcher.group(5));
 	double stDev = Double.parseDouble(matcher.group(6));
 
-	return new FiniteValuedInterval(start, includeStart, end, includeEnd, mean, stDev, seed);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s%.2f,%.2f%s", startIncluded? "[" : "(", start, end, endIncluded ? "]": ")");
+	return new FiniteValuedInterval(start, includeStart, end, includeEnd, mean, stDev, seed, seedGen);
     }
     
+    
+    @Override
+    public String toString() {
+	return String.format("%s%.2f,%.2f%s", startIncluded ? "[" : "(", start, end, endIncluded ? "]" : ")");
+    }
+
 }

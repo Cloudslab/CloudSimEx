@@ -12,6 +12,8 @@ import org.cloudbus.cloudsim.ex.vm.VMex;
 import org.uncommons.maths.number.NumberGenerator;
 import org.uncommons.maths.random.GaussianGenerator;
 import org.uncommons.maths.random.MersenneTwisterRNG;
+import org.uncommons.maths.random.SeedException;
+import org.uncommons.maths.random.SeedGenerator;
 
 /**
  * A boot delay generator, which for a given vm (specified by type and OS)
@@ -43,7 +45,7 @@ public class GaussianByTypeBootDelay implements IVMBootDelayDistribution {
      *            of VMs which are not present in this mapping is considered 0.
      */
     public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs) {
-	this(delayDefs, null, 0.0);
+	this(delayDefs, (byte[]) null, 0.0);
     }
 
     /**
@@ -57,7 +59,7 @@ public class GaussianByTypeBootDelay implements IVMBootDelayDistribution {
      */
     public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs,
 	    final double defaultVal) {
-	this(delayDefs, null, defaultVal);
+	this(delayDefs, (byte[]) null, defaultVal);
     }
 
     /**
@@ -78,6 +80,22 @@ public class GaussianByTypeBootDelay implements IVMBootDelayDistribution {
      * Constructor.
      * 
      * @param delayDefs
+     *            - a mapping of type [vm-type, OS] -> [m, stdev].The boot time
+     *            of VMs which are not present in this mapping is considered 0.
+     * @param seedGen
+     *            - the seed generator to use. If null or erronous, then default
+     *            seed gen policy is used.
+     * @param defaultVal
+     */
+    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs,
+	    final SeedGenerator seedGen) {
+	this(delayDefs, seedGen, 0);
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param delayDefs
      *            - a mapping of type [vm-type, OS] -> [m, stdev].
      * @param seed
      *            - a seed for the generator. If null, then no seed is used.
@@ -87,7 +105,39 @@ public class GaussianByTypeBootDelay implements IVMBootDelayDistribution {
      */
     public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs,
 	    final byte[] seed, final double defaultVal) {
-	Random merseneGenerator = seed == null ? new MersenneTwisterRNG() : new MersenneTwisterRNG(seed);
+	this(delayDefs, seed, null, defaultVal);
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param delayDefs
+     *            - a mapping of type [vm-type, OS] -> [m, stdev].
+     * @param seedGen
+     *            - the seed generator to use. If null or erronous, then default
+     *            seed gen policy is used.
+     * @param defaultVal
+     *            - a value to be returned when evaluating VMs, which are not
+     *            present in the aforementioned mapping.
+     */
+    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs,
+	    final SeedGenerator seedGen, final double defaultVal) {
+	this(delayDefs, null, seedGen, defaultVal);
+    }
+
+    private GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs,
+	    final byte[] seed, SeedGenerator seedGen, final double defaultVal) {
+	Random merseneGenerator = null;
+	if (seed == null) {
+	    try {
+		merseneGenerator = seedGen == null ? new MersenneTwisterRNG() : new MersenneTwisterRNG(seedGen);
+	    } catch (SeedException e) {
+		merseneGenerator = new MersenneTwisterRNG();
+	    }
+	} else {
+	    merseneGenerator = new MersenneTwisterRNG(seed);
+	}
+
 	this.defaultValue = defaultVal;
 
 	for (Map.Entry<Pair<String, String>, Pair<Double, Double>> entry : delayDefs.entrySet()) {

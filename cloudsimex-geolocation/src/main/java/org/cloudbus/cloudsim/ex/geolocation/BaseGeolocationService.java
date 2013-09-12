@@ -2,6 +2,9 @@ package org.cloudbus.cloudsim.ex.geolocation;
 
 import java.util.Objects;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
 /**
  * Implements common functionalities of the geolocation services, regardless of
  * how the data is accessed - through an online API or offline.
@@ -10,6 +13,17 @@ import java.util.Objects;
  * 
  */
 public abstract class BaseGeolocationService implements IGeolocationService {
+
+    private static final int CACHE_SIZE = 10_000;
+    private static final int INITIAL_CACHE_SIZE = 1_000;
+    /** In order to minimise the number of created instances, we keep a cache. */
+    private static final Cache<GeoDistanceCacheKey, Double> DISTANCE_CACHE =
+	    CacheBuilder.newBuilder().initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
+    /**
+     * We shall consider coordinates differing after the ROUND_DIGITS
+     * significant digit to be equal.
+     */
+    private static final int SIGNIFICANT_COORD_DIGITS = 2;
 
     /*
      * (non-Javadoc)
@@ -22,7 +36,15 @@ public abstract class BaseGeolocationService implements IGeolocationService {
      */
     @Override
     public double distance(double lat1, double lon1, double lat2, double lon2) {
-
+	// First check in the cache...
+	GeoDistanceCacheKey key = GeoDistanceCacheKey.of(lat1, lon1, lat2, lon2, SIGNIFICANT_COORD_DIGITS);
+	Double cachedDistance = DISTANCE_CACHE.getIfPresent(key);
+	if(cachedDistance != null) {
+//	    CustomLog.printf("[CACHED] Distance between [%.2f, %.2f] and [%.2f, %.2f] is %.3f", lat1, lon1, lat2, lon2, cachedDistance);
+	    return cachedDistance;
+	}
+	
+	// It is not in the cache... run Vincenty's formula ...
 	double a = 6378137, b = 6356752.314245, f = 1 / 298.257223563; // WGS-84
 								       // ellipsoid
 								       // params
@@ -68,6 +90,11 @@ public abstract class BaseGeolocationService implements IGeolocationService {
 				* (-3 + 4 * sinSigma * sinSigma) * (-3 + 4 * cos2SigmaM * cos2SigmaM)));
 	double dist = b * A * (sigma - deltaSigma);
 
+//	CustomLog.printf("Distance between [%.2f, %.2f] and [%.2f, %.2f] is %.3f", lat1, lon1, lat2, lon2, dist);
+	
+	// Update the cache..
+	DISTANCE_CACHE.put(key, dist);
+	
 	return dist;
     }
 

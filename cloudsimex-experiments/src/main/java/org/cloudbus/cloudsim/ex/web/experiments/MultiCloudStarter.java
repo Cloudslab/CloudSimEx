@@ -26,6 +26,7 @@ public class MultiCloudStarter {
 	for (Class<?> clazz : experimens) {
 	    experiments.put(clazz,
 		    TwoDatacentres_MultiCloudFramework.RESULT_DIR + String.format("%s.log", clazz.getSimpleName()));
+	    
 	}
 
 	// Run the experiments with custom_log.properties config of the loggers

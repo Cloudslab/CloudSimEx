@@ -23,6 +23,25 @@ public class MonitoredVMex extends VMex {
     final private Map<Double, double[]> performanceObservations = new LinkedHashMap<>();
     private final double summaryPeriodLength;
 
+    private double lastUtilUpdateTime = -1;
+    private double lastUtilMeasurmentTime = -1;
+    private double[] lastUtilMeasurement = new double[] { 0, 0, 0 };
+
+    /**
+     * Constr.
+     * 
+     * @param userId
+     * @param mips
+     * @param numberOfPes
+     * @param ram
+     * @param bw
+     * @param size
+     * @param vmm
+     * @param cloudletScheduler
+     * @param summaryPeriodLength
+     *            - the historical period, used to determine the utilisation at
+     *            runtime.
+     */
     public MonitoredVMex(final int userId, final double mips, final int numberOfPes, int ram,
 	    final long bw, final long size, final String vmm, final CloudletScheduler cloudletScheduler,
 	    final double summaryPeriodLength) {
@@ -30,6 +49,21 @@ public class MonitoredVMex extends VMex {
 	this.summaryPeriodLength = summaryPeriodLength;
     }
 
+    /**
+     * 
+     * @param userId
+     * @param mips
+     * @param numberOfPes
+     * @param ram
+     * @param bw
+     * @param size
+     * @param vmm
+     * @param cloudletScheduler
+     * @param metadata
+     * @param summaryPeriodLength
+     *            - the historical period, used to determine the utilisation at
+     *            runtime.
+     */
     public MonitoredVMex(final int userId, final double mips, final int numberOfPes, final int ram,
 	    final long bw, final long size, final String vmm, final CloudletScheduler cloudletScheduler,
 	    final VMMetadata metadata, final double summaryPeriodLength) {
@@ -69,8 +103,9 @@ public class MonitoredVMex extends VMex {
     public void updatePerformance(final double[] util) {
 	if (summaryPeriodLength >= 0) {
 	    double currTime = getCurrentTime();
+	    
+	    this.lastUtilUpdateTime = currTime;
 	    performanceObservations.put(currTime, util);
-
 	    cleanupOldData(currTime);
 	}
     }
@@ -104,7 +139,9 @@ public class MonitoredVMex extends VMex {
 
     /**
      * Returns the current utilisation as a array of numbers in the range [0,1]
-     * in the from [cp_util, ram_util, disk_util].
+     * in the from [cp_util, ram_util, disk_util]. <strong>NOTE</strong> calling
+     * methods should not modify the resulting array, as a shallow copy may be
+     * returned!
      * 
      * @return the current utilisation as a array of numbers in the range [0,1]
      *         in the from [cp_util, ram_util, disk_util].
@@ -114,19 +151,29 @@ public class MonitoredVMex extends VMex {
     }
 
     private double[] getAveragedPerformance(final double currTime) {
-	cleanupOldData(currTime);
-	double[] result = new double[] { 0, 0, 0 };
-	if (summaryPeriodLength >= 0 && !performanceObservations.isEmpty()) {
-	    for (Map.Entry<Double, double[]> entry : performanceObservations.entrySet()) {
+	// If there has not been any update - return the cached value
+	if (this.lastUtilUpdateTime < this.lastUtilMeasurmentTime) {
+	    return this.lastUtilMeasurement;
+	} else {
+	    cleanupOldData(currTime);
+	    double[] result = new double[] { 0, 0, 0 };
+	    if (summaryPeriodLength >= 0 && !performanceObservations.isEmpty()) {
+		for (Map.Entry<Double, double[]> entry : performanceObservations.entrySet()) {
+		    for (int i = 0; i < result.length; i++) {
+			result[i] += entry.getValue()[i];
+		    }
+		}
 		for (int i = 0; i < result.length; i++) {
-		    result[i] += entry.getValue()[i];
+		    result[i] = result[i] / performanceObservations.size();
 		}
 	    }
-	    for (int i = 0; i < result.length; i++) {
-		result[i] = result[i] / performanceObservations.size();
-	    }
+
+	    // Cache the value for further usage
+	    lastUtilMeasurmentTime = currTime;
+	    lastUtilMeasurement = result;
+
+	    return result;
 	}
-	return result;
     }
 
     private void cleanupOldData(final double currTime) {
