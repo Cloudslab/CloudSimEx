@@ -19,13 +19,13 @@ public class MultiCloudStarter {
      * @throws Execution
      */
     public static void main(final String[] args) throws Exception {
-	Class<?>[] experimens = new Class<?>[] { TwoDatacentres_MultiCloudFramework.class };
+	Class<?>[] experimens = new Class<?>[] { MultiCloudFramework.class };
 
 	// Map the main experiment classes to the output files
 	Map<Class<?>, String> experiments = new LinkedHashMap<>();
 	for (Class<?> clazz : experimens) {
 	    experiments.put(clazz,
-		    TwoDatacentres_MultiCloudFramework.RESULT_DIR + String.format("%s.log", clazz.getSimpleName()));
+		    MultiCloudFramework.RESULT_DIR + String.format("%s.log", clazz.getSimpleName()));
 	    
 	}
 

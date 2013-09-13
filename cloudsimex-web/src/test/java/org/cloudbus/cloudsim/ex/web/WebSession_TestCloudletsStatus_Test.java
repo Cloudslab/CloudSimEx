@@ -84,9 +84,9 @@ public class WebSession_TestCloudletsStatus_Test {
 	String vmm = "Xen"; // VMM name
 
 	// create two VMs
-	vm1 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
+	vm1 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-	vm2 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
+	vm2 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
 	// add the VMs to the vmList

@@ -83,11 +83,11 @@ public class SimpleWebLoadBalancerTest {
 	String vmm = "Xen"; // VMM name
 
 	// create two VMs
-	HddVm appVm1 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
+	HddVm appVm1 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-	HddVm appVm2 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
+	HddVm appVm2 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-	HddVm dbVm = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
+	HddVm dbVm = new HddVm("DB-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
 	// add the VMs to the vmList
@@ -140,11 +140,11 @@ public class SimpleWebLoadBalancerTest {
 	String vmm = "Xen"; // VMM name
 
 	// create two VMs
-	HddVm appVm1 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
+	HddVm appVm1 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-	HddVm appVm2 = new HddVm(broker.getId(), VM_MIPS * 2, HOST_MIOPS, pesNumber,
+	HddVm appVm2 = new HddVm("App-Srv", broker.getId(), VM_MIPS * 2, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-	HddVm dbVm = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
+	HddVm dbVm = new HddVm("DB-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
 	// add the VMs to the vmList
@@ -210,11 +210,11 @@ public class SimpleWebLoadBalancerTest {
 	String vmm = "Xen"; // VMM name
 
 	// create two VMs
-	HddVm appVm1 = new HddVm(broker.getId(), VM_MIPS * 2, HOST_MIOPS, pesNumber,
+	HddVm appVm1 = new HddVm("App-Srv", broker.getId(), VM_MIPS * 2, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-	HddVm appVm2 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
+	HddVm appVm2 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-	HddVm dbVm = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
+	HddVm dbVm = new HddVm("DB-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
 	// add the VMs to the vmList
@@ -280,11 +280,11 @@ public class SimpleWebLoadBalancerTest {
 	String vmm = "Xen"; // VMM name
 
 	// create two VMs
-	HddVm appVm1 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
+	HddVm appVm1 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-	HddVm appVm2 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
+	HddVm appVm2 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-	HddVm dbVm = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
+	HddVm dbVm = new HddVm("DB-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
 	// add the VMs to the vmList

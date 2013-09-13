@@ -107,7 +107,7 @@ public abstract class BaseDatacenterBrokerTest {
 	int pesNumber = 1; // number of cpus
 	String vmm = "Xen"; // VMM name
 
-	return new VMex(broker.getId(), VM_MIPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
+	return new VMex("TestVM", broker.getId(), VM_MIPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
 		new CloudletSchedulerTimeShared());
     }
 

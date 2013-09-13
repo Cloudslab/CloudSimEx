@@ -1,6 +1,7 @@
 package org.cloudbus.cloudsim.ex.web.experiments;
 
-import static org.cloudbus.cloudsim.Consts.*;
+import static org.cloudbus.cloudsim.Consts.DAY;
+import static org.cloudbus.cloudsim.Consts.HOUR;
 import static org.cloudbus.cloudsim.ex.web.experiments.ExperimentsUtil.HOURS;
 
 import java.io.FileInputStream;
@@ -117,16 +118,16 @@ public class TwoDatacentres {
 		    dc2.getId());
 
 	    // Step 4: Create virtual machines
-	    HddVm dbServerVMDC1 = createVM(brokerDC1.getId(), 10000, 10000, 512);
-	    List<HddVm> appServersVMDC1 = Arrays.asList(createVM(brokerDC1.getId(), 10000, 10000, 512));
+	    HddVm dbServerVMDC1 = createVM("Db-Srv", brokerDC1.getId(), 10000, 10000, 512);
+	    List<HddVm> appServersVMDC1 = Arrays.asList(createVM("App-Srv", brokerDC1.getId(), 10000, 10000, 512));
 
 	    vmScheduler1.map(dbServerVMDC1.getId(), pe1.getId());
 	    vmScheduler1.map(appServersVMDC1.get(0).getId(), pe2.getId());
 
-	    HddVm dbServerVMDC2 = createVM(brokerDC2.getId(),
+	    HddVm dbServerVMDC2 = createVM("Db-Srv", brokerDC2.getId(),
 		    (int) (10000 * ((2666 * (100 - 3.028893) / 100) / 3400.0)), 7500, 1666);
 	    List<HddVm> appServersVMDC2 =
-		    Arrays.asList(createVM(brokerDC2.getId(),
+		    Arrays.asList(createVM("App-Srv", brokerDC2.getId(),
 			    (int) (10000 * ((2266 * (100 - 0.241971) / 100) / 3400.0)), 7500, 1656));
 
 	    vmScheduler2.map(dbServerVMDC2.getId(), pe3.getId());
@@ -230,7 +231,7 @@ public class TwoDatacentres {
 	return null;
     }
 
-    private HddVm createVM(final int brokerId, final int mips, final int ioMips, final int ram) {
+    private HddVm createVM(String name, final int brokerId, final int mips, final int ioMips, final int ram) {
 	// VM description
 	// int mips = 10000;
 	// int ioMips = 10000;
@@ -241,7 +242,7 @@ public class TwoDatacentres {
 	String vmm = "Xen"; // VMM name
 
 	// create two VMs
-	HddVm appServerVM = new HddVm(brokerId, mips, ioMips, pesNumber,
+	HddVm appServerVM = new HddVm(name, brokerId, mips, ioMips, pesNumber,
 		ram, bw, size, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 	return appServerVM;
     }

@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -17,6 +19,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.cloudbus.cloudsim.Consts;
@@ -81,7 +84,7 @@ import com.google.common.collect.ImmutableMap;
  * @author nikolay.grozev
  * 
  */
-public class TwoDatacentres_MultiCloudFramework {
+public class MultiCloudFramework {
 
     private static final int LATENCY_SLA = 40;
 
@@ -115,7 +118,7 @@ public class TwoDatacentres_MultiCloudFramework {
 
     protected int simulationLength = DAY + HOUR / 2;
     protected int step = 60;
-    protected double monitoringPeriod = 1;
+    protected double monitoringPeriod = 0.1;
     protected String experimentName = "Multi-Cloud Framework Experiment";
 
     private static final DataItem DATA_EURO1 = new DataItem(5);
@@ -135,8 +138,17 @@ public class TwoDatacentres_MultiCloudFramework {
      * @throws IOException
      */
     public static void main(final String[] args) throws IOException {
-	ExperimentsUtil.parseExperimentParameters(args);
-	new TwoDatacentres_MultiCloudFramework().runExperimemt();
+//	ExperimentsUtil.parseExperimentParameters(args);
+
+	Properties props = new Properties();
+	try (InputStream is = Files.newInputStream(Paths.get("../custom_log.properties"))) {
+	    props.load(is);
+	}
+	props.put(CustomLog.FILE_PATH_PROP_KEY,
+		RESULT_DIR + String.format("%s.log", MultiCloudFramework.class.getSimpleName()));
+	CustomLog.configLogger(props);
+
+	new MultiCloudFramework().runExperimemt();
     }
 
     /**
@@ -240,22 +252,25 @@ public class TwoDatacentres_MultiCloudFramework {
 	    googleMeta.setOS(Consts.NIX_OS);
 	    googleMeta.setType("n1-standard-1-d");
 
-	    List<HddVm> appServersEuroGoogle = createVMs(brokerEuroGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numApp,
-		    googleMeta);
-	    List<HddVm> dbServersEuroGoogle = createVMs(brokerEuroGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numDBs,
-		    googleMeta);
+	    List<HddVm> appServersEuroGoogle =
+		    createVMs("AS-Google", brokerEuroGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numApp, googleMeta);
+	    List<HddVm> dbServersEuroGoogle =
+		    createVMs("DB-Google", brokerEuroGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numDBs, googleMeta);
 
-	    List<HddVm> appServersEuroEC2 = createVMs(brokerEuroEC2.getId(), MIPS_AS_VM_EC2, 7500, 1666, numApp,
-		    ec2Meta);
-	    List<HddVm> dbServersEuroEC2 = createVMs(brokerEuroEC2.getId(), MIPS_DB_VM_EC2, 7500, 1666, numDBs, ec2Meta);
+	    List<HddVm> appServersEuroEC2 =
+		    createVMs("AS-EC2", brokerEuroEC2.getId(), MIPS_AS_VM_EC2, 7500, 1666, numApp, ec2Meta);
+	    List<HddVm> dbServersEuroEC2 =
+		    createVMs("DB-EC2", brokerEuroEC2.getId(), MIPS_DB_VM_EC2, 7500, 1666, numDBs, ec2Meta);
 
-	    List<HddVm> appServersUSGoogle = createVMs(brokerUSGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numApp,
-		    googleMeta);
-	    List<HddVm> dbServersUSGoogle = createVMs(brokerUSGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numDBs,
-		    googleMeta);
+	    List<HddVm> appServersUSGoogle =
+		    createVMs("AS-Google", brokerUSGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numApp, googleMeta);
+	    List<HddVm> dbServersUSGoogle =
+		    createVMs("DB-Google", brokerUSGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numDBs, googleMeta);
 
-	    List<HddVm> appServersUSEC2 = createVMs(brokerUSEC2.getId(), MIPS_AS_VM_EC2, 7500, 1666, numApp, ec2Meta);
-	    List<HddVm> dbServersUSEC2 = createVMs(brokerUSEC2.getId(), MIPS_DB_VM_EC2, 7500, 1656, numDBs, ec2Meta);
+	    List<HddVm> appServersUSEC2 =
+		    createVMs("AS-EC2", brokerUSEC2.getId(), MIPS_AS_VM_EC2, 7500, 1666, numApp, ec2Meta);
+	    List<HddVm> dbServersUSEC2 =
+		    createVMs("DB-EC2", brokerUSEC2.getId(), MIPS_DB_VM_EC2, 7500, 1656, numDBs, ec2Meta);
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 6: Create load balancers
@@ -263,22 +278,22 @@ public class TwoDatacentres_MultiCloudFramework {
 	    double cpuThreshold = 0.8;
 	    double ramThreshold = 0.8;
 
-	    ILoadBalancer balancerEuroGoogle = new CompressLoadBalancer(
+	    ILoadBalancer balancerEuroGoogle = new CompressLoadBalancer(brokerEuroGoogle,
 		    1, HAMINA_FINLAND_IP, appServersEuroGoogle, new SimpleDBBalancer(dbServersEuroGoogle),
 		    cpuThreshold, ramThreshold);
 	    brokerEuroGoogle.addLoadBalancer(balancerEuroGoogle);
 
-	    ILoadBalancer balancerEuroEC2 = new CompressLoadBalancer(
+	    ILoadBalancer balancerEuroEC2 = new CompressLoadBalancer(brokerEuroEC2,
 		    1, DUBLIN_IP, appServersEuroEC2, new SimpleDBBalancer(dbServersEuroEC2),
 		    cpuThreshold, ramThreshold);
 	    brokerEuroEC2.addLoadBalancer(balancerEuroEC2);
 
-	    ILoadBalancer balancerUSGoogle = new CompressLoadBalancer(
+	    ILoadBalancer balancerUSGoogle = new CompressLoadBalancer(brokerUSGoogle,
 		    1, DALAS_IP, appServersUSGoogle, new SimpleDBBalancer(dbServersUSGoogle),
 		    cpuThreshold, ramThreshold);
 	    brokerUSGoogle.addLoadBalancer(balancerUSGoogle);
 
-	    ILoadBalancer balancerUSEC2 = new CompressLoadBalancer(
+	    ILoadBalancer balancerUSEC2 = new CompressLoadBalancer(brokerUSEC2,
 		    1, NEW_YORK_IP, appServersUSEC2, new SimpleDBBalancer(dbServersUSEC2),
 		    cpuThreshold, ramThreshold);
 	    brokerUSEC2.addLoadBalancer(balancerUSEC2);
@@ -306,7 +321,7 @@ public class TwoDatacentres_MultiCloudFramework {
 	    // Step 8: Define the workload and associate it with load balancers
 	    CustomLog.print("Step 8: Define workload....");
 
-	    double f = 0.1;
+	    double f = 10;
 	    IWorkloadGenerator workloadEuroGoogle = generateWorkload(
 		    brokerEuroGoogle.getId(),
 		    0 * HOUR,
@@ -367,7 +382,7 @@ public class TwoDatacentres_MultiCloudFramework {
 	    CustomLog.printResults(WebSession.class, brokerUSEC2.getServedSessions());
 
 	    // Print VMs
-	    String[] vmProperties = new String[] { "Id", "Status", "SubmissionTime", "StartTime", "EndTime",
+	    String[] vmProperties = new String[] { "Id", "Name", "Status", "SubmissionTime", "StartTime", "EndTime",
 		    "LifeDuration" };
 	    CustomLog.redirectToFile(RESULT_DIR + "VM-EuroGoogle.csv");
 	    CustomLog.printResults(HddVm.class, vmProperties, brokerEuroGoogle.getVmList());
@@ -433,7 +448,8 @@ public class TwoDatacentres_MultiCloudFramework {
 	}
     }
 
-    private List<HddVm> createVMs(final int brokerId, final int mips, final int ioMips, final int ram, int numberOfVms,
+    private List<HddVm> createVMs(String name, final int brokerId, final int mips, final int ioMips, final int ram,
+	    int numberOfVms,
 	    VMMetadata meta) {
 	List<HddVm> hddVMs = new ArrayList<>();
 	for (int i = 0; i < numberOfVms; i++) {
@@ -446,7 +462,7 @@ public class TwoDatacentres_MultiCloudFramework {
 	    int pesNumber = 1; // number of cpus
 	    String vmm = "Xen"; // VMM name
 
-	    HddVm hddVm = new HddVm(brokerId, mips, ioMips, pesNumber,
+	    HddVm hddVm = new HddVm(name, brokerId, mips, ioMips, pesNumber,
 		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared(), meta.clone(), new Integer[0]);
 	    hddVMs.add(hddVm);
 	}

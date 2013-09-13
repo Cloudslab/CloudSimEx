@@ -1,6 +1,7 @@
 package org.cloudbus.cloudsim.ex.vm;
 
 import java.util.EnumSet;
+import java.util.Objects;
 
 import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.Vm;
@@ -20,21 +21,49 @@ public class VMex extends Vm {
     private VMStatus status;
     private final VMMetadata metadata;
 
+    private String name;
+
     private double submissionTime;
     private double startTime;
     private double endTime;
 
-    public VMex(final int userId, final double mips, final int numberOfPes, final int ram, final long bw,
-	    final long size, final String vmm,
+    /**
+     * Constr.
+     * @param name - a short readable description of the VM - e.g. DB-server.
+     * @param userId
+     * @param mips
+     * @param numberOfPes
+     * @param ram
+     * @param bw
+     * @param size
+     * @param vmm
+     * @param cloudletScheduler
+     */
+    public VMex(final String name, final int userId, final double mips, final int numberOfPes, final int ram,
+	    final long bw, final long size, final String vmm,
 	    final CloudletScheduler cloudletScheduler) {
-	this(userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, new VMMetadata());
+	this(name, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, new VMMetadata());
 
     }
 
-    public VMex(final int userId, final double mips, final int numberOfPes, final int ram, final long bw,
-	    final long size, final String vmm,
+    /**
+     * Constr.
+     * @param name - a short readable description of the VM - e.g. DB-server.
+     * @param userId
+     * @param mips
+     * @param numberOfPes
+     * @param ram
+     * @param bw
+     * @param size
+     * @param vmm
+     * @param cloudletScheduler
+     * @param metadata
+     */
+    public VMex(final String name, final int userId, final double mips, final int numberOfPes, final int ram,
+	    final long bw, final long size, final String vmm,
 	    final CloudletScheduler cloudletScheduler, final VMMetadata metadata) {
 	super(Id.pollId(Vm.class), userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
+	this.name = name;
 	this.metadata = metadata;
     }
 
@@ -184,6 +213,15 @@ public class VMex extends Vm {
     }
 
     /**
+     * Returns the name of the VM.
+     * 
+     * @return the name of the VM.
+     */
+    public String getName() {
+	return name;
+    }
+
+    /**
      * Returns the metadata of this VM.
      * 
      * @return the metadata of this VM.
@@ -230,8 +268,14 @@ public class VMex extends Vm {
 	    throw new IllegalStateException("The operation is undefined for subclass: " + getClass().getCanonicalName());
 	}
 
-	VMex result = new VMex(getUserId(), getMips(), getNumberOfPes(), getRam(), getBw(), getSize(), getVmm(),
+	VMex result = new VMex(getName(), getUserId(), getMips(), getNumberOfPes(), getRam(), getBw(), getSize(),
+		getVmm(),
 		scheduler, getMetadata().clone());
 	return result;
+    }
+
+    @Override
+    public String toString() {
+	return String.format("VM(%s, %d)", Objects.toString(getName(), "N/A"), getId());
     }
 }

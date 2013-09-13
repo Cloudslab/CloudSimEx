@@ -209,7 +209,7 @@ public class MonitoringBorkerEXTest extends BaseDatacenterBrokerTest {
 	int pesNumber = 1; // number of cpus
 	String vmm = "Xen"; // VMM name
 
-	return new MonitoredVMex(broker.getId(), VM_MIPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
+	return new MonitoredVMex("Test", broker.getId(), VM_MIPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
 		new CloudletSchedulerTimeShared(), SUMMARY_PERIOD_LEN);
     }
 

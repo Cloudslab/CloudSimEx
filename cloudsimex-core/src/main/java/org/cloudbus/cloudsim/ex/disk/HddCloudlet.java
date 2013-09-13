@@ -15,6 +15,8 @@ import org.cloudbus.cloudsim.ex.util.TextUtil;
  */
 public class HddCloudlet extends Cloudlet {
 
+    private static final UtilizationModelFull UTIL_MODEL_FULL = new UtilizationModelFull();
+    
     private int numberOfHddPes = 1;
     protected long cloudletIOLength;
     protected final double ram;
@@ -45,8 +47,8 @@ public class HddCloudlet extends Cloudlet {
 	    final DataItem data,
 	    final boolean record) {
 
-	super(Id.pollId(Cloudlet.class), cloudletLength, pesNumber, 0, 0, new UtilizationModelFull(),
-		new UtilizationModelFull(), new UtilizationModelFull(), record);
+	super(Id.pollId(Cloudlet.class), cloudletLength, pesNumber, 0, 0, UTIL_MODEL_FULL,
+		UTIL_MODEL_FULL, UTIL_MODEL_FULL, record);
 	this.ram = ram;
 	this.cloudletIOLength = cloudletIOLength;
 	this.data = data;

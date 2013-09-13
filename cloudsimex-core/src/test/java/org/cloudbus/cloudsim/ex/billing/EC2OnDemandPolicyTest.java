@@ -220,7 +220,7 @@ public class EC2OnDemandPolicyTest extends BaseDatacenterBrokerTest {
     @Test
     public void testNexChargeTime() {
 	final Queue<Double> vmTimes = new LinkedList<>(Arrays.asList(0d, 30d * MINUTE, 100d * MINUTE));
-	VMex vmMock = new VMex(broker.getId(), VM_MIPS, 1, VM_RAM, VM_BW, VM_SIZE, "Test",
+	VMex vmMock = new VMex("TestVM", broker.getId(), VM_MIPS, 1, VM_RAM, VM_BW, VM_SIZE, "Test",
 		new CloudletSchedulerTimeShared()) {
 	    @Override
 	    protected double getCurrentTime() {

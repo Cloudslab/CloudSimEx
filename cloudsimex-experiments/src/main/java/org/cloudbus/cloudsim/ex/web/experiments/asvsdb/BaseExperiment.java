@@ -169,7 +169,7 @@ public class BaseExperiment {
 	String vmm = "Xen"; // VMM name
 
 	// create two VMs
-	HddVm appServerVM = new HddVm(brokerId, mips, ioMips, pesNumber,
+	HddVm appServerVM = new HddVm("VM", brokerId, mips, ioMips, pesNumber,
 		ram, bw, size, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 	return appServerVM;
     }

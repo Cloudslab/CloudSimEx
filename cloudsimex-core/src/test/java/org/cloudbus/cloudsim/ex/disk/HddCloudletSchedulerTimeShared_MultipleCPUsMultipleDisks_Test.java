@@ -89,11 +89,11 @@ public class HddCloudletSchedulerTimeShared_MultipleCPUsMultipleDisks_Test {
 
 	// create 3 VMs. Vm1 has access to both hdds. Vm2 and Vm3 access only
 	// disk 1 and 2 respectively
-	vm1 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
+	vm1 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-	vm2 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
+	vm2 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[]{disk1.getId()});
-	vm3 = new HddVm(broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
+	vm3 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
 		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[]{disk2.getId()});
 
 	// add the VMs to the vmList

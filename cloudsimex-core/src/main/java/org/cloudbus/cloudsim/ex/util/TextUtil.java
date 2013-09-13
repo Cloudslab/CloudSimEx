@@ -34,12 +34,18 @@ import com.google.common.primitives.Primitives;
  */
 public class TextUtil {
 
+    private static final SimpleDateFormat FULL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+    private static final SimpleDateFormat TIME_DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
+    
+    
     /** Format for double precision numbers. */
     public static final DecimalFormat DEC_FORMAT = new DecimalFormat("####0.00");
     /** Number of positions used when converting doubles to text. */
     public static final int SIZE_OF_DBL_STRINGS = 10;
     /** Number of positions used when converting integers to text. */
     public static final int SIZE_OF_INT_STRINGS = 7;
+    /** Minimal number of positions used when outputting strings. */
+    public static final int SIZE_OF_STRINGS = 20;
     /** The new line symbol of this system. */
     public static final String NEW_LINE = System.getProperty("line.separator");
 
@@ -49,7 +55,6 @@ public class TextUtil {
     private static final String STANDARD_GET_REGEX = "get.+";
     private static final String BOOLGET_REGEX = "is.+";
     private static final Map<Class<?>, List<Method>> GET_METHODS = new HashMap<Class<?>, List<Method>>();
-
 
     /**
      * Converts the specified class to a single line of text. Convenient for
@@ -148,7 +153,7 @@ public class TextUtil {
     public static String getTxtLine(final Object obj) {
 	return getTxtLine(obj, DEFAULT_DELIM);
     }
-    
+
     /**
      * Converts the specified object to a single line of text. Convenient to
      * converting an object to a line in a log or a line in a CSV file. For the
@@ -182,15 +187,14 @@ public class TextUtil {
     public static String getTxtLine(final Object obj, final String delimeter) {
 	return getTxtLine(obj, delimeter, null, false);
     }
-    
-    
+
     /**
      * Converts the specified object to a single line of text. Convenient to
      * converting an object to a line in a log or a line in a CSV file. For the
      * purpose all get methods of the object are consequently called and the
      * results are appended with appropriate formatting. Users, can control
-     * which get methods are called by directly specifying the properties 
-     * of interest (with the "properties" parameter).
+     * which get methods are called by directly specifying the properties of
+     * interest (with the "properties" parameter).
      * 
      * <br/>
      * 
@@ -202,23 +206,23 @@ public class TextUtil {
      * 
      * @param obj
      *            - the object to extract text from. Must not be null.
-     * @param properties 
-     * 		  - the properties to include in the line. 
+     * @param properties
+     *            - the properties to include in the line.
      * @return formated line of text, as described above.
      */
     public static String getTxtLine(final Object obj, final String[] properties) {
 	return getTxtLine(obj, DEFAULT_DELIM, properties, false);
     }
-    
+
     /**
      * Converts the specified object to a single line of text. Convenient to
      * converting an object to a line in a log or a line in a CSV file. For the
      * purpose all get methods of the object are consequently called and the
      * results are appended with appropriate formatting. Users, can control
-     * which get methods are called either by directly specifying the properties 
-     * of interest (with the "properties" parameter) or by using the {@link Textualize}
-     * annotation and specifying the properties (the parts of the get methods
-     * after "get" or "is") and the order they need.
+     * which get methods are called either by directly specifying the properties
+     * of interest (with the "properties" parameter) or by using the
+     * {@link Textualize} annotation and specifying the properties (the parts of
+     * the get methods after "get" or "is") and the order they need.
      * 
      * <br/>
      * 
@@ -233,26 +237,26 @@ public class TextUtil {
      * @param delimeter
      *            - the delimeter to put between the entries in the line. Must
      *            not be null.
-     * @param properties 
-     * 		  - the properties to include in the line. If null all properties
-     * 		  specified in a {@link Textualize} annotation are used. If null and 
-     * 		  no {@link Textualize} is defined for the class - then all properties
-     * 		  are used. 
+     * @param properties
+     *            - the properties to include in the line. If null all
+     *            properties specified in a {@link Textualize} annotation are
+     *            used. If null and no {@link Textualize} is defined for the
+     *            class - then all properties are used.
      * @return formated line of text, as described above.
      */
     public static String getTxtLine(final Object obj, final String delimeter, final String[] properties) {
 	return getTxtLine(obj, delimeter, properties, false);
     }
-    
+
     /**
      * Converts the specified object to a single line of text. Convenient to
      * converting an object to a line in a log or a line in a CSV file. For the
      * purpose all get methods of the object are consequently called and the
      * results are appended with appropriate formatting. Users, can control
-     * which get methods are called either by directly specifying the properties 
-     * of interest (with the "properties" parameter) or by using the {@link Textualize}
-     * annotation and specifying the properties (the parts of the get methods
-     * after "get" or "is") and the order they need.
+     * which get methods are called either by directly specifying the properties
+     * of interest (with the "properties" parameter) or by using the
+     * {@link Textualize} annotation and specifying the properties (the parts of
+     * the get methods after "get" or "is") and the order they need.
      * 
      * <br/>
      * 
@@ -273,17 +277,18 @@ public class TextUtil {
      * @param delimeter
      *            - the delimeter to put between the entries in the line. Must
      *            not be null.
-     * @param properties 
-     * 		  - the properties to include in the line. If null all properties
-     * 		  specified in a {@link Textualize} annotation are used. If null and 
-     * 		  no {@link Textualize} is defined for the class - then all properties
-     * 		  are used. 
+     * @param properties
+     *            - the properties to include in the line. If null all
+     *            properties specified in a {@link Textualize} annotation are
+     *            used. If null and no {@link Textualize} is defined for the
+     *            class - then all properties are used.
      * @param includeFieldNames
      *            - a flag whether to include the names of the properties in the
      *            line as well.
      * @return formated line of text, as described above.
      */
-    public static String getTxtLine(final Object obj, final String delimeter, final String[] properties, final boolean includeFieldNames) {
+    public static String getTxtLine(final Object obj, final String delimeter, final String[] properties,
+	    final boolean includeFieldNames) {
 	StringBuffer result = new StringBuffer();
 	List<Method> methods = extractGetMethodsForClass(obj.getClass(), properties);
 	int i = 0;
@@ -372,11 +377,11 @@ public class TextUtil {
      * generating a header line in a log or a CSV file. For the purpose the
      * names of all properties (the parts of the get methods after "get"
      * orString.valueOf(obj) "is") are concatenated with appropriate padding.
-     * The specified delimeter is placed between the entries in the line. Users, can control
-     * properties are used either by directly specifying the properties 
-     * of interest (with the "properties" parameter) or by using the {@link Textualize}
-     * annotation and specifying the properties (the parts of the get methods
-     * after "get" or "is") and the order they need.
+     * The specified delimeter is placed between the entries in the line. Users,
+     * can control properties are used either by directly specifying the
+     * properties of interest (with the "properties" parameter) or by using the
+     * {@link Textualize} annotation and specifying the properties (the parts of
+     * the get methods after "get" or "is") and the order they need.
      * 
      * <br/>
      * 
@@ -389,28 +394,27 @@ public class TextUtil {
      * 
      * @param clazz
      *            - the class to use to create the line. Must not be null.
-     * @param properties 
-     * 		  - the properties to include in the line. If null all properties
-     * 		  specified in a {@link Textualize} annotation are used. If null and 
-     * 		  no {@link Textualize} is defined for the class - then all properties
-     * 		  are used. 
+     * @param properties
+     *            - the properties to include in the line. If null all
+     *            properties specified in a {@link Textualize} annotation are
+     *            used. If null and no {@link Textualize} is defined for the
+     *            class - then all properties are used.
      * @return formated line of text, as described above.
      */
     public static String getCaptionLine(final Class<?> clazz, final String[] properties) {
 	return getCaptionLine(clazz, DEFAULT_DELIM, properties);
     }
-    
-    
+
     /**
      * Converts the specified class to a single line of text. Convenient for
      * generating a header line in a log or a CSV file. For the purpose the
      * names of all properties (the parts of the get methods after "get"
      * orString.valueOf(obj) "is") are concatenated with appropriate padding.
-     * The specified delimeter is placed between the entries in the line. Users, can control
-     * properties are used either by directly specifying the properties 
-     * of interest (with the "properties" parameter) or by using the {@link Textualize}
-     * annotation and specifying the properties (the parts of the get methods
-     * after "get" or "is") and the order they need.
+     * The specified delimeter is placed between the entries in the line. Users,
+     * can control properties are used either by directly specifying the
+     * properties of interest (with the "properties" parameter) or by using the
+     * {@link Textualize} annotation and specifying the properties (the parts of
+     * the get methods after "get" or "is") and the order they need.
      * 
      * <br/>
      * 
@@ -426,11 +430,11 @@ public class TextUtil {
      * @param delimeter
      *            - the delimeter to put between the entries in the line. Must
      *            not be null.
-     * @param properties 
-     * 		  - the properties to include in the line. If null all properties
-     * 		  specified in a {@link Textualize} annotation are used. If null and 
-     * 		  no {@link Textualize} is defined for the class - then all properties
-     * 		  are used. 
+     * @param properties
+     *            - the properties to include in the line. If null all
+     *            properties specified in a {@link Textualize} annotation are
+     *            used. If null and no {@link Textualize} is defined for the
+     *            class - then all properties are used.
      * @return formated line of text, as described above.
      */
     public static String getCaptionLine(final Class<?> clazz, final String delimeter, final String[] properties) {
@@ -451,12 +455,18 @@ public class TextUtil {
 	return result.toString();
     }
 
+    @SuppressWarnings("unchecked")
     private static String formatHeader(String header, final Class<?> entryType) {
 	if (Double.class.equals(entryType) || Float.class.equals(entryType)
 		&& header.length() < SIZE_OF_DBL_STRINGS) {
 	    header = String.format("%" + SIZE_OF_DBL_STRINGS + "s", header);
 	} else if (Number.class.isAssignableFrom(entryType) && header.length() < SIZE_OF_INT_STRINGS) {
 	    header = String.format("%" + SIZE_OF_INT_STRINGS + "s", header);
+	} else if (entryType != null && entryType.isEnum()) {
+	    header =
+		    String.format("%" + getEnumTxtSize((Class<? extends Enum<?>>) entryType) + "s", header);
+	} else if (String.class.isAssignableFrom(entryType)) {
+	    header = toString(header);
 	}
 	return header;
     }
@@ -464,25 +474,25 @@ public class TextUtil {
     private static List<Method> extractGetMethodsForClass(final Class<?> clazz1, final String[] properties) {
 	List<Method> methods = null;
 	Class<?> clazz = clazz1;
-	
+
 	Textualize classAnnotation = clazz1.getAnnotation(Textualize.class);
-	String[] allowedProps = properties != null? properties :
-	    classAnnotation != null? classAnnotation.properties() : null;
+	String[] allowedProps = properties != null ? properties :
+		classAnnotation != null ? classAnnotation.properties() : null;
 
 	if (!GET_METHODS.containsKey(clazz)) {
 	    methods = new ArrayList<>();
 	    do {
 		// Defined in the class methods (not inherited)
-		List<Method> clazzMethods = new LinkedList<Method> (Arrays.asList(clazz.getDeclaredMethods()));
-		
-		//Remove duplicated methods with super classes
+		List<Method> clazzMethods = new LinkedList<Method>(Arrays.asList(clazz.getDeclaredMethods()));
+
+		// Remove duplicated methods with super classes
 		List<Method> copyofMethods = new ArrayList<>(methods);
-		for(Method method : copyofMethods)
-			for (Method clazzMethod : clazzMethods) {
-				if(clazzMethod.getName() == method.getName())
-					methods.remove(method);
-			}
-		
+		for (Method method : copyofMethods)
+		    for (Method clazzMethod : clazzMethods) {
+			if (clazzMethod.getName() == method.getName())
+			    methods.remove(method);
+		    }
+
 		// Sort them by name... since getDeclaredMethods does not
 		// guarantee order
 		Collections.sort(clazzMethods, MethodsAlphaComparator.METHOD_CMP);
@@ -491,7 +501,6 @@ public class TextUtil {
 		clazz = clazz.getSuperclass();
 	    } while (clazz != null);
 
-	    
 	    // Filter methods that are not getters and are not in the annotation
 	    // (if annotation is specified)
 	    for (ListIterator<Method> iter = methods.listIterator(); iter.hasNext();) {
@@ -559,16 +568,30 @@ public class TextUtil {
 	} else if (Number.class.isAssignableFrom(clazz)) {
 	    result = String.format("%" + SIZE_OF_INT_STRINGS + "s", obj);
 	} else if (obj instanceof Date) {
-	    result = getDataFormat().format(obj);
+	    result = getDateFormat().format(obj);
 	} else if (obj instanceof Collection<?> || obj.getClass().isArray()) {
 	    result = "[...]";
+	} else if (obj instanceof Enum<?>) {
+	    result =
+		    String.format("%" + getEnumTxtSize(((Enum<?>) obj).getDeclaringClass()) + "s", String.valueOf(obj));
 	} else if (obj instanceof Class) {
 	    result = ((Class<?>) obj).getSimpleName();
 	    // If toString is not predefined ...
-	} else if (String.valueOf(obj).contains(String.valueOf(obj.hashCode()))) {
+	} else if (String.valueOf(obj).startsWith(obj.getClass().getCanonicalName() + "@")) {
 	    result = "ref<" + obj.hashCode() + ">";
 	} else {
-	    result = String.valueOf(obj);
+	    result = String.format("%" + SIZE_OF_STRINGS + "s", String.valueOf(obj));
+	}
+	return result;
+    }
+
+    private static int getEnumTxtSize(final Class<? extends Enum<?>> enumClass) {
+	int result = 0;
+	for (Enum<?> e : enumClass.getEnumConstants()) {
+	    int len = String.valueOf(e).length();
+	    if (len > result) {
+		result = len;
+	    }
 	}
 	return result;
     }
@@ -578,8 +601,17 @@ public class TextUtil {
      * 
      * @return the format for dates.
      */
-    public static DateFormat getDataFormat() {
-	return new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+    public static DateFormat getDateFormat() {
+	return FULL_DATE_FORMAT;
+    }
+
+    /**
+     * Returns the format for dates, that prints only the time of the day.
+     * 
+     * @return the format for dates, that prints only the time of the day.
+     */
+    public static DateFormat getTimeFormat() {
+	return TIME_DATE_FORMAT;
     }
 
     private static class MethodsAlphaComparator implements Comparator<Method> {

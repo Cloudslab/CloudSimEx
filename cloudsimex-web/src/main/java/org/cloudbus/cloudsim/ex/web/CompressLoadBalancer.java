@@ -6,11 +6,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 import java.util.logging.Level;
 
 import org.cloudbus.cloudsim.ex.disk.HddVm;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.vm.MonitoredVMex;
+import org.cloudbus.cloudsim.ex.web.workload.brokers.WebBroker;
 
 /**
  * 
@@ -22,7 +24,8 @@ import org.cloudbus.cloudsim.ex.vm.MonitoredVMex;
  */
 public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBalancer {
 
-    private static Comparator<MonitoredVMex> CPU_UTIL_INVERSE_CMP = new CPUUtilisationComparator();
+    private final CPUUtilisationComparator cpuUtilReverseComparator;
+    private final WebBroker broker;
     private final double cpuThreshold;
     private final double ramThreshold;
 
@@ -38,11 +41,14 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
      * @param ramThreshold
      *            - the RAM threshold. Must be in the interval [0, 1].
      */
-    public CompressLoadBalancer(final long appId, final String ip, final List<HddVm> appServers,
+    public CompressLoadBalancer(WebBroker broker, final long appId, final String ip, final List<HddVm> appServers,
 	    final IDBBalancer dbBalancer, double cpuThreshold, double ramThreshold) {
 	super(appId, ip, appServers, dbBalancer);
 	this.cpuThreshold = cpuThreshold;
 	this.ramThreshold = ramThreshold;
+
+	this.broker = broker;
+	cpuUtilReverseComparator = new CPUUtilisationComparator(this.broker);
     }
 
     @Override
@@ -73,16 +79,17 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 	} else {// Assign to one of the running VMs
 	    for (WebSession session : noAppServSessions) {
 		List<HddVm> vms = new ArrayList<>(runingVMs);
-		Collections.sort(vms, CPU_UTIL_INVERSE_CMP);
+		Collections.sort(vms, cpuUtilReverseComparator);
 
-		HddVm bestVm = vms.get(vms.size() - 1);
+		HddVm hostVM = vms.get(vms.size() - 1);
 		for (HddVm vm : vms) {
 		    if (vm.getCPUUtil() < cpuThreshold && vm.getRAMUtil() < ramThreshold && !vm.isOutOfMemory()) {
-			bestVm = vm;
+			hostVM = vm;
+			break;
 		    }
 		}
 
-		session.setAppVmId(bestVm.getId());
+		session.setAppVmId(hostVM.getId());
 	    }
 
 	    // Set the DB VM
@@ -96,9 +103,25 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 
     private static class CPUUtilisationComparator implements Comparator<MonitoredVMex> {
 
+	private final WebBroker webBroker;
+
+	public CPUUtilisationComparator(WebBroker webBroker) {
+	    super();
+	    this.webBroker = webBroker;
+	}
+
 	@Override
 	public int compare(final MonitoredVMex vm1, final MonitoredVMex vm2) {
-	    return -Double.valueOf(vm1.getCPUUtil()).compareTo(Double.valueOf(vm2.getCPUUtil()));
+	    Set<Integer> asToNumSess = webBroker.getUsedASServers();
+	    if (!asToNumSess.contains(vm1.getId()) && !asToNumSess.contains(vm2.getId())) {
+		return 0;
+	    } else if (!asToNumSess.contains(vm1.getId())) {
+		return 1;
+	    } else if (!asToNumSess.contains(vm2.getId())) {
+		return -1;
+	    } else {
+		return -Double.valueOf(vm1.getCPUUtil()).compareTo(Double.valueOf(vm2.getCPUUtil()));
+	    }
 	}
     }
 

@@ -3,9 +3,8 @@ package org.cloudbus.cloudsim.ex.web.workload.brokers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.ex.IAutoscalingPolicy;
@@ -13,8 +12,9 @@ import org.cloudbus.cloudsim.ex.MonitoringBorkerEX;
 import org.cloudbus.cloudsim.ex.billing.IVmBillingPolicy;
 import org.cloudbus.cloudsim.ex.disk.HddCloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.ex.disk.HddVm;
+import org.cloudbus.cloudsim.ex.util.CustomLog;
+import org.cloudbus.cloudsim.ex.vm.VMStatus;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
-import org.cloudbus.cloudsim.ex.web.WebSession;
 
 /**
  * 
@@ -44,7 +44,7 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 	if (broker instanceof WebBroker) {
 	    WebBroker webBroker = (WebBroker) broker;
 	    ILoadBalancer loadBalancer = webBroker.getLoadBalancers().get(appId);
-	    Map<Integer, Integer> asToNumSess = constructASToNumberOfSessionsTable(webBroker);
+	    Set<Integer> asToNumSess = webBroker.getUsedASServers();
 
 	    int numOverloaded = 0;
 	    int numAS = loadBalancer.getAppServers().size();
@@ -54,7 +54,7 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 	    for (HddVm vm : loadBalancer.getAppServers()) {
 		double vmCPU = vm.getCPUUtil();
 		double vmRAM = vm.getRAMUtil();
-		if (!asToNumSess.containsKey(vm.getId())) {
+		if (!asToNumSess.contains(vm.getId())) {
 		    freeVms.add(vm);
 		} else if (vmCPU >= triggerCPU && vmRAM >= triggerRAM) {
 		    numOverloaded++;
@@ -86,13 +86,18 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 		for (int i = 0; i < numVmsToStop; i++) {
 		    double billTime = webBroker.getVMBillingPolicy().nexChargeTime(freeVms.get(i));
 		    int delta = 10;
-		    if (billTime - CloudSim.clock() < delta) {
+		    if (freeVms.get(i).getStatus() == VMStatus.RUNNING && billTime - CloudSim.clock() < delta) {
 			toStop.add(freeVms.get(i));
 		    } else {
 			break;
 		    }
 		}
-		webBroker.destroyVMsAfter(toStop, 0);
+
+		if (!toStop.isEmpty()) {
+		    CustomLog.printf("Autoscale-Policy(%s): AS VMs terminated: %s", 
+			    webBroker.toString(), toStop.toString());
+		    webBroker.destroyVMsAfter(toStop, 0);
+		}
 	    }
 	}
     }
@@ -103,20 +108,13 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 	    for (int i = 0; i < numVmsToStart; i++) {
 		HddVm newASServer = loadBalancer.getAppServers().get(0).clone(new HddCloudletSchedulerTimeShared());
 		loadBalancer.registerAppServer(newASServer);
+		newVMs.add(newASServer);
 	    }
+
+	    CustomLog
+		    .printf("Autoscale-Policy(%s) New AS VMs provisioned: %s", webBroker.toString(), newVMs.toString());
 	    webBroker.createVmsAfter(newVMs, 0);
 	}
-    }
-
-    private Map<Integer, Integer> constructASToNumberOfSessionsTable(final WebBroker broker) {
-	Map<Integer, Integer> result = new HashMap<>();
-	for (WebSession session : broker.getServedSessions()) {
-	    if (!session.isComplete()) {
-		result.put(session.getAppVmId(),
-			result.containsKey(session.getAppVmId()) ? result.get(session.getAppVmId()) + 1 : 1);
-	    }
-	}
-	return result;
     }
 
     private static class CloudPriceComparator implements Comparator<HddVm> {

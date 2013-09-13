@@ -143,6 +143,9 @@ public class EntryPoint {
 	for (Map.Entry<WebBroker, List<WebSession>> entry : assignments.entrySet()) {
 	    WebBroker broker = entry.getKey();
 	    List<WebSession> sessions = entry.getValue();
+	    for(WebSession sess : sessions) {
+		CustomLog.printf("Session %d will be dispatched to %s", sess.getSessionId(), broker.toString());
+	    }
 	    broker.submitSessionsDirectly(sessions, appId);
 	}
     }

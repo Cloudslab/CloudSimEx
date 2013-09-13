@@ -237,7 +237,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 	    throw new IllegalArgumentException("Invalid IP", e);
 	} catch (IOException | GeoIp2Exception e) {
 	    String msg = "Could not locate IP: " + Objects.toString(ip) + ", because: " + e.getMessage();
-	    CustomLog.logError(Level.INFO, msg, e);
+	    CustomLog.logError(Level.FINER, msg, e);
 	    return null;
 	}
     }

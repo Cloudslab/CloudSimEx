@@ -57,6 +57,12 @@ public class CustomLog {
      * with the current CloudSim time.
      */
     public static final String LOG_CLOUD_SIM_CLOCK_PROP_KEY = "LogCloudSimClock";
+ 
+    /**
+     * A key for a boolean property, specifying if every log entry should start
+     * with the current CloudSim time.
+     */
+    public static final String LOG_CLOUD_REAL_TIME_PROP_KEY = "LogRealTimeClock";
 
     /**
      * Specifies which methods of the {@link LogRecord} class should be used to
@@ -457,6 +463,8 @@ public class CustomLog {
 		"getLevel;getMessage").toString();
 	final boolean prefixCloudSimClock = Boolean.parseBoolean(props
 		.getProperty(LOG_CLOUD_SIM_CLOCK_PROP_KEY, "false").toString());
+	final boolean prefixRealTimeClock = Boolean.parseBoolean(props
+		.getProperty(LOG_CLOUD_REAL_TIME_PROP_KEY, "false").toString());
 	final boolean shutStandardMessages = Boolean
 		.parseBoolean(props.getProperty(SHUT_STANDART_LOGGER_PROP_KEY,
 			"false").toString());
@@ -468,7 +476,7 @@ public class CustomLog {
 	}
 
 	LOGGER.setUseParentHandlers(false);
-	formatter = new CustomFormatter(prefixCloudSimClock, format);
+	formatter = new CustomFormatter(prefixCloudSimClock, prefixRealTimeClock, format);
 
 	redirectToFile(fileName);
     }
@@ -540,13 +548,15 @@ public class CustomLog {
     private static class CustomFormatter extends Formatter {
 
 	private final boolean prefixCloudSimClock;
+	private final boolean prefixRealTimeClock;
 	private final String format;
 	SimpleFormatter defaultFormatter = new SimpleFormatter();
 
-	public CustomFormatter(final boolean prefixCloudSimClock,
+	public CustomFormatter(final boolean prefixCloudSimClock, final boolean prefixRealTimeClock,
 		final String format) {
 	    super();
 	    this.prefixCloudSimClock = prefixCloudSimClock;
+	    this.prefixRealTimeClock = prefixRealTimeClock;
 	    this.format = format;
 	}
 
@@ -554,9 +564,12 @@ public class CustomLog {
 	public String format(final LogRecord record) {
 	    final String[] methodCalls = format.split(";");
 	    final StringBuffer result = new StringBuffer();
+	    if (prefixRealTimeClock) {
+		result.append(TextUtil.getTimeFormat().format(new Date(record.getMillis())) + "\t");
+	    }
 	    if (prefixCloudSimClock) {
 		result.append(formatClockTime() + "\t");
-	    }
+	    } 
 
 	    // If there is an exception - use the standard formatter
 	    if (record.getThrown() != null) {
@@ -565,12 +578,7 @@ public class CustomLog {
 		int i = 0;
 		for (String method : methodCalls) {
 		    try {
-			if(method.equals("execTime")) {
-			    result.append(TextUtil.toString(new Date(record.getMillis())));
-			} else {
-			    result.append(record.getClass().getMethod(method)
-				.invoke(record));
-			}
+			result.append(record.getClass().getMethod(method).invoke(record));
 		    } catch (Exception e) {
 			System.err.println("Error in logging:");
 			e.printStackTrace(System.err);

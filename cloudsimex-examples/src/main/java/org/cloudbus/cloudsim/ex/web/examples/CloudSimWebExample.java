@@ -110,10 +110,10 @@ public class CloudSimWebExample {
 	    String vmm = "Xen"; // VMM name
 
 	    // create two VMs
-	    HddVm appServerVM = new HddVm(broker.getId(), mips, ioMips, pesNumber,
+	    HddVm appServerVM = new HddVm("App-Srv", broker.getId(), mips, ioMips, pesNumber,
 		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
-	    HddVm dbServerVM = new HddVm(broker.getId(), mips, ioMips, pesNumber,
+	    HddVm dbServerVM = new HddVm("Db-Srv", broker.getId(), mips, ioMips, pesNumber,
 		    ram, bw, size, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
 	    ILoadBalancer balancer = new SimpleWebLoadBalancer(

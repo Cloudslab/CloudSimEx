@@ -3,9 +3,11 @@ package org.cloudbus.cloudsim.ex.web.workload.brokers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 
 import org.cloudbus.cloudsim.Cloudlet;
@@ -42,7 +44,8 @@ public class WebBroker extends MonitoringBorkerEX {
     private final Map<Long, ILoadBalancer> appsToLoadBalancers = new HashMap<>();
     private final Map<Long, List<IWorkloadGenerator>> appsToGenerators = new HashMap<>();
 
-    private final LinkedHashMap<Integer, WebSession> servedSessions = new LinkedHashMap<>();
+    private final LinkedHashMap<Integer, WebSession> activeSessions = new LinkedHashMap<>();
+    private final List<WebSession> completedSessions = new ArrayList<>();
     private final List<WebSession> canceledSessions = new ArrayList<>();
 
     /** Mapping of application Ids to entry points. */
@@ -133,7 +136,9 @@ public class WebBroker extends MonitoringBorkerEX {
      * @return the sessions that were successfully served.
      */
     public List<WebSession> getServedSessions() {
-	return new ArrayList<>(servedSessions.values());
+	List<WebSession> result = new ArrayList<>(activeSessions.values());
+	result.addAll(completedSessions);
+	return result;
     }
 
     /**
@@ -162,6 +167,10 @@ public class WebBroker extends MonitoringBorkerEX {
     public void submitSessions(final List<WebSession> webSessions, final long appId) {
 	if (entryPoins.containsKey(appId)) {
 	    EntryPoint entryPoint = entryPoins.get(appId);
+
+	    for (WebSession sess : webSessions) {
+		CustomLog.printf("Session %d has arrived in the Entry Point of %s", sess.getSessionId(), getName());
+	    }
 	    entryPoint.dispatchSessions(webSessions);
 	} else {
 	    submitSessionsDirectly(webSessions, appId);
@@ -185,7 +194,7 @@ public class WebBroker extends MonitoringBorkerEX {
 		if (session.getAppVmId() == null || session.getDbBalancer() == null) {
 		    canceledSessions.add(session);
 		    CustomLog.printf(Level.SEVERE,
-			    "Session could not be served and is canceled. Session id:%d", session.getSessionId());
+			    "%s: Session %d could not be served and is canceled.", toString(), session.getSessionId());
 		} else {
 		    session.setUserId(getId());
 		    // Let the session prepare the first cloudlets
@@ -198,7 +207,7 @@ public class WebBroker extends MonitoringBorkerEX {
 			session.notifyOfTime(CloudSim.clock() + stepPeriod);
 		    }
 
-		    servedSessions.put(session.getSessionId(), session);
+		    activeSessions.put(session.getSessionId(), session);
 
 		    // Start the session or schedule it if its VMs are not
 		    // initiated.
@@ -334,8 +343,15 @@ public class WebBroker extends MonitoringBorkerEX {
     }
 
     private void updateSessions(final Integer... sessionIds) {
-	for (Integer id : sessionIds.length == 0 ? servedSessions.keySet() : Arrays.asList(sessionIds)) {
-	    WebSession sess = servedSessions.get(id);
+	List<Integer> completedIds = new ArrayList<>();
+	for (Integer id : sessionIds.length == 0 ? activeSessions.keySet() : Arrays.asList(sessionIds)) {
+	    WebSession sess = activeSessions.get(id);
+
+	    // If the session is complete - there is no need to update it.
+	    if (sess == null || sess.isComplete()) {
+		completedIds.add(id);
+		continue;
+	    }
 
 	    // Check if all VMs for the sessions are set. In the simulation
 	    // start, this may not be so, as the refreshing action of the broker
@@ -347,11 +363,11 @@ public class WebBroker extends MonitoringBorkerEX {
 		WebSession.StepCloudlets webCloudlets = sess.pollCloudlets(currTime);
 
 		if (webCloudlets != null) {
-		    
-		    if(webCloudlets.asCloudlet.getUserId() != sess.getUserId() || sess.getUserId() != getId()) {
+
+		    if (webCloudlets.asCloudlet.getUserId() != sess.getUserId() || sess.getUserId() != getId()) {
 			throw new IllegalStateException();
 		    }
-		    
+
 		    getCloudletList().add(webCloudlets.asCloudlet);
 		    getCloudletList().addAll(webCloudlets.dbCloudlets);
 		    submitCloudlets();
@@ -361,6 +377,14 @@ public class WebBroker extends MonitoringBorkerEX {
 
 		    send(getId(), stepPeriod, UPDATE_SESSION_TAG, sess.getSessionId());
 		}
+	    }
+	}
+
+	// Remote completed sessions...
+	for (Integer id : completedIds) {
+	    WebSession sess = activeSessions.remove(id);
+	    if (sess != null) {
+		completedSessions.add(sess);
 	    }
 	}
     }
@@ -404,6 +428,17 @@ public class WebBroker extends MonitoringBorkerEX {
 	for (Integer datacenterId : getDatacenterIdsList()) {
 	    sendNow(datacenterId, CloudSimTags.RESOURCE_CHARACTERISTICS, getId());
 	}
+    }
+
+    public Set<Integer> getUsedASServers() {
+	Set<Integer> result = new HashSet<>();
+	for (Map.Entry<Integer, WebSession> e : activeSessions.entrySet()) {
+	    WebSession session = e.getValue();
+	    if (!session.isComplete()) {
+		result.add(session.getAppVmId());
+	    }
+	}
+	return result;
     }
 
 }
