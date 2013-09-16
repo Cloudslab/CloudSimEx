@@ -118,6 +118,7 @@ public class MultiCloudFramework {
 
     protected int simulationLength = DAY + HOUR / 2;
     protected int step = 60;
+    protected double wldFactor = 10;
     protected double monitoringPeriod = 0.1;
     protected String experimentName = "Multi-Cloud Framework Experiment";
 
@@ -138,7 +139,7 @@ public class MultiCloudFramework {
      * @throws IOException
      */
     public static void main(final String[] args) throws IOException {
-//	ExperimentsUtil.parseExperimentParameters(args);
+	// ExperimentsUtil.parseExperimentParameters(args);
 
 	Properties props = new Properties();
 	try (InputStream is = Files.newInputStream(Paths.get("../custom_log.properties"))) {
@@ -321,31 +322,30 @@ public class MultiCloudFramework {
 	    // Step 8: Define the workload and associate it with load balancers
 	    CustomLog.print("Step 8: Define workload....");
 
-	    double f = 10;
 	    IWorkloadGenerator workloadEuroGoogle = generateWorkload(
 		    brokerEuroGoogle.getId(),
 		    0 * HOUR,
 		    ImmutableMap.<String[], Double> of(new String[] { "US" }, 1.0, new String[] { "EU" }, 10.0),
-		    euroIPGen, f);
+		    euroIPGen, wldFactor);
 	    brokerEuroGoogle.addWorkloadGenerators(Arrays.asList(workloadEuroGoogle), balancerEuroGoogle.getAppId());
 	    IWorkloadGenerator workloadEuroEC2 = generateWorkload(
 		    brokerEuroEC2.getId(),
 		    0 * HOUR,
 		    ImmutableMap.<String[], Double> of(new String[] { "US" }, 1.0, new String[] { "EU" }, 10.0),
-		    euroIPGen, f);
+		    euroIPGen, wldFactor);
 	    brokerEuroEC2.addWorkloadGenerators(Arrays.asList(workloadEuroEC2), balancerEuroGoogle.getAppId());
 
 	    IWorkloadGenerator workloadUSGoogle = generateWorkload(
 		    brokerUSGoogle.getId(),
 		    12 * HOUR,
 		    ImmutableMap.<String[], Double> of(new String[] { "US" }, 10.0, new String[] { "EU" }, 1.0),
-		    usIPGen, f);
+		    usIPGen, wldFactor);
 	    brokerUSGoogle.addWorkloadGenerators(Arrays.asList(workloadUSGoogle), balancerEuroEC2.getAppId());
 	    IWorkloadGenerator workloadUSEC2 = generateWorkload(
 		    brokerUSEC2.getId(),
 		    12 * HOUR,
 		    ImmutableMap.<String[], Double> of(new String[] { "US" }, 10.0, new String[] { "EU" }, 1.0),
-		    usIPGen, f);
+		    usIPGen, wldFactor);
 	    brokerUSEC2.addWorkloadGenerators(Arrays.asList(workloadUSEC2), balancerEuroEC2.getAppId());
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
@@ -399,6 +399,8 @@ public class MultiCloudFramework {
 	    CustomLog.redirectToFile(RESULT_DIR + "VM-USEC2.csv");
 	    CustomLog.printResults(HddVm.class, vmProperties, brokerUSEC2.getVmList());
 	    CustomLog.print(brokerUSEC2.bill());
+
+	    CustomLog.flush();
 
 	    System.err.println();
 	    System.err.println(experimentName + ": Simulation is finished!");

@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.cloudbus.cloudsim.ex.disk.HddVm;
 import org.cloudbus.cloudsim.ex.geolocation.IGeolocationService;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
@@ -144,7 +143,7 @@ public class EntryPoint {
 	    WebBroker broker = entry.getKey();
 	    List<WebSession> sessions = entry.getValue();
 	    for(WebSession sess : sessions) {
-		CustomLog.printf("Session %d will be dispatched to %s", sess.getSessionId(), broker.toString());
+		CustomLog.printf("Session %d will be assigned to %s", sess.getSessionId(), broker.toString());
 	    }
 	    broker.submitSessionsDirectly(sessions, appId);
 	}

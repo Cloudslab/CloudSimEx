@@ -27,6 +27,8 @@ import org.cloudbus.cloudsim.ex.util.CustomLog;
 
 import au.com.bytecode.opencsv.CSVReader;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.MinMaxPriorityQueue;
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
@@ -49,6 +51,10 @@ import com.maxmind.geoip2.model.City;
  * 
  */
 public class GeoIP2PingERService extends BaseGeolocationService implements IGeolocationService, Closeable {
+
+    /** In order to minimise the number of created instances, we keep a cache. */
+    private static final Cache<String, Double[]> COORDINATES_CACHE =
+	    CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
 
     // TODO Extract these TSV/CSV constants elsewhere as they can be reused ...
     /** The separator in the tsv file. */
@@ -202,20 +208,30 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 
     @Override
     public Double[] getCoordinates(final String ip) {
-	City city;
-	try {
-	    city = reader.city(InetAddress.getByName(ip));
-	    return new Double[] { city.getLocation().getLatitude(),
-		    city.getLocation().getLongitude() };
-	} catch (UnknownHostException e) {
-	    String msg = "Invalid IP: " + Objects.toString(ip);
-	    CustomLog.logError(Level.SEVERE, msg, e);
-	    throw new IllegalArgumentException("Invalid IP", e);
-	} catch (IOException | GeoIp2Exception e) {
-	    String msg = "Could not locate IP: " + Objects.toString(ip) + ", because " + e.getMessage();
-	    CustomLog.logError(Level.FINER, msg, e);
-	    return new Double[] { null, null };
+	Double[] result = COORDINATES_CACHE.getIfPresent(ip);
+	if (result == null) { // If not in the cache
+	    City city;
+	    try {
+		city = reader.city(InetAddress.getByName(ip));
+		result = new Double[] { city.getLocation().getLatitude(),
+			city.getLocation().getLongitude() };
+	    } catch (UnknownHostException e) {
+		String msg = "Invalid IP: " + Objects.toString(ip);
+		CustomLog.logError(Level.SEVERE, msg, e);
+		throw new IllegalArgumentException("Invalid IP", e);
+	    } catch (IOException e) {
+		String msg = "Could not locate IP: " + Objects.toString(ip) + ", " +
+			"because of I/O error:" + e.getMessage();
+		CustomLog.logError(Level.SEVERE, msg, e);
+		throw new IllegalStateException(e);
+	    } catch (GeoIp2Exception e) {
+		String msg = "Could not locate IP: " + Objects.toString(ip) + ", because " + e.getMessage();
+		CustomLog.logError(Level.FINER, msg, e);
+		result = new Double[] { null, null };
+	    }
+	    COORDINATES_CACHE.put(ip, result);
 	}
+	return result;
     }
 
     @Override

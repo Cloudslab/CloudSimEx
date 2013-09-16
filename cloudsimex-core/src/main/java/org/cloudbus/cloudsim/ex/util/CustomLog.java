@@ -57,7 +57,7 @@ public class CustomLog {
      * with the current CloudSim time.
      */
     public static final String LOG_CLOUD_SIM_CLOCK_PROP_KEY = "LogCloudSimClock";
- 
+
     /**
      * A key for a boolean property, specifying if every log entry should start
      * with the current CloudSim time.
@@ -85,14 +85,23 @@ public class CustomLog {
     public static final String SHUT_STANDART_LOGGER_PROP_KEY = "ShutStandardLogger";
 
     /**
+     * A key for an integer property, specifying how the size of the log buffer
+     * - i.e. how many records to be buffered before an actual write is
+     * performed. If not specified - no buffering is used.
+     */
+    private static final String BUFFER_SIZE_PROP_KEY = "BufferSize";
+
+    /**
      * The default log level used by this log, if not specified.
      */
     public final static Level DEFAULT_LEVEL = Level.INFO;
 
     private static final Logger LOGGER = Logger.getLogger(CustomLog.class
 	    .getPackage().getName());
+
     private static Level granularityLevel;
     private static Formatter formatter;
+    private static int bufferSize = -1;
 
     /**
      * Prints the message passed as an object. Simply uses toString
@@ -104,8 +113,10 @@ public class CustomLog {
      *            - the message.
      */
     public static void print(final Level level, final Object message) {
-	LOGGER.log(level == null ? DEFAULT_LEVEL : level,
-		String.valueOf(message));
+	if (isLevelHighEnough(level)) {
+	    LOGGER.log(level == null ? DEFAULT_LEVEL : level,
+		    String.valueOf(message));
+	}
     }
 
     /**
@@ -128,7 +139,9 @@ public class CustomLog {
      *            - the message. Must not be null.
      */
     public static void printLine(final Level level, final String msg) {
-	LOGGER.log(level == null ? DEFAULT_LEVEL : level, msg);
+	if (isLevelHighEnough(level)) {
+	    LOGGER.log(level == null ? DEFAULT_LEVEL : level, msg);
+	}
     }
 
     /**
@@ -153,8 +166,15 @@ public class CustomLog {
      */
     public static void printf(final Level level, final String format,
 	    final Object... args) {
-	LOGGER.log(level == null ? DEFAULT_LEVEL : level,
-		String.format(format, args));
+	if (isLevelHighEnough(level)) {
+	    LOGGER.log(level == null ? DEFAULT_LEVEL : level,
+		    String.format(format, args));
+	}
+    }
+
+    public static boolean isLevelHighEnough(final Level level) {
+	return (level == null && DEFAULT_LEVEL.intValue() >= granularityLevel.intValue())
+		|| (level != null && level.intValue() >= granularityLevel.intValue());
     }
 
     /**
@@ -166,7 +186,7 @@ public class CustomLog {
      * @param args
      */
     public static void printf(final String format, final Object... args) {
-	LOGGER.log(DEFAULT_LEVEL, String.format(format, args));
+	printf(DEFAULT_LEVEL, String.format(format, args));
     }
 
     /**
@@ -398,7 +418,9 @@ public class CustomLog {
      */
     public static void logError(final Level level, final String message,
 	    final Throwable exc) {
-	LOGGER.log(level, message, exc);
+	if (isLevelHighEnough(level)) {
+	    LOGGER.log(level, message, exc);
+	}
     }
 
     /**
@@ -460,16 +482,16 @@ public class CustomLog {
 	final String fileName = props.containsKey(FILE_PATH_PROP_KEY) ? props
 		.getProperty(FILE_PATH_PROP_KEY).toString() : null;
 	final String format = props.getProperty(LOG_FORMAT_PROP_KEY,
-		"getLevel;getMessage").toString();
+		"getLevel;getMessage").toString().trim();
 	final boolean prefixCloudSimClock = Boolean.parseBoolean(props
-		.getProperty(LOG_CLOUD_SIM_CLOCK_PROP_KEY, "false").toString());
+		.getProperty(LOG_CLOUD_SIM_CLOCK_PROP_KEY, "false").toString().trim());
 	final boolean prefixRealTimeClock = Boolean.parseBoolean(props
-		.getProperty(LOG_CLOUD_REAL_TIME_PROP_KEY, "false").toString());
-	final boolean shutStandardMessages = Boolean
-		.parseBoolean(props.getProperty(SHUT_STANDART_LOGGER_PROP_KEY,
-			"false").toString());
+		.getProperty(LOG_CLOUD_REAL_TIME_PROP_KEY, "false").toString().trim());
+	final boolean shutStandardMessages =
+		Boolean.parseBoolean(props.getProperty(SHUT_STANDART_LOGGER_PROP_KEY, "false").toString().trim());
 	granularityLevel = Level.parse(props.getProperty(LOG_LEVEL_PROP_KEY,
 		DEFAULT_LEVEL.getName()).toString());
+	bufferSize = Integer.parseInt(props.getProperty(BUFFER_SIZE_PROP_KEY, "-1").toString().trim());
 
 	if (shutStandardMessages) {
 	    Log.setOutput(new NullOutputStream());
@@ -510,18 +532,31 @@ public class CustomLog {
 		    + new File(fileName).getAbsolutePath());
 	}
 
-	StreamHandler handler;
 	try {
-	    handler = fileName != null ? new FileHandler(fileName, append)
-		    : new ConsoleHandler();
+	    Handler handler = fileName != null ? new FileHandler(fileName, append) : new ConsoleHandler();
 	    handler.setLevel(granularityLevel);
 	    handler.setFormatter(formatter);
-	    LOGGER.addHandler(handler);
+
+	    Handler bufferedHandler = buffer(handler);
+
+	    LOGGER.addHandler(bufferedHandler);
 	    LOGGER.setLevel(granularityLevel);
 
 	} catch (SecurityException | IOException e) {
 	    e.printStackTrace();
 	}
+    }
+
+    /**
+     * Redirects this logger to the standard output.
+     */
+    public static void redirectToConsole() {
+	redirectToFile(null);
+    }
+
+    private static Handler buffer(Handler handler) {
+	Handler wrapHandler = bufferSize > 0 ? new InMemoryBufferredHandler(handler, bufferSize) : handler;
+	return wrapHandler;
     }
 
     /**
@@ -569,7 +604,7 @@ public class CustomLog {
 	    }
 	    if (prefixCloudSimClock) {
 		result.append(formatClockTime() + "\t");
-	    } 
+	    }
 
 	    // If there is an exception - use the standard formatter
 	    if (record.getThrown() != null) {

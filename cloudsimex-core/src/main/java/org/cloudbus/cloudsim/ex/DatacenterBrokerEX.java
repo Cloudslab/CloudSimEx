@@ -204,12 +204,12 @@ public class DatacenterBrokerEX extends DatacenterBroker {
 		    + " received");
 	    cloudletsSubmitted--;
 
-	    if (getCloudletList().size() > 0 && cloudletsSubmitted == 0) {
-		// all the cloudlets sent finished. It means that some bount
-		// cloudlet is waiting its VM be created
-		clearDatacenters();
-		createVmsInDatacenter(0);
-	    }
+//	    if (getCloudletList().size() > 0 && cloudletsSubmitted == 0) {
+//		// all the cloudlets sent finished. It means that some bount
+//		// cloudlet is waiting its VM be created
+//		clearDatacenters();
+//		createVmsInDatacenter(0);
+//	    }
 	}
     }
 

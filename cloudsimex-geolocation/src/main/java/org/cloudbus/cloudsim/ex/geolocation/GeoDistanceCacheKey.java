@@ -17,7 +17,7 @@ public class GeoDistanceCacheKey {
     private static final int INITIAL_CACHE_SIZE = 1_000;
     /** In order to minimise the number of created instances, we keep a cache. */
     private static final Cache<Integer, GeoDistanceCacheKey> CACHE = 
-	    CacheBuilder.newBuilder().initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
+	    CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
 
     private final double lat1;
     private final double lon1;

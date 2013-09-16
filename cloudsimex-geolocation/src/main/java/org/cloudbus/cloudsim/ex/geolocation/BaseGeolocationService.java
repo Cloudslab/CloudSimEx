@@ -14,11 +14,11 @@ import com.google.common.cache.CacheBuilder;
  */
 public abstract class BaseGeolocationService implements IGeolocationService {
 
-    private static final int CACHE_SIZE = 10_000;
-    private static final int INITIAL_CACHE_SIZE = 1_000;
+    protected static final int CACHE_SIZE = 100_000;
+    protected static final int INITIAL_CACHE_SIZE = 10_000;
     /** In order to minimise the number of created instances, we keep a cache. */
     private static final Cache<GeoDistanceCacheKey, Double> DISTANCE_CACHE =
-	    CacheBuilder.newBuilder().initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
+	    CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
     /**
      * We shall consider coordinates differing after the ROUND_DIGITS
      * significant digit to be equal.
