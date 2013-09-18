@@ -142,8 +142,11 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 
 	double cpuCapacity = getCPUCapacity(mipsShare);
 	int[] disksToNumCloudlets = disksToNumCloudlets();
+	int[] disksToNumCopy = Arrays.copyOf(disksToNumCloudlets, disksToNumCloudlets.length);
 	List<HddResCloudlet> finishedCloudlets = new ArrayList<>();
-	for (HddResCloudlet rcl : this.<HddResCloudlet> getCloudletExecList()) {
+	for (ListIterator<HddResCloudlet> iter = this.<HddResCloudlet> getCloudletExecList().listIterator(); iter
+		.hasNext();) {
+	    HddResCloudlet rcl = iter.next();
 	    long cpuFinishedSoFar =
 		    (long) (cpuCapacity * timeSpam * rcl.getNumberOfPes() * Consts.MILLION);
 	    long ioFinishedSoFar =
@@ -157,24 +160,40 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 	    if (remainingLength == 0 && remainingIOLength == 0) {
 		finishedCloudlets.add(rcl);
 		cloudletFinish(rcl);
+		iter.remove();
+
+		// Update the disksToNumCopy, since it is expensive to recompute
+		updateDisksToNumMapping(disksToNumCopy, rcl);
 	    }
 	}
 
-	getCloudletExecList().removeAll(finishedCloudlets);
-
-	double nextEvent = computeNextEventTime(currentTime, mipsShare, iopsShare);
+	double nextEvent = computeNextEventTime(currentTime, mipsShare, iopsShare, disksToNumCopy);
 	setPreviousTime(currentTime);
 
 	return nextEvent;
     }
 
+    private void updateDisksToNumMapping(int[] disksToNumCopy, HddResCloudlet rcl) {
+	List<? extends HddPe> pes = getVm().getHost().getHddList();
+	DataItem dataItem = rcl.getCloudlet().getData();
+	if (dataItem != null && rcl.getRemainingCloudletIOLength() == 0) {
+	    for (int i = 0; i < pes.size(); i++) {
+		// Does the cloudlet use the disk
+		if (pes.get(i).containsDataItem(dataItem.getId())) {
+		    disksToNumCopy[i]--;
+		    break;
+		}
+	    }
+	}
+    }
+
     private double computeNextEventTime(final double currentTime, final List<Double> mipsShare,
-	    final List<Double> iopsShare) {
+	    final List<Double> iopsShare, int[] disksToNumCloudlets) {
 	// check finished cloudlets
 	double nextEvent = Double.MAX_VALUE;
 
 	double cpuCapacity = getCPUCapacity(mipsShare);
-	int[] disksToNumCloudlets = disksToNumCloudlets();
+	// int[] disksToNumCloudlets = disksToNumCloudlets();
 
 	// estimate finish time of cloudlets
 	for (HddResCloudlet rcl : this.<HddResCloudlet> getCloudletExecList()) {
@@ -313,6 +332,22 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 	}
 	return res;
     }
+
+//    private void updateDiskToNumCloudlets(int[] disksToNum, List<HddResCloudlet> finished) {
+//	List<? extends HddPe> pes = getVm().getHost().getHddList();
+//	for (HddResCloudlet rcl : finished) {
+//	    DataItem dataItem = rcl.getCloudlet().getData();
+//	    if (dataItem != null && rcl.getRemainingCloudletIOLength() == 0) {
+//		for (int i = 0; i < pes.size(); i++) {
+//		    // Does the cloudlet use the disk
+//		    if (pes.get(i).containsDataItem(dataItem.getId())) {
+//			disksToNum[i]--;
+//			break;
+//		    }
+//		}
+//	    }
+//	}
+//    }
 
     private double getCPUCapacity(final List<Double> mipsShare) {
 	double capacity = 0.0;
