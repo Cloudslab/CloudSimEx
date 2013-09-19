@@ -20,9 +20,7 @@ import org.cloudbus.cloudsim.ex.util.CustomLog;
  * @author nikolay.grozev
  * 
  */
-public class SimpleDBBalancer implements IDBBalancer {
-
-    private List<HddVm> dbVms;
+public class SimpleDBBalancer extends BaseDBLoadBalancer implements IDBBalancer {
 
     /**
      * Constr.
@@ -31,7 +29,7 @@ public class SimpleDBBalancer implements IDBBalancer {
      *            - The list of DB vms to distribute cloudlets among.
      */
     public SimpleDBBalancer(final List<HddVm> dbVms) {
-	this.dbVms = dbVms;
+	super(dbVms);
     }
 
     /**
@@ -41,7 +39,7 @@ public class SimpleDBBalancer implements IDBBalancer {
      *            - The list of DB vms to distribute cloudlets among.
      */
     public SimpleDBBalancer(final HddVm... dbVms) {
-	this(Arrays.asList(dbVms));
+	super(Arrays.asList(dbVms));
     }
 
     /*
@@ -75,26 +73,4 @@ public class SimpleDBBalancer implements IDBBalancer {
 	    }
 	}
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.cloudbus.cloudsim.incubator.web.IDBBalancer#getVMs()
-     */
-    @Override
-    public List<HddVm> getVMs() {
-	return dbVms;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.cloudbus.cloudsim.incubator.web.IDBBalancer#setVms(java.util.List)
-     */
-    @Override
-    public void setVms(final List<HddVm> vms) {
-	dbVms = vms;
-    }
-
 }

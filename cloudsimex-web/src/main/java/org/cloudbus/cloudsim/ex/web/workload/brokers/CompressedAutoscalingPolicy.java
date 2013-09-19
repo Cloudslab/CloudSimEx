@@ -26,6 +26,8 @@ import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
  */
 public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 
+    private StringBuilder debugSB = new StringBuilder();
+
     private long appId;
     private double triggerCPU;
     private double triggerRAM;
@@ -51,14 +53,28 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 	    List<HddVm> freeVms = new ArrayList<>();
 
 	    // Inspect the status of all AS VMs
+	    boolean debug = (int) (CloudSim.clock() * 100) % 300 == 0;
+	    debugSB.setLength(0);
 	    for (HddVm vm : loadBalancer.getAppServers()) {
+		appendDebug(debugSB, vm, debug);
 		double vmCPU = vm.getCPUUtil();
 		double vmRAM = vm.getRAMUtil();
 		if (!asToNumSess.contains(vm.getId())) {
 		    freeVms.add(vm);
-		} else if (vmCPU >= triggerCPU && vmRAM >= triggerRAM) {
+		    appendDebug(debugSB, "[FREE, ", debug);
+		} else if (vmCPU >= triggerCPU || vmRAM >= triggerRAM) {
 		    numOverloaded++;
+		    appendDebug(debugSB, "[OVERLOADED, ", debug);
+		} else {
+		    appendDebug(debugSB, "[", debug);
 		}
+		appendFormatDebug(debugSB, debug, "%s] ", vm.getStatus());
+		appendFormatDebug(debugSB, debug, "cpu(%.2f) ram(%.2f) cdlts(%d);\t",
+			vmCPU, vmRAM, vm.getCloudletScheduler().getCloudletExecList().size());
+	    }
+
+	    if (debug) {
+		CustomLog.printf("Autoscale-Policy(%s): %s", broker, debugSB);
 	    }
 
 	    int numFree = freeVms.size();
@@ -94,11 +110,23 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 		}
 
 		if (!toStop.isEmpty()) {
-		    CustomLog.printf("Autoscale-Policy(%s): AS VMs terminated: %s", 
+		    CustomLog.printf("Autoscale-Policy(%s) Scale-Down: AS VMs terminated: %s",
 			    webBroker.toString(), toStop.toString());
 		    webBroker.destroyVMsAfter(toStop, 0);
 		}
 	    }
+	}
+    }
+
+    public static void appendDebug(StringBuilder debugSB, Object o, final boolean debugIt) {
+	if (debugIt) {
+	    debugSB.append(o.toString());
+	}
+    }
+
+    public static void appendFormatDebug(StringBuilder debugSB, final boolean debugIt, String format, Object... args) {
+	if (debugIt) {
+	    debugSB.append(String.format(format, args));
 	}
     }
 
@@ -112,7 +140,8 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 	    }
 
 	    CustomLog
-		    .printf("Autoscale-Policy(%s) New AS VMs provisioned: %s", webBroker.toString(), newVMs.toString());
+		    .printf("Autoscale-Policy(%s) Scale-Up: New AS VMs provisioned: %s",
+			    webBroker.toString(), newVMs.toString());
 	    webBroker.createVmsAfter(newVMs, 0);
 	}
     }

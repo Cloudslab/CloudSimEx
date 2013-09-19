@@ -68,12 +68,15 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 	    for (WebSession session : noAppServSessions) {
 		if (getAppServers().isEmpty()) {
 		    CustomLog.printf(Level.SEVERE,
-			    "Session %d cannot be scheduled, as there are not AS servers",
+			    "Load Balancer(%s): session %d cannot be scheduled, as there are not AS servers",
+			    this.broker.toString(),
 			    session.getSessionId());
 		} else {
-		    CustomLog.printf(Level.SEVERE,
-			    "Session %d cannot be scheduled, as all AS servers are either booting or terminated",
-			    session.getSessionId());
+		    CustomLog
+			    .printf(Level.SEVERE,
+				    "Load Balancer(%s): session %d cannot be scheduled, as all AS servers are either booting or terminated",
+				    this.broker.toString(),
+				    session.getSessionId());
 		}
 	    }
 	} else {// Assign to one of the running VMs

@@ -126,8 +126,8 @@ public class MonitoringBorkerEXTest extends BaseDatacenterBrokerTest {
 
 	double periodBetweenJobsVM1 = cloudletDuration / expecteCPUUtilVM1;
 	double periodBetweenJobsVM2 = cloudletDuration / expecteCPUUtilVM2;
-	int numloudletsPerVM = 200;
-	for (int i = 0; i < numloudletsPerVM; i++) {
+	int numCloudletsPerVM = 200;
+	for (int i = 0; i < numCloudletsPerVM; i++) {
 	    Cloudlet cloudlet1 = createCloudlet(cloudletDuration);
 	    Cloudlet cloudlet2 = createCloudlet(cloudletDuration);
 	    cloudlet1.setUserId(broker.getId());
@@ -149,7 +149,7 @@ public class MonitoringBorkerEXTest extends BaseDatacenterBrokerTest {
 	List<Cloudlet> resultList = broker.getCloudletReceivedList();
 	CloudSim.stopSimulation();
 
-	assertEquals(2 * numloudletsPerVM, resultList.size());
+	assertEquals(2 * numCloudletsPerVM, resultList.size());
 	for (Cloudlet c : resultList) {
 	    assertEquals(Cloudlet.SUCCESS, c.getCloudletStatus());
 	}
@@ -158,7 +158,7 @@ public class MonitoringBorkerEXTest extends BaseDatacenterBrokerTest {
 		.entrySet()) {
 	    // In the beginning it will be inaccurate ...
 	    double time = e.getKey();
-	    if (time < SUMMARY_PERIOD_LEN) {
+	    if (time <= SUMMARY_PERIOD_LEN) {
 		continue;
 	    }
 
@@ -166,18 +166,18 @@ public class MonitoringBorkerEXTest extends BaseDatacenterBrokerTest {
 	    double[] vm2Observations = e.getValue().get(vm2.getId());
 
 	    if (printUtilisation) {
-		if (time <= 2 * numloudletsPerVM + offset2) {
+		if (time <= 2 * numCloudletsPerVM + offset2) {
 		    System.err.printf("Time=%.3f\tVM=%d;\tCPU=%.4f;\t", time, vm1.getId(), vm1Observations[0]);
 		    System.err.printf("VM=%d;\tCPU=%.4f;\t\n", vm2.getId(), vm2Observations[0]);
 		}
 	    }
 
 	    // Validate VM 1 ...
-	    if (time < numloudletsPerVM * periodBetweenJobsVM1 + offset1) {
+	    if (time < numCloudletsPerVM * periodBetweenJobsVM1 + offset1) {
 		assertEquals(expecteCPUUtilVM1, vm1Observations[0], delta);
 		assertEquals(0, vm1Observations[1], delta);
 		assertEquals(0, vm1Observations[2], delta);
-	    } else if (time > numloudletsPerVM * periodBetweenJobsVM1 + SUMMARY_PERIOD_LEN + offset1) {
+	    } else if (time > numCloudletsPerVM * periodBetweenJobsVM1 + SUMMARY_PERIOD_LEN + offset1) {
 		assertEquals(0, vm1Observations[0], delta);
 		assertEquals(0, vm1Observations[1], delta);
 		assertEquals(0, vm1Observations[2], delta);
@@ -188,11 +188,11 @@ public class MonitoringBorkerEXTest extends BaseDatacenterBrokerTest {
 	    }
 
 	    // Validate VM 2 ...
-	    if (time < numloudletsPerVM * periodBetweenJobsVM2 + offset2) {
+	    if (time < numCloudletsPerVM * periodBetweenJobsVM2 + offset2) {
 		assertEquals(expecteCPUUtilVM2, vm2Observations[0], delta);
 		assertEquals(0, vm2Observations[1], delta);
 		assertEquals(0, vm2Observations[2], delta);
-	    } else if (time > numloudletsPerVM * periodBetweenJobsVM2 + SUMMARY_PERIOD_LEN + offset2) {
+	    } else if (time > numCloudletsPerVM * periodBetweenJobsVM2 + SUMMARY_PERIOD_LEN + offset2) {
 		assertEquals(0, vm2Observations[0], delta);
 		assertEquals(0, vm2Observations[1], delta);
 		assertEquals(0, vm2Observations[2], delta);

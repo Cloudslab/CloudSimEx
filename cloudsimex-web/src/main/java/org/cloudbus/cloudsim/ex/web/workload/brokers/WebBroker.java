@@ -169,7 +169,8 @@ public class WebBroker extends MonitoringBorkerEX {
 	    EntryPoint entryPoint = entryPoins.get(appId);
 
 	    for (WebSession sess : webSessions) {
-		CustomLog.printf("Session %d has arrived in the Entry Point of %s", sess.getSessionId(), getName());
+		CustomLog.printf("[Broker](%s) Session %d has arrived in the Entry Point of %s", toString(),
+			sess.getSessionId(), getName());
 	    }
 	    entryPoint.dispatchSessions(webSessions);
 	} else {

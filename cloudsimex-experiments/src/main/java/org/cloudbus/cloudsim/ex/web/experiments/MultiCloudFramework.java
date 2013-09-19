@@ -56,7 +56,7 @@ import org.cloudbus.cloudsim.ex.web.CompressLoadBalancer;
 import org.cloudbus.cloudsim.ex.web.IGenerator;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.RandomListGenerator;
-import org.cloudbus.cloudsim.ex.web.SimpleDBBalancer;
+import org.cloudbus.cloudsim.ex.web.RoundRobinDBBalancer;
 import org.cloudbus.cloudsim.ex.web.StatGenerator;
 import org.cloudbus.cloudsim.ex.web.WebCloudlet;
 import org.cloudbus.cloudsim.ex.web.WebSession;
@@ -117,9 +117,18 @@ public class MultiCloudFramework {
     public static String RESULT_DIR = DEF_DIR + "stat/";
 
     protected int simulationLength = DAY + HOUR / 2;
-    protected int step = 60;
-    protected double wldFactor = 20;
-    protected double monitoringPeriod = 0.1;
+    protected int step = 10;
+    protected double wldFactor = 40;
+    protected double monitoringPeriod = 0.01;
+
+    // AutoScaling
+    protected double autoscaleTriggerCPU = 0.70;
+    protected double autoscaleTriggerRAM = 0.70;
+    
+    // Load balancing
+    protected double loadblancingThresholdCPU = 0.70;
+    protected double autoscaleThresholdRAM = 0.70;
+    
     protected String experimentName = "Multi-Cloud Framework Experiment";
 
     private static final DataItem DATA_EURO1 = new DataItem(5);
@@ -204,32 +213,30 @@ public class MultiCloudFramework {
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 3: Create Brokers and set the appropriate billing policies
 	    CustomLog.print("Step 3: Creating Brokers and billing policies....");
-	    double triggerCPU = 0.8;
-	    double triggerRAM = 0.8;
 	    int n = 1;
 
 	    IVmBillingPolicy googleEUBilling = new GoogleOnDemandPolicy(ExamplePrices.GOOGLE_NIX_OS_PRICES_EUROPE);
 	    WebBroker brokerEuroGoogle = new WebBroker("Euro-Google", step, simulationLength, monitoringPeriod,
 		    dcEuroGoogle.getId(), "EU");
-	    brokerEuroGoogle.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, triggerCPU, triggerRAM, n));
+	    brokerEuroGoogle.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU, autoscaleTriggerRAM, n));
 	    brokerEuroGoogle.setVMBillingPolicy(googleEUBilling);
 
 	    IVmBillingPolicy ec2EUBilling = new EC2OnDemandPolicy(ExamplePrices.EC2_NIX_OS_PRICES_IRELAND);
 	    WebBroker brokerEuroEC2 = new WebBroker("Euro-EC2", step, simulationLength, monitoringPeriod,
 		    dcEuroEC2.getId(), "EU");
-	    brokerEuroEC2.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, triggerCPU, triggerRAM, n));
+	    brokerEuroEC2.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU, autoscaleTriggerRAM, n));
 	    brokerEuroEC2.setVMBillingPolicy(ec2EUBilling);
 
 	    IVmBillingPolicy googleUSBilling = new GoogleOnDemandPolicy(ExamplePrices.GOOGLE_NIX_OS_PRICES_US);
 	    WebBroker brokerUSGoogle = new WebBroker("US-Google", step, simulationLength, monitoringPeriod,
 		    dcUSGoogle.getId(), "US");
-	    brokerUSGoogle.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, triggerCPU, triggerRAM, n));
+	    brokerUSGoogle.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU, autoscaleTriggerRAM, n));
 	    brokerUSGoogle.setVMBillingPolicy(googleUSBilling);
 
 	    IVmBillingPolicy ec2USBilling = new EC2OnDemandPolicy(ExamplePrices.EC2_NIX_OS_PRICES_VIRGINIA);
 	    WebBroker brokerUSEC2 = new WebBroker("US-EC2", step, simulationLength, monitoringPeriod,
 		    dcUSEC2.getId(), "US");
-	    brokerUSEC2.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, triggerCPU, triggerRAM, n));
+	    brokerUSEC2.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU, autoscaleTriggerRAM, n));
 	    brokerUSEC2.setVMBillingPolicy(ec2USBilling);
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
@@ -244,7 +251,7 @@ public class MultiCloudFramework {
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 5: Create virtual machines
 	    CustomLog.print("Step 5: Setting up VMs....");
-	    int numDBs = 3;
+	    int numDBs = 5;
 	    int numApp = 1;
 	    VMMetadata ec2Meta = new VMMetadata();
 	    ec2Meta.setOS(Consts.NIX_OS);
@@ -254,49 +261,47 @@ public class MultiCloudFramework {
 	    googleMeta.setType("n1-standard-1-d");
 
 	    List<HddVm> appServersEuroGoogle =
-		    createVMs("AS-Google", brokerEuroGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numApp, googleMeta);
+		    createVMs("AS-Google-Euro", brokerEuroGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numApp, googleMeta);
 	    List<HddVm> dbServersEuroGoogle =
-		    createVMs("DB-Google", brokerEuroGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numDBs, googleMeta);
+		    createVMs("DB-Google-Euro", brokerEuroGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numDBs, googleMeta);
 
 	    List<HddVm> appServersEuroEC2 =
-		    createVMs("AS-EC2", brokerEuroEC2.getId(), MIPS_AS_VM_EC2, 7500, 1666, numApp, ec2Meta);
+		    createVMs("AS-EC2-Euro", brokerEuroEC2.getId(), MIPS_AS_VM_EC2, 7500, 1666, numApp, ec2Meta);
 	    List<HddVm> dbServersEuroEC2 =
-		    createVMs("DB-EC2", brokerEuroEC2.getId(), MIPS_DB_VM_EC2, 7500, 1666, numDBs, ec2Meta);
+		    createVMs("DB-EC2-Euro", brokerEuroEC2.getId(), MIPS_DB_VM_EC2, 7500, 1666, numDBs, ec2Meta);
 
 	    List<HddVm> appServersUSGoogle =
-		    createVMs("AS-Google", brokerUSGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numApp, googleMeta);
+		    createVMs("AS-Google-US", brokerUSGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numApp, googleMeta);
 	    List<HddVm> dbServersUSGoogle =
-		    createVMs("DB-Google", brokerUSGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numDBs, googleMeta);
+		    createVMs("DB-Google-US", brokerUSGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numDBs, googleMeta);
 
 	    List<HddVm> appServersUSEC2 =
-		    createVMs("AS-EC2", brokerUSEC2.getId(), MIPS_AS_VM_EC2, 7500, 1666, numApp, ec2Meta);
+		    createVMs("AS-EC2-US", brokerUSEC2.getId(), MIPS_AS_VM_EC2, 7500, 1666, numApp, ec2Meta);
 	    List<HddVm> dbServersUSEC2 =
-		    createVMs("DB-EC2", brokerUSEC2.getId(), MIPS_DB_VM_EC2, 7500, 1656, numDBs, ec2Meta);
+		    createVMs("DB-EC2-US", brokerUSEC2.getId(), MIPS_DB_VM_EC2, 7500, 1656, numDBs, ec2Meta);
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 6: Create load balancers
 	    CustomLog.print("Step 6: Setting up load balancers....");
-	    double cpuThreshold = 0.8;
-	    double ramThreshold = 0.8;
 
 	    ILoadBalancer balancerEuroGoogle = new CompressLoadBalancer(brokerEuroGoogle,
-		    1, HAMINA_FINLAND_IP, appServersEuroGoogle, new SimpleDBBalancer(dbServersEuroGoogle),
-		    cpuThreshold, ramThreshold);
+		    1, HAMINA_FINLAND_IP, appServersEuroGoogle, new RoundRobinDBBalancer(dbServersEuroGoogle),
+		    loadblancingThresholdCPU, autoscaleThresholdRAM);
 	    brokerEuroGoogle.addLoadBalancer(balancerEuroGoogle);
 
 	    ILoadBalancer balancerEuroEC2 = new CompressLoadBalancer(brokerEuroEC2,
-		    1, DUBLIN_IP, appServersEuroEC2, new SimpleDBBalancer(dbServersEuroEC2),
-		    cpuThreshold, ramThreshold);
+		    1, DUBLIN_IP, appServersEuroEC2, new RoundRobinDBBalancer(dbServersEuroEC2),
+		    loadblancingThresholdCPU, autoscaleThresholdRAM);
 	    brokerEuroEC2.addLoadBalancer(balancerEuroEC2);
 
 	    ILoadBalancer balancerUSGoogle = new CompressLoadBalancer(brokerUSGoogle,
-		    1, DALAS_IP, appServersUSGoogle, new SimpleDBBalancer(dbServersUSGoogle),
-		    cpuThreshold, ramThreshold);
+		    1, DALAS_IP, appServersUSGoogle, new RoundRobinDBBalancer(dbServersUSGoogle),
+		    loadblancingThresholdCPU, autoscaleThresholdRAM);
 	    brokerUSGoogle.addLoadBalancer(balancerUSGoogle);
 
 	    ILoadBalancer balancerUSEC2 = new CompressLoadBalancer(brokerUSEC2,
-		    1, NEW_YORK_IP, appServersUSEC2, new SimpleDBBalancer(dbServersUSEC2),
-		    cpuThreshold, ramThreshold);
+		    1, NEW_YORK_IP, appServersUSEC2, new RoundRobinDBBalancer(dbServersUSEC2),
+		    loadblancingThresholdCPU, autoscaleThresholdRAM);
 	    brokerUSEC2.addLoadBalancer(balancerUSEC2);
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==

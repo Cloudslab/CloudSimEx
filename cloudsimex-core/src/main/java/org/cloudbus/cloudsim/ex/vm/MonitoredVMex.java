@@ -1,9 +1,8 @@
 package org.cloudbus.cloudsim.ex.vm;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.cloudbus.cloudsim.CloudletScheduler;
@@ -21,12 +20,23 @@ import org.cloudbus.cloudsim.CloudletScheduler;
  */
 public class MonitoredVMex extends VMex {
 
-    final private Map<Double, double[]> performanceObservations = new LinkedHashMap<>();
     private final double summaryPeriodLength;
 
-    private double lastUtilUpdateTime = -1;
-    private double lastUtilMeasurmentTime = -1;
+    /** The list/ordered set of all observations. */
+    final private Map<Double, double[]> performanceObservations = new LinkedHashMap<>();
+    /**
+     * Keeping the sums of all observations, to avoid excessive looping over the
+     * observations.
+     */
+    private double[] perfSums = new double[] { 0, 0, 0 };
+    /**
+     * The number/count of all observations. We keep it in a variable to avoid
+     * looping.
+     */
+    private int perfCount = 0;
+
     private double[] lastUtilMeasurement = new double[] { 0, 0, 0 };
+    private boolean newPerfDataAvailableFlag = false;
 
     /**
      * Constr.
@@ -92,12 +102,7 @@ public class MonitoredVMex extends VMex {
      *            - the Disk utilisation. Must be in the range [0,1];
      */
     public void updatePerformance(final double cpuUtil, final double ramUtil, final double diskUtil) {
-	if (summaryPeriodLength >= 0) {
-	    double currTime = getCurrentTime();
-	    performanceObservations.put(currTime, new double[] { cpuUtil, ramUtil, diskUtil });
-
-	    cleanupOldData(currTime);
-	}
+	updatePerformance(new double[] { cpuUtil, ramUtil, diskUtil });
     }
 
     /**
@@ -110,13 +115,18 @@ public class MonitoredVMex extends VMex {
 	if (summaryPeriodLength >= 0) {
 	    double currTime = getCurrentTime();
 
-	    this.lastUtilUpdateTime = currTime;
-	    
-	    if(Arrays.equals(util, this.lastUtilMeasurement)) {
-		this.lastUtilMeasurmentTime = currTime;
+	    if (!newPerfDataAvailableFlag && Arrays.equals(util, this.lastUtilMeasurement)) {
+		this.newPerfDataAvailableFlag = false;
+	    } else {
+		this.newPerfDataAvailableFlag = true;
 	    }
-	    
+
 	    performanceObservations.put(currTime, util);
+	    for (int i = 0; i < util.length; i++) {
+		perfSums[i] += util[i];
+	    }
+	    this.perfCount++;
+
 	    cleanupOldData(currTime);
 	}
     }
@@ -163,24 +173,19 @@ public class MonitoredVMex extends VMex {
 
     private double[] getAveragedPerformance(final double currTime) {
 	// If there has not been any update - return the cached value
-	if (this.lastUtilUpdateTime < this.lastUtilMeasurmentTime) {
+	if (!newPerfDataAvailableFlag) {
 	    return this.lastUtilMeasurement;
 	} else {
 	    cleanupOldData(currTime);
 	    double[] result = new double[] { 0, 0, 0 };
-	    if (summaryPeriodLength >= 0 && !performanceObservations.isEmpty()) {
-		for (Map.Entry<Double, double[]> entry : performanceObservations.entrySet()) {
-		    for (int i = 0; i < result.length; i++) {
-			result[i] += entry.getValue()[i];
-		    }
-		}
+	    if (summaryPeriodLength >= 0 && perfCount > 0) {
 		for (int i = 0; i < result.length; i++) {
-		    result[i] = result[i] / performanceObservations.size();
+		    result[i] = perfSums[i] / perfCount;
 		}
 	    }
 
 	    // Cache the value for further usage
-	    lastUtilMeasurmentTime = currTime;
+	    newPerfDataAvailableFlag = false;
 	    lastUtilMeasurement = result;
 
 	    return result;
@@ -188,14 +193,18 @@ public class MonitoredVMex extends VMex {
     }
 
     private void cleanupOldData(final double currTime) {
-	List<Double> toRemove = new ArrayList<>();
-	for (Map.Entry<Double, double[]> entry : performanceObservations.entrySet()) {
+	for (Iterator<Map.Entry<Double, double[]>> it = performanceObservations.entrySet().iterator(); it.hasNext();) {
+	    Map.Entry<Double, double[]> entry = it.next();
+
 	    if (entry.getKey() < currTime - summaryPeriodLength) {
-		toRemove.add(entry.getKey());
+		for (int i = 0; i < entry.getValue().length; i++) {
+		    perfSums[i] -= entry.getValue()[i];
+		}
+		perfCount--;
+		it.remove();
+	    } else {
+		break;
 	    }
-	}
-	for (Double time : toRemove) {
-	    performanceObservations.remove(time);
 	}
     }
 
@@ -209,4 +218,14 @@ public class MonitoredVMex extends VMex {
 		getBw(), getSize(), getVmm(), scheduler, getMetadata().clone(), getSummaryPeriodLength());
 	return result;
     }
+
+    /**
+     * For testing/debugging purposes only!
+     * 
+     * @return
+     */
+    public Map<Double, double[]> getPerformanceObservations() {
+	return performanceObservations;
+    }
+
 }

@@ -40,7 +40,7 @@ import org.cloudbus.cloudsim.ex.util.Textualize;
  * @author nikolay.grozev
  * 
  */
-@Textualize(properties = { "SessionId", "AppVmId", "DbVmId", "ReadableStartTime", "StartTime", "FinishTime",
+@Textualize(properties = { "SessionId", "AppVmId", "ReadableStartTime", "StartTime", "FinishTime",
 	"IdealEnd", "Delay", "Complete", "SourceIP",  "ServerIP"})
 public class WebSession {
 

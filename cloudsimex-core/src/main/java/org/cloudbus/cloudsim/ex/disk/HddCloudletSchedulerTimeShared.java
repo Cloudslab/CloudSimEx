@@ -138,12 +138,17 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 	    return 0.0;
 	}
 
+//	if ((int) (CloudSim.clock() * 100) % 300 == 0) {
+//	    CustomLog.printf(
+//		    "[Cloudlet Sched:] Cloudlet scheduling in %s, numCloudlets(%d), cpuUtil(%.2f), ioUtil(%.2f)",
+//		    getVm().toString(), getCloudletExecList().size(), getVm().getCPUUtil(), getVm().getDiskUtil());
+//	}
+
 	double timeSpam = currentTime - getPreviousTime();
 
 	double cpuCapacity = getCPUCapacity(mipsShare);
 	int[] disksToNumCloudlets = disksToNumCloudlets();
 	int[] disksToNumCopy = Arrays.copyOf(disksToNumCloudlets, disksToNumCloudlets.length);
-	List<HddResCloudlet> finishedCloudlets = new ArrayList<>();
 	for (ListIterator<HddResCloudlet> iter = this.<HddResCloudlet> getCloudletExecList().listIterator(); iter
 		.hasNext();) {
 	    HddResCloudlet rcl = iter.next();
@@ -158,7 +163,6 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 	    long remainingLength = rcl.getRemainingCloudletLength();
 	    long remainingIOLength = rcl.getRemainingCloudletIOLength();
 	    if (remainingLength == 0 && remainingIOLength == 0) {
-		finishedCloudlets.add(rcl);
 		cloudletFinish(rcl);
 		iter.remove();
 
@@ -333,21 +337,22 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 	return res;
     }
 
-//    private void updateDiskToNumCloudlets(int[] disksToNum, List<HddResCloudlet> finished) {
-//	List<? extends HddPe> pes = getVm().getHost().getHddList();
-//	for (HddResCloudlet rcl : finished) {
-//	    DataItem dataItem = rcl.getCloudlet().getData();
-//	    if (dataItem != null && rcl.getRemainingCloudletIOLength() == 0) {
-//		for (int i = 0; i < pes.size(); i++) {
-//		    // Does the cloudlet use the disk
-//		    if (pes.get(i).containsDataItem(dataItem.getId())) {
-//			disksToNum[i]--;
-//			break;
-//		    }
-//		}
-//	    }
-//	}
-//    }
+    // private void updateDiskToNumCloudlets(int[] disksToNum,
+    // List<HddResCloudlet> finished) {
+    // List<? extends HddPe> pes = getVm().getHost().getHddList();
+    // for (HddResCloudlet rcl : finished) {
+    // DataItem dataItem = rcl.getCloudlet().getData();
+    // if (dataItem != null && rcl.getRemainingCloudletIOLength() == 0) {
+    // for (int i = 0; i < pes.size(); i++) {
+    // // Does the cloudlet use the disk
+    // if (pes.get(i).containsDataItem(dataItem.getId())) {
+    // disksToNum[i]--;
+    // break;
+    // }
+    // }
+    // }
+    // }
+    // }
 
     private double getCPUCapacity(final List<Double> mipsShare) {
 	double capacity = 0.0;

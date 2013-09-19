@@ -21,7 +21,7 @@ public class VMex extends Vm {
     private VMStatus status;
     private final VMMetadata metadata;
 
-    private String name;
+    private final String name;
 
     private double submissionTime;
     private double startTime;
@@ -29,7 +29,9 @@ public class VMex extends Vm {
 
     /**
      * Constr.
-     * @param name - a short readable description of the VM - e.g. DB-server.
+     * 
+     * @param name
+     *            - a short readable description of the VM - e.g. DB-server.
      * @param userId
      * @param mips
      * @param numberOfPes
@@ -48,7 +50,9 @@ public class VMex extends Vm {
 
     /**
      * Constr.
-     * @param name - a short readable description of the VM - e.g. DB-server.
+     * 
+     * @param name
+     *            - a short readable description of the VM - e.g. DB-server.
      * @param userId
      * @param mips
      * @param numberOfPes

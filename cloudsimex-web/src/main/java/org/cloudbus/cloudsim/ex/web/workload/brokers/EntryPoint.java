@@ -130,7 +130,7 @@ public class EntryPoint {
 	    }
 
 	    if (selectedBroker == null) {
-		CustomLog.print("Session " + sess.getSessionId() + " has been denied service.");
+		CustomLog.print("[Entry Point] Session " + sess.getSessionId() + " has been denied service.");
 		canceledSessions.add(sess);
 	    } else {
 		assignments.get(selectedBroker).add(sess);
@@ -143,7 +143,7 @@ public class EntryPoint {
 	    WebBroker broker = entry.getKey();
 	    List<WebSession> sessions = entry.getValue();
 	    for(WebSession sess : sessions) {
-		CustomLog.printf("Session %d will be assigned to %s", sess.getSessionId(), broker.toString());
+		CustomLog.printf("[Entry Point] Session %d will be assigned to %s", sess.getSessionId(), broker.toString());
 	    }
 	    broker.submitSessionsDirectly(sessions, appId);
 	}

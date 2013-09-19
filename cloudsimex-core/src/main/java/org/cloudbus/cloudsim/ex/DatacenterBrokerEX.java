@@ -444,7 +444,7 @@ public class DatacenterBrokerEX extends DatacenterBroker {
 
     @Override
     public String toString() {
-	return String.format("Broker(%s, %d)", Objects.toString(getName(), "N/A"), getId());
+	return String.valueOf(String.format("Broker(%s, %d)", Objects.toString(getName(), "N/A"), getId()));
     }
 
     /**

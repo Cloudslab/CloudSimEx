@@ -35,7 +35,7 @@ public class MonitoringBorkerEX extends DatacenterBrokerEX {
     protected static final int BROKER_RECORD_UTIL_NOW = BROKER_MEASURE_UTIL_NOW + 1;
 
     /** The time of the first measurement. */
-    private final double offset = Math.min(0.1, CloudSim.getMinTimeBetweenEvents());
+    private final double offset = Math.min(0.01, CloudSim.getMinTimeBetweenEvents());
     /** The period between subsequent VM utilisation measurements. */
     private final double monitoringPeriod;
 
