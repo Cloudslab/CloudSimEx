@@ -118,7 +118,7 @@ public class MultiCloudFramework {
 
     protected int simulationLength = DAY + HOUR / 2;
     protected int step = 60;
-    protected double wldFactor = 10;
+    protected double wldFactor = 20;
     protected double monitoringPeriod = 0.1;
     protected String experimentName = "Multi-Cloud Framework Experiment";
 
