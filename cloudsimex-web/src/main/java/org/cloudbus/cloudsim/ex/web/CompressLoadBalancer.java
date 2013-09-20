@@ -48,7 +48,7 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 	this.ramThreshold = ramThreshold;
 
 	this.broker = broker;
-	cpuUtilReverseComparator = new CPUUtilisationComparator(this.broker);
+	cpuUtilReverseComparator = new CPUUtilisationComparator();
     }
 
     @Override
@@ -82,6 +82,7 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 	} else {// Assign to one of the running VMs
 	    for (WebSession session : noAppServSessions) {
 		List<HddVm> vms = new ArrayList<>(runingVMs);
+		cpuUtilReverseComparator.setUsedASServers(this.broker.getUsedASServers());
 		Collections.sort(vms, cpuUtilReverseComparator);
 
 		HddVm hostVM = vms.get(vms.size() - 1);
@@ -106,21 +107,19 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 
     private static class CPUUtilisationComparator implements Comparator<MonitoredVMex> {
 
-	private final WebBroker webBroker;
+	private Set<Integer> usedASServers;
 
-	public CPUUtilisationComparator(WebBroker webBroker) {
-	    super();
-	    this.webBroker = webBroker;
+	public void setUsedASServers(Set<Integer> usedASServers) {
+	    this.usedASServers = usedASServers;
 	}
 
 	@Override
 	public int compare(final MonitoredVMex vm1, final MonitoredVMex vm2) {
-	    Set<Integer> asToNumSess = webBroker.getUsedASServers();
-	    if (!asToNumSess.contains(vm1.getId()) && !asToNumSess.contains(vm2.getId())) {
+	    if (!usedASServers.contains(vm1.getId()) && !usedASServers.contains(vm2.getId())) {
 		return 0;
-	    } else if (!asToNumSess.contains(vm1.getId())) {
+	    } else if (!usedASServers.contains(vm1.getId())) {
 		return 1;
-	    } else if (!asToNumSess.contains(vm2.getId())) {
+	    } else if (!usedASServers.contains(vm2.getId())) {
 		return -1;
 	    } else {
 		return -Double.valueOf(vm1.getCPUUtil()).compareTo(Double.valueOf(vm2.getCPUUtil()));

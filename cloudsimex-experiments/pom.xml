@@ -17,7 +17,7 @@
         </descriptorRefs>
         <archive>
           <manifest>
-            <mainClass>org.cloudbus.cloudsim.ex.web.experiments.Experiments</mainClass>
+            <mainClass>org.cloudbus.cloudsim.ex.web.experiments.MultiCloudFramework</mainClass>
           </manifest>
         </archive>
       </configuration>

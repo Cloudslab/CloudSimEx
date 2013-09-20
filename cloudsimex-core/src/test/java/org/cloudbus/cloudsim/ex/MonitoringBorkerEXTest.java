@@ -216,7 +216,7 @@ public class MonitoringBorkerEXTest extends BaseDatacenterBrokerTest {
     @Override
     protected DatacenterBrokerEX createBroker() throws Exception {
 	// return new DatacenterBrokerEX("Broker", SIM_LENGTH);
-	return new MonitoringBorkerEX("Broker", SIM_LENGTH, MONITORING_PERIOD);
+	return new MonitoringBorkerEX("Broker", SIM_LENGTH, MONITORING_PERIOD, MONITORING_PERIOD);
     }
 
 }

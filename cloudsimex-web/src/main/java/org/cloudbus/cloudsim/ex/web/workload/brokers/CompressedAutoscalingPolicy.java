@@ -3,6 +3,7 @@ package org.cloudbus.cloudsim.ex.web.workload.brokers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -46,20 +47,25 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 	if (broker instanceof WebBroker) {
 	    WebBroker webBroker = (WebBroker) broker;
 	    ILoadBalancer loadBalancer = webBroker.getLoadBalancers().get(appId);
-	    Set<Integer> asToNumSess = webBroker.getUsedASServers();
+	    Set<Integer> usedASServers = webBroker.getUsedASServers();
 
 	    int numOverloaded = 0;
-	    int numAS = loadBalancer.getAppServers().size();
+	    int numAS = 0;
 	    List<HddVm> freeVms = new ArrayList<>();
 
 	    // Inspect the status of all AS VMs
-	    boolean debug = (int) (CloudSim.clock() * 100) % 300 == 0;
+	    boolean debug = true;// (int) (CloudSim.clock() * 100) % 300 == 0;
 	    debugSB.setLength(0);
 	    for (HddVm vm : loadBalancer.getAppServers()) {
+		if (!EnumSet.of(VMStatus.INITIALISING, VMStatus.RUNNING).contains(vm.getStatus())) {
+		    continue;
+		}
+		numAS++;
+
 		appendDebug(debugSB, vm, debug);
 		double vmCPU = vm.getCPUUtil();
 		double vmRAM = vm.getRAMUtil();
-		if (!asToNumSess.contains(vm.getId())) {
+		if (!usedASServers.contains(vm.getId())) {
 		    freeVms.add(vm);
 		    appendDebug(debugSB, "[FREE, ", debug);
 		} else if (vmCPU >= triggerCPU || vmRAM >= triggerRAM) {
@@ -102,7 +108,8 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 		for (int i = 0; i < numVmsToStop; i++) {
 		    double billTime = webBroker.getVMBillingPolicy().nexChargeTime(freeVms.get(i));
 		    int delta = 10;
-		    if (freeVms.get(i).getStatus() == VMStatus.RUNNING && billTime - CloudSim.clock() < delta) {
+		    if (freeVms.get(i).getStatus() == VMStatus.RUNNING && billTime - CloudSim.clock() < delta &&
+			    toStop.size() < numAS - 1) {
 			toStop.add(freeVms.get(i));
 		    } else {
 			break;
@@ -113,6 +120,7 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 		    CustomLog.printf("Autoscale-Policy(%s) Scale-Down: AS VMs terminated: %s",
 			    webBroker.toString(), toStop.toString());
 		    webBroker.destroyVMsAfter(toStop, 0);
+		    loadBalancer.getAppServers().removeAll(toStop);
 		}
 	    }
 	}

@@ -62,7 +62,7 @@ public class GeoDistanceCacheKey {
 	    return true;
 	} else {
 	    GeoDistanceCacheKey other = (GeoDistanceCacheKey) obj;
-	    return areEqualCoords(lat1, lon1, lat2, lon2,
+	    return hashCode == other.hashCode && areEqualCoords(lat1, lon1, lat2, lon2,
 		    other.lat1, other.lon1, other.lat2, other.lon2);
 	}
     }
@@ -136,6 +136,8 @@ public class GeoDistanceCacheKey {
 	if (digits > 0) {
 	    double exp = Math.pow(10, digits);
 	    return Math.round(num * exp) / exp;
+	} else if (digits == 0) {
+	    return (int) num;
 	} else {
 	    return num;
 	}

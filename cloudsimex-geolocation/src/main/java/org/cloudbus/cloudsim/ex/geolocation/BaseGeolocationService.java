@@ -20,10 +20,10 @@ public abstract class BaseGeolocationService implements IGeolocationService {
     private static final Cache<GeoDistanceCacheKey, Double> DISTANCE_CACHE =
 	    CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
     /**
-     * We shall consider coordinates differing after the ROUND_DIGITS
+     * We shall consider coordinates differing only after the ROUND_DIGITS
      * significant digit to be equal.
      */
-    private static final int SIGNIFICANT_COORD_DIGITS = 2;
+    private static final int SIGNIFICANT_COORD_DIGITS = 1;
 
     /*
      * (non-Javadoc)
@@ -35,7 +35,7 @@ public abstract class BaseGeolocationService implements IGeolocationService {
      * Based on http://www.movable-type.co.uk/scripts/latlong-vincenty.html
      */
     @Override
-    public double distance(double lat1, double lon1, double lat2, double lon2) {
+    public final double distance(double lat1, double lon1, double lat2, double lon2) {
 	// First check in the cache...
 	GeoDistanceCacheKey key = GeoDistanceCacheKey.of(lat1, lon1, lat2, lon2, SIGNIFICANT_COORD_DIGITS);
 	Double cachedDistance = DISTANCE_CACHE.getIfPresent(key);

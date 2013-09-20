@@ -33,11 +33,14 @@ public class MonitoringBorkerEX extends DatacenterBrokerEX {
     // FIXME find a better way to get an unused tag instead of hardcoding ...
     protected static final int BROKER_MEASURE_UTIL_NOW = BROKER_DESTROY_ITSELF_NOW + 20;
     protected static final int BROKER_RECORD_UTIL_NOW = BROKER_MEASURE_UTIL_NOW + 1;
+    protected static final int BROKER_AUTOSCALE_NOW = BROKER_RECORD_UTIL_NOW + 1;
 
     /** The time of the first measurement. */
     private final double offset = Math.min(0.01, CloudSim.getMinTimeBetweenEvents());
     /** The period between subsequent VM utilisation measurements. */
     private final double monitoringPeriod;
+    /** The period between subsequent VM autoscaling events. */
+    private final double autoScalePeriod;
 
     private final List<IAutoscalingPolicy> autoscalingPolicies = new ArrayList<>();
 
@@ -59,14 +62,19 @@ public class MonitoringBorkerEX extends DatacenterBrokerEX {
      *            complete.
      * @param monitoringPeriod
      *            - the period between subsequent measurements.
+     * @param autoScalePeriod
+     *            - the period between subsequent autoscalings.
      * @throws Exception
      *             - from the superclass.
      */
-    public MonitoringBorkerEX(final String name, final double lifeLength, final double monitoringPeriod)
+    public MonitoringBorkerEX(final String name, final double lifeLength, final double monitoringPeriod,
+	    final double autoScalePeriod)
 	    throws Exception {
 	super(name, lifeLength);
 	this.monitoringPeriod = monitoringPeriod <= 0 ? -1 :
 		Math.max(monitoringPeriod, CloudSim.getMinTimeBetweenEvents());
+	this.autoScalePeriod = autoScalePeriod <= 0 ? -1 :
+		Math.max(monitoringPeriod, autoScalePeriod);
     }
 
     /**
@@ -121,6 +129,9 @@ public class MonitoringBorkerEX extends DatacenterBrokerEX {
 	if (!super.isStarted() && monitoringPeriod > 0) {
 	    send(getId(), offset, BROKER_MEASURE_UTIL_NOW);
 	}
+	if (!super.isStarted() && autoScalePeriod > 0) {
+	    send(getId(), offset, BROKER_AUTOSCALE_NOW);
+	}
 	super.processEvent(ev);
     }
 
@@ -130,8 +141,13 @@ public class MonitoringBorkerEX extends DatacenterBrokerEX {
 	    case BROKER_MEASURE_UTIL_NOW:
 		if (CloudSim.clock() <= getLifeLength()) {
 		    measureUtil();
-		    autoscale();
 		    send(getId(), monitoringPeriod, BROKER_MEASURE_UTIL_NOW);
+		}
+		break;
+	    case BROKER_AUTOSCALE_NOW:
+		if (CloudSim.clock() <= getLifeLength()) {
+		    autoscale();
+		    send(getId(), autoScalePeriod, BROKER_AUTOSCALE_NOW);
 		}
 		break;
 	    case BROKER_RECORD_UTIL_NOW:

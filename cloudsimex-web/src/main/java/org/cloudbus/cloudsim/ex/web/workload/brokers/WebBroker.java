@@ -77,9 +77,9 @@ public class WebBroker extends MonitoringBorkerEX {
      *             class.
      */
     public WebBroker(final String name, final double refreshPeriod, final double lifeLength,
-	    final double monitoringPeriod, final int dataCenterId, final String... metadata)
+	    final double monitoringPeriod, final double autoscalePeriod, final int dataCenterId, final String... metadata)
 	    throws Exception {
-	super(name, lifeLength, monitoringPeriod);
+	super(name, lifeLength, monitoringPeriod, autoscalePeriod);
 	this.stepPeriod = refreshPeriod;
 	this.dataCenterId = dataCenterId;
 	this.metadata = metadata;
@@ -104,7 +104,7 @@ public class WebBroker extends MonitoringBorkerEX {
      */
     public WebBroker(final String name, final double refreshPeriod, final double lifeLength, final int dataCenterId)
 	    throws Exception {
-	this(name, refreshPeriod, lifeLength, -1, dataCenterId);
+	this(name, refreshPeriod, lifeLength, -1, -1, dataCenterId);
     }
 
     /**

@@ -52,10 +52,16 @@ import com.maxmind.geoip2.model.City;
  */
 public class GeoIP2PingERService extends BaseGeolocationService implements IGeolocationService, Closeable {
 
+    
     /** In order to minimise the number of created instances, we keep a cache. */
     private static final Cache<String, Double[]> COORDINATES_CACHE =
 	    CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
 
+    /** In order to minimise the number of created instances, we keep a cache. */
+    private static final Cache<String, Double> IP_DISTANCE_CACHE =
+	    CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
+
+    
     // TODO Extract these TSV/CSV constants elsewhere as they can be reused ...
     /** The separator in the tsv file. */
     private static final char TSV_SEP = '\t';
@@ -207,7 +213,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
     }
 
     @Override
-    public Double[] getCoordinates(final String ip) {
+    public final Double[] getCoordinates(final String ip) {
 	Double[] result = COORDINATES_CACHE.getIfPresent(ip);
 	if (result == null) { // If not in the cache
 	    City city;
@@ -264,8 +270,13 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
     }
 
     @Override
-    public double latency(final String ip1, final String ip2) {
-
+    public final double latency(final String ip1, final String ip2) {
+	String key = ip1 + ip2;
+	Double cached = IP_DISTANCE_CACHE.getIfPresent(key);
+	if (cached != null) {
+	    return cached;
+	}
+	
 	// Set up the heap...
 	@SuppressWarnings("rawtypes")
 	MinMaxPriorityQueue.Builder builderRaw = MinMaxPriorityQueue.maximumSize(NUM_APPROX_FOR_LATENCY_ESTIMATION);
@@ -322,6 +333,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 	double result = weigthedAverage(heap);
 	CustomLog.print(Level.FINEST, String.format("Latency betweeen %s and %s is %.2f", ip1, ip2, result));
 
+	IP_DISTANCE_CACHE.put(key, result);
 	return result;
     }
 

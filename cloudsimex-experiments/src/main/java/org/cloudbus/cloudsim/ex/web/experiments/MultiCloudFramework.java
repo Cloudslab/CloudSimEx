@@ -32,6 +32,7 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.ex.billing.EC2OnDemandPolicy;
 import org.cloudbus.cloudsim.ex.billing.ExamplePrices;
 import org.cloudbus.cloudsim.ex.billing.GoogleOnDemandPolicy;
@@ -117,18 +118,19 @@ public class MultiCloudFramework {
     public static String RESULT_DIR = DEF_DIR + "stat/";
 
     protected int simulationLength = DAY + HOUR / 2;
-    protected int step = 10;
-    protected double wldFactor = 40;
+    protected int step = 60;
+    protected double wldFactor = 50;
     protected double monitoringPeriod = 0.01;
+    protected double autoscalingPeriod = 10;
 
     // AutoScaling
     protected double autoscaleTriggerCPU = 0.70;
     protected double autoscaleTriggerRAM = 0.70;
-    
+
     // Load balancing
     protected double loadblancingThresholdCPU = 0.70;
     protected double autoscaleThresholdRAM = 0.70;
-    
+
     protected String experimentName = "Multi-Cloud Framework Experiment";
 
     private static final DataItem DATA_EURO1 = new DataItem(5);
@@ -216,27 +218,31 @@ public class MultiCloudFramework {
 	    int n = 1;
 
 	    IVmBillingPolicy googleEUBilling = new GoogleOnDemandPolicy(ExamplePrices.GOOGLE_NIX_OS_PRICES_EUROPE);
-	    WebBroker brokerEuroGoogle = new WebBroker("Euro-Google", step, simulationLength, monitoringPeriod,
-		    dcEuroGoogle.getId(), "EU");
-	    brokerEuroGoogle.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU, autoscaleTriggerRAM, n));
+	    WebBroker brokerEuroGoogle = new FlushWebBroker("Euro-Google", step, simulationLength, monitoringPeriod,
+		    autoscalingPeriod, dcEuroGoogle.getId(), "EU");
+	    brokerEuroGoogle.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU,
+		    autoscaleTriggerRAM, n));
 	    brokerEuroGoogle.setVMBillingPolicy(googleEUBilling);
 
 	    IVmBillingPolicy ec2EUBilling = new EC2OnDemandPolicy(ExamplePrices.EC2_NIX_OS_PRICES_IRELAND);
-	    WebBroker brokerEuroEC2 = new WebBroker("Euro-EC2", step, simulationLength, monitoringPeriod,
-		    dcEuroEC2.getId(), "EU");
-	    brokerEuroEC2.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU, autoscaleTriggerRAM, n));
+	    WebBroker brokerEuroEC2 = new FlushWebBroker("Euro-EC2", step, simulationLength, monitoringPeriod,
+		    autoscalingPeriod, dcEuroEC2.getId(), "EU");
+	    brokerEuroEC2.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU,
+		    autoscaleTriggerRAM, n));
 	    brokerEuroEC2.setVMBillingPolicy(ec2EUBilling);
 
 	    IVmBillingPolicy googleUSBilling = new GoogleOnDemandPolicy(ExamplePrices.GOOGLE_NIX_OS_PRICES_US);
-	    WebBroker brokerUSGoogle = new WebBroker("US-Google", step, simulationLength, monitoringPeriod,
-		    dcUSGoogle.getId(), "US");
-	    brokerUSGoogle.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU, autoscaleTriggerRAM, n));
+	    WebBroker brokerUSGoogle = new FlushWebBroker("US-Google", step, simulationLength, monitoringPeriod,
+		    autoscalingPeriod, dcUSGoogle.getId(), "US");
+	    brokerUSGoogle.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU,
+		    autoscaleTriggerRAM, n));
 	    brokerUSGoogle.setVMBillingPolicy(googleUSBilling);
 
 	    IVmBillingPolicy ec2USBilling = new EC2OnDemandPolicy(ExamplePrices.EC2_NIX_OS_PRICES_VIRGINIA);
-	    WebBroker brokerUSEC2 = new WebBroker("US-EC2", step, simulationLength, monitoringPeriod,
-		    dcUSEC2.getId(), "US");
-	    brokerUSEC2.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU, autoscaleTriggerRAM, n));
+	    WebBroker brokerUSEC2 = new FlushWebBroker("US-EC2", step, simulationLength, monitoringPeriod,
+		    autoscalingPeriod, dcUSEC2.getId(), "US");
+	    brokerUSEC2.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU,
+		    autoscaleTriggerRAM, n));
 	    brokerUSEC2.setVMBillingPolicy(ec2USBilling);
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
@@ -261,9 +267,11 @@ public class MultiCloudFramework {
 	    googleMeta.setType("n1-standard-1-d");
 
 	    List<HddVm> appServersEuroGoogle =
-		    createVMs("AS-Google-Euro", brokerEuroGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numApp, googleMeta);
+		    createVMs("AS-Google-Euro", brokerEuroGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numApp,
+			    googleMeta);
 	    List<HddVm> dbServersEuroGoogle =
-		    createVMs("DB-Google-Euro", brokerEuroGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numDBs, googleMeta);
+		    createVMs("DB-Google-Euro", brokerEuroGoogle.getId(), MIPS_VM_GOOGLE, 7500, 3840, numDBs,
+			    googleMeta);
 
 	    List<HddVm> appServersEuroEC2 =
 		    createVMs("AS-EC2-Euro", brokerEuroEC2.getId(), MIPS_AS_VM_EC2, 7500, 1666, numApp, ec2Meta);
@@ -581,4 +589,26 @@ public class MultiCloudFramework {
 	}
     }
 
+    private static class FlushWebBroker extends WebBroker {
+
+	public FlushWebBroker(String name, double refreshPeriod, double lifeLength, double monitoringPeriod,
+		double autoscalePeriod, int dataCenterId, String... metadata) throws Exception {
+	    super(name, refreshPeriod, lifeLength, monitoringPeriod, autoscalePeriod, dataCenterId, metadata);
+	    // TODO Auto-generated constructor stub
+	}
+
+	public FlushWebBroker(String name, double refreshPeriod, double lifeLength, int dataCenterId) throws Exception {
+	    super(name, refreshPeriod, lifeLength, dataCenterId);
+	    // TODO Auto-generated constructor stub
+	}
+	
+	@Override
+	protected void processCloudletReturn(SimEvent ev) {
+	    super.processCloudletReturn(ev);
+	    
+	    //Flush the memory - there are too many cloudlets
+	    getCloudletReceivedList().clear();
+	}
+    }
+    
 }
