@@ -119,7 +119,7 @@ public class MultiCloudFramework {
 
     protected int simulationLength = DAY + HOUR / 2;
     protected int step = 60;
-    protected double wldFactor = 50;
+    protected double wldFactor = 100;
     protected double monitoringPeriod = 0.01;
     protected double autoscalingPeriod = 10;
 
@@ -174,6 +174,22 @@ public class MultiCloudFramework {
 
 	// CustomLog.redirectToFile(RESULT_DIR + "log.txt");
 
+	CustomLog.print("Simulation summary:");
+	CustomLog.printf("wldFactor=%.2f", wldFactor);
+	CustomLog.printf("monitoringPeriod=%.2f", monitoringPeriod);
+	CustomLog.printf("autoscalingPeriod=%.2f", autoscalingPeriod);
+	CustomLog.printf("autoscaleTriggerCPU=%.2f", autoscaleTriggerCPU);
+	CustomLog.printf("autoscaleTriggerRAM=%.2f", autoscaleTriggerRAM);
+	CustomLog.printf("loadblancingThresholdCPU=%.2f", loadblancingThresholdCPU);
+	CustomLog.printf("autoscaleThresholdRAM=%.2f", autoscaleThresholdRAM);
+	CustomLog.printLine("");
+	CustomLog.print("Workload frequencies:");
+	for(String period : getPeriods(wldFactor)) {
+	    CustomLog.printLine("\t" + period);
+	    
+	}
+	CustomLog.printLine("");
+
 	CustomLog.print("Step 0: Initialising IP services....");
 	euroIPGen = new GeoIP2IPGenerator(EURO_CODES,
 		new File(GEO_RESOURCE_PATH + "GeoIPCountryWhois.csv"));
@@ -221,28 +237,28 @@ public class MultiCloudFramework {
 	    WebBroker brokerEuroGoogle = new FlushWebBroker("Euro-Google", step, simulationLength, monitoringPeriod,
 		    autoscalingPeriod, dcEuroGoogle.getId(), "EU");
 	    brokerEuroGoogle.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU,
-		    autoscaleTriggerRAM, n));
+		    autoscaleTriggerRAM, n, autoscalingPeriod));
 	    brokerEuroGoogle.setVMBillingPolicy(googleEUBilling);
 
 	    IVmBillingPolicy ec2EUBilling = new EC2OnDemandPolicy(ExamplePrices.EC2_NIX_OS_PRICES_IRELAND);
 	    WebBroker brokerEuroEC2 = new FlushWebBroker("Euro-EC2", step, simulationLength, monitoringPeriod,
 		    autoscalingPeriod, dcEuroEC2.getId(), "EU");
 	    brokerEuroEC2.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU,
-		    autoscaleTriggerRAM, n));
+		    autoscaleTriggerRAM, n, autoscalingPeriod));
 	    brokerEuroEC2.setVMBillingPolicy(ec2EUBilling);
 
 	    IVmBillingPolicy googleUSBilling = new GoogleOnDemandPolicy(ExamplePrices.GOOGLE_NIX_OS_PRICES_US);
 	    WebBroker brokerUSGoogle = new FlushWebBroker("US-Google", step, simulationLength, monitoringPeriod,
 		    autoscalingPeriod, dcUSGoogle.getId(), "US");
 	    brokerUSGoogle.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU,
-		    autoscaleTriggerRAM, n));
+		    autoscaleTriggerRAM, n, autoscalingPeriod));
 	    brokerUSGoogle.setVMBillingPolicy(googleUSBilling);
 
 	    IVmBillingPolicy ec2USBilling = new EC2OnDemandPolicy(ExamplePrices.EC2_NIX_OS_PRICES_VIRGINIA);
 	    WebBroker brokerUSEC2 = new FlushWebBroker("US-EC2", step, simulationLength, monitoringPeriod,
 		    autoscalingPeriod, dcUSEC2.getId(), "US");
 	    brokerUSEC2.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU,
-		    autoscaleTriggerRAM, n));
+		    autoscaleTriggerRAM, n, autoscalingPeriod));
 	    brokerUSEC2.setVMBillingPolicy(ec2USBilling);
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
@@ -382,7 +398,7 @@ public class MultiCloudFramework {
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 10 : stop the simulation and print the results
 	    CloudSim.stopSimulation();
-	    CustomLog.redirectToFile(RESULT_DIR + "Sessions-EuroGoogle.csv");
+	    CustomLog.redirectToFile(RESULT_DIR + "Sessions-BrokerEuroGoogle.csv");
 	    CustomLog.printResults(WebSession.class, brokerEuroGoogle.getServedSessions());
 
 	    CustomLog.redirectToFile(RESULT_DIR + "Sessions-BrokerEuroEC2.csv");
@@ -427,19 +443,7 @@ public class MultiCloudFramework {
 
     protected IWorkloadGenerator generateWorkload(final int userId, final double nullPoint,
 	    final Map<String[], Double> valuesAndFreqs, GeoIP2IPGenerator ipGen, double f) {
-	String[] periods = new String[] {
-		String.format("[%d,%d] m=%f  std=%f", HOURS[0], HOURS[6], 10d * f, 1d),
-		String.format("(%d,%d] m=%f  std=%f", HOURS[6], HOURS[7], 30d * f, 2d),
-		String.format("(%d,%d] m=%f  std=%f", HOURS[7], HOURS[10], 50d * f, 3d),
-		String.format("(%d,%d] m=%f  std=%f", HOURS[10], HOURS[14], 100d * f, 4d),
-		String.format("(%d,%d] m=%f  std=%f", HOURS[14], HOURS[17], 50d * f, 3d),
-		String.format("(%d,%d] m=%f  std=%f", HOURS[17], HOURS[18], 30d * f, 2d),
-		String.format("(%d,%d] m=%f  std=%f", HOURS[18], HOURS[24], 10d * f, 1d) };
-	return generateWorkload(userId, nullPoint, periods, valuesAndFreqs, ipGen);
-    }
-
-    protected IWorkloadGenerator generateWorkload(final int userId, final double nullPoint,
-	    final String[] periods, final Map<String[], Double> valuesAndFreqs, GeoIP2IPGenerator ipGen) {
+	String[] periods = getPeriods(f);
 
 	Map<String, List<Double>> asDefs;
 	Map<String, List<Double>> dbDefs;
@@ -461,6 +465,18 @@ public class MultiCloudFramework {
 	} catch (IOException e) {
 	    throw new RuntimeException(e);
 	}
+    }
+
+    private String[] getPeriods(double f) {
+	String[] periods = new String[] {
+		String.format("[%d,%d] m=%f  std=%.2f", HOURS[0], HOURS[6], 10d * f, 1d),
+		String.format("(%d,%d] m=%.2f  std=%.2f", HOURS[6], HOURS[7], 30d * f, 2d),
+		String.format("(%d,%d] m=%.2f  std=%.2f", HOURS[7], HOURS[10], 50d * f, 3d),
+		String.format("(%d,%d] m=%.2f  std=%.2f", HOURS[10], HOURS[14], 100d * f, 4d),
+		String.format("(%d,%d] m=%.2f  std=%.2f", HOURS[14], HOURS[17], 50d * f, 3d),
+		String.format("(%d,%d] m=%.2f  std=%.2f", HOURS[17], HOURS[18], 30d * f, 2d),
+		String.format("(%d,%d] m=%.2f  std=%.2f", HOURS[18], HOURS[24], 10d * f, 1d) };
+	return periods;
     }
 
     private List<HddVm> createVMs(String name, final int brokerId, final int mips, final int ioMips, final int ram,
@@ -601,14 +617,14 @@ public class MultiCloudFramework {
 	    super(name, refreshPeriod, lifeLength, dataCenterId);
 	    // TODO Auto-generated constructor stub
 	}
-	
+
 	@Override
 	protected void processCloudletReturn(SimEvent ev) {
 	    super.processCloudletReturn(ev);
-	    
-	    //Flush the memory - there are too many cloudlets
+
+	    // Flush the memory - there are too many cloudlets
 	    getCloudletReceivedList().clear();
 	}
     }
-    
+
 }

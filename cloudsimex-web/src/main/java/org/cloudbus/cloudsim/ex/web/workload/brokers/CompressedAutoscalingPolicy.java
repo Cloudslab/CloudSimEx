@@ -33,13 +33,15 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
     private double triggerCPU;
     private double triggerRAM;
     private int n;
+    private double delta;
 
-    public CompressedAutoscalingPolicy(long appId, double triggerCPU, double triggerRAM, int n) {
+    public CompressedAutoscalingPolicy(long appId, double triggerCPU, double triggerRAM, int n, double delta) {
 	super();
 	this.appId = appId;
 	this.triggerCPU = triggerCPU;
 	this.triggerRAM = triggerRAM;
 	this.n = n;
+	this.delta = delta;
     }
 
     @Override
@@ -107,7 +109,6 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 		Collections.sort(freeVms, new CloudPriceComparator(webBroker.getVMBillingPolicy()));
 		for (int i = 0; i < numVmsToStop; i++) {
 		    double billTime = webBroker.getVMBillingPolicy().nexChargeTime(freeVms.get(i));
-		    int delta = 10;
 		    if (freeVms.get(i).getStatus() == VMStatus.RUNNING && billTime - CloudSim.clock() < delta &&
 			    toStop.size() < numAS - 1) {
 			toStop.add(freeVms.get(i));

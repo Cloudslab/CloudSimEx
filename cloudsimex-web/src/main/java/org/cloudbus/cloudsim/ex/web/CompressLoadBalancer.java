@@ -29,6 +29,8 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
     private final double cpuThreshold;
     private final double ramThreshold;
 
+    private StringBuilder debugSB = new StringBuilder();
+
     /**
      * Const.
      * 
@@ -74,7 +76,7 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 		} else {
 		    CustomLog
 			    .printf(Level.SEVERE,
-				    "Load Balancer(%s): session %d cannot be scheduled, as all AS servers are either booting or terminated",
+				    "[Load Balancer](%s): session %d cannot be scheduled, as all AS servers are either booting or terminated",
 				    this.broker.toString(),
 				    session.getSessionId());
 		}
@@ -82,8 +84,17 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 	} else {// Assign to one of the running VMs
 	    for (WebSession session : noAppServSessions) {
 		List<HddVm> vms = new ArrayList<>(runingVMs);
-		cpuUtilReverseComparator.setUsedASServers(this.broker.getUsedASServers());
+		Set<Integer> usedASServers = this.broker.getUsedASServers();
+		cpuUtilReverseComparator.setUsedASServers(usedASServers);
 		Collections.sort(vms, cpuUtilReverseComparator);
+
+		// For debug purposes:
+		debugSB.setLength(0);
+		for (HddVm vm : vms) {
+		    debugSB.append(String.format("%s[%s] cpu(%.2f), ram(%.2f), cdlts(%d); ",
+			    vm, (usedASServers.contains(vm.getId()) ? "" : "FREE, ") + vm.getStatus(),
+			    vm.getCPUUtil(), vm.getRAMUtil(), vm.getCloudletScheduler().getCloudletExecList().size()));
+		}
 
 		HddVm hostVM = vms.get(vms.size() - 1);
 		for (HddVm vm : vms) {
@@ -94,6 +105,12 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 		}
 
 		session.setAppVmId(hostVM.getId());
+		CustomLog.printf(
+			"[Load Balancer](%s): Assigning sesssion %d to %s[%s] cpu(%.2f), ram(%.2f), cdlts(%d)",
+			broker, session.getSessionId(), hostVM, hostVM.getStatus(),
+			hostVM.getCPUUtil(), hostVM.getRAMUtil(), hostVM.getCloudletScheduler().getCloudletExecList()
+				.size());
+		CustomLog.printf("[Load Balancer](%s), Cadidate VMs: %s", broker, debugSB);
 	    }
 
 	    // Set the DB VM
