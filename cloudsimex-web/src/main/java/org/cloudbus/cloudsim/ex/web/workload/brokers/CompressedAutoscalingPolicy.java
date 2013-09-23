@@ -99,7 +99,7 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 		startASVms(webBroker, loadBalancer, numVmsToStart);
 	    } else { // Release VMs
 		int numVmsToStop = 0;
-		if (allOverloaded) {
+		if (allOverloaded || n == 0) {
 		    numVmsToStop = numFree - n;
 		} else {
 		    numVmsToStop = numFree - n + 1;
@@ -165,7 +165,7 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 
 	@Override
 	public int compare(final HddVm vm1, final HddVm vm2) {
-	    return Double.valueOf(policy.nexChargeTime(vm1)).compareTo(policy.nexChargeTime(vm2));
+	    return Double.compare(policy.nexChargeTime(vm1), policy.nexChargeTime(vm2));
 	}
 
     }

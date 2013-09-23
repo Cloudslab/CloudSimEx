@@ -419,7 +419,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 
 	@Override
 	public int compareTo(PingERLatencyEntry o) {
-	    return Double.valueOf(accumDistance).compareTo(o.accumDistance);
+	    return Double.compare(accumDistance, o.accumDistance);
 	}
 
 	@Override

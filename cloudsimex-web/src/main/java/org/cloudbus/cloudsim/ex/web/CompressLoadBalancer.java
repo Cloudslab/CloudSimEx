@@ -139,7 +139,7 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 	    } else if (!usedASServers.contains(vm2.getId())) {
 		return -1;
 	    } else {
-		return -Double.valueOf(vm1.getCPUUtil()).compareTo(Double.valueOf(vm2.getCPUUtil()));
+		return -Double.compare(vm1.getCPUUtil(), vm2.getCPUUtil());
 	    }
 	}
     }

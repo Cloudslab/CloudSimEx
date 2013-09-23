@@ -1,8 +1,11 @@
 package org.cloudbus.cloudsim.ex.web.experiments;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.cloudbus.cloudsim.ex.util.ExperimentsRunner;
 
 /**
@@ -42,19 +45,20 @@ public class Experiments {
 	// // SingleDataCentre1000.class
 	// };
 
-	Class<?>[] experimens = new Class<?>[] { TwoDatacentres.class };
+	Class<?>[] experiments = new Class<?>[] { TwoDatacentres.class };
 
 	// Map the main experiment classes to the output files
-	Map<Class<?>, String> experiments = new LinkedHashMap<>();
-	for (Class<?> clazz : experimens) {
-	    experiments.put(clazz,
-		    SingleDatacentre.RESULT_DIR + String.format("%s.log", clazz.getSimpleName()));
+	List<Map.Entry<? extends Class<?>, String[]>> experimentsDefs = new ArrayList<>();
+
+	for (Class<?> clazz : experiments) {
+	    experimentsDefs.add(ImmutablePair.of(clazz,
+		    new String[] { SingleDatacentre.RESULT_DIR + String.format("%s.log", clazz.getSimpleName(), "../custom_log.properties") }
+	    ));
 	}
 
 	// Run the experiments with custom_log.properties config of the loggers
 	// and leave 1 CPU free at all times.
-	ExperimentsRunner.runExperiments(experiments,
-		"../custom_log.properties", 1);
+	ExperimentsRunner.runExperiments(experimentsDefs, 1);
     }
 
 }

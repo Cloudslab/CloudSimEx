@@ -14,11 +14,13 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import com.google.common.base.Function;
 import com.google.common.primitives.Primitives;
 
 /**
@@ -36,8 +38,7 @@ public class TextUtil {
 
     private static final SimpleDateFormat FULL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
     private static final SimpleDateFormat TIME_DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
-    
-    
+
     /** Format for double precision numbers. */
     public static final DecimalFormat DEC_FORMAT = new DecimalFormat("####0.00");
     /** Number of positions used when converting doubles to text. */
@@ -319,6 +320,65 @@ public class TextUtil {
     }
 
     /**
+     * Converts the specified object to a single line of text by concatenating
+     * its properties and "Virtual Properties". Essentially this methods calls
+     * {@link TextUtil.getTxtLine(final Object obj, final String delimeter,
+     * final String[] properties, final boolean includeFieldNames)} to
+     * textualise the properties and then appends the virtual properties.
+     * 
+     * <br>
+     * <br>
+     * Each virtual property is specified by a name and a function. The function
+     * takes as a parameter the object and returns a string.
+     * 
+     * @param obj
+     *            - the object to extract text from. Must not be null.
+     * @param delimeter
+     *            - the delimeter to put between the entries in the line. Must
+     *            not be null.
+     * @param properties
+     *            - the properties to include in the line. If null all
+     *            properties specified in a {@link Textualize} annotation are
+     *            used. If null and no {@link Textualize} is defined for the
+     *            class - then all properties are used.
+     * @param includeFieldNames
+     *            - a flag whether to include the names of the properties in the
+     *            line as well.
+     * @param virtualProps
+     *            - must not be null. The Functions must not throw exceptions or
+     *            modify the state of the object
+     * @return
+     */
+    public static <F> String getTxtLine(final F obj, final String delimeter, final String[] properties,
+	    final boolean includeFieldNames, final LinkedHashMap<String, Function<F, String>> virtualProps) {
+	StringBuffer result = new StringBuffer(getTxtLine(obj, delimeter, properties, includeFieldNames));
+	if (!virtualProps.isEmpty()) {
+	    result.append(delimeter);
+
+	    int i = 0;
+	    for (Map.Entry<String, Function<F, String>> prop : virtualProps.entrySet()) {
+		String propName = prop.getKey();
+		String propRes = prop.getValue().apply(obj);
+
+		String txt = toString(propRes);
+		if (includeFieldNames) {
+		    result.append(propName + "=" + txt);
+		} else {
+		    if (propName.length() > txt.length()) {
+			txt = String.format("%" + propName.length() + "s", txt);
+		    }
+		    result.append(txt);
+		}
+
+		result.append(i < virtualProps.size() - 1 ? delimeter : "");
+		i++;
+	    }
+	}
+
+	return result.toString();
+    }
+
+    /**
      * Converts the specified class to a single line of text. Convenient for
      * generating a header line in a log or a CSV file. For the purpose the
      * names of all properties (the parts of the get methods after "get" or
@@ -450,6 +510,41 @@ public class TextUtil {
 	    result.append(propEntry);
 	    result.append(i < methods.size() - 1 ? delimeter : "");
 	    i++;
+	}
+
+	return result.toString();
+    }
+
+    /**
+     * Converts the specified class to a single line of text by appending its
+     * properties and a set of so-called "virtual properties".
+     * 
+     * @param clazz
+     *            - the class to use to create the line. Must not be null.
+     * @param delimeter
+     *            - the delimeter to put between the entries in the line. Must
+     *            not be null.
+     * @param properties
+     *            - the properties to include in the line. If null all
+     *            properties specified in a {@link Textualize} annotation are
+     *            used. If null and no {@link Textualize} is defined for the
+     *            class - then all properties are used.
+     * @param virtualProps
+     *            - virtual properties, which are not actual properties of the
+     *            class.
+     * @return
+     */
+    public static String getCaptionLine(final Class<?> clazz, final String delimeter, final String[] properties,
+	    final String[] virtualProps) {
+	StringBuffer result = new StringBuffer(getCaptionLine(clazz, delimeter, properties));
+	if (virtualProps.length > 0) {
+	    result.append(delimeter);
+	    int i = 0;
+	    for (String prop : virtualProps) {
+		result.append(formatHeader(prop, String.class));
+		result.append(i < virtualProps.length - 1 ? delimeter : "");
+		i++;
+	    }
 	}
 
 	return result.toString();

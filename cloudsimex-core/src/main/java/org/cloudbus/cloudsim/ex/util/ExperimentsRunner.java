@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -47,10 +48,9 @@ public class ExperimentsRunner {
      * not freeze.
      * 
      * @param experimentsToOutputs
-     *            - the experiments's main classes mapped to the output files
-     *            they'll be using.
-     * @param logPropertiesFile
-     *            - the properties for the loggers of the experiments.
+     *            - the experiments's main classes mapped to the parameters of
+     *            the experiment. These could be both application and JVM
+     *            parameters.
      * @param numFreeCPUs
      *            - number of processors to leave unused. Must be non-negative
      *            and less than the number processors - 1. For example if 0 -
@@ -61,19 +61,18 @@ public class ExperimentsRunner {
      * @throws Exception
      *             - if something goes wrong.
      */
-    public static synchronized void runExperiments(final Map<Class<?>, String> experimentsToOutputs,
-	    final String logPropertiesFile, final int numFreeCPUs) throws Exception {
+    public static synchronized void runExperiments(
+	    final List<Map.Entry<? extends Class<?>, String[]>> experimentsToOutputs,
+	    final int numFreeCPUs) throws Exception {
 
 	// If only one experiment - run it in this process
 	// If more than on experiment - spawn a new process for each
 	if (experimentsToOutputs.size() == 1) {
-	    Class<?> experiment = (Class<?>) experimentsToOutputs.keySet().toArray()[0];
-	    String file = experimentsToOutputs.get(experiment);
+	    Class<?> experiment = (Class<?>) experimentsToOutputs.get(0).getKey();
 
 	    // Find the main method and run it here
 	    Method main = experiment.getMethod("main", String[].class);
-	    String[] params = new String[] { file, logPropertiesFile };
-	    main.invoke(null, (Object) params);
+	    main.invoke(null, (Object) experimentsToOutputs.get(0).getValue());
 	} else if (!experimentsToOutputs.isEmpty()) {
 	    // Prints the pid of the current process... so we know who to kill
 	    printPIDInformation();
@@ -88,15 +87,15 @@ public class ExperimentsRunner {
 	    ExecutorService pool = Executors.newFixedThreadPool(coresToUse);
 	    Collection<Future<?>> futures = new ArrayList<Future<?>>();
 
-	    for (Map.Entry<Class<?>, String> entry : experimentsToOutputs.entrySet()) {
+	    for (Map.Entry<? extends Class<?>, String[]> entry : experimentsToOutputs) {
 		final Class<?> experiment = entry.getKey();
-		final String file = entry.getValue();
+		final String[] params = entry.getValue();
 		Runnable runnable = new Runnable() {
 		    @Override
 		    public void run() {
 			int resultStatus;
 			try {
-			    resultStatus = exec(experiment, file, logPropertiesFile);
+			    resultStatus = exec(experiment, params);
 			} catch (IOException | InterruptedException e) {
 			    resultStatus = 1;
 			}
@@ -141,13 +140,12 @@ public class ExperimentsRunner {
      * >StackOverflow: Executing java in a separate process</a>
      * 
      * @param klass
-     * @param logPropertiesFile
-     * @param logFile
+     * @param params
      * @return
      * @throws IOException
      * @throws InterruptedException
      */
-    private static int exec(final Class<?> klass, final String logFile, final String logPropertiesFile)
+    private static int exec(final Class<?> klass, final String[] params)
 	    throws IOException,
 	    InterruptedException {
 	String javaHome = System.getProperty("java.home");
@@ -157,8 +155,22 @@ public class ExperimentsRunner {
 	String classpath = System.getProperty("java.class.path");
 	String className = klass.getCanonicalName();
 
-	ProcessBuilder builder = new ProcessBuilder(
-		javaBin, "-cp", classpath, className, logFile, logPropertiesFile);
+	List<String> vmParams = new ArrayList<>();
+	List<String> appParams = new ArrayList<>();
+	for (String param : params) {
+	    if(param.startsWith("-X") || param.startsWith("-D")) {
+		vmParams.add(param);
+	    } else {
+		appParams.add(param);
+	    }
+	}
+	
+	List<String> processBuilderList = new ArrayList<>();
+	processBuilderList.add(javaBin);
+	processBuilderList.addAll(vmParams);
+	processBuilderList.addAll(Arrays.asList("-cp", classpath, className));
+	processBuilderList.addAll(appParams);
+	ProcessBuilder builder = new ProcessBuilder((String[]) processBuilderList.toArray(new String[0]));
 
 	// Redirect the standard I/O to here (this process)
 	builder.inheritIO();

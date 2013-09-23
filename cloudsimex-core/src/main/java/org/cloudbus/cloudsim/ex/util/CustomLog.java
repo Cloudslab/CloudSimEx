@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.ConsoleHandler;
@@ -19,6 +20,8 @@ import java.util.logging.StreamHandler;
 import org.apache.commons.io.output.NullOutputStream;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
+
+import com.google.common.base.Function;
 
 /**
  * Replaces the primitive functionality of the standard CloudSim Log. Allows
@@ -293,6 +296,24 @@ public class CustomLog {
 	for (List<?> list : lines) {
 	    for (Object o : list) {
 		printLineForObject(o, TextUtil.DEFAULT_DELIM, properties);
+	    }
+	}
+    }
+
+    @SafeVarargs
+    public static <F> void printResults(final Class<? extends F> klass, String[] properties,
+	    final LinkedHashMap<String, Function<F, String>> virtualProps,
+	    final List<F>... lines) {
+	if (klass != null) {
+	    // Print header line
+	    CustomLog.printLine(TextUtil.getCaptionLine(klass, TextUtil.DEFAULT_DELIM, properties, 
+		    virtualProps.keySet().toArray(new String[virtualProps.size()])));
+	}
+
+	// Print details for each element
+	for (List<F> list : lines) {
+	    for (F o : list) {
+		CustomLog.print(TextUtil.getTxtLine(o, TextUtil.DEFAULT_DELIM, properties, false, virtualProps));
 	    }
 	}
     }

@@ -201,33 +201,33 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 
 	// estimate finish time of cloudlets
 	for (HddResCloudlet rcl : this.<HddResCloudlet> getCloudletExecList()) {
-	    Double estimatedFinishCPUTime = rcl.getRemainingCloudletLength() == 0 ? null :
+	    double estimatedFinishCPUTime = rcl.getRemainingCloudletLength() == 0 ? Double.NaN :
 		    currentTime
 			    + (rcl.getRemainingCloudletLength() / (cpuCapacity * rcl.getNumberOfPes()));
-	    Double estimatedFinishIOTime = rcl.getRemainingCloudletIOLength() == 0 ? null
+	    double estimatedFinishIOTime = rcl.getRemainingCloudletIOLength() == 0 ? Double.NaN
 		    :
 		    currentTime
 			    + (rcl.getRemainingCloudletIOLength() / (getIOCapacity(iopsShare, disksToNumCloudlets, rcl) * rcl
 				    .getNumberOfHdds()));
 
-	    Double estimatedFinishTime = refMin(estimatedFinishCPUTime, estimatedFinishIOTime);
+	    double estimatedFinishTime = nanMin(estimatedFinishCPUTime, estimatedFinishIOTime);
 
-	    if (estimatedFinishTime != null && estimatedFinishTime - currentTime < CloudSim.getMinTimeBetweenEvents()) {
+	    if (!Double.isNaN(estimatedFinishTime) && estimatedFinishTime - currentTime < CloudSim.getMinTimeBetweenEvents()) {
 		estimatedFinishTime = currentTime + CloudSim.getMinTimeBetweenEvents();
 	    }
 
-	    if (estimatedFinishTime != null && estimatedFinishTime < nextEvent) {
+	    if (!Double.isNaN(estimatedFinishTime) && estimatedFinishTime < nextEvent) {
 		nextEvent = estimatedFinishTime;
 	    }
 	}
 	return nextEvent;
     }
 
-    private static Double refMin(final Double estimatedFinishCPUTime, final Double estimatedFinishIOTime) {
-	Double estimatedFinishTime = null;
-	if (estimatedFinishCPUTime == null) {
+    private static double nanMin(final double estimatedFinishCPUTime, final double estimatedFinishIOTime) {
+	double estimatedFinishTime = Double.NaN;
+	if (Double.isNaN(estimatedFinishCPUTime)) {
 	    estimatedFinishTime = estimatedFinishIOTime;
-	} else if (estimatedFinishIOTime == null) {
+	} else if (Double.isNaN(estimatedFinishIOTime)) {
 	    estimatedFinishTime = estimatedFinishCPUTime;
 	} else {
 	    estimatedFinishTime = Math.min(estimatedFinishCPUTime, estimatedFinishIOTime);
@@ -486,16 +486,16 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 
 	    double remainingLength = rgl.getRemainingCloudletLength();
 	    double remainingIOLength = rgl.getRemainingCloudletIOLength();
-	    Double estimatedFinishCPUTime = remainingLength == 0 ? null :
+	    double estimatedFinishCPUTime = remainingLength == 0 ? Double.NaN :
 		    CloudSim.clock()
 			    + (remainingLength / (getCPUCapacity(getCurrentMipsShare()) * rgl.getNumberOfPes()));
-	    Double estimatedFinishIOTime = remainingIOLength == 0 ? null
+	    double estimatedFinishIOTime = remainingIOLength == 0 ? Double.NaN
 		    :
 		    CloudSim.clock()
 			    + (remainingIOLength / (getIOCapacity(getCurrentIOMipsShare(), disksToNumCloudlets(), rgl) * rgl
 				    .getNumberOfHdds()));
 
-	    return refMin(estimatedFinishCPUTime, estimatedFinishIOTime);
+	    return nanMin(estimatedFinishCPUTime, estimatedFinishIOTime);
 	}
 
 	return 0.0;
@@ -536,13 +536,13 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 	    hddCloudlet.setCloudletLength(cpuLength);
 	    hddCloudlet.setCloudletIOLength(ioLength);
 
-	    Double cpuEst = hddCloudlet.getCloudletLength() == 0 ? null :
+	    double cpuEst = hddCloudlet.getCloudletLength() == 0 ? Double.NaN :
 		    hddCloudlet.getCloudletLength() / getCPUCapacity(getCurrentMipsShare());
-	    Double ioEst = hddCloudlet.getCloudletIOLength() == 0 ? null :
+	    double ioEst = hddCloudlet.getCloudletIOLength() == 0 ? Double.NaN :
 		    hddCloudlet.getCloudletIOLength()
 			    / getIOCapacity(getCurrentIOMipsShare(), disksToNumCloudlets(), rcl);
 
-	    return refMin(cpuEst, ioEst);
+	    return nanMin(cpuEst, ioEst);
 	} else {
 	    CustomLog.printf("Cloudlet %d could not be served on VM %d, since its data item #%d is not accessible.",
 		    hddCloudlet.getCloudletId(), getVm().getId(), hddCloudlet.getData().getId());

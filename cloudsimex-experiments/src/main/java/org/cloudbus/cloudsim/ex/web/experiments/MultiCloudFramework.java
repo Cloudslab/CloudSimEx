@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -78,6 +79,7 @@ import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 import org.uncommons.maths.random.SecureRandomSeedGenerator;
 import org.uncommons.maths.random.SeedGenerator;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 
 /**
@@ -86,8 +88,6 @@ import com.google.common.collect.ImmutableMap;
  * 
  */
 public class MultiCloudFramework {
-
-    private static final int LATENCY_SLA = 40;
 
     private static SeedGenerator SEED_GEN = new SecureRandomSeedGenerator();
 
@@ -119,6 +119,9 @@ public class MultiCloudFramework {
 
     protected int simulationLength = DAY + HOUR / 2;
     protected int step = 60;
+
+    protected int n = 1;
+    protected int latencySLA = 40;
     protected double wldFactor = 100;
     protected double monitoringPeriod = 0.01;
     protected double autoscalingPeriod = 10;
@@ -128,10 +131,11 @@ public class MultiCloudFramework {
     protected double autoscaleTriggerRAM = 0.70;
 
     // Load balancing
-    protected double loadblancingThresholdCPU = 0.70;
-    protected double autoscaleThresholdRAM = 0.70;
+    protected double loadbalancingThresholdCPU = 0.70;
+    protected double loadbalancingThresholdRAM = 0.70;
 
     protected String experimentName = "Multi-Cloud Framework Experiment";
+    public String resultDIR = RESULT_DIR;
 
     private static final DataItem DATA_EURO1 = new DataItem(5);
     private static final DataItem DATA_EURO2 = new DataItem(5);
@@ -151,16 +155,46 @@ public class MultiCloudFramework {
      */
     public static void main(final String[] args) throws IOException {
 	// ExperimentsUtil.parseExperimentParameters(args);
-
 	Properties props = new Properties();
-	try (InputStream is = Files.newInputStream(Paths.get("../custom_log.properties"))) {
-	    props.load(is);
-	}
-	props.put(CustomLog.FILE_PATH_PROP_KEY,
-		RESULT_DIR + String.format("%s.log", MultiCloudFramework.class.getSimpleName()));
-	CustomLog.configLogger(props);
+	MultiCloudFramework experiment = new MultiCloudFramework();
+	if (args.length == 0) {
+	    try (InputStream is = Files.newInputStream(Paths.get("../custom_log.properties"))) {
+		props.load(is);
+	    }
+	} else {
+	    int i = 1;
+	    experiment.n = Integer.parseInt(args[i++]);
+	    experiment.latencySLA = Integer.parseInt(args[i++]);
+	    experiment.wldFactor = Double.parseDouble(args[i++]);
+	    experiment.monitoringPeriod = Double.parseDouble(args[i++]);
+	    experiment.autoscalingPeriod = Double.parseDouble(args[i++]);
 
-	new MultiCloudFramework().runExperimemt();
+	    // AutoScaling
+	    experiment.autoscaleTriggerCPU = Double.parseDouble(args[i++]);
+	    experiment.autoscaleTriggerRAM = Double.parseDouble(args[i++]);
+
+	    // Load balancing
+	    experiment.loadbalancingThresholdCPU = Double.parseDouble(args[i++]);
+	    experiment.loadbalancingThresholdRAM = Double.parseDouble(args[i++]);
+
+	    experiment.experimentName = String.format("Experiment-wldf(%d)-n(%d)",
+		    (int) experiment.wldFactor, experiment.latencySLA);
+	    experiment.resultDIR = String.format("%swldf-%d-n-%d/", RESULT_DIR,
+		    (int) experiment.wldFactor, experiment.latencySLA);
+	    File resultDirFile = new File(experiment.resultDIR);
+	    if (!resultDirFile.exists()) {
+		resultDirFile.mkdir();
+	    }
+
+	    try (InputStream is = Files.newInputStream(Paths.get(args[0]))) {
+		props.load(is);
+	    }
+	}
+
+	props.put(CustomLog.FILE_PATH_PROP_KEY,
+		experiment.resultDIR + String.format("%s.log", MultiCloudFramework.class.getSimpleName()));
+	CustomLog.configLogger(props);
+	experiment.runExperimemt();
     }
 
     /**
@@ -172,21 +206,21 @@ public class MultiCloudFramework {
     public final void runExperimemt() throws SecurityException, IOException {
 	long simulationStart = System.currentTimeMillis();
 
-	// CustomLog.redirectToFile(RESULT_DIR + "log.txt");
-
 	CustomLog.print("Simulation summary:");
+	CustomLog.printf("latencySLA=%.2f", (double) latencySLA);
+	CustomLog.printf("n=%d", n);
 	CustomLog.printf("wldFactor=%.2f", wldFactor);
 	CustomLog.printf("monitoringPeriod=%.2f", monitoringPeriod);
 	CustomLog.printf("autoscalingPeriod=%.2f", autoscalingPeriod);
 	CustomLog.printf("autoscaleTriggerCPU=%.2f", autoscaleTriggerCPU);
 	CustomLog.printf("autoscaleTriggerRAM=%.2f", autoscaleTriggerRAM);
-	CustomLog.printf("loadblancingThresholdCPU=%.2f", loadblancingThresholdCPU);
-	CustomLog.printf("autoscaleThresholdRAM=%.2f", autoscaleThresholdRAM);
+	CustomLog.printf("loadbalancingThresholdCPU=%.2f", loadbalancingThresholdCPU);
+	CustomLog.printf("loadbalancingThresholdRAM=%.2f", loadbalancingThresholdRAM);
 	CustomLog.printLine("");
 	CustomLog.print("Workload frequencies:");
-	for(String period : getPeriods(wldFactor)) {
+	for (String period : getPeriods(wldFactor)) {
 	    CustomLog.printLine("\t" + period);
-	    
+
 	}
 	CustomLog.printLine("");
 
@@ -231,7 +265,6 @@ public class MultiCloudFramework {
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 3: Create Brokers and set the appropriate billing policies
 	    CustomLog.print("Step 3: Creating Brokers and billing policies....");
-	    int n = 1;
 
 	    IVmBillingPolicy googleEUBilling = new GoogleOnDemandPolicy(ExamplePrices.GOOGLE_NIX_OS_PRICES_EUROPE);
 	    WebBroker brokerEuroGoogle = new FlushWebBroker("Euro-Google", step, simulationLength, monitoringPeriod,
@@ -265,7 +298,7 @@ public class MultiCloudFramework {
 	    // Step 4: Set up the entry point
 	    CustomLog.print("Step 4: Setting up entry points....");
 
-	    EntryPoint entryPoint = new EntryPoint(geoService, 1, LATENCY_SLA);
+	    EntryPoint entryPoint = new EntryPoint(geoService, 1, latencySLA);
 	    for (WebBroker broker : new WebBroker[] { brokerEuroGoogle, brokerEuroEC2, brokerUSGoogle, brokerUSEC2 }) {
 		broker.addEntryPoint(entryPoint);
 	    }
@@ -310,22 +343,22 @@ public class MultiCloudFramework {
 
 	    ILoadBalancer balancerEuroGoogle = new CompressLoadBalancer(brokerEuroGoogle,
 		    1, HAMINA_FINLAND_IP, appServersEuroGoogle, new RoundRobinDBBalancer(dbServersEuroGoogle),
-		    loadblancingThresholdCPU, autoscaleThresholdRAM);
+		    loadbalancingThresholdCPU, loadbalancingThresholdRAM);
 	    brokerEuroGoogle.addLoadBalancer(balancerEuroGoogle);
 
 	    ILoadBalancer balancerEuroEC2 = new CompressLoadBalancer(brokerEuroEC2,
 		    1, DUBLIN_IP, appServersEuroEC2, new RoundRobinDBBalancer(dbServersEuroEC2),
-		    loadblancingThresholdCPU, autoscaleThresholdRAM);
+		    loadbalancingThresholdCPU, loadbalancingThresholdRAM);
 	    brokerEuroEC2.addLoadBalancer(balancerEuroEC2);
 
 	    ILoadBalancer balancerUSGoogle = new CompressLoadBalancer(brokerUSGoogle,
 		    1, DALAS_IP, appServersUSGoogle, new RoundRobinDBBalancer(dbServersUSGoogle),
-		    loadblancingThresholdCPU, autoscaleThresholdRAM);
+		    loadbalancingThresholdCPU, loadbalancingThresholdRAM);
 	    brokerUSGoogle.addLoadBalancer(balancerUSGoogle);
 
 	    ILoadBalancer balancerUSEC2 = new CompressLoadBalancer(brokerUSEC2,
 		    1, NEW_YORK_IP, appServersUSEC2, new RoundRobinDBBalancer(dbServersUSEC2),
-		    loadblancingThresholdCPU, autoscaleThresholdRAM);
+		    loadbalancingThresholdCPU, loadbalancingThresholdRAM);
 	    brokerUSEC2.addLoadBalancer(balancerUSEC2);
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
@@ -398,36 +431,47 @@ public class MultiCloudFramework {
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 10 : stop the simulation and print the results
 	    CloudSim.stopSimulation();
-	    CustomLog.redirectToFile(RESULT_DIR + "Sessions-BrokerEuroGoogle.csv");
-	    CustomLog.printResults(WebSession.class, brokerEuroGoogle.getServedSessions());
-
-	    CustomLog.redirectToFile(RESULT_DIR + "Sessions-BrokerEuroEC2.csv");
-	    CustomLog.printResults(WebSession.class, brokerEuroEC2.getServedSessions());
-
-	    CustomLog.redirectToFile(RESULT_DIR + "Sessions-BrokerUSGoogle.csv");
-	    CustomLog.printResults(WebSession.class, brokerUSGoogle.getServedSessions());
-
-	    CustomLog.redirectToFile(RESULT_DIR + "Sessions-BrokerUSEC2.csv");
-	    CustomLog.printResults(WebSession.class, brokerUSEC2.getServedSessions());
 
 	    // Print VMs
 	    String[] vmProperties = new String[] { "Id", "Name", "Status", "SubmissionTime", "StartTime", "EndTime",
 		    "LifeDuration" };
-	    CustomLog.redirectToFile(RESULT_DIR + "VM-EuroGoogle.csv");
-	    CustomLog.printResults(HddVm.class, vmProperties, brokerEuroGoogle.getVmList());
+
+	    LinkedHashMap<String, Function<Vm, String>> virtualProps = new LinkedHashMap<>();
+	    virtualProps.put("toString", new Function<Vm, String>() {
+		@Override
+		public String apply(Vm input) {
+		    return input.toString();
+		}
+	    });
+
+	    CustomLog.redirectToFile(resultDIR + "VM-EuroGoogle.csv");
+	    CustomLog.printResults(HddVm.class, vmProperties, virtualProps, brokerEuroGoogle.getVmList());
 	    CustomLog.print(brokerEuroGoogle.bill());
 
-	    CustomLog.redirectToFile(RESULT_DIR + "VM-EuroEC2.csv");
-	    CustomLog.printResults(HddVm.class, vmProperties, brokerEuroEC2.getVmList());
+	    CustomLog.redirectToFile(resultDIR + "VM-EuroEC2.csv");
+	    CustomLog.printResults(HddVm.class, vmProperties, virtualProps, brokerEuroEC2.getVmList());
 	    CustomLog.print(brokerEuroEC2.bill());
 
-	    CustomLog.redirectToFile(RESULT_DIR + "VM-USGoogle.csv");
-	    CustomLog.printResults(HddVm.class, vmProperties, brokerUSGoogle.getVmList());
+	    CustomLog.redirectToFile(resultDIR + "VM-USGoogle.csv");
+	    CustomLog.printResults(HddVm.class, vmProperties, virtualProps, brokerUSGoogle.getVmList());
 	    CustomLog.print(brokerUSGoogle.bill());
 
-	    CustomLog.redirectToFile(RESULT_DIR + "VM-USEC2.csv");
-	    CustomLog.printResults(HddVm.class, vmProperties, brokerUSEC2.getVmList());
+	    CustomLog.redirectToFile(resultDIR + "VM-USEC2.csv");
+	    CustomLog.printResults(HddVm.class, vmProperties, virtualProps, brokerUSEC2.getVmList());
 	    CustomLog.print(brokerUSEC2.bill());
+
+	    // Print sessions
+	    CustomLog.redirectToFile(resultDIR + "Sessions-BrokerEuroGoogle.csv");
+	    CustomLog.printResults(WebSession.class, brokerEuroGoogle.getServedSessions());
+
+	    CustomLog.redirectToFile(resultDIR + "Sessions-BrokerEuroEC2.csv");
+	    CustomLog.printResults(WebSession.class, brokerEuroEC2.getServedSessions());
+
+	    CustomLog.redirectToFile(resultDIR + "Sessions-BrokerUSGoogle.csv");
+	    CustomLog.printResults(WebSession.class, brokerUSGoogle.getServedSessions());
+
+	    CustomLog.redirectToFile(resultDIR + "Sessions-BrokerUSEC2.csv");
+	    CustomLog.printResults(WebSession.class, brokerUSEC2.getServedSessions());
 
 	    CustomLog.flush();
 

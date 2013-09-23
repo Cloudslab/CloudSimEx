@@ -1,8 +1,10 @@
 package org.cloudbus.cloudsim.ex.web.experiments;
 
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.cloudbus.cloudsim.ex.util.ExperimentsRunner;
 
 /**
@@ -19,19 +21,50 @@ public class MultiCloudStarter {
      * @throws Execution
      */
     public static void main(final String[] args) throws Exception {
-	Class<?>[] experimens = new Class<?>[] { MultiCloudFramework.class };
+	Class<?> experiment = MultiCloudFramework.class;
+
+	String logProp = "../custom_log.properties";
 
 	// Map the main experiment classes to the output files
-	Map<Class<?>, String> experiments = new LinkedHashMap<>();
-	for (Class<?> clazz : experimens) {
-	    experiments.put(clazz,
-		    MultiCloudFramework.RESULT_DIR + String.format("%s.log", clazz.getSimpleName()));
-	    
+	List<Map.Entry<? extends Class<?>, String[]>> experiments = new ArrayList<>();
+
+	int n = 0;
+	int latencySLA = 40;
+	double monitoringPeriod = 0.01;
+	double autoscalingPeriod = 10;
+
+	// AutoScaling
+	double autoscaleTriggerCPU = 0.70;
+	double autoscaleTriggerRAM = 0.70;
+
+	// Load balancing
+	double loadbalancingThresholdCPU = 0.80;
+	double loadbalancingThresholdRAM = 0.80;
+
+	for (double wld : new Double[] { 150d, 200d, 250d}) {
+	    String minRam = "-Xms" + 512 + "m";
+	    String maxRam = "-Xmx" + (wld < 100 ? 1024 : 2048) + "m";
+
+	    experiments.add(ImmutablePair.of(experiment, new String[] {
+		    "-Djava.security.egd=file:/dev/./urandom",
+		    minRam,
+		    maxRam,
+		    logProp,
+		    String.valueOf(n),
+		    String.valueOf(latencySLA),
+		    String.valueOf(wld),
+		    String.valueOf(monitoringPeriod),
+		    String.valueOf(autoscalingPeriod),
+		    String.valueOf(autoscaleTriggerCPU),
+		    String.valueOf(autoscaleTriggerRAM),
+		    String.valueOf(loadbalancingThresholdCPU),
+		    String.valueOf(loadbalancingThresholdRAM),
+	    }));
 	}
 
 	// Run the experiments with custom_log.properties config of the loggers
 	// and leave 1 CPU free at all times.
-	ExperimentsRunner.runExperiments(experiments, "../custom_log.properties", 1);
+	ExperimentsRunner.runExperiments(experiments, 1);
     }
 
 }
