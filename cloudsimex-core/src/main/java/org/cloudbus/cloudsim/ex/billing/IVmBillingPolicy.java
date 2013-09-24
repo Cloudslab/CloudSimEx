@@ -22,7 +22,7 @@ public interface IVmBillingPolicy {
      *            - the vms to bill. Must not be empty
      * @return the cost for the specified vms.
      */
-    public BigDecimal bill(final List<Vm> vms);
+    public BigDecimal bill(final List<? extends Vm> vms);
 
     /**
      * Returns the next charging time.

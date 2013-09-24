@@ -349,16 +349,20 @@ public class TextUtil {
      *            modify the state of the object
      * @return
      */
-    public static <F> String getTxtLine(final F obj, final String delimeter, final String[] properties,
-	    final boolean includeFieldNames, final LinkedHashMap<String, Function<F, String>> virtualProps) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <F> String getTxtLine(final F obj,
+	    final String delimeter,
+	    final String[] properties,
+	    final boolean includeFieldNames,
+	    final LinkedHashMap<String, Function<? extends F, String>> virtualProps) {
 	StringBuffer result = new StringBuffer(getTxtLine(obj, delimeter, properties, includeFieldNames));
 	if (!virtualProps.isEmpty()) {
 	    result.append(delimeter);
 
 	    int i = 0;
-	    for (Map.Entry<String, Function<F, String>> prop : virtualProps.entrySet()) {
-		String propName = prop.getKey();
-		String propRes = prop.getValue().apply(obj);
+	    for ( Map.Entry prop : virtualProps.entrySet()) {
+		String propName = (String) prop.getKey();
+		String propRes = ((Function<F, String>) prop.getValue()).apply(obj);
 
 		String txt = toString(propRes);
 		if (includeFieldNames) {
@@ -707,6 +711,18 @@ public class TextUtil {
      */
     public static DateFormat getTimeFormat() {
 	return TIME_DATE_FORMAT;
+    }
+
+    public static String getReadableTime(double time) {
+	int days = ((int) time / (24 * 3600));
+	int hours = ((int) time / 3600);
+	int minutes = (int) time / 60;
+	int rest = (int) time % 60;
+
+	// Now normalize the values
+	hours = hours % 24;
+	minutes = minutes % 60;
+	return String.format("%2d:%2d:%2d:%2d", days, hours, minutes, rest);
     }
 
     private static class MethodsAlphaComparator implements Comparator<Method> {

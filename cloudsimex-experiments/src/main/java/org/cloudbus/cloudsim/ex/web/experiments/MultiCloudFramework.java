@@ -48,11 +48,14 @@ import org.cloudbus.cloudsim.ex.disk.HddHost;
 import org.cloudbus.cloudsim.ex.disk.HddPe;
 import org.cloudbus.cloudsim.ex.disk.HddVm;
 import org.cloudbus.cloudsim.ex.disk.VmDiskScheduler;
+import org.cloudbus.cloudsim.ex.geolocation.IPMetadata;
 import org.cloudbus.cloudsim.ex.geolocation.geoip2.GeoIP2IPGenerator;
 import org.cloudbus.cloudsim.ex.geolocation.geoip2.GeoIP2PingERService;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.Id;
+import org.cloudbus.cloudsim.ex.util.TextUtil;
 import org.cloudbus.cloudsim.ex.vm.VMMetadata;
+import org.cloudbus.cloudsim.ex.vm.VMex;
 import org.cloudbus.cloudsim.ex.web.CompositeGenerator;
 import org.cloudbus.cloudsim.ex.web.CompressLoadBalancer;
 import org.cloudbus.cloudsim.ex.web.IGenerator;
@@ -122,7 +125,7 @@ public class MultiCloudFramework {
 
     protected int n = 1;
     protected int latencySLA = 40;
-    protected double wldFactor = 100;
+    protected double wldFactor = 1;
     protected double monitoringPeriod = 0.01;
     protected double autoscalingPeriod = 10;
 
@@ -436,42 +439,49 @@ public class MultiCloudFramework {
 	    String[] vmProperties = new String[] { "Id", "Name", "Status", "SubmissionTime", "StartTime", "EndTime",
 		    "LifeDuration" };
 
-	    LinkedHashMap<String, Function<Vm, String>> virtualProps = new LinkedHashMap<>();
-	    virtualProps.put("toString", new Function<Vm, String>() {
-		@Override
-		public String apply(Vm input) {
-		    return input.toString();
-		}
-	    });
+	    LinkedHashMap<String, Function<? extends Vm, String>> virtualProps = new LinkedHashMap<>();
+	    virtualProps.put("Cost", new BillVmFunction(brokerEuroGoogle.getVMBillingPolicy()));
+	    virtualProps.put("r_submitTime", F_READABLE_SUBMISSION_TIME);
+	    virtualProps.put("r_startTime", F_READABLE_START_TIME);
+	    virtualProps.put("r_endTime", F_READABLE_END_TIME);
 
 	    CustomLog.redirectToFile(resultDIR + "VM-EuroGoogle.csv");
 	    CustomLog.printResults(HddVm.class, vmProperties, virtualProps, brokerEuroGoogle.getVmList());
 	    CustomLog.print(brokerEuroGoogle.bill());
 
+	    virtualProps.put("Cost", new BillVmFunction(brokerEuroEC2.getVMBillingPolicy()));
 	    CustomLog.redirectToFile(resultDIR + "VM-EuroEC2.csv");
 	    CustomLog.printResults(HddVm.class, vmProperties, virtualProps, brokerEuroEC2.getVmList());
 	    CustomLog.print(brokerEuroEC2.bill());
 
+	    virtualProps.put("Cost", new BillVmFunction(brokerUSGoogle.getVMBillingPolicy()));
 	    CustomLog.redirectToFile(resultDIR + "VM-USGoogle.csv");
 	    CustomLog.printResults(HddVm.class, vmProperties, virtualProps, brokerUSGoogle.getVmList());
 	    CustomLog.print(brokerUSGoogle.bill());
 
+	    virtualProps.put("Cost", new BillVmFunction(brokerUSEC2.getVMBillingPolicy()));
 	    CustomLog.redirectToFile(resultDIR + "VM-USEC2.csv");
 	    CustomLog.printResults(HddVm.class, vmProperties, virtualProps, brokerUSEC2.getVmList());
 	    CustomLog.print(brokerUSEC2.bill());
 
 	    // Print sessions
+	    LinkedHashMap<String, Function<? extends WebSession, String>> sessVirtualProps = new LinkedHashMap<>();
+	    sessVirtualProps.put("Meta", F_SESSION_META);
+	    sessVirtualProps.put("Latency", new LatencyFunction(geoService));
+	    sessVirtualProps.put("UserLocation", new SourceAddressFunction(geoService));
+	    sessVirtualProps.put("DCLocation", new DCAddressFunction(geoService));
+	    
 	    CustomLog.redirectToFile(resultDIR + "Sessions-BrokerEuroGoogle.csv");
-	    CustomLog.printResults(WebSession.class, brokerEuroGoogle.getServedSessions());
+	    CustomLog.printResults(WebSession.class, sessVirtualProps, brokerEuroGoogle.getServedSessions());
 
 	    CustomLog.redirectToFile(resultDIR + "Sessions-BrokerEuroEC2.csv");
-	    CustomLog.printResults(WebSession.class, brokerEuroEC2.getServedSessions());
+	    CustomLog.printResults(WebSession.class, sessVirtualProps, brokerEuroEC2.getServedSessions());
 
 	    CustomLog.redirectToFile(resultDIR + "Sessions-BrokerUSGoogle.csv");
-	    CustomLog.printResults(WebSession.class, brokerUSGoogle.getServedSessions());
+	    CustomLog.printResults(WebSession.class, sessVirtualProps, brokerUSGoogle.getServedSessions());
 
 	    CustomLog.redirectToFile(resultDIR + "Sessions-BrokerUSEC2.csv");
-	    CustomLog.printResults(WebSession.class, brokerUSEC2.getServedSessions());
+	    CustomLog.printResults(WebSession.class, sessVirtualProps, brokerUSEC2.getServedSessions());
 
 	    CustomLog.flush();
 
@@ -668,6 +678,78 @@ public class MultiCloudFramework {
 
 	    // Flush the memory - there are too many cloudlets
 	    getCloudletReceivedList().clear();
+	}
+    }
+
+    private static final Function<VMex, String> F_READABLE_SUBMISSION_TIME = new Function<VMex, String>() {
+	public String apply(VMex input) {
+	    return TextUtil.getReadableTime(input.getSubmissionTime());
+	}
+    };
+
+    private static final Function<VMex, String> F_READABLE_START_TIME = new Function<VMex, String>() {
+	public String apply(VMex input) {
+	    return TextUtil.getReadableTime(input.getStartTime());
+	}
+    };
+    private static final Function<VMex, String> F_READABLE_END_TIME = new Function<VMex, String>() {
+	public String apply(VMex input) {
+	    return TextUtil.getReadableTime(input.getEndTime());
+	}
+    };
+
+    private class BillVmFunction implements Function<VMex, String> {
+	private IVmBillingPolicy policy;
+
+	public BillVmFunction(IVmBillingPolicy policy) {
+	    this.policy = policy;
+	}
+
+	public String apply(VMex input) {
+	    return String.format("%.2f$", policy.bill(Arrays.asList(input)).doubleValue());
+	}
+    }
+
+    private static final Function<WebSession, String> F_SESSION_META = new Function<WebSession, String>() {
+	public String apply(WebSession input) {
+	    return Arrays.asList(input.getMetadata()).toString();
+	}
+    };
+    
+    private class SourceAddressFunction implements Function<WebSession, String> {
+	private GeoIP2PingERService geoService;
+
+	public SourceAddressFunction(GeoIP2PingERService geoService) {
+	    this.geoService = geoService;
+	}
+
+	public String apply(WebSession input) {
+	    IPMetadata metadata = geoService.getMetaData(input.getSourceIP());
+	    return String.valueOf(metadata.getCountryName()) + ";" + String.valueOf(metadata.getCityName());
+	}
+    }
+
+    private class DCAddressFunction implements Function<WebSession, String> {
+	private GeoIP2PingERService geoService;
+
+	public DCAddressFunction(GeoIP2PingERService geoService) {
+	    this.geoService = geoService;
+	}
+
+	public String apply(WebSession input) {
+	    IPMetadata metadata = geoService.getMetaData(input.getServerIP());
+	    return String.valueOf(metadata.getCountryName()) + ";" + String.valueOf(metadata.getCityName());
+	}
+    }
+    private class LatencyFunction implements Function<WebSession, String> {
+	private GeoIP2PingERService geoService;
+	
+	public LatencyFunction(GeoIP2PingERService geoService) {
+	    this.geoService = geoService;
+	}
+	
+	public String apply(WebSession input) {
+	    return String.format("%.2f", geoService.latency(input.getSourceIP(), input.getServerIP()));
 	}
     }
 

@@ -56,14 +56,20 @@ public class CustomLog {
     public static final String LOG_LEVEL_PROP_KEY = "LogLevel";
 
     /**
-     * A key for a boolean property, specifying if every log entry should start
-     * with the current CloudSim time.
+     * A key for a boolean property, specifying if every log entry should
+     * contain the current CloudSim time.
      */
     public static final String LOG_CLOUD_SIM_CLOCK_PROP_KEY = "LogCloudSimClock";
 
     /**
-     * A key for a boolean property, specifying if every log entry should start
-     * with the current CloudSim time.
+     * A key for a boolean property, specifying if every log entry should
+     * contain with the current CloudSim time in a readable format.
+     */
+    public static final String LOG_READABLE_CLOUD_SIM_CLOCK_PROP_KEY = "LogReadableSimClock";
+
+    /**
+     * A key for a boolean property, specifying if every log entry should
+     * contain the current CloudSim time.
      */
     public static final String LOG_CLOUD_REAL_TIME_PROP_KEY = "LogRealTimeClock";
 
@@ -302,11 +308,11 @@ public class CustomLog {
 
     @SafeVarargs
     public static <F> void printResults(final Class<? extends F> klass, String[] properties,
-	    final LinkedHashMap<String, Function<F, String>> virtualProps,
+	    final LinkedHashMap<String, Function<? extends F, String>> virtualProps,
 	    final List<F>... lines) {
 	if (klass != null) {
 	    // Print header line
-	    CustomLog.printLine(TextUtil.getCaptionLine(klass, TextUtil.DEFAULT_DELIM, properties, 
+	    CustomLog.printLine(TextUtil.getCaptionLine(klass, TextUtil.DEFAULT_DELIM, properties,
 		    virtualProps.keySet().toArray(new String[virtualProps.size()])));
 	}
 
@@ -338,6 +344,24 @@ public class CustomLog {
 	for (List<?> list : lines) {
 	    for (Object o : list) {
 		printLineForObject(o);
+	    }
+	}
+    }
+    
+    @SafeVarargs
+    public static <F> void printResults(final Class<? extends F> klass,
+	    final LinkedHashMap<String, Function<? extends F, String>> virtualProps,
+	    final List<F>... lines) {
+	if (klass != null) {
+	    // Print header line
+	    CustomLog.printLine(TextUtil.getCaptionLine(klass, TextUtil.DEFAULT_DELIM, null,
+		    virtualProps.keySet().toArray(new String[virtualProps.size()])));
+	}
+	
+	// Print details for each cloudlet
+	for (List<F> list : lines) {
+	    for (F o : list) {
+		CustomLog.print(TextUtil.getTxtLine(o, TextUtil.DEFAULT_DELIM, null, false, virtualProps));
 	    }
 	}
     }
@@ -479,15 +503,6 @@ public class CustomLog {
     }
 
     /**
-     * Returns a nicely formatted representation of the current CloudSim time.
-     * 
-     * @return a nicely formatted representation of the current CloudSim time.
-     */
-    public static String formatClockTime() {
-	return TextUtil.toString(CloudSim.clock());
-    }
-
-    /**
      * Configures the logger. Must be called before the logger is used.
      * 
      * @param props
@@ -506,6 +521,8 @@ public class CustomLog {
 		"getLevel;getMessage").toString().trim();
 	final boolean prefixCloudSimClock = Boolean.parseBoolean(props
 		.getProperty(LOG_CLOUD_SIM_CLOCK_PROP_KEY, "false").toString().trim());
+	final boolean prefixReadableCloudSimClock = Boolean.parseBoolean(props
+		.getProperty(LOG_READABLE_CLOUD_SIM_CLOCK_PROP_KEY, "false").toString().trim());
 	final boolean prefixRealTimeClock = Boolean.parseBoolean(props
 		.getProperty(LOG_CLOUD_REAL_TIME_PROP_KEY, "false").toString().trim());
 	final boolean shutStandardMessages =
@@ -519,7 +536,7 @@ public class CustomLog {
 	}
 
 	LOGGER.setUseParentHandlers(false);
-	formatter = new CustomFormatter(prefixCloudSimClock, prefixRealTimeClock, format);
+	formatter = new CustomFormatter(prefixCloudSimClock, prefixReadableCloudSimClock, prefixRealTimeClock, format);
 
 	redirectToFile(fileName);
     }
@@ -604,14 +621,16 @@ public class CustomLog {
     private static class CustomFormatter extends Formatter {
 
 	private final boolean prefixCloudSimClock;
+	private final boolean prefixReadableCloudSimClock;
 	private final boolean prefixRealTimeClock;
 	private final String format;
 	SimpleFormatter defaultFormatter = new SimpleFormatter();
 
-	public CustomFormatter(final boolean prefixCloudSimClock, final boolean prefixRealTimeClock,
-		final String format) {
+	public CustomFormatter(final boolean prefixCloudSimClock, final boolean prefixReadableCloudSimClock,
+		final boolean prefixRealTimeClock, final String format) {
 	    super();
 	    this.prefixCloudSimClock = prefixCloudSimClock;
+	    this.prefixReadableCloudSimClock = prefixReadableCloudSimClock;
 	    this.prefixRealTimeClock = prefixRealTimeClock;
 	    this.format = format;
 	}
@@ -624,7 +643,10 @@ public class CustomLog {
 		result.append(TextUtil.getTimeFormat().format(new Date(record.getMillis())) + "\t");
 	    }
 	    if (prefixCloudSimClock) {
-		result.append(formatClockTime() + "\t");
+		result.append(TextUtil.toString(CloudSim.clock()) + "\t");
+	    }
+	    if (prefixReadableCloudSimClock) {
+		result.append(TextUtil.getReadableTime(CloudSim.clock()) + "\t");
 	    }
 
 	    // If there is an exception - use the standard formatter

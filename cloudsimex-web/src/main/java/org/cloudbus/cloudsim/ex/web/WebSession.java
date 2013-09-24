@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.cloudbus.cloudsim.ex.disk.HddVm;
 import org.cloudbus.cloudsim.ex.util.Id;
+import org.cloudbus.cloudsim.ex.util.TextUtil;
 import org.cloudbus.cloudsim.ex.util.Textualize;
 
 /**
@@ -57,7 +58,7 @@ public class WebSession {
     private int cloudletsLeft;
 
     private double idealEnd;
-    private Double startTime;
+    private double startTime = Double.NaN;
 
     private String sourceIP;
     private String serverIP;
@@ -197,7 +198,7 @@ public class WebSession {
 
 	    cloudletsLeft--;
 
-	    if (startTime == null) {
+	    if (Double.isNaN(startTime)) {
 		startTime = Math.min(currentAppServerCloudLet.getIdealStartTime(),
 			getEarliestIdealStartTime(currentDBServerCloudLets));
 	    }
@@ -342,15 +343,7 @@ public class WebSession {
      * @return a readable representation of the start time.
      */
     public String getReadableStartTime() {
-	int days = (startTime.intValue() / (24 * 3600));
-	int hours = (startTime.intValue() / 3600);
-	int minutes = (startTime.intValue()) / 60;
-	int rest = (startTime.intValue()) % 60;
-
-	// Now normalize the values
-	hours = hours % 24;
-	minutes = minutes % 60;
-	return String.format("%2d: %2d: %2d: %2d", days, hours, minutes, rest);
+	return TextUtil.getReadableTime(startTime);
     }
 
     /**
