@@ -349,7 +349,7 @@ public class WebBroker extends MonitoringBorkerEX {
 	    WebSession sess = activeSessions.get(id);
 
 	    // If the session is complete - there is no need to update it.
-	    if (sess == null || sess.isComplete()) {
+	    if (sess == null || sess.isComplete() || sess.isFailed()) {
 		completedIds.add(id);
 		continue;
 	    }

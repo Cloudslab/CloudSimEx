@@ -1,9 +1,13 @@
 package org.cloudbus.cloudsim.ex.web;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.ex.disk.HddVm;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.TextUtil;
@@ -42,8 +46,11 @@ import org.cloudbus.cloudsim.ex.util.Textualize;
  * 
  */
 @Textualize(properties = { "SessionId", "AppVmId", "ReadableStartTime", "StartTime", "FinishTime",
-	"IdealEnd", "Delay", "Complete", "SourceIP",  "ServerIP"})
+	"IdealEnd", "Delay", "Complete", "Failed", "SourceIP", "ServerIP" })
 public class WebSession {
+
+    private static final Set<Integer> FAIL_CLOUDLET_STATES = new HashSet<Integer>(Arrays.asList(Cloudlet.FAILED,
+	    Cloudlet.FAILED_RESOURCE_UNAVAILABLE, Cloudlet.CANCELED));
 
     private final IGenerator<? extends WebCloudlet> appServerCloudLets;
     private final IGenerator<? extends Collection<? extends WebCloudlet>> dbServerCloudLets;
@@ -357,6 +364,26 @@ public class WebSession {
 		currentAppServerCloudLet.isFinished() &&
 		currentDBServerCloudLets != null &&
 		areAllCloudletsFinished(currentDBServerCloudLets);
+    }
+
+    /**
+     * Returns if the session has failed.
+     * 
+     * @return if the session has failed.
+     */
+    public boolean isFailed() {
+	return (currentAppServerCloudLet != null &&
+		FAIL_CLOUDLET_STATES.contains(currentAppServerCloudLet.getCloudletStatus())) ||
+		(currentDBServerCloudLets != null && anyCloudletsFailed(currentDBServerCloudLets));
+    }
+
+    private boolean anyCloudletsFailed(List<? extends WebCloudlet> currentDBServerCloudLets2) {
+	for (WebCloudlet wc : currentDBServerCloudLets2) {
+	    if (FAIL_CLOUDLET_STATES.contains(wc.getCloudletStatus())) {
+		return true;
+	    }
+	}
+	return false;
     }
 
     /**

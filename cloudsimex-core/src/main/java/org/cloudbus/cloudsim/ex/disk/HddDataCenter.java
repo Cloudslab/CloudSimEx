@@ -81,7 +81,7 @@ public class HddDataCenter extends DatacenterEX {
 		    scheduler.failAllCloudlets();
 		    scheduler.addFailedCloudlet(cl);
 		    vm.setOutOfMemory(true);
-
+		    
 		    CustomLog.printf("VM/Server %d on host %d in data center %s(%d) is out of memory. " +
 			    "It will not be further available",
 			    vm.getId(), host.getId(), getName(), getId());

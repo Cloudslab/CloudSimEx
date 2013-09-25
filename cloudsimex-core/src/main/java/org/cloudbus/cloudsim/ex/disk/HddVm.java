@@ -10,6 +10,7 @@ import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.ex.VmSchedulerMapVmsToPes;
 import org.cloudbus.cloudsim.ex.vm.MonitoredVMex;
 import org.cloudbus.cloudsim.ex.vm.VMMetadata;
+import org.cloudbus.cloudsim.ex.vm.VMStatus;
 
 /**
  * A virtual machine with a harddisk. Unlike the other CloudSim implementations
@@ -254,6 +255,9 @@ public class HddVm extends MonitoredVMex {
 
     public void setOutOfMemory(final boolean outOfMemory) {
 	this.outOfMemory = outOfMemory;
+	if(outOfMemory) {
+	    setStatus(VMStatus.TERMINATED);
+	}
     }
 
     @Override
