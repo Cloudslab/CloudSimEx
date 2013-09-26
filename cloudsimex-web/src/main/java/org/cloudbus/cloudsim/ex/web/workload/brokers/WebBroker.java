@@ -77,7 +77,8 @@ public class WebBroker extends MonitoringBorkerEX {
      *             class.
      */
     public WebBroker(final String name, final double refreshPeriod, final double lifeLength,
-	    final double monitoringPeriod, final double autoscalePeriod, final int dataCenterId, final String... metadata)
+	    final double monitoringPeriod, final double autoscalePeriod, final int dataCenterId,
+	    final String... metadata)
 	    throws Exception {
 	super(name, lifeLength, monitoringPeriod, autoscalePeriod);
 	this.stepPeriod = refreshPeriod;
@@ -136,8 +137,8 @@ public class WebBroker extends MonitoringBorkerEX {
      * @return the sessions that were successfully served.
      */
     public List<WebSession> getServedSessions() {
-	List<WebSession> result = new ArrayList<>(activeSessions.values());
-	result.addAll(completedSessions);
+	List<WebSession> result = new ArrayList<>(completedSessions);
+	result.addAll(activeSessions.values());
 	return result;
     }
 
@@ -437,6 +438,18 @@ public class WebBroker extends MonitoringBorkerEX {
 	    WebSession session = e.getValue();
 	    if (!session.isComplete()) {
 		result.add(session.getAppVmId());
+	    }
+	}
+	return result;
+    }
+
+    public Map<Integer, Integer> getASServersToNumSessions() {
+	Map<Integer, Integer> result = new HashMap<>();
+	for (Map.Entry<Integer, WebSession> e : activeSessions.entrySet()) {
+	    WebSession session = e.getValue();
+	    if (!session.isComplete()) {
+		result.put(session.getAppVmId(),
+			result.containsKey(session.getAppVmId()) ? result.get(session.getAppVmId()) + 1 : 1);
 	    }
 	}
 	return result;

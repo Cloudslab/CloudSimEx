@@ -10,11 +10,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -22,6 +24,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.util.Zip4jConstants;
 
 import org.cloudbus.cloudsim.Consts;
 import org.cloudbus.cloudsim.Datacenter;
@@ -120,12 +127,12 @@ public class MultiCloudFramework {
     public static String DEF_DIR = "multi-cloud/";
     public static String RESULT_DIR = DEF_DIR + "stat/";
 
-    protected int simulationLength = DAY + HOUR / 2;
+    protected int simulationLength = (DAY + HOUR / 2) / (48);
     protected int step = 60;
 
     protected int n = 1;
     protected int latencySLA = 40;
-    protected double wldFactor = 1;
+    protected double wldFactor = 200;
     protected double monitoringPeriod = 0.01;
     protected double autoscalingPeriod = 10;
 
@@ -309,8 +316,8 @@ public class MultiCloudFramework {
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 5: Create virtual machines
 	    CustomLog.print("Step 5: Setting up VMs....");
-	    int numDBs = 5;
-	    int numApp = 1;
+	    int numDBs = 20;
+	    int numApp = n < 1 ? 1 : n;
 	    VMMetadata ec2Meta = new VMMetadata();
 	    ec2Meta.setOS(Consts.NIX_OS);
 	    ec2Meta.setType("m1.small");
@@ -416,20 +423,9 @@ public class MultiCloudFramework {
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 9: Starts the simulation
 	    CustomLog.print("Step 9: Start simulation....");
+	    CustomLog.printLine("");
 
 	    CloudSim.startSimulation();
-
-	    // == == == == == == == == == == == == == == == == == == == == == ==
-	    // Step 10: get the results
-	    // List<WebSession> resultDC1Sessions =
-	    // brokerEuroGoogle.getServedSessions();
-	    // List<Cloudlet> cloudletsDC1 =
-	    // brokerEuroGoogle.getCloudletReceivedList();
-	    //
-	    // List<WebSession> resultDC2Sessions =
-	    // brokerEuroEC2.getServedSessions();
-	    // List<Cloudlet> cloudletsDC2 =
-	    // brokerEuroEC2.getCloudletReceivedList();
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 10 : stop the simulation and print the results
@@ -470,7 +466,7 @@ public class MultiCloudFramework {
 	    sessVirtualProps.put("Latency", new LatencyFunction(geoService));
 	    sessVirtualProps.put("UserLocation", new SourceAddressFunction(geoService));
 	    sessVirtualProps.put("DCLocation", new DCAddressFunction(geoService));
-	    
+
 	    CustomLog.redirectToFile(resultDIR + "Sessions-BrokerEuroGoogle.csv");
 	    CustomLog.printResults(WebSession.class, sessVirtualProps, brokerEuroGoogle.getServedSessions());
 
@@ -485,6 +481,9 @@ public class MultiCloudFramework {
 
 	    CustomLog.flush();
 
+	    System.err.println(experimentName + ": Archiving the results into: " + createZipFileName(resultDIR, RESULT_DIR));
+	    archiveDir(resultDIR, RESULT_DIR);
+	    
 	    System.err.println();
 	    System.err.println(experimentName + ": Simulation is finished!");
 	} catch (Exception e) {
@@ -664,12 +663,10 @@ public class MultiCloudFramework {
 	public FlushWebBroker(String name, double refreshPeriod, double lifeLength, double monitoringPeriod,
 		double autoscalePeriod, int dataCenterId, String... metadata) throws Exception {
 	    super(name, refreshPeriod, lifeLength, monitoringPeriod, autoscalePeriod, dataCenterId, metadata);
-	    // TODO Auto-generated constructor stub
 	}
 
 	public FlushWebBroker(String name, double refreshPeriod, double lifeLength, int dataCenterId) throws Exception {
 	    super(name, refreshPeriod, lifeLength, dataCenterId);
-	    // TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -679,6 +676,51 @@ public class MultiCloudFramework {
 	    // Flush the memory - there are too many cloudlets
 	    getCloudletReceivedList().clear();
 	}
+    }
+    
+    /**
+     * Based on
+     * http://windchill101.com/creating-a-zip-file-in-java-using-the-zip4j
+     * -library/ .
+     * 
+     * @param dir
+     * @throws ZipException
+     */
+    private static String archiveDir(String dir, String destinationDir) throws ZipException {
+	String zipFileName = createZipFileName(dir, destinationDir);
+	// Initiate ZipFile object with the path/name of the zip file.
+	ZipFile zipFile = new ZipFile(zipFileName);
+
+	// Folder to add
+	String folderToAdd = dir;
+
+	// Initiate Zip Parameters which define various properties such
+	// as compression method, etc.
+	ZipParameters parameters = new ZipParameters();
+
+	// set compression method to store compression
+	parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
+
+	// Set the compression level
+	parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+
+	// Add folder to the zip file
+	zipFile.addFolder(folderToAdd, parameters);
+	
+	return zipFileName;
+
+    }
+
+    private static String createZipFileName(String dir, String destinationDir) {
+	Calendar calendar = Calendar.getInstance();
+	Date time = calendar.getTime();
+	String name = new File(dir).getName();
+	
+	
+	String timeTxt = DateFormat.getDateTimeInstance(
+		DateFormat.SHORT, DateFormat.SHORT).format(time).replace('/', '-').replaceAll("\\s+", "_");
+	String zipFileName = destinationDir + name + "_" + timeTxt + ".zip";
+	return zipFileName;
     }
 
     private static final Function<VMex, String> F_READABLE_SUBMISSION_TIME = new Function<VMex, String>() {
@@ -715,7 +757,7 @@ public class MultiCloudFramework {
 	    return Arrays.asList(input.getMetadata()).toString();
 	}
     };
-    
+
     private class SourceAddressFunction implements Function<WebSession, String> {
 	private GeoIP2PingERService geoService;
 
@@ -741,16 +783,16 @@ public class MultiCloudFramework {
 	    return String.valueOf(metadata.getCountryName()) + ";" + String.valueOf(metadata.getCityName());
 	}
     }
+
     private class LatencyFunction implements Function<WebSession, String> {
 	private GeoIP2PingERService geoService;
-	
+
 	public LatencyFunction(GeoIP2PingERService geoService) {
 	    this.geoService = geoService;
 	}
-	
+
 	public String apply(WebSession input) {
 	    return String.format("%.2f", geoService.latency(input.getSourceIP(), input.getServerIP()));
 	}
     }
-
 }

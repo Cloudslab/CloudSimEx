@@ -6,9 +6,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.ex.disk.HddVm;
+import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.TextUtil;
 import org.cloudbus.cloudsim.ex.util.Textualize;
@@ -189,6 +191,10 @@ public class WebSession {
 	boolean dbServerNextReady = !dbServerCloudLets.isEmpty()
 		&& getEarliestIdealStartTime(dbServerCloudLets.peek()) <= currTime;
 
+	if(cloudletsLeft != 0 && appCloudletFinished && !dbCloudletFinished) {
+	    CustomLog.printf(Level.FINE, "Session %d in AS VM %d blocked in DB layer", getSessionId(), appVmId);
+	}
+	
 	if (cloudletsLeft != 0 && appCloudletFinished && dbCloudletFinished && appServerNextReady && dbServerNextReady) {
 	    result = new StepCloudlets(
 		    appServerCloudLets.poll(),

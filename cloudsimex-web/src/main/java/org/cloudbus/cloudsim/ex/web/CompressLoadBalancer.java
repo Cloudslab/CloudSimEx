@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
+import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.ex.disk.HddVm;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.vm.MonitoredVMex;
@@ -30,6 +34,8 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
     private final double ramThreshold;
 
     private StringBuilder debugSB = new StringBuilder();
+
+    private LinkedHashMap<Integer, Integer> secsToArrivals = new LinkedHashMap<>();
 
     /**
      * Const.
@@ -64,13 +70,15 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 	    }
 	}
 
+	updateNumberOfSessions(noAppServSessions, (int) CloudSim.clock());
+
 	List<HddVm> runingVMs = getRunningAppServers();
 	// No running AS servers - log an error
 	if (runingVMs.isEmpty()) {
 	    for (WebSession session : noAppServSessions) {
 		if (getAppServers().isEmpty()) {
 		    CustomLog.printf(Level.SEVERE,
-			    "Load Balancer(%s): session %d cannot be scheduled, as there are not AS servers",
+			    "Load Balancer(%s): session %d cannot be scheduled, as there are no AS servers",
 			    this.broker.toString(),
 			    session.getSessionId());
 		} else {
@@ -84,16 +92,17 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 	} else {// Assign to one of the running VMs
 	    for (WebSession session : noAppServSessions) {
 		List<HddVm> vms = new ArrayList<>(runingVMs);
-		Set<Integer> usedASServers = this.broker.getUsedASServers();
-		cpuUtilReverseComparator.setUsedASServers(usedASServers);
+		Map<Integer, Integer> usedASServers = this.broker.getASServersToNumSessions();
+		cpuUtilReverseComparator.setUsedASServers(usedASServers.keySet());
 		Collections.sort(vms, cpuUtilReverseComparator);
 
 		// For debug purposes:
 		debugSB.setLength(0);
 		for (HddVm vm : vms) {
-		    debugSB.append(String.format("%s[%s] cpu(%.2f), ram(%.2f), cdlts(%d); ",
-			    vm, (usedASServers.contains(vm.getId()) ? "" : "FREE, ") + vm.getStatus(),
-			    vm.getCPUUtil(), vm.getRAMUtil(), vm.getCloudletScheduler().getCloudletExecList().size()));
+		    debugSB.append(String.format("%s[%s] cpu(%.2f), ram(%.2f), cdlts(%d), sess(%d); ",
+			    vm, (usedASServers.containsKey(vm.getId()) ? "" : "FREE, ") + vm.getStatus(),
+			    vm.getCPUUtil(), vm.getRAMUtil(), vm.getCloudletScheduler().getCloudletExecList().size(),
+			    !usedASServers.containsKey(vm.getId()) ? 0 : usedASServers.get(vm.getId())));
 		}
 
 		HddVm hostVM = vms.get(vms.size() - 1);
@@ -105,12 +114,24 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 		}
 
 		session.setAppVmId(hostVM.getId());
-		CustomLog.printf(
-			"[Load Balancer](%s): Assigning sesssion %d to %s[%s] cpu(%.2f), ram(%.2f), cdlts(%d)",
-			broker, session.getSessionId(), hostVM, hostVM.getStatus(),
-			hostVM.getCPUUtil(), hostVM.getRAMUtil(), hostVM.getCloudletScheduler().getCloudletExecList()
-				.size());
-		CustomLog.printf("[Load Balancer](%s), Cadidate VMs: %s", broker, debugSB);
+		CustomLog
+			.printf(
+				"[Load Balancer](%s): Assigning sesssion %d to %s[%s] cpu(%.2f), ram(%.2f), cdlts(%d), sess(%d);",
+				broker, session.getSessionId(), hostVM, hostVM.getStatus(),
+				hostVM.getCPUUtil(), hostVM.getRAMUtil(), hostVM.getCloudletScheduler()
+					.getCloudletExecList()
+					.size(),
+				!usedASServers.containsKey(hostVM.getId()) ? 0 : usedASServers.get(hostVM.getId()));
+		CustomLog.printf("[Load Balancer](%s), Canidate VMs: %s", broker, debugSB);
+
+		// Log the state of the DB servers
+		debugSB.setLength(0);
+		for (HddVm dbVm : getDbBalancer().getVMs()) {
+		    debugSB.append(String.format("%s cpu(%.2f), ram(%.2f), disk(%.2f), cdlts(%d);",
+			    dbVm, dbVm.getCPUUtil(), dbVm.getRAMUtil(), dbVm.getDiskUtil(),
+			    dbVm.getCloudletScheduler().getCloudletExecList().size()));
+		}
+		CustomLog.printf("[Load Balancer](%s), DB VMs: %s", broker, debugSB);
 	    }
 
 	    // Set the DB VM
@@ -120,6 +141,32 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 		}
 	    }
 	}
+    }
+
+    private void updateNumberOfSessions(List<WebSession> noAppServSessions, int time) {
+	int secsToKeep = 60;
+	if (noAppServSessions == null || !noAppServSessions.isEmpty()) {
+	    secsToArrivals.put(time,
+		    !secsToArrivals.containsKey(time) ? noAppServSessions.size() : secsToArrivals.get(time)
+			    + noAppServSessions.size());
+	}
+	for (Iterator<Integer> iter = secsToArrivals.keySet().iterator(); iter.hasNext();) {
+	    int recorededTime = iter.next();
+	    if (recorededTime + secsToKeep < time) {
+		iter.remove();
+	    } else {
+		break;
+	    }
+	}
+    }
+
+    public int getNumSessionsOverLastMinute() {
+	updateNumberOfSessions(null, (int) CloudSim.clock());
+	int result = 0;
+	for (Map.Entry<Integer, Integer> e : secsToArrivals.entrySet()) {
+	    result += e.getValue();
+	}
+	return result;
     }
 
     private static class CPUUtilisationComparator implements Comparator<MonitoredVMex> {
@@ -143,5 +190,4 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 	    }
 	}
     }
-
 }

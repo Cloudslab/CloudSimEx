@@ -8,8 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.cloudbus.cloudsim.ex.disk.HddVm;
 import org.cloudbus.cloudsim.ex.geolocation.IGeolocationService;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
+import org.cloudbus.cloudsim.ex.vm.VMStatus;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
 import org.cloudbus.cloudsim.ex.web.WebSession;
 
@@ -25,7 +27,9 @@ import org.cloudbus.cloudsim.ex.web.WebSession;
  */
 public class EntryPoint {
 
-    private final Comparator<WebBroker> costComparator;
+    private static final double OVERLOAD_UTIL = 0.8;
+
+    private final CloudPriceComparator costComparator;
 
     private final List<WebSession> canceledSessions = new ArrayList<>();
     private final List<WebBroker> brokers = new ArrayList<>();
@@ -96,6 +100,7 @@ public class EntryPoint {
      *            - the web sessions to dispatch. Must not be null.
      */
     public void dispatchSessions(final List<WebSession> webSessions) {
+	costComparator.prepareToCompare();
 	Collections.sort(brokers, costComparator);
 
 	// A table of assignments of web sessions to brokers/clouds.
@@ -108,7 +113,7 @@ public class EntryPoint {
 	// assignments table accordingly
 	for (WebSession sess : webSessions) {
 	    List<WebBroker> eligibleBrokers = filterBrokers(brokers, sess, appId);
-	    Collections.sort(eligibleBrokers, costComparator);
+	    // Collections.sort(eligibleBrokers, costComparator);
 
 	    WebBroker selectedBroker = null;
 	    double bestLatencySoFar = Double.MAX_VALUE;
@@ -142,8 +147,9 @@ public class EntryPoint {
 	for (Map.Entry<WebBroker, List<WebSession>> entry : assignments.entrySet()) {
 	    WebBroker broker = entry.getKey();
 	    List<WebSession> sessions = entry.getValue();
-	    for(WebSession sess : sessions) {
-		CustomLog.printf("[Entry Point] Session %d will be assigned to %s", sess.getSessionId(), broker.toString());
+	    for (WebSession sess : sessions) {
+		CustomLog.printf("[Entry Point] Session %d will be assigned to %s", sess.getSessionId(),
+			broker.toString());
 	    }
 	    broker.submitSessionsDirectly(sessions, appId);
 	}
@@ -164,20 +170,78 @@ public class EntryPoint {
     private static class CloudPriceComparator implements Comparator<WebBroker> {
 	private long appId;
 
+	// We do not want to call getASServersToNumSessions() all the time,
+	// since it can be resource intensive operation. Thus we cache the
+	// values.
+	private Map<WebBroker, Map<Integer, Integer>> brokersToMaps = new HashMap<>();
+	private Map<WebBroker, Boolean> overloadedDBLayer = new HashMap<>();
+
 	public CloudPriceComparator(final long appId) {
 	    super();
 	    this.appId = appId;
 	}
 
+	/**
+	 * Should be called before this comparator is used to sort a collection.
+	 */
+	public void prepareToCompare() {
+	    brokersToMaps.clear();
+	    overloadedDBLayer.clear();
+	}
+
 	@Override
 	public int compare(final WebBroker b1, final WebBroker b2) {
-	    ILoadBalancer lb1 = b1.getLoadBalancers().get(appId);
-	    ILoadBalancer lb2 = b2.getLoadBalancers().get(appId);
+	    return Double.compare(definePrice(b1), definePrice(b2));
+	}
 
-	    BigDecimal cost1 = b1.getVMBillingPolicy().normalisedCostPerMinute(lb1.getAppServers().get(0));
-	    BigDecimal cost2 = b2.getVMBillingPolicy().normalisedCostPerMinute(lb2.getAppServers().get(0));
+	public double definePrice(final WebBroker b) {
+	    if (isDBLayerOverloaded(b)) {
+		return Double.MAX_VALUE;
+	    } else {
+		ILoadBalancer lb = b.getLoadBalancers().get(appId);
+		BigDecimal pricePerMinute = b.getVMBillingPolicy().normalisedCostPerMinute(lb.getAppServers().get(0));
+		Map<Integer, Integer> srvToNumSessions = brokersToMaps.get(b);
+		if (srvToNumSessions == null) {
+		    srvToNumSessions = b.getASServersToNumSessions();
+		    brokersToMaps.put(b, srvToNumSessions);
+		}
 
-	    return cost1.compareTo(cost2);
+		int numRunning = 0;
+		double sumAvg = 0;
+		for (HddVm vm : lb.getAppServers()) {
+		    if (vm.getStatus() == VMStatus.RUNNING && srvToNumSessions.containsKey(vm.getId())) {
+			numRunning++;
+			sumAvg += Math.min(vm.getCPUUtil() / srvToNumSessions.get(vm.getId()), vm.getCPUUtil()
+				/ srvToNumSessions.get(vm.getId()));
+		    }
+		}
+
+		double avgSessionsPerVm = numRunning == 0 ? 1 : 1 / (sumAvg / numRunning);
+		return pricePerMinute.doubleValue() * avgSessionsPerVm;
+	    }
+	}
+
+	private boolean isDBLayerOverloaded(WebBroker b) {
+	    if (overloadedDBLayer.containsKey(b)) {
+		return overloadedDBLayer.get(b);
+	    } else {
+		boolean result = true;
+		ILoadBalancer lb = b.getLoadBalancers().get(appId);
+		for (HddVm db : lb.getDbBalancer().getVMs()) {
+		    if (db.getStatus() == VMStatus.RUNNING && db.getCPUUtil() < OVERLOAD_UTIL
+			    && db.getRAMUtil() < OVERLOAD_UTIL && db.getDiskUtil() < OVERLOAD_UTIL) {
+			result = false;
+			break;
+		    }
+		}
+		overloadedDBLayer.put(b, result);
+
+		if (result) {
+		    CustomLog.printf("[Entry Point] Broker (%s) has overloaded DB layer", b);
+		}
+
+		return result;
+	    }
 	}
     }
 }

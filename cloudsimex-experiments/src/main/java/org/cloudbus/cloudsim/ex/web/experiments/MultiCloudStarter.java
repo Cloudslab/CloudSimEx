@@ -28,7 +28,7 @@ public class MultiCloudStarter {
 	// Map the main experiment classes to the output files
 	List<Map.Entry<? extends Class<?>, String[]>> experiments = new ArrayList<>();
 
-	int n = 0;
+	int n = 1;
 	int latencySLA = 40;
 	double monitoringPeriod = 0.01;
 	double autoscalingPeriod = 10;
@@ -41,9 +41,9 @@ public class MultiCloudStarter {
 	double loadbalancingThresholdCPU = 0.80;
 	double loadbalancingThresholdRAM = 0.80;
 
-	for (double wld : new Double[] { 150d, 200d, 250d}) {
-	    String minRam = "-Xms" + 512 + "m";
-	    String maxRam = "-Xmx" + (wld < 100 ? 1024 : 2048) + "m";
+	for (double[] wld : new double[][] { { 1d, 1536d }, { 200d, 8000d } }) {
+	    String minRam = "-Xms" + 1024 + "m";
+	    String maxRam = "-Xmx" + (int) wld[1] + "m";
 
 	    experiments.add(ImmutablePair.of(experiment, new String[] {
 		    "-Djava.security.egd=file:/dev/./urandom",
@@ -52,7 +52,7 @@ public class MultiCloudStarter {
 		    logProp,
 		    String.valueOf(n),
 		    String.valueOf(latencySLA),
-		    String.valueOf(wld),
+		    String.valueOf(wld[0]),
 		    String.valueOf(monitoringPeriod),
 		    String.valueOf(autoscalingPeriod),
 		    String.valueOf(autoscaleTriggerCPU),
@@ -64,7 +64,6 @@ public class MultiCloudStarter {
 
 	// Run the experiments with custom_log.properties config of the loggers
 	// and leave 1 CPU free at all times.
-	ExperimentsRunner.runExperiments(experiments, 1);
+	ExperimentsRunner.runExperiments(experiments, -1);
     }
-
 }
