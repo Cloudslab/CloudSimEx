@@ -54,11 +54,11 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 
     
     /** In order to minimise the number of created instances, we keep a cache. */
-    private static final Cache<String, Double[]> COORDINATES_CACHE =
+    private final Cache<String, Double[]> coordinatesCache =
 	    CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
 
     /** In order to minimise the number of created instances, we keep a cache. */
-    private static final Cache<String, Double> IP_DISTANCE_CACHE =
+    private final Cache<String, Double> ipDistanceCache =
 	    CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
 
     
@@ -214,7 +214,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 
     @Override
     public final Double[] getCoordinates(final String ip) {
-	Double[] result = COORDINATES_CACHE.getIfPresent(ip);
+	Double[] result = coordinatesCache.getIfPresent(ip);
 	if (result == null) { // If not in the cache
 	    City city;
 	    try {
@@ -235,7 +235,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 		CustomLog.logError(Level.FINER, msg, e);
 		result = new Double[] { null, null };
 	    }
-	    COORDINATES_CACHE.put(ip, result);
+	    coordinatesCache.put(ip, result);
 	}
 	return result;
     }
@@ -272,7 +272,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
     @Override
     public final double latency(final String ip1, final String ip2) {
 	String key = ip1 + ip2;
-	Double cached = IP_DISTANCE_CACHE.getIfPresent(key);
+	Double cached = ipDistanceCache.getIfPresent(key);
 	if (cached != null) {
 	    return cached;
 	}
@@ -333,7 +333,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 	double result = weigthedAverage(heap);
 	CustomLog.print(Level.FINEST, String.format("Latency betweeen %s and %s is %.2f", ip1, ip2, result));
 
-	IP_DISTANCE_CACHE.put(key, result);
+	ipDistanceCache.put(key, result);
 	return result;
     }
 

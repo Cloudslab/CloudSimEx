@@ -33,9 +33,21 @@ public class EC2OnDemandPolicy extends BaseCustomerVmBillingPolicy {
     @Override
     public BigDecimal billSingleVm(final VMex vm) {
 	double timeAfterBoot = vm.getTimeAfterBooting();
-	int chargeCount = (int) timeAfterBoot / HOUR + 1;
-	if (timeAfterBoot == (int) timeAfterBoot && (int) timeAfterBoot % HOUR == 0) {
-	    chargeCount = (int) timeAfterBoot / HOUR;
+	return computeBill(vm, timeAfterBoot);
+    }
+
+    @Override
+    public BigDecimal billSingleVmUntil(VMex vm, double endTime) {
+	double time = vm.getEndTime() < 0 || vm.getEndTime() > endTime ?
+		endTime - vm.getStartTime() :
+		vm.getTimeAfterBooting();
+	return computeBill(vm, time);
+    }
+
+    private BigDecimal computeBill(final VMex vm, double duration) {
+	int chargeCount = (int) duration / HOUR + 1;
+	if (duration == (int) duration && (int) duration % HOUR == 0) {
+	    chargeCount = (int) duration / HOUR;
 	}
 
 	return prices.get(keyOf(vm)).multiply(BigDecimal.valueOf(chargeCount));

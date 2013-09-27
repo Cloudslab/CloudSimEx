@@ -17,7 +17,7 @@ public abstract class BaseGeolocationService implements IGeolocationService {
     protected static final int CACHE_SIZE = 100_000;
     protected static final int INITIAL_CACHE_SIZE = 10_000;
     /** In order to minimise the number of created instances, we keep a cache. */
-    private static final Cache<GeoDistanceCacheKey, Double> DISTANCE_CACHE =
+    private final Cache<GeoDistanceCacheKey, Double> distanceCache =
 	    CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
     /**
      * We shall consider coordinates differing only after the ROUND_DIGITS
@@ -38,7 +38,7 @@ public abstract class BaseGeolocationService implements IGeolocationService {
     public final double distance(double lat1, double lon1, double lat2, double lon2) {
 	// First check in the cache...
 	GeoDistanceCacheKey key = GeoDistanceCacheKey.of(lat1, lon1, lat2, lon2, SIGNIFICANT_COORD_DIGITS);
-	Double cachedDistance = DISTANCE_CACHE.getIfPresent(key);
+	Double cachedDistance = distanceCache.getIfPresent(key);
 	if(cachedDistance != null) {
 //	    CustomLog.printf("[CACHED] Distance between [%.2f, %.2f] and [%.2f, %.2f] is %.3f", lat1, lon1, lat2, lon2, cachedDistance);
 	    return cachedDistance;
@@ -93,7 +93,7 @@ public abstract class BaseGeolocationService implements IGeolocationService {
 //	CustomLog.printf("Distance between [%.2f, %.2f] and [%.2f, %.2f] is %.3f", lat1, lon1, lat2, lon2, dist);
 	
 	// Update the cache..
-	DISTANCE_CACHE.put(key, dist);
+	distanceCache.put(key, dist);
 	
 	return dist;
     }

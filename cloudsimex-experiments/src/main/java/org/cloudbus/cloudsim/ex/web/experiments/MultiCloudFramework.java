@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
@@ -41,6 +42,7 @@ import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.ex.IAutoscalingPolicy;
 import org.cloudbus.cloudsim.ex.billing.EC2OnDemandPolicy;
 import org.cloudbus.cloudsim.ex.billing.ExamplePrices;
 import org.cloudbus.cloudsim.ex.billing.GoogleOnDemandPolicy;
@@ -63,6 +65,7 @@ import org.cloudbus.cloudsim.ex.util.Id;
 import org.cloudbus.cloudsim.ex.util.TextUtil;
 import org.cloudbus.cloudsim.ex.vm.VMMetadata;
 import org.cloudbus.cloudsim.ex.vm.VMex;
+import org.cloudbus.cloudsim.ex.web.BaseWebLoadBalancer;
 import org.cloudbus.cloudsim.ex.web.CompositeGenerator;
 import org.cloudbus.cloudsim.ex.web.CompressLoadBalancer;
 import org.cloudbus.cloudsim.ex.web.IGenerator;
@@ -77,6 +80,10 @@ import org.cloudbus.cloudsim.ex.web.workload.RandomIPWorkloadGenerator;
 import org.cloudbus.cloudsim.ex.web.workload.StatWorkloadGenerator;
 import org.cloudbus.cloudsim.ex.web.workload.brokers.CompressedAutoscalingPolicy;
 import org.cloudbus.cloudsim.ex.web.workload.brokers.EntryPoint;
+import org.cloudbus.cloudsim.ex.web.workload.brokers.IEntryPoint;
+import org.cloudbus.cloudsim.ex.web.workload.brokers.RoundRobinWebLoadBalancer;
+import org.cloudbus.cloudsim.ex.web.workload.brokers.Route53EntryPoint;
+import org.cloudbus.cloudsim.ex.web.workload.brokers.SimpleAutoScalingPolicy;
 import org.cloudbus.cloudsim.ex.web.workload.brokers.WebBroker;
 import org.cloudbus.cloudsim.ex.web.workload.freq.CompositeValuedSet;
 import org.cloudbus.cloudsim.ex.web.workload.freq.FrequencyFunction;
@@ -93,6 +100,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 
 /**
+ * 
+ * Prices - http://aws.amazon.com/pricing/
  * 
  * @author nikolay.grozev
  * 
@@ -132,7 +141,7 @@ public class MultiCloudFramework {
 
     protected int n = 1;
     protected int latencySLA = 40;
-    protected double wldFactor = 200;
+    protected double wldFactor = 1;
     protected double monitoringPeriod = 0.01;
     protected double autoscalingPeriod = 10;
 
@@ -143,6 +152,13 @@ public class MultiCloudFramework {
     // Load balancing
     protected double loadbalancingThresholdCPU = 0.70;
     protected double loadbalancingThresholdRAM = 0.70;
+
+    // EC2 autoscaling
+    private final double coolDownFactor = 150;
+    private final double scaleDownFactor = 0.1;
+    private final double scaleUpFactor = 0.8;
+
+    private boolean baseline = false;
 
     protected String experimentName = "Multi-Cloud Framework Experiment";
     public String resultDIR = RESULT_DIR;
@@ -165,40 +181,58 @@ public class MultiCloudFramework {
      */
     public static void main(final String[] args) throws IOException {
 	// ExperimentsUtil.parseExperimentParameters(args);
-	Properties props = new Properties();
-	MultiCloudFramework experiment = new MultiCloudFramework();
 	if (args.length == 0) {
+	    MultiCloudFramework experiment = new MultiCloudFramework();
+	    Properties props = new Properties();
 	    try (InputStream is = Files.newInputStream(Paths.get("../custom_log.properties"))) {
 		props.load(is);
 	    }
+
+	    props.put(CustomLog.FILE_PATH_PROP_KEY,
+		    experiment.resultDIR + String.format("%s.log", MultiCloudFramework.class.getSimpleName()));
+	    CustomLog.configLogger(props);
+	    experiment.runExperimemt();
+
 	} else {
-	    int i = 1;
-	    experiment.n = Integer.parseInt(args[i++]);
-	    experiment.latencySLA = Integer.parseInt(args[i++]);
-	    experiment.wldFactor = Double.parseDouble(args[i++]);
-	    experiment.monitoringPeriod = Double.parseDouble(args[i++]);
-	    experiment.autoscalingPeriod = Double.parseDouble(args[i++]);
+	    configandRun(args, true);
+	    System.gc();
+	    System.gc();
+	    configandRun(args, false);
+	}
+    }
 
-	    // AutoScaling
-	    experiment.autoscaleTriggerCPU = Double.parseDouble(args[i++]);
-	    experiment.autoscaleTriggerRAM = Double.parseDouble(args[i++]);
+    public static void configandRun(final String[] args, boolean baseline) throws IOException {
+	MultiCloudFramework experiment = new MultiCloudFramework();
+	int i = 1;
+	experiment.n = Integer.parseInt(args[i++]);
+	experiment.latencySLA = Integer.parseInt(args[i++]);
+	experiment.wldFactor = Double.parseDouble(args[i++]);
+	experiment.monitoringPeriod = Double.parseDouble(args[i++]);
+	experiment.autoscalingPeriod = Double.parseDouble(args[i++]);
 
-	    // Load balancing
-	    experiment.loadbalancingThresholdCPU = Double.parseDouble(args[i++]);
-	    experiment.loadbalancingThresholdRAM = Double.parseDouble(args[i++]);
+	// AutoScaling
+	experiment.autoscaleTriggerCPU = Double.parseDouble(args[i++]);
+	experiment.autoscaleTriggerRAM = Double.parseDouble(args[i++]);
 
-	    experiment.experimentName = String.format("Experiment-wldf(%d)-n(%d)",
-		    (int) experiment.wldFactor, experiment.latencySLA);
-	    experiment.resultDIR = String.format("%swldf-%d-n-%d/", RESULT_DIR,
-		    (int) experiment.wldFactor, experiment.latencySLA);
-	    File resultDirFile = new File(experiment.resultDIR);
-	    if (!resultDirFile.exists()) {
-		resultDirFile.mkdir();
-	    }
+	// Load balancing
+	experiment.loadbalancingThresholdCPU = Double.parseDouble(args[i++]);
+	experiment.loadbalancingThresholdRAM = Double.parseDouble(args[i++]);
 
-	    try (InputStream is = Files.newInputStream(Paths.get(args[0]))) {
-		props.load(is);
-	    }
+	experiment.baseline = baseline;
+
+	experiment.experimentName = String.format("Experiment-wldf(%d)-n(%d)",
+		(int) experiment.wldFactor, experiment.latencySLA);
+	experiment.resultDIR = String.format("%swldf(%s)-%d-n-%d/", RESULT_DIR,
+		experiment.baseline ? "baseline" : "run",
+		(int) experiment.wldFactor, experiment.latencySLA);
+	File resultDirFile = new File(experiment.resultDIR);
+	if (!resultDirFile.exists()) {
+	    resultDirFile.mkdir();
+	}
+
+	Properties props = new Properties();
+	try (InputStream is = Files.newInputStream(Paths.get(args[0]))) {
+	    props.load(is);
 	}
 
 	props.put(CustomLog.FILE_PATH_PROP_KEY,
@@ -226,6 +260,7 @@ public class MultiCloudFramework {
 	CustomLog.printf("autoscaleTriggerRAM=%.2f", autoscaleTriggerRAM);
 	CustomLog.printf("loadbalancingThresholdCPU=%.2f", loadbalancingThresholdCPU);
 	CustomLog.printf("loadbalancingThresholdRAM=%.2f", loadbalancingThresholdRAM);
+	CustomLog.printf("Baseline=%s", Boolean.toString(baseline));
 	CustomLog.printLine("");
 	CustomLog.print("Workload frequencies:");
 	for (String period : getPeriods(wldFactor)) {
@@ -279,36 +314,33 @@ public class MultiCloudFramework {
 	    IVmBillingPolicy googleEUBilling = new GoogleOnDemandPolicy(ExamplePrices.GOOGLE_NIX_OS_PRICES_EUROPE);
 	    WebBroker brokerEuroGoogle = new FlushWebBroker("Euro-Google", step, simulationLength, monitoringPeriod,
 		    autoscalingPeriod, dcEuroGoogle.getId(), "EU");
-	    brokerEuroGoogle.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU,
-		    autoscaleTriggerRAM, n, autoscalingPeriod));
+	    brokerEuroGoogle.addAutoScalingPolicy(createAutoscalingPolicy());
 	    brokerEuroGoogle.setVMBillingPolicy(googleEUBilling);
 
 	    IVmBillingPolicy ec2EUBilling = new EC2OnDemandPolicy(ExamplePrices.EC2_NIX_OS_PRICES_IRELAND);
 	    WebBroker brokerEuroEC2 = new FlushWebBroker("Euro-EC2", step, simulationLength, monitoringPeriod,
 		    autoscalingPeriod, dcEuroEC2.getId(), "EU");
-	    brokerEuroEC2.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU,
-		    autoscaleTriggerRAM, n, autoscalingPeriod));
+	    brokerEuroEC2.addAutoScalingPolicy(createAutoscalingPolicy());
 	    brokerEuroEC2.setVMBillingPolicy(ec2EUBilling);
 
 	    IVmBillingPolicy googleUSBilling = new GoogleOnDemandPolicy(ExamplePrices.GOOGLE_NIX_OS_PRICES_US);
 	    WebBroker brokerUSGoogle = new FlushWebBroker("US-Google", step, simulationLength, monitoringPeriod,
 		    autoscalingPeriod, dcUSGoogle.getId(), "US");
-	    brokerUSGoogle.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU,
-		    autoscaleTriggerRAM, n, autoscalingPeriod));
+	    brokerUSGoogle.addAutoScalingPolicy(createAutoscalingPolicy());
 	    brokerUSGoogle.setVMBillingPolicy(googleUSBilling);
 
 	    IVmBillingPolicy ec2USBilling = new EC2OnDemandPolicy(ExamplePrices.EC2_NIX_OS_PRICES_VIRGINIA);
 	    WebBroker brokerUSEC2 = new FlushWebBroker("US-EC2", step, simulationLength, monitoringPeriod,
 		    autoscalingPeriod, dcUSEC2.getId(), "US");
-	    brokerUSEC2.addAutoScalingPolicy(new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU,
-		    autoscaleTriggerRAM, n, autoscalingPeriod));
+	    brokerUSEC2.addAutoScalingPolicy(createAutoscalingPolicy());
 	    brokerUSEC2.setVMBillingPolicy(ec2USBilling);
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 4: Set up the entry point
 	    CustomLog.print("Step 4: Setting up entry points....");
 
-	    EntryPoint entryPoint = new EntryPoint(geoService, 1, latencySLA);
+	    IEntryPoint entryPoint = baseline ? new Route53EntryPoint(geoService, 1) : new EntryPoint(geoService, 1,
+		    latencySLA);
 	    for (WebBroker broker : new WebBroker[] { brokerEuroGoogle, brokerEuroEC2, brokerUSGoogle, brokerUSEC2 }) {
 		broker.addEntryPoint(entryPoint);
 	    }
@@ -351,24 +383,20 @@ public class MultiCloudFramework {
 	    // Step 6: Create load balancers
 	    CustomLog.print("Step 6: Setting up load balancers....");
 
-	    ILoadBalancer balancerEuroGoogle = new CompressLoadBalancer(brokerEuroGoogle,
-		    1, HAMINA_FINLAND_IP, appServersEuroGoogle, new RoundRobinDBBalancer(dbServersEuroGoogle),
-		    loadbalancingThresholdCPU, loadbalancingThresholdRAM);
+	    ILoadBalancer balancerEuroGoogle =
+		    createLoadBalancer(brokerEuroGoogle, appServersEuroGoogle, dbServersEuroGoogle, HAMINA_FINLAND_IP);
 	    brokerEuroGoogle.addLoadBalancer(balancerEuroGoogle);
 
-	    ILoadBalancer balancerEuroEC2 = new CompressLoadBalancer(brokerEuroEC2,
-		    1, DUBLIN_IP, appServersEuroEC2, new RoundRobinDBBalancer(dbServersEuroEC2),
-		    loadbalancingThresholdCPU, loadbalancingThresholdRAM);
+	    ILoadBalancer balancerEuroEC2 =
+		    createLoadBalancer(brokerEuroEC2, appServersEuroEC2, dbServersEuroEC2, DUBLIN_IP);
 	    brokerEuroEC2.addLoadBalancer(balancerEuroEC2);
 
-	    ILoadBalancer balancerUSGoogle = new CompressLoadBalancer(brokerUSGoogle,
-		    1, DALAS_IP, appServersUSGoogle, new RoundRobinDBBalancer(dbServersUSGoogle),
-		    loadbalancingThresholdCPU, loadbalancingThresholdRAM);
+	    ILoadBalancer balancerUSGoogle =
+		    createLoadBalancer(brokerUSGoogle, appServersUSGoogle, dbServersUSGoogle, DALAS_IP);
 	    brokerUSGoogle.addLoadBalancer(balancerUSGoogle);
 
-	    ILoadBalancer balancerUSEC2 = new CompressLoadBalancer(brokerUSEC2,
-		    1, NEW_YORK_IP, appServersUSEC2, new RoundRobinDBBalancer(dbServersUSEC2),
-		    loadbalancingThresholdCPU, loadbalancingThresholdRAM);
+	    ILoadBalancer balancerUSEC2 =
+		    createLoadBalancer(brokerUSEC2, appServersUSEC2, dbServersUSEC2, NEW_YORK_IP);
 	    brokerUSEC2.addLoadBalancer(balancerUSEC2);
 
 	    // == == == == == == == == == == == == == == == == == == == == == ==
@@ -443,17 +471,14 @@ public class MultiCloudFramework {
 
 	    CustomLog.redirectToFile(resultDIR + "VM-EuroGoogle.csv");
 	    CustomLog.printResults(HddVm.class, vmProperties, virtualProps, brokerEuroGoogle.getVmList());
-	    CustomLog.print(brokerEuroGoogle.bill());
 
 	    virtualProps.put("Cost", new BillVmFunction(brokerEuroEC2.getVMBillingPolicy()));
 	    CustomLog.redirectToFile(resultDIR + "VM-EuroEC2.csv");
 	    CustomLog.printResults(HddVm.class, vmProperties, virtualProps, brokerEuroEC2.getVmList());
-	    CustomLog.print(brokerEuroEC2.bill());
 
 	    virtualProps.put("Cost", new BillVmFunction(brokerUSGoogle.getVMBillingPolicy()));
 	    CustomLog.redirectToFile(resultDIR + "VM-USGoogle.csv");
 	    CustomLog.printResults(HddVm.class, vmProperties, virtualProps, brokerUSGoogle.getVmList());
-	    CustomLog.print(brokerUSGoogle.bill());
 
 	    virtualProps.put("Cost", new BillVmFunction(brokerUSEC2.getVMBillingPolicy()));
 	    CustomLog.redirectToFile(resultDIR + "VM-USEC2.csv");
@@ -462,10 +487,16 @@ public class MultiCloudFramework {
 
 	    // Print sessions
 	    LinkedHashMap<String, Function<? extends WebSession, String>> sessVirtualProps = new LinkedHashMap<>();
+	    sessVirtualProps.put("LatDelay", new DelayLatencyFunction(geoService));
 	    sessVirtualProps.put("Meta", F_SESSION_META);
 	    sessVirtualProps.put("Latency", new LatencyFunction(geoService));
 	    sessVirtualProps.put("UserLocation", new SourceAddressFunction(geoService));
+	    sessVirtualProps.put("UserLat", new SourceCoordFunction(geoService, true));
+	    sessVirtualProps.put("UserLon", new SourceCoordFunction(geoService, false));
 	    sessVirtualProps.put("DCLocation", new DCAddressFunction(geoService));
+	    sessVirtualProps.put("DCLat", new DCCoordFunction(geoService, true));
+	    sessVirtualProps.put("DCLong", new DCCoordFunction(geoService, false));
+	    sessVirtualProps.put("URL", new URLFunction(geoService));
 
 	    CustomLog.redirectToFile(resultDIR + "Sessions-BrokerEuroGoogle.csv");
 	    CustomLog.printResults(WebSession.class, sessVirtualProps, brokerEuroGoogle.getServedSessions());
@@ -479,11 +510,50 @@ public class MultiCloudFramework {
 	    CustomLog.redirectToFile(resultDIR + "Sessions-BrokerUSEC2.csv");
 	    CustomLog.printResults(WebSession.class, sessVirtualProps, brokerUSEC2.getServedSessions());
 
+	    // Additional billing:
+	    CustomLog.redirectToFile(resultDIR + "AdditionalBill.csv");
+	    if (baseline) {
+		// http://aws.amazon.com/pricing/
+		int numVM = brokerEuroGoogle.getVmList().size() + brokerEuroEC2.getVmList().size()
+			+ brokerUSGoogle.getVmList().size() + brokerUSEC2.getVmList().size();
+		CustomLog.printf("Route 53: %d hits: $%.4f", entryPoint.getSessionsDispatched(),
+			((double) entryPoint.getSessionsDispatched() / Consts.MILLION) * 0.75);
+		CustomLog.printf("4 Elastic load balancer: $%.4f", 4 * 24 * 0.025);
+		CustomLog.printf("Amazon CloudWatch: $%.4f", 4 * (0.1 + 0.5 + 3.50 * numVM) / 30.0);
+	    } else {
+		BigDecimal euroGooglePrice = brokerEuroGoogle.getVMBillingPolicy().bill(
+			Arrays.asList(brokerEuroGoogle.getVmList().get(0)), DAY);
+		BigDecimal euroEC2Price = brokerEuroEC2.getVMBillingPolicy().bill(
+			Arrays.asList(brokerEuroEC2.getVmList().get(0)), DAY);
+		BigDecimal usGooglePrice = brokerUSGoogle.getVMBillingPolicy().bill(
+			Arrays.asList(brokerUSGoogle.getVmList().get(0)), DAY);
+		BigDecimal usEc2Price = brokerUSEC2.getVMBillingPolicy().bill(
+			Arrays.asList(brokerUSEC2.getVmList().get(0)), DAY);
+
+		double sum = euroGooglePrice.doubleValue() +
+			euroEC2Price.doubleValue() +
+			usGooglePrice.doubleValue() +
+			usEc2Price.doubleValue();
+
+		CustomLog.printf("DC Controller: $%.2f, $%.2f, $%.2f, $%.2f; Cost=$%.2f",
+			euroGooglePrice.doubleValue(), euroEC2Price.doubleValue(),
+			usGooglePrice.doubleValue(), usEc2Price.doubleValue(), sum);
+		CustomLog.printf("Load Balancer: $%.2f, $%.2f, $%.2f, $%.2f; Cost=$%.2f",
+			euroGooglePrice.doubleValue(), euroEC2Price.doubleValue(),
+			usGooglePrice.doubleValue(), usEc2Price.doubleValue(), sum);
+		CustomLog.printf("Admission Controller: $%.2f, $%.2f, $%.2f, $%.2f; Cost=$%.2f",
+			euroGooglePrice.doubleValue(), euroEC2Price.doubleValue(), usGooglePrice.doubleValue(),
+			usEc2Price.doubleValue(), sum);
+		CustomLog.printf("Entry Point: $%.2f, $%.2f, $%.2f, $%.2f; Cost=$%.2f", euroGooglePrice.doubleValue(),
+			euroEC2Price.doubleValue(), usGooglePrice.doubleValue(), usEc2Price.doubleValue(), sum);
+	    }
+
 	    CustomLog.flush();
 
-	    System.err.println(experimentName + ": Archiving the results into: " + createZipFileName(resultDIR, RESULT_DIR));
+	    System.err.println(experimentName + ": Archiving the results into: "
+		    + createZipFileName(resultDIR, RESULT_DIR));
 	    archiveDir(resultDIR, RESULT_DIR);
-	    
+
 	    System.err.println();
 	    System.err.println(experimentName + ": Simulation is finished!");
 	} catch (Exception e) {
@@ -492,6 +562,23 @@ public class MultiCloudFramework {
 	}
 	System.err.println(experimentName + ": Finished in " +
 		(System.currentTimeMillis() - simulationStart) / 1000 + " seconds");
+    }
+
+    public IAutoscalingPolicy createAutoscalingPolicy() {
+	return baseline ? new SimpleAutoScalingPolicy(1, scaleUpFactor, scaleDownFactor, coolDownFactor)
+		: new CompressedAutoscalingPolicy(1, autoscaleTriggerCPU,
+			autoscaleTriggerRAM, n, autoscalingPeriod);
+    }
+
+    public BaseWebLoadBalancer createLoadBalancer(WebBroker broker, List<HddVm> appServers, List<HddVm> dbServers,
+	    String ip) {
+	return baseline ?
+		new RoundRobinWebLoadBalancer(1, ip, appServers,
+			new RoundRobinDBBalancer(dbServers),
+			broker) :
+		new CompressLoadBalancer(broker,
+			1, ip, appServers, new RoundRobinDBBalancer(dbServers),
+			loadbalancingThresholdCPU, loadbalancingThresholdRAM);
     }
 
     protected IWorkloadGenerator generateWorkload(final int userId, final double nullPoint,
@@ -677,7 +764,7 @@ public class MultiCloudFramework {
 	    getCloudletReceivedList().clear();
 	}
     }
-    
+
     /**
      * Based on
      * http://windchill101.com/creating-a-zip-file-in-java-using-the-zip4j
@@ -706,7 +793,7 @@ public class MultiCloudFramework {
 
 	// Add folder to the zip file
 	zipFile.addFolder(folderToAdd, parameters);
-	
+
 	return zipFileName;
 
     }
@@ -715,8 +802,7 @@ public class MultiCloudFramework {
 	Calendar calendar = Calendar.getInstance();
 	Date time = calendar.getTime();
 	String name = new File(dir).getName();
-	
-	
+
 	String timeTxt = DateFormat.getDateTimeInstance(
 		DateFormat.SHORT, DateFormat.SHORT).format(time).replace('/', '-').replaceAll("\\s+", "_");
 	String zipFileName = destinationDir + name + "_" + timeTxt + ".zip";
@@ -748,7 +834,7 @@ public class MultiCloudFramework {
 	}
 
 	public String apply(VMex input) {
-	    return String.format("%.2f$", policy.bill(Arrays.asList(input)).doubleValue());
+	    return String.format("%.2f$", policy.bill(Arrays.asList(input), DAY).doubleValue());
 	}
     }
 
@@ -766,8 +852,22 @@ public class MultiCloudFramework {
 	}
 
 	public String apply(WebSession input) {
-	    IPMetadata metadata = geoService.getMetaData(input.getSourceIP());
-	    return String.valueOf(metadata.getCountryName()) + ";" + String.valueOf(metadata.getCityName());
+	    return formatLocation(geoService.getMetaData(input.getSourceIP()));
+	}
+    }
+
+    private class SourceCoordFunction implements Function<WebSession, String> {
+	private GeoIP2PingERService geoService;
+	private boolean latency;
+
+	public SourceCoordFunction(GeoIP2PingERService geoService, boolean latency) {
+	    this.geoService = geoService;
+	    this.latency = latency;
+	}
+
+	public String apply(WebSession input) {
+	    Double[] res = geoService.getCoordinates(input.getSourceIP());
+	    return res == null ? "N/A" : latency ? formatSingleCoord(res[0]) : formatSingleCoord(res[1]);
 	}
     }
 
@@ -779,8 +879,22 @@ public class MultiCloudFramework {
 	}
 
 	public String apply(WebSession input) {
-	    IPMetadata metadata = geoService.getMetaData(input.getServerIP());
-	    return String.valueOf(metadata.getCountryName()) + ";" + String.valueOf(metadata.getCityName());
+	    return formatLocation(geoService.getMetaData(input.getServerIP()));
+	}
+    }
+
+    private class DCCoordFunction implements Function<WebSession, String> {
+	private GeoIP2PingERService geoService;
+	private boolean latency;
+
+	public DCCoordFunction(GeoIP2PingERService geoService, boolean latency) {
+	    this.geoService = geoService;
+	    this.latency = latency;
+	}
+
+	public String apply(WebSession input) {
+	    Double[] res = geoService.getCoordinates(input.getServerIP());
+	    return res == null ? "N/A" : latency ? formatSingleCoord(res[0]) : formatSingleCoord(res[1]);
 	}
     }
 
@@ -794,5 +908,47 @@ public class MultiCloudFramework {
 	public String apply(WebSession input) {
 	    return String.format("%.2f", geoService.latency(input.getSourceIP(), input.getServerIP()));
 	}
+    }
+
+    private class URLFunction implements Function<WebSession, String> {
+	private GeoIP2PingERService geoService;
+
+	public URLFunction(GeoIP2PingERService geoService) {
+	    this.geoService = geoService;
+	}
+
+	public String apply(WebSession input) {
+	    Double[] srv = geoService.getCoordinates(input.getServerIP());
+	    Double[] cli = geoService.getCoordinates(input.getSourceIP());
+	    return srv == null || cli == null ? "N/A" :
+		    String.format("http://econym.org.uk/gmap/example_plotpoints.htm?q=Client@%s,%s&q=DC@%s,%s",
+			    formatSingleCoord(cli[0]),
+			    formatSingleCoord(cli[1]),
+			    formatSingleCoord(srv[0]),
+			    formatSingleCoord(srv[1]));
+	}
+    }
+
+    private class DelayLatencyFunction implements Function<WebSession, String> {
+	private GeoIP2PingERService geoService;
+
+	public DelayLatencyFunction(GeoIP2PingERService geoService) {
+	    this.geoService = geoService;
+	}
+
+	public String apply(WebSession input) {
+	    double latDelay = (60.0 / 7.0) * geoService.latency(input.getSourceIP(), input.getServerIP()) / 1000 * 22;
+	    return String.format("%.2f", latDelay);
+	}
+    }
+
+    public static String formatLocation(IPMetadata metadata) {
+	String res = String.valueOf(metadata.getCountryIsoCode()) + ";" + String.valueOf(metadata.getCityName());
+	return res.length() < 20 ? res : res.substring(0, 16) + "...";
+
+    }
+
+    private static String formatSingleCoord(Double coord) {
+	return coord == null ? "N/A" : String.format("%.2f", coord);
     }
 }

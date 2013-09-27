@@ -50,6 +50,22 @@ public abstract class BaseCustomerVmBillingPolicy implements IVmBillingPolicy {
 	return result;
     }
 
+    @Override
+    public BigDecimal bill(final List<? extends Vm> vms, double before) {
+	BigDecimal result = BigDecimal.ZERO;
+	for (Vm vm : vms) {
+	    if (vm instanceof VMex) {
+		VMex vmEx = (VMex) vm;
+		if (shouldBillVm(vmEx)) {
+		    result = result.add(billSingleVmUntil(vmEx, before));
+		}
+	    } else {
+		CustomLog.print("Unable to bill VM" + vm.getId() + " as it is not of type " + VMex.class.getName());
+	    }
+	}
+	return result;
+    }
+
     /**
      * Returns if the VM should be billed. Override this method to implement
      * logic like billing the VMs of a given user.
@@ -70,6 +86,16 @@ public abstract class BaseCustomerVmBillingPolicy implements IVmBillingPolicy {
      * @return the bill for a single VM.
      */
     public abstract BigDecimal billSingleVm(final VMex vm);
+
+    /**
+     * Returns the accummulated bill for a single VM before a specified time.
+     * 
+     * @param vm
+     *            - the vm
+     * @param endTime
+     * @return the bill for a single VM.
+     */
+    public abstract BigDecimal billSingleVmUntil(final VMex vm, double endTime);
 
     /**
      * Returns the current simulation time. Can be overridden for test purposes.

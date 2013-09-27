@@ -108,7 +108,7 @@ public class CustomLog {
     private static final Logger LOGGER = Logger.getLogger(CustomLog.class
 	    .getPackage().getName());
 
-    private static Level granularityLevel;
+    private static Level granularityLevel = DEFAULT_LEVEL;
     private static Formatter formatter;
     private static int bufferSize = -1;
 

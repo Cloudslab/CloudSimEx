@@ -122,7 +122,7 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
 					.getCloudletExecList()
 					.size(),
 				!usedASServers.containsKey(hostVM.getId()) ? 0 : usedASServers.get(hostVM.getId()));
-		CustomLog.printf("[Load Balancer](%s), Canidate VMs: %s", broker, debugSB);
+		CustomLog.printf("[Load Balancer](%s), Candidate VMs: %s", broker, debugSB);
 
 		// Log the state of the DB servers
 		debugSB.setLength(0);

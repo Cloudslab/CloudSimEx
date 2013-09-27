@@ -56,7 +56,7 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 	    List<HddVm> freeVms = new ArrayList<>();
 
 	    // Inspect the status of all AS VMs
-	    boolean debug = true;// (int) (CloudSim.clock() * 100) % 300 == 0;
+	    boolean debug = true;
 	    debugSB.setLength(0);
 	    for (HddVm vm : loadBalancer.getAppServers()) {
 		if (!EnumSet.of(VMStatus.INITIALISING, VMStatus.RUNNING).contains(vm.getStatus())) {
@@ -148,9 +148,8 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
 		newVMs.add(newASServer);
 	    }
 
-	    CustomLog
-		    .printf("Autoscale-Policy(%s) Scale-Up: New AS VMs provisioned: %s",
-			    webBroker.toString(), newVMs.toString());
+	    CustomLog.printf("Autoscale-Policy(%s) Scale-Up: New AS VMs provisioned: %s",
+		    webBroker.toString(), newVMs.toString());
 	    webBroker.createVmsAfter(newVMs, 0);
 	}
     }

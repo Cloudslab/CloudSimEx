@@ -754,5 +754,4 @@ public class TextUtil {
 	    return Integer.valueOf(properties.indexOf(prop1)).compareTo(properties.indexOf(prop2));
 	}
     }
-
 }

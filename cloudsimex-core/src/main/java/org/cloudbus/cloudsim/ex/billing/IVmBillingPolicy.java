@@ -25,6 +25,15 @@ public interface IVmBillingPolicy {
     public BigDecimal bill(final List<? extends Vm> vms);
 
     /**
+     * Returns the cost for the specified vms before a specified moment in time.
+     * 
+     * @param vms
+     * @param before
+     * @return
+     */
+    public BigDecimal bill(final List<? extends Vm> vms, double before);
+
+    /**
      * Returns the next charging time.
      * 
      * @param vm

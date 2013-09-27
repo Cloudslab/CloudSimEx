@@ -15,6 +15,7 @@ import java.util.Queue;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
+import org.cloudbus.cloudsim.Consts;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.ex.BaseDatacenterBrokerTest;
 import org.cloudbus.cloudsim.ex.delay.ConstantVMBootDelay;
@@ -60,6 +61,10 @@ public class EC2OnDemandPolicyTest extends BaseDatacenterBrokerTest {
 	double expectedBill = times * (smallPrice + medPrice);
 
 	assertEquals(expectedBill, bill.doubleValue(), 0.01);
+
+	//Now test billing before time...
+	assertEquals((smallPrice + medPrice) * 2,
+		policy.bill(Arrays.asList(vm1, vm2), Consts.HOUR * 1.4).doubleValue(), 0.01);
     }
 
     @Test

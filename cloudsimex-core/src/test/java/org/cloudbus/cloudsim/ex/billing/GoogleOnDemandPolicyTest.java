@@ -15,6 +15,7 @@ import java.util.Queue;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
+import org.cloudbus.cloudsim.Consts;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.ex.BaseDatacenterBrokerTest;
 import org.cloudbus.cloudsim.ex.delay.ConstantVMBootDelay;
@@ -60,6 +61,12 @@ public class GoogleOnDemandPolicyTest extends BaseDatacenterBrokerTest {
 	double expectedBill = times * (d1PricePerHour / 60.0 + d2PricePerHour / 60.0);
 
 	assertEquals(expectedBill, bill.doubleValue(), 0.01);
+	
+	//Now test billing before time...
+	assertEquals((d1PricePerHour + d2PricePerHour) * 0.4,
+		policy.bill(Arrays.asList(vm1, vm2), Consts.HOUR * 0.4).doubleValue(), 0.01);
+	assertEquals((d1PricePerHour + d2PricePerHour) * (1/6d),
+		policy.bill(Arrays.asList(vm1, vm2), Consts.HOUR / 10).doubleValue(), 0.01);
     }
 
     @Test

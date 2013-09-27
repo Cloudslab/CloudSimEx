@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,7 +16,9 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.ex.disk.DataItem;
 import org.cloudbus.cloudsim.ex.disk.HddCloudlet;
 import org.cloudbus.cloudsim.ex.disk.HddVm;
+import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.util.Id;
+import org.cloudbus.cloudsim.ex.util.helpers.TestUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.uncommons.maths.number.NumberGenerator;
@@ -65,8 +68,9 @@ public class WebSessionTest {
     private static final DataItem data2 = new DataItem(65);
 
     @Before
-    public void setUp() {
-
+    public void setUp() throws SecurityException, IOException {
+	CustomLog.configLogger(TestUtil.LOG_PROPS);
+	
 	IDBBalancer dummyBalancer = new IDBBalancer() {
 	    @Override
 	    public void setVms(final List<HddVm> vms) {

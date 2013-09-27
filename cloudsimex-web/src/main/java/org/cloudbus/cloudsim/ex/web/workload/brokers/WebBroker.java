@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,6 +20,7 @@ import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.ex.MonitoringBorkerEX;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 import org.cloudbus.cloudsim.ex.web.ILoadBalancer;
+import org.cloudbus.cloudsim.ex.web.SessionFailedException;
 import org.cloudbus.cloudsim.ex.web.WebCloudlet;
 import org.cloudbus.cloudsim.ex.web.WebSession;
 import org.cloudbus.cloudsim.ex.web.workload.IWorkloadGenerator;
@@ -49,7 +51,7 @@ public class WebBroker extends MonitoringBorkerEX {
     private final List<WebSession> canceledSessions = new ArrayList<>();
 
     /** Mapping of application Ids to entry points. */
-    private final Map<Long, EntryPoint> entryPoins = new HashMap<>();
+    private final Map<Long, IEntryPoint> entryPoins = new HashMap<>();
 
     private String[] metadata;
 
@@ -167,7 +169,7 @@ public class WebBroker extends MonitoringBorkerEX {
 
     public void submitSessions(final List<WebSession> webSessions, final long appId) {
 	if (entryPoins.containsKey(appId)) {
-	    EntryPoint entryPoint = entryPoins.get(appId);
+	    IEntryPoint entryPoint = entryPoins.get(appId);
 
 	    for (WebSession sess : webSessions) {
 		CustomLog.printf("[Broker](%s) Session %d has arrived in the Entry Point of %s", toString(),
@@ -260,8 +262,8 @@ public class WebBroker extends MonitoringBorkerEX {
      * @param entryPoint
      *            - the entry point. Must not be null.
      */
-    public void addEntryPoint(final EntryPoint entryPoint) {
-	EntryPoint currEP = entryPoins.get(entryPoint.getAppId());
+    public void addEntryPoint(final IEntryPoint entryPoint) {
+	IEntryPoint currEP = entryPoins.get(entryPoint.getAppId());
 	if (entryPoint != entryPoins.get(entryPoint.getAppId())) {
 	    entryPoins.put(entryPoint.getAppId(), entryPoint);
 	    entryPoint.registerBroker(this);
@@ -277,7 +279,7 @@ public class WebBroker extends MonitoringBorkerEX {
      * @param entryPoint
      *            - the entry point. Must not be null.
      */
-    public void removeEntryPoint(final EntryPoint entryPoint) {
+    public void removeEntryPoint(final IEntryPoint entryPoint) {
 	if (entryPoint == entryPoins.get(entryPoint.getAppId())) {
 	    entryPoins.remove(entryPoint.getAppId());
 	    entryPoint.deregisterBroker(this);
@@ -351,6 +353,10 @@ public class WebBroker extends MonitoringBorkerEX {
 
 	    // If the session is complete - there is no need to update it.
 	    if (sess == null || sess.isComplete() || sess.isFailed()) {
+		if (sess != null) {
+		    CustomLog.printf("Broker(%s): Session %d with metadate %s has failed",
+			    this, sess.getSessionId(), Arrays.toString(sess.getMetadata()));
+		}
 		completedIds.add(id);
 		continue;
 	    }
@@ -362,22 +368,28 @@ public class WebBroker extends MonitoringBorkerEX {
 		double currTime = CloudSim.clock();
 
 		// sess.notifyOfTime(currTime);
-		WebSession.StepCloudlets webCloudlets = sess.pollCloudlets(currTime);
+		try {
+		    WebSession.StepCloudlets webCloudlets = sess.pollCloudlets(currTime);
 
-		if (webCloudlets != null) {
+		    if (webCloudlets != null) {
 
-		    if (webCloudlets.asCloudlet.getUserId() != sess.getUserId() || sess.getUserId() != getId()) {
-			throw new IllegalStateException();
+			if (webCloudlets.asCloudlet.getUserId() != sess.getUserId() || sess.getUserId() != getId()) {
+			    throw new IllegalStateException();
+			}
+
+			getCloudletList().add(webCloudlets.asCloudlet);
+			getCloudletList().addAll(webCloudlets.dbCloudlets);
+			submitCloudlets();
+
+			double nextIdealTime = currTime + stepPeriod;
+			sess.notifyOfTime(nextIdealTime);
+
+			send(getId(), stepPeriod, UPDATE_SESSION_TAG, sess.getSessionId());
 		    }
-
-		    getCloudletList().add(webCloudlets.asCloudlet);
-		    getCloudletList().addAll(webCloudlets.dbCloudlets);
-		    submitCloudlets();
-
-		    double nextIdealTime = currTime + stepPeriod;
-		    sess.notifyOfTime(nextIdealTime);
-
-		    send(getId(), stepPeriod, UPDATE_SESSION_TAG, sess.getSessionId());
+		} catch (SessionFailedException e) {
+		    CustomLog.printf("Broker(%s): Session %d with metadate %s has failed",
+			    this, sess.getSessionId(), Arrays.toString(sess.getMetadata()));
+		    completedIds.add(sess.getSessionId());
 		}
 	    }
 	}
@@ -430,6 +442,17 @@ public class WebBroker extends MonitoringBorkerEX {
 	for (Integer datacenterId : getDatacenterIdsList()) {
 	    sendNow(datacenterId, CloudSimTags.RESOURCE_CHARACTERISTICS, getId());
 	}
+    }
+
+    public Set<Integer> getSessionsInServer(int vmId) {
+	Set<Integer> result = new LinkedHashSet<>();
+	for (Map.Entry<Integer, WebSession> e : activeSessions.entrySet()) {
+	    WebSession session = e.getValue();
+	    if (!session.isComplete() && session.getAppVmId() == vmId) {
+		result.add(session.getSessionId());
+	    }
+	}
+	return result;
     }
 
     public Set<Integer> getUsedASServers() {

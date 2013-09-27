@@ -191,10 +191,10 @@ public class WebSession {
 	boolean dbServerNextReady = !dbServerCloudLets.isEmpty()
 		&& getEarliestIdealStartTime(dbServerCloudLets.peek()) <= currTime;
 
-	if(cloudletsLeft != 0 && appCloudletFinished && !dbCloudletFinished) {
+	if (cloudletsLeft != 0 && appCloudletFinished && !dbCloudletFinished) {
 	    CustomLog.printf(Level.FINE, "Session %d in AS VM %d blocked in DB layer", getSessionId(), appVmId);
 	}
-	
+
 	if (cloudletsLeft != 0 && appCloudletFinished && dbCloudletFinished && appServerNextReady && dbServerNextReady) {
 	    result = new StepCloudlets(
 		    appServerCloudLets.poll(),
@@ -203,17 +203,20 @@ public class WebSession {
 	    currentDBServerCloudLets = result.dbCloudlets;
 
 	    currentAppServerCloudLet.setVmId(appVmId);
-	    assignToServer(dbBalancer, currentDBServerCloudLets);
+	    if (assignToServer(dbBalancer, currentDBServerCloudLets)) {
 
-	    currentAppServerCloudLet.setSessionId(getSessionId());
-	    currentAppServerCloudLet.setUserId(userId);
-	    setSessionAndUserIds(getSessionId(), userId, currentDBServerCloudLets);
+		currentAppServerCloudLet.setSessionId(getSessionId());
+		currentAppServerCloudLet.setUserId(userId);
+		setSessionAndUserIds(getSessionId(), userId, currentDBServerCloudLets);
 
-	    cloudletsLeft--;
+		cloudletsLeft--;
 
-	    if (Double.isNaN(startTime)) {
-		startTime = Math.min(currentAppServerCloudLet.getIdealStartTime(),
-			getEarliestIdealStartTime(currentDBServerCloudLets));
+		if (Double.isNaN(startTime)) {
+		    startTime = Math.min(currentAppServerCloudLet.getIdealStartTime(),
+			    getEarliestIdealStartTime(currentDBServerCloudLets));
+		}
+	    } else {
+		throw new SessionFailedException(sessionId, "The data for this web session could not be found.");
 	    }
 	}
 	return result;
@@ -439,10 +442,15 @@ public class WebSession {
 	return result;
     }
 
-    private static void assignToServer(final IDBBalancer dbBalancer, final Collection<? extends WebCloudlet> cloudlets) {
+    private static boolean assignToServer(final IDBBalancer dbBalancer,
+	    final Collection<? extends WebCloudlet> cloudlets) {
 	for (WebCloudlet cl : cloudlets) {
 	    dbBalancer.allocateToServer(cl);
+	    if (cl.getVmId() < 0) {
+		return false;
+	    }
 	}
+	return true;
     }
 
     private static void setSessionAndUserIds(final int sessId, final int userId,

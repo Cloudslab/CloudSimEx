@@ -2,11 +2,16 @@ package org.cloudbus.cloudsim.ex.web;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
+import java.util.logging.Level;
 
 import org.cloudbus.cloudsim.ex.disk.HddResCloudlet;
 import org.cloudbus.cloudsim.ex.disk.HddVm;
+import org.cloudbus.cloudsim.ex.util.CustomLog;
+import org.cloudbus.cloudsim.ex.web.workload.brokers.WebBroker;
 
 /**
  * Implements simple load balancing - sessions are assigned to the least busy
@@ -18,6 +23,8 @@ import org.cloudbus.cloudsim.ex.disk.HddVm;
 public class SimpleWebLoadBalancer extends BaseWebLoadBalancer implements ILoadBalancer {
 
     private long startPositionWhenEqual = 0;
+    private StringBuffer debugSB = new StringBuffer();
+    WebBroker broker;
 
     /**
      * Constructor.
@@ -25,15 +32,24 @@ public class SimpleWebLoadBalancer extends BaseWebLoadBalancer implements ILoadB
      * @param appId
      *            - the id of the applications, which this load balancer is
      *            serving.
-     * @param ip - the IP address represented in a standard Ipv4 or IPv6 dot notation.
+     * @param ip
+     *            - the IP address represented in a standard Ipv4 or IPv6 dot
+     *            notation.
      * @param appServers
      *            - the application servers. Must not be null.
      * @param dbBalancer
      *            - the balancer of the DB cloudlets among DB servers. Must not
      *            be null.
      */
-    public SimpleWebLoadBalancer(final long appId, final String ip, final List<HddVm> appServers, final IDBBalancer dbBalancer) {
+    public SimpleWebLoadBalancer(final long appId, final String ip, final List<HddVm> appServers,
+	    final IDBBalancer dbBalancer) {
 	super(appId, ip, appServers, dbBalancer);
+    }
+
+    public SimpleWebLoadBalancer(final long appId, final String ip, final List<HddVm> appServers,
+	    final IDBBalancer dbBalancer, WebBroker broker) {
+	super(appId, ip, appServers, dbBalancer);
+	this.broker = broker;
     }
 
     @Override
@@ -48,29 +64,72 @@ public class SimpleWebLoadBalancer extends BaseWebLoadBalancer implements ILoadB
 	    }
 	}
 
-	// Get the VMs which are utilized the least
-	List<HddVm> bestVms = new ArrayList<>();
-	double bestUtilization = Double.MAX_VALUE;
-	for (HddVm vm : getRunningAppServers()) {
-	    double vmUtilization = evaluateUtilization(vm);
-	    if (!vm.isOutOfMemory()) {
-		if (vmUtilization < bestUtilization) {
-		    bestVms.clear();
-		    bestUtilization = vmUtilization;
-		    bestVms.add(vm);
-		} else if (vmUtilization == bestUtilization) {
-		    bestVms.add(vm);
+	List<HddVm> runingVMs = getRunningAppServers();
+	// No running AS servers - log an error
+	if (runingVMs.isEmpty()) {
+	    for (WebSession session : noAppServSessions) {
+		if (getAppServers().isEmpty()) {
+		    CustomLog.printf(Level.SEVERE,
+			    "Simple Load Balancer(%s): session %d cannot be scheduled, as there are no AS servers",
+			    broker == null ? "N/A" : broker,
+			    session.getSessionId());
+		} else {
+		    CustomLog
+			    .printf(Level.SEVERE,
+				    "[Simple Load Balancer](%s): session %d cannot be scheduled, as all AS servers are either booting or terminated",
+				    broker == null ? "N/A" : broker,
+				    session.getSessionId());
 		}
 	    }
-	}
+	} else {
+	    @SuppressWarnings("unchecked")
+	    Map<Integer, Integer> usedASServers = broker != null ? this.broker.getASServersToNumSessions()
+		    : Collections.EMPTY_MAP;
 
-	// Distribute the sessions among the best VMs
-	long i = startPositionWhenEqual++;
-	if (!bestVms.isEmpty()) {
-	    for (WebSession session : noAppServSessions) {
-		long index = i++ % bestVms.size();
-		session.setAppVmId(bestVms.get((int) index).getId());
+	    // Get the VMs which are utilized the least
+	    debugSB.setLength(0);
+	    List<HddVm> bestVms = new ArrayList<>();
+	    double bestUtilization = Double.MAX_VALUE;
+	    for (HddVm vm : runingVMs) {
+		double vmUtilization = evaluateSuitability(vm);
+		if (!vm.isOutOfMemory()) {
+		    if (vmUtilization < bestUtilization) {
+			bestVms.clear();
+			bestUtilization = vmUtilization;
+			bestVms.add(vm);
+		    } else if (vmUtilization == bestUtilization) {
+			bestVms.add(vm);
+		    }
+		}
+
+		debugSB.append(String.format("%s[%s] cpu(%.2f), ram(%.2f), cdlts(%d), sess(%d); ",
+			vm, vm.getStatus(),
+			vm.getCPUUtil(), vm.getRAMUtil(), vm.getCloudletScheduler().getCloudletExecList().size(),
+			!usedASServers.containsKey(vm.getId()) ? 0 : usedASServers.get(vm.getId())));
 	    }
+
+	    // Distribute the sessions among the best VMs
+	    long i = startPositionWhenEqual++;
+	    if (!bestVms.isEmpty()) {
+		for (WebSession session : noAppServSessions) {
+		    long index = i++ % bestVms.size();
+		    HddVm hostVM = bestVms.get((int) index);
+		    session.setAppVmId(hostVM.getId());
+
+		    CustomLog
+			    .printf("[Simple Load Balancer(%s): Assigning sesssion %d to %s[%s] cpu(%.2f), ram(%.2f), cdlts(%d), sess(%d);",
+				    broker == null ? "N/A" : broker,
+				    session.getSessionId(), hostVM, hostVM.getStatus(),
+				    hostVM.getCPUUtil(), hostVM.getRAMUtil(), hostVM.getCloudletScheduler()
+					    .getCloudletExecList()
+					    .size(),
+				    !usedASServers.containsKey(hostVM.getId()) ? 0 : usedASServers.get(hostVM.getId()));
+		    CustomLog.printf("[Simple Load Balancer(%s), Candidate VMs: %s",
+			    broker == null ? "N/A" : broker, debugSB);
+
+		}
+	    }
+
 	}
 
 	// Set the DB VM
@@ -79,11 +138,21 @@ public class SimpleWebLoadBalancer extends BaseWebLoadBalancer implements ILoadB
 		session.setDbBalancer(getDbBalancer());
 	    }
 	}
+
+	// Log the state of the DB servers
+	debugSB.setLength(0);
+	for (HddVm dbVm : getDbBalancer().getVMs()) {
+	    debugSB.append(String.format("%s cpu(%.2f), ram(%.2f), disk(%.2f), cdlts(%d);",
+		    dbVm, dbVm.getCPUUtil(), dbVm.getRAMUtil(), dbVm.getDiskUtil(),
+		    dbVm.getCloudletScheduler().getCloudletExecList().size()));
+	}
+	CustomLog.printf("[Simple Load Balancer], DB VMs: %s", debugSB);
+
     }
 
-    private static double evaluateUtilization(final HddVm vm) {
+    protected static double evaluateSuitability(final HddVm vm) {
 	double sumExecCloudLets = 0;
-	for (HddResCloudlet cloudlet : vm.getCloudletScheduler().<HddResCloudlet>getCloudletExecList()) {
+	for (HddResCloudlet cloudlet : vm.getCloudletScheduler().<HddResCloudlet> getCloudletExecList()) {
 	    sumExecCloudLets += cloudlet.getCloudletLength();
 	}
 	double vmMips = vm.getMips() * vm.getNumberOfPes();

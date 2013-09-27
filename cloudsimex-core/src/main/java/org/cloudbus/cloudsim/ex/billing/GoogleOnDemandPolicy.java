@@ -32,6 +32,19 @@ public class GoogleOnDemandPolicy extends BaseCustomerVmBillingPolicy {
 
     @Override
     public BigDecimal billSingleVm(final VMex vm) {
+	double timeAfterBoot = vm.getTimeAfterBooting();
+	return computeBill(vm, timeAfterBoot);
+    }
+
+    @Override
+    public BigDecimal billSingleVmUntil(VMex vm, double endTime) {
+	double time = vm.getEndTime() < 0 || vm.getEndTime() > endTime ?
+		endTime - vm.getStartTime() :
+		vm.getTimeAfterBooting();
+	return computeBill(vm, time);
+    }
+    
+    public BigDecimal computeBill(final VMex vm, double duration) {
 	BigDecimal pricePerMin = null;
 	try {
 	    pricePerMin = prices.get(keyOf(vm)).divide(BigDecimal.valueOf(60));
@@ -39,10 +52,9 @@ public class GoogleOnDemandPolicy extends BaseCustomerVmBillingPolicy {
 	    pricePerMin = BigDecimal.valueOf(prices.get(keyOf(vm)).doubleValue() / 60);
 	}
 
-	double timeAfterBoot = vm.getTimeAfterBooting();
-	int chargeCount = (int) timeAfterBoot / MINUTE + 1;
-	if (timeAfterBoot == (int) timeAfterBoot && (int) timeAfterBoot % MINUTE == 0) {
-	    chargeCount = (int) timeAfterBoot / MINUTE;
+	int chargeCount = (int) duration / MINUTE + 1;
+	if (duration == (int) duration && (int) duration % MINUTE == 0) {
+	    chargeCount = (int) duration / MINUTE;
 	}
 
 	chargeCount = Math.max(10, chargeCount);
@@ -59,5 +71,4 @@ public class GoogleOnDemandPolicy extends BaseCustomerVmBillingPolicy {
 	}
 	return result;
     }
-
 }
