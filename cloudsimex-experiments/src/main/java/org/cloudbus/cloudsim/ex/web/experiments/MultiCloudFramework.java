@@ -136,7 +136,7 @@ public class MultiCloudFramework {
     public static String DEF_DIR = "multi-cloud/";
     public static String RESULT_DIR = DEF_DIR + "stat/";
 
-    protected int simulationLength = (DAY + HOUR / 2);
+    protected int simulationLength = (DAY + HOUR / 2) / (48 * 2);
     protected int step = 60;
 
     protected int n = 1;
@@ -158,7 +158,7 @@ public class MultiCloudFramework {
     private final double scaleDownFactor = 0.1;
     private final double scaleUpFactor = 0.8;
 
-    private boolean baseline = false;
+    private boolean baseline = true;
 
     protected String experimentName = "Multi-Cloud Framework Experiment";
     public String resultDIR = RESULT_DIR;
@@ -194,14 +194,11 @@ public class MultiCloudFramework {
 	    experiment.runExperimemt();
 
 	} else {
-	    configandRun(args, true);
-	    System.gc();
-	    System.gc();
-	    configandRun(args, false);
+	    configandRun(args);
 	}
     }
 
-    public static void configandRun(final String[] args, boolean baseline) throws IOException {
+    public static void configandRun(final String[] args) throws IOException {
 	MultiCloudFramework experiment = new MultiCloudFramework();
 	int i = 1;
 	experiment.n = Integer.parseInt(args[i++]);
@@ -218,9 +215,10 @@ public class MultiCloudFramework {
 	experiment.loadbalancingThresholdCPU = Double.parseDouble(args[i++]);
 	experiment.loadbalancingThresholdRAM = Double.parseDouble(args[i++]);
 
-	experiment.baseline = baseline;
+	experiment.baseline = Boolean.parseBoolean(args[i++]);
 
-	experiment.experimentName = String.format("Experiment-wldf(%d)-n(%d)",
+	experiment.experimentName = String.format("[%s]Exp-wldf(%d)-n(%d)",
+		experiment.baseline? "Baseline" : "Run",
 		(int) experiment.wldFactor, experiment.latencySLA);
 	experiment.resultDIR = String.format("%swldf(%s)-%d-n-%d/", RESULT_DIR,
 		experiment.baseline ? "baseline" : "run",

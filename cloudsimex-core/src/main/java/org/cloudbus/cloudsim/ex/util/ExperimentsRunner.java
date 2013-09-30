@@ -2,13 +2,13 @@ package org.cloudbus.cloudsim.ex.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -47,10 +47,8 @@ public class ExperimentsRunner {
      * idle if you're running experiments on your PC or laptop, so that it does
      * not freeze.
      * 
-     * @param experimentsToOutputs
-     *            - the experiments's main classes mapped to the parameters of
-     *            the experiment. These could be both application and JVM
-     *            parameters.
+     * @param experimentsDefs
+     *            - the experiments' definitions.
      * @param numFreeCPUs
      *            - number of processors to leave unused. Must be non-negative
      *            and less than the number processors - 1. For example if 0 -
@@ -62,18 +60,10 @@ public class ExperimentsRunner {
      *             - if something goes wrong.
      */
     public static synchronized void runExperiments(
-	    final List<Map.Entry<? extends Class<?>, String[]>> experimentsToOutputs,
+	    final List<ExperimentDefinition> experimentsDefs,
 	    final int numFreeCPUs) throws Exception {
 
-	// If only one experiment - run it in this process
-	// If more than on experiment - spawn a new process for each
-	if (experimentsToOutputs.size() == 1) {
-	    Class<?> experiment = (Class<?>) experimentsToOutputs.get(0).getKey();
-
-	    // Find the main method and run it here
-	    Method main = experiment.getMethod("main", String[].class);
-	    main.invoke(null, (Object) experimentsToOutputs.get(0).getValue());
-	} else if (!experimentsToOutputs.isEmpty()) {
+	if (!experimentsDefs.isEmpty()) {
 	    // Prints the pid of the current process... so we know who to kill
 	    printPIDInformation();
 
@@ -87,20 +77,18 @@ public class ExperimentsRunner {
 	    ExecutorService pool = Executors.newFixedThreadPool(coresToUse);
 	    Collection<Future<?>> futures = new ArrayList<Future<?>>();
 
-	    for (Map.Entry<? extends Class<?>, String[]> entry : experimentsToOutputs) {
-		final Class<?> experiment = entry.getKey();
-		final String[] params = entry.getValue();
+	    for (final ExperimentDefinition def : experimentsDefs) {
 		Runnable runnable = new Runnable() {
 		    @Override
 		    public void run() {
 			int resultStatus;
 			try {
-			    resultStatus = exec(experiment, params);
+			    resultStatus = exec(def);
 			} catch (IOException | InterruptedException e) {
 			    resultStatus = 1;
 			}
 			if (resultStatus != 0) {
-			    System.err.println("!!! Experiment " + experiment.getCanonicalName() + " has failed!!!");
+			    System.err.println("!!! Experiment " + def.getMainClass().getCanonicalName() + " has failed!!!");
 			}
 		    }
 		};
@@ -116,6 +104,37 @@ public class ExperimentsRunner {
 	}
 	System.err.println();
 	System.err.println("All experiments are finished");
+    }
+
+    @SuppressWarnings("unused")
+    private static int[] getHeapArgs() {
+	RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
+	List<String> arguments = runtimeMxBean.getInputArguments();
+	int minMem = 64;
+	int maxMem = 2;
+	for (String arg : arguments) {
+	    char lastChar = arg.charAt(arg.length());
+	    if (arg.startsWith("-Xmx")) {
+		maxMem = Integer.parseInt(arg.trim().replaceAll("[^\\d]", ""));
+		maxMem = normaliseToMegabytes(maxMem, lastChar);
+	    } else if (arg.startsWith("-Xms")) {
+		minMem = Integer.parseInt(arg.trim().replaceAll("[^\\d]", ""));
+		minMem = normaliseToMegabytes(minMem, lastChar);
+	    }
+	}
+	return new int[] { maxMem, minMem };
+    }
+
+    private static int normaliseToMegabytes(int mem, char lastChar) {
+	int res = mem;
+	if (lastChar == 'g' || lastChar == 'G') {
+	    res = mem * 1024;
+	} else if (lastChar == 'k' || lastChar == 'K') {
+	    res = mem / 1024;
+	} else if (lastChar != 'm' || lastChar == 'M') {
+	    res = mem / 1048576;
+	}
+	return res;
     }
 
     private synchronized static void addHookToKillProcesses() {
@@ -139,13 +158,12 @@ public class ExperimentsRunner {
      * "http://stackoverflow.com/questions/636367/executing-a-java-application-in-a-separate-process"
      * >StackOverflow: Executing java in a separate process</a>
      * 
-     * @param klass
-     * @param params
+     * @param def
      * @return
      * @throws IOException
      * @throws InterruptedException
      */
-    private static int exec(final Class<?> klass, final String[] params)
+    private static int exec(final ExperimentDefinition def)
 	    throws IOException,
 	    InterruptedException {
 	String javaHome = System.getProperty("java.home");
@@ -153,18 +171,26 @@ public class ExperimentsRunner {
 		File.separator + "bin" +
 		File.separator + "java";
 	String classpath = System.getProperty("java.class.path");
-	String className = klass.getCanonicalName();
+	String className = def.getMainClass().getCanonicalName();
 
 	List<String> vmParams = new ArrayList<>();
 	List<String> appParams = new ArrayList<>();
-	for (String param : params) {
-	    if(param.startsWith("-X") || param.startsWith("-D")) {
+	
+	if(def.getMaxMem() > 0) {
+	    vmParams.add("-Xmx" + def.getMaxMem() + "m");
+	}
+	if(def.getMinMem() > 0) {
+	    vmParams.add("-Xms" + def.getMinMem() + "m");
+	}
+	
+	for (String param : def.getArguements()) {
+	    if (param.startsWith("-X") || param.startsWith("-D")) {
 		vmParams.add(param);
 	    } else {
 		appParams.add(param);
 	    }
 	}
-	
+
 	List<String> processBuilderList = new ArrayList<>();
 	processBuilderList.add(javaBin);
 	processBuilderList.addAll(vmParams);
