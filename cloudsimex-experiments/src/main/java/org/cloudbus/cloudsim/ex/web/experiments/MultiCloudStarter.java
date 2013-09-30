@@ -41,7 +41,7 @@ public class MultiCloudStarter {
 	double loadbalancingThresholdCPU = 0.80;
 	double loadbalancingThresholdRAM = 0.80;
 
-	for (double[] wld : new double[][] { { 1d, 1536d }, { 200d, 8000d } }) {
+	for (double[] wld : new double[][] { { 1d, 1024d }, { 200d, 2048d } }) {
 	    String minRam = "-Xms" + 1024 + "m";
 	    String maxRam = "-Xmx" + (int) wld[1] + "m";
 

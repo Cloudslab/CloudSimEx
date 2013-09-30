@@ -195,41 +195,40 @@ public class MonitoringBorkerEX extends DatacenterBrokerEX {
     protected void measureUtil() {
 	for (Vm vm : getVmList()) {
 	    if (vm instanceof MonitoredVMex) {
-		((MonitoredVMex) vm).updatePerformance(evaluateUtil(vm));
+		updateUtil(((MonitoredVMex) vm));
 	    }
 	}
     }
 
-    protected double[] evaluateUtil(final Vm vm) {
+    protected void updateUtil(final MonitoredVMex vm) {
 	if (monitoringPeriod <= 0 || vm.getCloudletScheduler().getCloudletExecList().isEmpty()) {
-	    return new double[] { 0, 0, 0 };
-	}
+	    vm.updatePerformance(0, 0, 0);
+	} else {
+	    double sumCPUCloudLets = 0;
+	    double sumIOCloudLets = 0;
+	    double sumRAMCloudLets = 0;
 
-	double sumCPUCloudLets = 0;
-	double sumIOCloudLets = 0;
-	double sumRAMCloudLets = 0;
-
-	double vmMips = vm.getMips() * vm.getNumberOfPes();
-	double vmIOMips = 0;
-	double vmRam = vm.getRam();
-	for (ResCloudlet cloudlet : vm.getCloudletScheduler().getCloudletExecList()) {
-	    sumCPUCloudLets += cloudlet.getRemainingCloudletLength();
-	    if (vm instanceof HddVm) {
-		if (cloudlet instanceof HddResCloudlet) {
-		    sumIOCloudLets += ((HddResCloudlet) cloudlet).getRemainingCloudletIOLength();
-		    sumRAMCloudLets += ((HddCloudlet) cloudlet.getCloudlet()).getRam();
+	    double vmMips = vm.getMips() * vm.getNumberOfPes();
+	    double vmIOMips = 0;
+	    double vmRam = vm.getRam();
+	    for (ResCloudlet cloudlet : vm.getCloudletScheduler().getCloudletExecList()) {
+		sumCPUCloudLets += cloudlet.getRemainingCloudletLength();
+		if (vm instanceof HddVm) {
+		    if (cloudlet instanceof HddResCloudlet) {
+			sumIOCloudLets += ((HddResCloudlet) cloudlet).getRemainingCloudletIOLength();
+			sumRAMCloudLets += ((HddCloudlet) cloudlet.getCloudlet()).getRam();
+		    }
+		    vmIOMips = ((HddVm) vm).getIoMips();
 		}
-		vmIOMips = ((HddVm) vm).getIoMips();
 	    }
+
+	    double expectedWorkloadCPUDuration = (sumCPUCloudLets / vmMips);
+	    double expectedWorkloadIODuration = vmIOMips == 0 ? 0 : (sumIOCloudLets / vmIOMips);
+
+	    vm.updatePerformance(
+		    Math.min(1, expectedWorkloadCPUDuration / monitoringPeriod),
+		    Math.min(1, vmRam == 0 ? 0 : sumRAMCloudLets / vmRam),
+		    Math.min(1, expectedWorkloadIODuration / monitoringPeriod));
 	}
-
-	double expectedWorkloadCPUDuration = (sumCPUCloudLets / vmMips);
-	double expectedWorkloadIODuration = vmIOMips == 0 ? 0 : (sumIOCloudLets / vmIOMips);
-
-	return new double[] {
-		Math.min(1, expectedWorkloadCPUDuration / monitoringPeriod),
-		Math.min(1, vmRam == 0 ? 0 : sumRAMCloudLets / vmRam),
-		Math.min(1, expectedWorkloadIODuration / monitoringPeriod)
-	};
     }
 }

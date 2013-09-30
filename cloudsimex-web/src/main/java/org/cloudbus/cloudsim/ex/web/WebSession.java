@@ -216,7 +216,8 @@ public class WebSession {
 			    getEarliestIdealStartTime(currentDBServerCloudLets));
 		}
 	    } else {
-		throw new SessionFailedException(sessionId, "The data for this web session could not be found.");
+		throw new SessionFailedException(sessionId, "The data for web session " + sessionId
+			+ " could not be found.");
 	    }
 	}
 	return result;

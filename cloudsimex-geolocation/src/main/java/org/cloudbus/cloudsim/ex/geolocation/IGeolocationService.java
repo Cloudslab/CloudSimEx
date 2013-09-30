@@ -27,9 +27,9 @@ public interface IGeolocationService {
      *            formats.
      * @return an array with two elements in the form [Lattitude, Longtitude].
      *         If any of them could not be estimated, the corresponding value in
-     *         the resulting arrays is null - e.g. [null, null].
+     *         the resulting arrays is NaN - e.g. [NaN, NaN].
      */
-    Double[] getCoordinates(final String ip);
+    double[] getCoordinates(final String ip);
 
     /**
      * Computes the distance in meters between between the points with
@@ -61,7 +61,7 @@ public interface IGeolocationService {
      *            valid coordinates.
      * @return the distance in meters between the two points in meters.
      */
-    double distance(Double[] coord1, Double[] coord2);
+    double distance(double[] coord1, double[] coord2);
 
     /**
      * Returns the extracted geographical information about the IP address.

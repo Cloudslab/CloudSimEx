@@ -74,7 +74,7 @@ public class GeoIP2PingERServiceTest {
 	assertEquals(-37.8139, result.getLatitude(), 0.01);
 	assertEquals(144.9634, result.getLongitude(), 0.01);
 
-	Double[] coords = service.getCoordinates(MELBOURNE_IP);
+	double[] coords = service.getCoordinates(MELBOURNE_IP);
 	assertEquals(-37.8139, coords[0], 0.01);
 	assertEquals(144.9634, coords[1], 0.01);
     }
@@ -90,15 +90,15 @@ public class GeoIP2PingERServiceTest {
 	assertEquals(40.7143, result.getLatitude(), 0.01);
 	assertEquals(-74.006, result.getLongitude(), 0.01);
 
-	Double[] coords = service.getCoordinates(NEW_YORK_IP);
+	double[] coords = service.getCoordinates(NEW_YORK_IP);
 	assertEquals(40.7143, coords[0], 0.01);
 	assertEquals(-74.006, coords[1], 0.01);
     }
 
     @Test
     public void testDistanceLondonNewYork() {
-	Double[] newYork = service.getCoordinates(NEW_YORK_IP);
-	Double[] london = service.getCoordinates(LONDON_IP);
+	double[] newYork = service.getCoordinates(NEW_YORK_IP);
+	double[] london = service.getCoordinates(LONDON_IP);
 	double distanceLondonToNewYorkKM = service.distance(london, newYork) / 1000;
 	double distanceNewYorkToLondonKM = service.distance(newYork, london) / 1000;
 
@@ -108,8 +108,8 @@ public class GeoIP2PingERServiceTest {
 
     @Test
     public void testDistanceSydneyNewYork() {
-	Double[] sydney = service.getCoordinates(SYDNEY_IP);
-	Double[] newYork = service.getCoordinates(NEW_YORK_IP);
+	double[] sydney = service.getCoordinates(SYDNEY_IP);
+	double[] newYork = service.getCoordinates(NEW_YORK_IP);
 	double distanceSydneyToNewYorkKM = service.distance(sydney, newYork) / 1000;
 	double distanceNewYorkToSydneyKM = service.distance(newYork, sydney) / 1000;
 
@@ -119,8 +119,8 @@ public class GeoIP2PingERServiceTest {
 
     @Test
     public void testDistanceSydneyLondon() {
-	Double[] sydney = service.getCoordinates(SYDNEY_IP);
-	Double[] london = service.getCoordinates(LONDON_IP);
+	double[] sydney = service.getCoordinates(SYDNEY_IP);
+	double[] london = service.getCoordinates(LONDON_IP);
 	double distanceSydneyToLondonKM = service.distance(sydney, london) / 1000;
 	double distanceLondonToSydneyKM = service.distance(london, sydney) / 1000;
 
@@ -130,8 +130,8 @@ public class GeoIP2PingERServiceTest {
 
     @Test
     public void testDistanceSydneyMelbourne() {
-	Double[] sydney = service.getCoordinates(SYDNEY_IP);
-	Double[] melbourne = service.getCoordinates(MELBOURNE_IP);
+	double[] sydney = service.getCoordinates(SYDNEY_IP);
+	double[] melbourne = service.getCoordinates(MELBOURNE_IP);
 	double distanceSydneyToMelbourneKM = service.distance(sydney, melbourne) / 1000;
 	double distanceMelbourneToSydneyKM = service.distance(melbourne, sydney) / 1000;
 

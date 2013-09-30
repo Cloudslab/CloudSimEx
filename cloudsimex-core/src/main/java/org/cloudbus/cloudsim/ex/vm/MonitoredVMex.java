@@ -1,10 +1,10 @@
 package org.cloudbus.cloudsim.ex.vm;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.cloudbus.cloudsim.CloudletScheduler;
 
 /**
@@ -22,18 +22,7 @@ public class MonitoredVMex extends VMex {
 
     private final double summaryPeriodLength;
 
-    /** The list/ordered set of all observations. */
-    final private Map<Double, double[]> performanceObservations = new LinkedHashMap<>();
-    /**
-     * Keeping the sums of all observations, to avoid excessive looping over the
-     * observations.
-     */
-    private double[] perfSums = new double[] { 0, 0, 0 };
-    /**
-     * The number/count of all observations. We keep it in a variable to avoid
-     * looping.
-     */
-    private int perfCount = 0;
+    private MonitoredData data = new MonitoredData();
 
     private double[] lastUtilMeasurement = new double[] { 0, 0, 0 };
     private boolean newPerfDataAvailableFlag = false;
@@ -102,31 +91,18 @@ public class MonitoredVMex extends VMex {
      *            - the Disk utilisation. Must be in the range [0,1];
      */
     public void updatePerformance(final double cpuUtil, final double ramUtil, final double diskUtil) {
-	updatePerformance(new double[] { cpuUtil, ramUtil, diskUtil });
-    }
 
-    /**
-     * Notifies this VM of its utilisation.
-     * 
-     * @param util
-     *            - in the form [cpuUtil, ramUtil, diskUtil].
-     */
-    public void updatePerformance(final double[] util) {
 	if (summaryPeriodLength >= 0) {
 	    double currTime = getCurrentTime();
 
-	    if (!newPerfDataAvailableFlag && Arrays.equals(util, this.lastUtilMeasurement)) {
+	    if (!newPerfDataAvailableFlag && this.lastUtilMeasurement[0] == cpuUtil
+		    && this.lastUtilMeasurement[1] == ramUtil && this.lastUtilMeasurement[2] == diskUtil) {
 		this.newPerfDataAvailableFlag = false;
 	    } else {
 		this.newPerfDataAvailableFlag = true;
 	    }
 
-	    performanceObservations.put(currTime, util);
-	    for (int i = 0; i < util.length; i++) {
-		perfSums[i] += util[i];
-	    }
-	    this.perfCount++;
-
+	    data.put(currTime, cpuUtil, ramUtil, diskUtil);
 	    cleanupOldData(currTime);
 	}
     }
@@ -177,12 +153,7 @@ public class MonitoredVMex extends VMex {
 	    return this.lastUtilMeasurement;
 	} else {
 	    cleanupOldData(currTime);
-	    double[] result = new double[] { 0, 0, 0 };
-	    if (summaryPeriodLength >= 0 && perfCount > 0) {
-		for (int i = 0; i < result.length; i++) {
-		    result[i] = perfSums[i] / perfCount;
-		}
-	    }
+	    double[] result = computerAvgData();
 
 	    // Cache the value for further usage
 	    newPerfDataAvailableFlag = false;
@@ -192,20 +163,16 @@ public class MonitoredVMex extends VMex {
 	}
     }
 
-    private void cleanupOldData(final double currTime) {
-	for (Iterator<Map.Entry<Double, double[]>> it = performanceObservations.entrySet().iterator(); it.hasNext();) {
-	    Map.Entry<Double, double[]> entry = it.next();
-
-	    if (entry.getKey() < currTime - summaryPeriodLength) {
-		for (int i = 0; i < entry.getValue().length; i++) {
-		    perfSums[i] -= entry.getValue()[i];
-		}
-		perfCount--;
-		it.remove();
-	    } else {
-		break;
-	    }
+    private double[] computerAvgData() {
+	double[] result = new double[] { 0, 0, 0 };
+	if (summaryPeriodLength >= 0) {
+	    result = data.computerAvgData();
 	}
+	return result;
+    }
+
+    private void cleanupOldData(final double currTime) {
+	data.cleanUp(currTime, summaryPeriodLength);
     }
 
     @Override
@@ -220,12 +187,197 @@ public class MonitoredVMex extends VMex {
     }
 
     /**
-     * For testing/debugging purposes only!
+     * Returns the internal data structure, containing the monitored utilisation
+     * data. Use only for testing purposes!
      * 
-     * @return
+     * @return the internal data structure, containing the monitored utilisation
+     *         data.
      */
-    public Map<Double, double[]> getPerformanceObservations() {
-	return performanceObservations;
+    public MonitoredData getMonitoredData() {
+	return data;
+    }
+
+    /**
+     * Represents the monitored utilisation data. This class should be used
+     * outside this VM only for testing purposes.
+     * 
+     * @author nikolay.grozev
+     * 
+     */
+    public static class MonitoredData {
+
+	private static int MAX_POOL_SIZE = 500;
+
+	/**
+	 * We don't want to create new arrays every time - this creates too much
+	 * garbage. That's why we need to keep a pool of unused array objects,
+	 * which we reuse.
+	 */
+	private List<double[]> arrayPool = new ArrayList<>();
+	private List<MutableDouble> doublePool = new ArrayList<>();
+
+	private ArrayList<MutablePair<MutableDouble, double[]>> data = new ArrayList<>();
+	private int startIdx = 0;
+	private int endIdx = 0;
+	/** If there is not monitoring data. */
+	private boolean empty = true;
+
+	/**
+	 * Keeping the sums of all observations, to avoid excessive looping over
+	 * the observations.
+	 */
+	private double[] measurementsSums = new double[] { 0, 0, 0 };
+	/**
+	 * The number/count of all observations. We keep it in a variable to
+	 * avoid looping.
+	 */
+	private int measurementsCount = 0;
+
+	public void put(double time, final double cpuUtil, final double ramUtil, final double diskUtil) {
+	    double[] util = getPooledArray(cpuUtil, ramUtil, diskUtil);
+	    MutableDouble pooledTime = getPooledDouble(time);
+	    if (empty) {
+		data.add(startIdx, new MutablePair<MutableDouble, double[]>(pooledTime, util));
+		endIdx = startIdx;
+
+		// If startIdx is in the beginning of the list and endIdx is in
+		// the end...
+	    } else if (data.isEmpty() || (startIdx == 0 && endIdx == data.size() - 1)) {
+		data.add(new MutablePair<MutableDouble, double[]>(pooledTime, util));
+		endIdx = data.size() - 1;
+
+		// If endIdx is not at the end or just before startIdx
+	    } else if (endIdx < data.size() - 1 && (startIdx < endIdx || endIdx + 1 < startIdx)) {
+		endIdx++;
+
+		MutablePair<MutableDouble, double[]> entry = data.get(endIdx);
+		entry.setLeft(pooledTime);
+		entry.setRight(util);
+
+		// If endIdx is at the end and startIdx is not in the beginning
+	    } else if (startIdx > 0 && endIdx == data.size() - 1) {
+		endIdx = 0;
+
+		MutablePair<MutableDouble, double[]> entry = data.get(endIdx);
+		entry.setLeft(pooledTime);
+		entry.setRight(util);
+
+		// If endIdx is is just before startIdx
+	    } else if (endIdx + 1 == startIdx) {
+		endIdx++;
+		startIdx++;
+		data.add(endIdx, new MutablePair<>(pooledTime, util));
+	    } else {
+		// Something went wrong...
+		throw new IllegalStateException("Ivalid state of counters: start=" + startIdx + " end=" + endIdx);
+	    }
+
+	    for (int i = 0; i < util.length; i++) {
+		measurementsSums[i] += util[i];
+	    }
+	    this.measurementsCount++;
+	    empty = false;
+	}
+
+	public void cleanUp(double currTime, double summaryPeriodLength) {
+	    if (empty || summaryPeriodLength < 0) {
+		return;
+	    }
+
+	    while (data.get(startIdx).getLeft().doubleValue() < currTime - summaryPeriodLength && startIdx != endIdx) {
+		for (int i = 0; i < data.get(startIdx).getRight().length; i++) {
+		    measurementsSums[i] -= data.get(startIdx).getRight()[i];
+		}
+		measurementsCount--;
+
+		// Pool the objects, so we can reuse them.
+		arrayPool.add(data.get(startIdx).getRight());
+		doublePool.add(data.get(startIdx).getLeft());
+
+		startIdx = (startIdx + 1) % data.size();
+	    }
+
+	    if (startIdx == endIdx && data.get(startIdx).getLeft().doubleValue() < currTime - summaryPeriodLength) {
+		for (int i = 0; i < measurementsSums.length; i++) {
+		    measurementsSums[i] = 0;
+		}
+		measurementsCount = 0;
+
+		// Pool the objects, so we can reuse them.
+		arrayPool.add(data.get(startIdx).getRight());
+		doublePool.add(data.get(startIdx).getLeft());
+
+		empty = true;
+		startIdx = 0;
+		endIdx = 0;
+	    }
+	}
+
+	public double[] computerAvgData() {
+	    double[] result = new double[] { 0, 0, 0 };
+	    if (measurementsCount > 0) {
+		for (int i = 0; i < result.length; i++) {
+		    result[i] = measurementsSums[i] / measurementsCount;
+		}
+	    }
+	    return result;
+	}
+
+	/**
+	 * Return the number of utilisation records.
+	 * 
+	 * @return the number of utilisation records.
+	 */
+	public int size() {
+	    if (endIdx == startIdx) {
+		return empty ? 0 : 1;
+	    } else if (endIdx > startIdx) {
+		return endIdx - startIdx + 1;
+	    } else {
+		return data.size() - (startIdx - endIdx) + 1;
+	    }
+	}
+
+	private double[] getPooledArray(final double cpuUtil, final double ramUtil, final double diskUtil) {
+	    if (arrayPool.isEmpty()) {
+		return new double[] { cpuUtil, ramUtil, diskUtil };
+	    } else {
+		double[] res = arrayPool.remove(arrayPool.size() - 1);
+		res[0] = cpuUtil;
+		res[1] = ramUtil;
+		res[2] = diskUtil;
+		
+		if(arrayPool.size() > MAX_POOL_SIZE) {
+		    arrayPool.clear();
+		}
+		
+		return res;
+	    }
+	}
+	private MutableDouble getPooledDouble(final double dbl) {
+	    if (doublePool.isEmpty()) {
+		return new MutableDouble(dbl);
+	    } else {
+		MutableDouble res = doublePool.remove(doublePool.size() - 1);
+		res.setValue(dbl);
+		
+		if(doublePool.size() > MAX_POOL_SIZE) {
+		    doublePool.clear();
+		}
+		
+		return res;
+	    }
+	}
+
+	/**
+	 * Returns the size of the used undrlying data structure. Used for
+	 * testing purposes.
+	 * 
+	 * @return the size of the used undrlying data structure.
+	 */
+	public int dataSize() {
+	    return data.size();
+	}
     }
 
 }

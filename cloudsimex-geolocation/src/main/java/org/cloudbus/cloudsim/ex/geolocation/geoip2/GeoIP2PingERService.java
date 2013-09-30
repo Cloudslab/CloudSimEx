@@ -52,16 +52,16 @@ import com.maxmind.geoip2.model.City;
  */
 public class GeoIP2PingERService extends BaseGeolocationService implements IGeolocationService, Closeable {
 
-    
     /** In order to minimise the number of created instances, we keep a cache. */
-    private final Cache<String, Double[]> coordinatesCache =
-	    CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
+    private final Cache<String, double[]> coordinatesCache =
+	    CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE)
+		    .build();
 
     /** In order to minimise the number of created instances, we keep a cache. */
     private final Cache<String, Double> ipDistanceCache =
-	    CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
+	    CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE)
+		    .build();
 
-    
     // TODO Extract these TSV/CSV constants elsewhere as they can be reused ...
     /** The separator in the tsv file. */
     private static final char TSV_SEP = '\t';
@@ -84,7 +84,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 
     private DatabaseReader reader;
 
-    private final Map<String, Double[]> nodesTable = new HashMap<>();
+    private final Map<String, double[]> nodesTable = new HashMap<>();
     private final Map<Pair<String, String>, Double> latencyTable = new HashMap<>();
 
     /**
@@ -185,7 +185,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 		if (matcher.find()) {
 		    Double lat = Double.parseDouble(matcher.group(1));
 		    Double lon = Double.parseDouble(matcher.group(3));
-		    nodesTable.put(node, new Double[] { lat, lon });
+		    nodesTable.put(node, new double[] { lat, lon });
 		} else {
 		    nodesTable.clear();
 		    throw new IllegalArgumentException("Could not extract the geo location from \"" + location + "\"");
@@ -213,13 +213,13 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
     }
 
     @Override
-    public final Double[] getCoordinates(final String ip) {
-	Double[] result = coordinatesCache.getIfPresent(ip);
+    public final double[] getCoordinates(final String ip) {
+	double[] result = coordinatesCache.getIfPresent(ip);
 	if (result == null) { // If not in the cache
 	    City city;
 	    try {
 		city = reader.city(InetAddress.getByName(ip));
-		result = new Double[] { city.getLocation().getLatitude(),
+		result = new double[] { city.getLocation().getLatitude(),
 			city.getLocation().getLongitude() };
 	    } catch (UnknownHostException e) {
 		String msg = "Invalid IP: " + Objects.toString(ip);
@@ -233,7 +233,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 	    } catch (GeoIp2Exception e) {
 		String msg = "Could not locate IP: " + Objects.toString(ip) + ", because " + e.getMessage();
 		CustomLog.logError(Level.FINER, msg, e);
-		result = new Double[] { null, null };
+		result = new double[] { Double.NaN, Double.NaN };
 	    }
 	    coordinatesCache.put(ip, result);
 	}
@@ -276,7 +276,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 	if (cached != null) {
 	    return cached;
 	}
-	
+
 	// Set up the heap...
 	@SuppressWarnings("rawtypes")
 	MinMaxPriorityQueue.Builder builderRaw = MinMaxPriorityQueue.maximumSize(NUM_APPROX_FOR_LATENCY_ESTIMATION);
@@ -290,16 +290,16 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 	MinMaxPriorityQueue<PingERLatencyEntry> heap = builder.create();
 
 	// The coordinates of the requested IPs
-	final Double[] reqCoord1 = getCoordinates(ip1);
-	final Double[] reqCoord2 = getCoordinates(ip2);
+	final double[] reqCoord1 = getCoordinates(ip1);
+	final double[] reqCoord2 = getCoordinates(ip2);
 
 	// Loop through the latencies and put them in the priority queue.
 	for (Map.Entry<Pair<String, String>, Double> el : latencyTable.entrySet()) {
 	    // The coordinates and names of the two nodes of the latency entry.
 	    String node1 = el.getKey().getLeft();
 	    String node2 = el.getKey().getRight();
-	    Double[] nodeCoord1 = nodesTable.get(node1);
-	    Double[] nodeCoord2 = nodesTable.get(node2);
+	    double[] nodeCoord1 = nodesTable.get(node1);
+	    double[] nodeCoord2 = nodesTable.get(node2);
 	    double latency = el.getValue();
 
 	    // If the nodes are missing from the table of nodes'
@@ -399,8 +399,8 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 
     private static class PingERLatencyEntry implements Comparable<PingERLatencyEntry> {
 
-	public PingERLatencyEntry(final String node1, final Double[] coord1,
-		final String node2, final Double[] coord2, final double distance, final double latency) {
+	public PingERLatencyEntry(final String node1, final double[] coord1,
+		final String node2, final double[] coord2, final double distance, final double latency) {
 	    super();
 	    this.node1 = node1;
 	    this.coord1 = coord1;
@@ -411,9 +411,9 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 	}
 
 	final String node1;
-	final Double[] coord1;
+	final double[] coord1;
 	final String node2;
-	final Double[] coord2;
+	final double[] coord2;
 	final double accumDistance;
 	final double latency;
 

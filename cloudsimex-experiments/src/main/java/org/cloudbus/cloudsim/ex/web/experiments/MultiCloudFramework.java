@@ -141,7 +141,7 @@ public class MultiCloudFramework {
 
     protected int n = 1;
     protected int latencySLA = 40;
-    protected double wldFactor = 1;
+    protected double wldFactor = 200;
     protected double monitoringPeriod = 0.01;
     protected double autoscalingPeriod = 10;
 
@@ -866,7 +866,7 @@ public class MultiCloudFramework {
 	}
 
 	public String apply(WebSession input) {
-	    Double[] res = geoService.getCoordinates(input.getSourceIP());
+	    double[] res = geoService.getCoordinates(input.getSourceIP());
 	    return res == null ? "N/A" : latency ? formatSingleCoord(res[0]) : formatSingleCoord(res[1]);
 	}
     }
@@ -893,7 +893,7 @@ public class MultiCloudFramework {
 	}
 
 	public String apply(WebSession input) {
-	    Double[] res = geoService.getCoordinates(input.getServerIP());
+	    double[] res = geoService.getCoordinates(input.getServerIP());
 	    return res == null ? "N/A" : latency ? formatSingleCoord(res[0]) : formatSingleCoord(res[1]);
 	}
     }
@@ -918,8 +918,8 @@ public class MultiCloudFramework {
 	}
 
 	public String apply(WebSession input) {
-	    Double[] srv = geoService.getCoordinates(input.getServerIP());
-	    Double[] cli = geoService.getCoordinates(input.getSourceIP());
+	    double[] srv = geoService.getCoordinates(input.getServerIP());
+	    double[] cli = geoService.getCoordinates(input.getSourceIP());
 	    return srv == null || cli == null ? "N/A" :
 		    String.format("http://econym.org.uk/gmap/example_plotpoints.htm?q=Client@%s,%s&q=DC@%s,%s",
 			    formatSingleCoord(cli[0]),

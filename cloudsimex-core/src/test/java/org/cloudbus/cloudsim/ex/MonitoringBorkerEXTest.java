@@ -88,6 +88,12 @@ public class MonitoringBorkerEXTest extends BaseDatacenterBrokerTest {
 	    assertEquals(0, vm2Observations[1], delta);
 	    assertEquals(0, vm2Observations[2], delta);
 	}
+	
+	//Test the internal representation of the monitored data.
+	assertEquals(SUMMARY_PERIOD_LEN/MONITORING_PERIOD, (double)((MonitoredVMex)vm1).getMonitoredData().size(), 1);
+	assertEquals(SUMMARY_PERIOD_LEN/MONITORING_PERIOD, (double)((MonitoredVMex)vm1).getMonitoredData().dataSize(), 5);
+	assertEquals(SUMMARY_PERIOD_LEN/MONITORING_PERIOD, (double)((MonitoredVMex)vm2).getMonitoredData().size(), 1);
+	assertEquals(SUMMARY_PERIOD_LEN/MONITORING_PERIOD, (double)((MonitoredVMex)vm2).getMonitoredData().dataSize(), 5);
     }
 
     @Test
@@ -202,6 +208,12 @@ public class MonitoringBorkerEXTest extends BaseDatacenterBrokerTest {
 		assertEquals(0, vm2Observations[2], delta);
 	    }
 	}
+	
+	//Test the internal representation of the monitored data.
+	assertEquals(SUMMARY_PERIOD_LEN/MONITORING_PERIOD, (double)((MonitoredVMex)vm1).getMonitoredData().size(), 1);
+	assertEquals(SUMMARY_PERIOD_LEN/MONITORING_PERIOD, (double)((MonitoredVMex)vm1).getMonitoredData().dataSize(), 5);
+	assertEquals(SUMMARY_PERIOD_LEN/MONITORING_PERIOD, (double)((MonitoredVMex)vm2).getMonitoredData().size(), 1);
+	assertEquals(SUMMARY_PERIOD_LEN/MONITORING_PERIOD, (double)((MonitoredVMex)vm2).getMonitoredData().dataSize(), 5);
     }
 
     @Override

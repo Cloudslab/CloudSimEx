@@ -99,7 +99,7 @@ public abstract class BaseGeolocationService implements IGeolocationService {
     }
 
     @Override
-    public double distance(Double[] coord1, Double[] coord2) {
+    public double distance(double[] coord1, double[] coord2) {
 	return distance(coord1[0], coord1[1], coord2[0], coord2[1]);
     }
 

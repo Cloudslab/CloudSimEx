@@ -198,7 +198,8 @@ public class WebBroker extends MonitoringBorkerEX {
 		if (session.getAppVmId() == null || session.getDbBalancer() == null) {
 		    canceledSessions.add(session);
 		    CustomLog.printf(Level.SEVERE,
-			    "%s: Session %d could not be served and is canceled.", toString(), session.getSessionId());
+			    "%s: Session %d could not be assigned to an AS server and is canceled.", toString(),
+			    session.getSessionId());
 		} else {
 		    session.setUserId(getId());
 		    // Let the session prepare the first cloudlets
@@ -354,7 +355,7 @@ public class WebBroker extends MonitoringBorkerEX {
 	    // If the session is complete - there is no need to update it.
 	    if (sess == null || sess.isComplete() || sess.isFailed()) {
 		if (sess != null) {
-		    CustomLog.printf("Broker(%s): Session %d with metadate %s has failed",
+		    CustomLog.printf("Broker(%s): Session %d with metadata %s has failed",
 			    this, sess.getSessionId(), Arrays.toString(sess.getMetadata()));
 		}
 		completedIds.add(id);
@@ -387,8 +388,8 @@ public class WebBroker extends MonitoringBorkerEX {
 			send(getId(), stepPeriod, UPDATE_SESSION_TAG, sess.getSessionId());
 		    }
 		} catch (SessionFailedException e) {
-		    CustomLog.printf("Broker(%s): Session %d with metadate %s has failed",
-			    this, sess.getSessionId(), Arrays.toString(sess.getMetadata()));
+		    CustomLog.printf("Broker(%s): Session %d with metadata %s has failed. Details: ",
+			    this, sess.getSessionId(), Arrays.toString(sess.getMetadata()), e.getMessage());
 		    completedIds.add(sess.getSessionId());
 		}
 	    }
