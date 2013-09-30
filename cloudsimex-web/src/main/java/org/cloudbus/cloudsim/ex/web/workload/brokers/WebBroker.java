@@ -388,7 +388,7 @@ public class WebBroker extends MonitoringBorkerEX {
 			send(getId(), stepPeriod, UPDATE_SESSION_TAG, sess.getSessionId());
 		    }
 		} catch (SessionFailedException e) {
-		    CustomLog.printf("Broker(%s): Session %d with metadata %s has failed. Details: ",
+		    CustomLog.printf("Broker(%s): Session %d with metadata %s has failed. Details: %s",
 			    this, sess.getSessionId(), Arrays.toString(sess.getMetadata()), e.getMessage());
 		    completedIds.add(sess.getSessionId());
 		}
