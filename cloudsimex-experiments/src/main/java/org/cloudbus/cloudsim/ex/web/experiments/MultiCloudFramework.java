@@ -136,7 +136,7 @@ public class MultiCloudFramework {
     public static String DEF_DIR = "multi-cloud/";
     public static String RESULT_DIR = DEF_DIR + "stat/";
 
-    protected int simulationLength = (DAY + HOUR / 2) / (48 * 2);
+    protected int simulationLength = (DAY + HOUR / 2);
     protected int step = 60;
 
     protected int n = 1;

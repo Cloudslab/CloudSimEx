@@ -43,8 +43,8 @@ public class MultiCloudStarter {
 
 	experiments.add(new ExperimentDefinition(
 		experimentClass,
+		(int)(2.5 * ExperimentDefinition.GIGABYTE_IN_MEGA),
 		(int)(1 * ExperimentDefinition.GIGABYTE_IN_MEGA),
-		(int)(0.5 * ExperimentDefinition.GIGABYTE_IN_MEGA),
 		urandProp,
 		logProp,
 		String.valueOf(n),
@@ -61,8 +61,8 @@ public class MultiCloudStarter {
 
 	experiments.add(new ExperimentDefinition(
 		experimentClass,
+		(int)(2.5 * ExperimentDefinition.GIGABYTE_IN_MEGA),
 		(int)(1 * ExperimentDefinition.GIGABYTE_IN_MEGA),
-		(int)(0.5 * ExperimentDefinition.GIGABYTE_IN_MEGA),
 		urandProp,
 		logProp,
 		String.valueOf(n),
