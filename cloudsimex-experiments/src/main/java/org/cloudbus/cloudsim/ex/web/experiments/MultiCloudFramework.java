@@ -158,6 +158,8 @@ public class MultiCloudFramework {
     private final double scaleDownFactor = 0.1;
     private final double scaleUpFactor = 0.8;
 
+    private final static int numDBs = 15;
+
     private boolean baseline = true;
 
     protected String experimentName = "Multi-Cloud Framework Experiment";
@@ -258,6 +260,7 @@ public class MultiCloudFramework {
 	CustomLog.printf("autoscaleTriggerRAM=%.2f", autoscaleTriggerRAM);
 	CustomLog.printf("loadbalancingThresholdCPU=%.2f", loadbalancingThresholdCPU);
 	CustomLog.printf("loadbalancingThresholdRAM=%.2f", loadbalancingThresholdRAM);
+	CustomLog.printf("numDBs=%d", numDBs);
 	CustomLog.printf("Baseline=%s", Boolean.toString(baseline));
 	CustomLog.printLine("");
 	CustomLog.print("Workload frequencies:");
@@ -346,7 +349,7 @@ public class MultiCloudFramework {
 	    // == == == == == == == == == == == == == == == == == == == == == ==
 	    // Step 5: Create virtual machines
 	    CustomLog.print("Step 5: Setting up VMs....");
-	    int numDBs = 20;
+	    	    
 	    int numApp = n < 1 ? 1 : n;
 	    VMMetadata ec2Meta = new VMMetadata();
 	    ec2Meta.setOS(Consts.NIX_OS);
