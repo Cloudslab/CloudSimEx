@@ -3,6 +3,7 @@ package org.cloudbus.cloudsim.ex.web;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -385,6 +386,31 @@ public class WebSession {
 	return (currentAppServerCloudLet != null &&
 		FAIL_CLOUDLET_STATES.contains(currentAppServerCloudLet.getCloudletStatus())) ||
 		(currentDBServerCloudLets != null && anyCloudletsFailed(currentDBServerCloudLets));
+    }
+
+    /**
+     * If the session has failed, returns the cloudlets which caused the
+     * failure.
+     * 
+     * @return If the session has failed, returns the cloudlets which caused the
+     *         failure.
+     */
+    public List<WebCloudlet> getFailedCloudlets() {
+	if (isFailed()) {
+	    List<WebCloudlet> res = new ArrayList<>();
+	    if (currentAppServerCloudLet != null &&
+		    FAIL_CLOUDLET_STATES.contains(currentAppServerCloudLet.getCloudletStatus())) {
+		res.add(currentAppServerCloudLet);
+		for (WebCloudlet wc : currentDBServerCloudLets) {
+		    if (FAIL_CLOUDLET_STATES.contains(wc.getCloudletStatus())) {
+			res.add(wc);
+		    }
+		}
+	    }
+	    return res;
+	} else {
+	    return Collections.<WebCloudlet>emptyList();
+	}
     }
 
     private boolean anyCloudletsFailed(List<? extends WebCloudlet> currentDBServerCloudLets2) {

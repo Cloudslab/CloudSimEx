@@ -354,9 +354,8 @@ public class WebBroker extends MonitoringBorkerEX {
 
 	    // If the session is complete - there is no need to update it.
 	    if (sess == null || sess.isComplete() || sess.isFailed()) {
-		if (sess != null) {
-		    CustomLog.printf("Broker(%s): Session %d with metadata %s has failed",
-			    this, sess.getSessionId(), Arrays.toString(sess.getMetadata()));
+		if (sess != null && sess.isFailed()) {
+		    logSessionFailure(sess);
 		}
 		completedIds.add(id);
 		continue;
@@ -402,6 +401,22 @@ public class WebBroker extends MonitoringBorkerEX {
 		completedSessions.add(sess);
 	    }
 	}
+    }
+
+    private void logSessionFailure(WebSession sess) {
+	StringBuffer detailsBuffer = new StringBuffer();
+	for (WebCloudlet wc : sess.getFailedCloudlets()) {
+	detailsBuffer.append(String.format(
+		"Cloudlet %d on %s VM/Server %d has status %s ",
+		wc.getCloudletId(),
+		wc.getVmId() == sess.getAppVmId() ? "AS" : "DB",
+		wc.getVmId(),
+		wc.getCloudletStatusString() == null ? String.valueOf(wc.getCloudletStatus()) : wc
+			.getCloudletStatusString()));
+	}
+
+	CustomLog.printf("Broker(%s): Session %d with metadata %s has failed. Details: %s",
+	    this, sess.getSessionId(), Arrays.toString(sess.getMetadata()), detailsBuffer);
     }
 
     /*
