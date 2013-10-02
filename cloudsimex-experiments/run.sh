@@ -50,7 +50,7 @@ cd ..
 mvn clean install  | grep BUILD
 cd ./cloudsimex-experiments
 mvn clean install  | grep BUILD
-mvn clean compile assembly:single  | grep BUILD
+mvn clean compile assembly:single | grep BUILD
 sleep 5s
 echo
 echo
