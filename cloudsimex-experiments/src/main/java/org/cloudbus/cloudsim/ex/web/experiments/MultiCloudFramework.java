@@ -794,7 +794,7 @@ public class MultiCloudFramework {
 	parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
 
 	// Set the compression level
-	parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+	parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_MAXIMUM);
 
 	// Add folder to the zip file
 	zipFile.addFolder(folderToAdd, parameters);
