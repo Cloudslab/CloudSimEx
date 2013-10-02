@@ -4,46 +4,60 @@ echo Current Dir: `pwd`
 echo
 echo
 
-echo "========= Killing all running java processes..."
+echo "=================== Killing all running java processes..."
 sudo killall -9 java
+sleep 5s
 echo 
 echo
-echo
 
-echo "========= Cleaning up old data..."
+echo "=================== Backing up previous results..."
+for f in `ls multi-cloud/stat/ | egrep wld.*\.zip`
+do
+	echo $f
+	if [ ! -d multi-cloud/stat/$f ]
+	then
+	    echo "	Backing up: "$f
+	    cp -f multi-cloud/stat/$f multi-cloud/$f
+	fi
+done
+sleep 5s
+echo
+echo 
+
+echo "=================== Cleaning up old data..."
 for dir in `ls multi-cloud/stat/ | grep wld-*`
 do
-	echo "	Removing: "$dir
 	if [ -d multi-cloud/stat/$dir ]
 	then
+		echo "	Removing: "$dir
 	    sudo rm -rf multi-cloud/stat/$dir
 	fi
 done
+sleep 5s
 echo
 echo 
 
-echo "========= Removing previous binaries and output..."
+echo "=================== Removing previous binaries and output..."
 sudo rm run.jar
 sudo rm target/cloudsimex-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar
 sudo rm out.txt
+sleep 5s
 echo
 echo
 
-echo "Building project..."
+echo "=================== Building project..."
 cd ..
-mvn clean install 
+mvn clean install  | grep BUILD
 cd ./cloudsimex-experiments
-echo 
-echo
-
-mvn clean install
-mvn clean compile assembly:single
+mvn clean install  | grep BUILD
+mvn clean compile assembly:single  | grep BUILD
+sleep 5s
 echo
 echo
 
-echo "Running Experiments..."
-mvn clean compile assembly:single 
-mv target/cloudsimex-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar ./run.jar
+echo "=================== Running Experiments..."
+mv -f target/cloudsimex-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar ./run.jar
+sleep 5s
 java -jar run.jar &> out.txt &
 
 
