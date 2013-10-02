@@ -56,6 +56,7 @@ public class MultiCloudStarter {
 		String.valueOf(autoscaleTriggerRAM),
 		String.valueOf(loadbalancingThresholdCPU),
 		String.valueOf(loadbalancingThresholdRAM),
+		String.valueOf(15),
 		String.valueOf(Boolean.TRUE)
 		));
 
@@ -74,6 +75,7 @@ public class MultiCloudStarter {
 		String.valueOf(autoscaleTriggerRAM),
 		String.valueOf(loadbalancingThresholdCPU),
 		String.valueOf(loadbalancingThresholdRAM),
+		String.valueOf(15),
 		String.valueOf(Boolean.FALSE)
 		));
 

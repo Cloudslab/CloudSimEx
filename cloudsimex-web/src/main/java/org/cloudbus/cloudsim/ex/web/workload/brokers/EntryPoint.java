@@ -23,7 +23,7 @@ import org.cloudbus.cloudsim.ex.web.WebSession;
  */
 public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
 
-    private static final double OVERLOAD_UTIL = 0.8;
+    private static final double OVERLOAD_UTIL = 0.7;
 
     private final CloudPriceComparator costComparator;
 

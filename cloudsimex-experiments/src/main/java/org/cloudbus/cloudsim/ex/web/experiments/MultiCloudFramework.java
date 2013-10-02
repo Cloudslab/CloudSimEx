@@ -158,7 +158,8 @@ public class MultiCloudFramework {
     private final double scaleDownFactor = 0.1;
     private final double scaleUpFactor = 0.8;
 
-    private final static int numDBs = 15;
+    // Num of VMs in the DB layer 
+    private int numDBs = 15;
 
     private boolean baseline = true;
 
@@ -217,6 +218,9 @@ public class MultiCloudFramework {
 	experiment.loadbalancingThresholdCPU = Double.parseDouble(args[i++]);
 	experiment.loadbalancingThresholdRAM = Double.parseDouble(args[i++]);
 
+	// VMs in DB layer
+	experiment.numDBs = Integer.parseInt(args[i++]);
+	
 	experiment.baseline = Boolean.parseBoolean(args[i++]);
 
 	experiment.experimentName = String.format("[%s]Exp-wldf(%d)-n(%d)",
