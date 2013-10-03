@@ -44,7 +44,7 @@ public abstract class BaseCustomerVmBillingPolicy implements IVmBillingPolicy {
 		    result = result.add(billSingleVm(vmEx));
 		}
 	    } else {
-		CustomLog.print("Unable to bill VM" + vm.getId() + " as it is not of type " + VMex.class.getName());
+		CustomLog.printConcat("Unable to bill VM", vm.getId(), " as it is not of type ", VMex.class.getName());
 	    }
 	}
 	return result;
@@ -60,7 +60,7 @@ public abstract class BaseCustomerVmBillingPolicy implements IVmBillingPolicy {
 		    result = result.add(billSingleVmUntil(vmEx, before));
 		}
 	    } else {
-		CustomLog.print("Unable to bill VM" + vm.getId() + " as it is not of type " + VMex.class.getName());
+		CustomLog.printConcat("Unable to bill VM", vm.getId(), " as it is not of type ", VMex.class.getName());
 	    }
 	}
 	return result;

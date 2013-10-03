@@ -94,7 +94,7 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
 	    }
 
 	    if (selectedBroker == null) {
-		CustomLog.print("[Entry Point] Session " + sess.getSessionId() + " has been denied service.");
+		CustomLog.printConcat("[Entry Point] Session ", sess.getSessionId(), " has been denied service.");
 		getCanceledSessions().add(sess);
 	    } else {
 		assignments.get(selectedBroker).add(sess);

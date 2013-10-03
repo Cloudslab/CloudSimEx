@@ -14,8 +14,8 @@ import com.google.common.cache.CacheBuilder;
  */
 public abstract class BaseGeolocationService implements IGeolocationService {
 
-    protected static final int CACHE_SIZE = 100_000;
-    protected static final int INITIAL_CACHE_SIZE = 10_000;
+    protected static final int CACHE_SIZE = 1_000_000;
+    protected static final int INITIAL_CACHE_SIZE = 100_000;
     /** In order to minimise the number of created instances, we keep a cache. */
     private final Cache<GeoDistanceCacheKey, Double> distanceCache =
 	    CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
@@ -131,5 +131,4 @@ public abstract class BaseGeolocationService implements IGeolocationService {
     public String getLocationMapUrl(Double... coordinates) {
 	return String.format("https://maps.google.com/?q=%f,%f", coordinates[0], coordinates[1]);
     }
-
 }

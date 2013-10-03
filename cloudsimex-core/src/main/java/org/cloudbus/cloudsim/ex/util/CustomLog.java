@@ -108,6 +108,9 @@ public class CustomLog {
     private static final Logger LOGGER = Logger.getLogger(CustomLog.class
 	    .getPackage().getName());
 
+    /** Buffer to avoid creating new string builder upon every print. */
+    private static StringBuilder builder = new StringBuilder();
+
     private static Level granularityLevel = DEFAULT_LEVEL;
     private static Formatter formatter;
     private static int bufferSize = -1;
@@ -127,7 +130,7 @@ public class CustomLog {
 		    String.valueOf(message));
 	}
     }
-
+    
     /**
      * Prints the message passed as an object. Simply uses toString
      * implementation. Uses the default log level.
@@ -139,6 +142,64 @@ public class CustomLog {
 	print(DEFAULT_LEVEL, message);
     }
 
+    /**
+     * Prints the concatenated messages.
+     * 
+     * @param level
+     *            - the level to use. If null the default level is used.
+     * @param messages
+     *            - the messages.
+     */
+    public static void printConcat(final Level level, final Object... messages) {
+	if (isLevelHighEnough(level)) {
+	    builder.setLength(0); // Clear the buffer
+	    for (int i = 0; i < messages.length; i++) {
+		builder.append(String.valueOf(messages[i]));
+	    }
+	    LOGGER.log(level == null ? DEFAULT_LEVEL : level,
+		    String.valueOf(builder));
+	}
+    }
+
+    /**
+     * Prints the concatenated messages.
+     * 
+     * @param messages
+     *            - the messages.
+     */
+    public static void printConcat(final Object... messages) {
+	printConcat(DEFAULT_LEVEL, messages);
+    }
+
+    /**
+     * Prints a line with the concatenated messages.
+     * 
+     * @param level
+     *            - the log level. If null, the default log level is used.
+     * @param messages
+     *            - the messages.
+     */
+    public static void printConcatLine(final Level level, final Object... messages) {
+	if (isLevelHighEnough(level)) {
+	    builder.setLength(0); // Clear the buffer
+	    for (int i = 0; i < messages.length; i++) {
+		builder.append(String.valueOf(messages[i]));
+	    }
+	    LOGGER.log(level == null ? DEFAULT_LEVEL : level,
+		    String.valueOf(builder));
+	}
+    }
+    
+    /**
+     * Prints a line with the concatenated messages.
+     * 
+     * @param messages
+     *            - the messages.
+     */
+    public static void printConcatLine(final Object... messages) {
+	printConcatLine(DEFAULT_LEVEL, messages);
+    }
+    
     /**
      * Prints a line with the message to the log.
      * 
@@ -347,7 +408,7 @@ public class CustomLog {
 	    }
 	}
     }
-    
+
     @SafeVarargs
     public static <F> void printResults(final Class<? extends F> klass,
 	    final LinkedHashMap<String, Function<? extends F, String>> virtualProps,
@@ -357,7 +418,7 @@ public class CustomLog {
 	    CustomLog.printLine(TextUtil.getCaptionLine(klass, TextUtil.DEFAULT_DELIM, null,
 		    virtualProps.keySet().toArray(new String[virtualProps.size()])));
 	}
-	
+
 	// Print details for each cloudlet
 	for (List<F> list : lines) {
 	    for (F o : list) {
@@ -533,6 +594,7 @@ public class CustomLog {
 
 	if (shutStandardMessages) {
 	    Log.setOutput(new NullOutputStream());
+	    Log.disable();
 	}
 
 	LOGGER.setUseParentHandlers(false);

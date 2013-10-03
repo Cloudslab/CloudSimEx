@@ -138,12 +138,6 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
 	    return 0.0;
 	}
 
-//	if ((int) (CloudSim.clock() * 100) % 300 == 0) {
-//	    CustomLog.printf(
-//		    "[Cloudlet Sched:] Cloudlet scheduling in %s, numCloudlets(%d), cpuUtil(%.2f), ioUtil(%.2f)",
-//		    getVm().toString(), getCloudletExecList().size(), getVm().getCPUUtil(), getVm().getDiskUtil());
-//	}
-
 	double timeSpam = currentTime - getPreviousTime();
 
 	double cpuCapacity = getCPUCapacity(mipsShare);

@@ -354,6 +354,13 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
     }
 
     /**
+     * Performance optimisation! Use this variable instead of creating a new
+     * ArrayList in every call to updateHeap! <strong>NOTE:<\strong> do not
+     * modify from other methods!
+     */
+    private List<PingERLatencyEntry> elemsWithMatchingNodes = new ArrayList<>();
+
+    /**
      * Adds the new entry to the heap, only if there is no other entry with less
      * distance to the requested point and having a common node. If in the heap
      * there is an element with a common node and greater distance, it is
@@ -371,7 +378,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
      *            - the new entry.
      */
     public void updateHeap(final MinMaxPriorityQueue<PingERLatencyEntry> heap, final PingERLatencyEntry qEntry) {
-	List<PingERLatencyEntry> elemsWithMatchingNodes = new ArrayList<>();
+	elemsWithMatchingNodes.clear();
 	for (PingERLatencyEntry e : heap) {
 	    if (qEntry.node1.equals(e.node1) || qEntry.node1.equals(e.node2) ||
 		    qEntry.node2.equals(e.node1) || qEntry.node2.equals(e.node2)) {
@@ -431,7 +438,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
     }
 
     public static void main(String[] args) throws IOException {
-	String ip = "144.168.168.128";
+	String ip = "124.168.86.122";
 	try (GeoIP2PingERService service = new GeoIP2PingERService(new File("GeoLite2-City.mmdb"),
 		new File("PingTablePingER.tsv"),
 		new File("MonitoringSitesPingER.csv"))) {

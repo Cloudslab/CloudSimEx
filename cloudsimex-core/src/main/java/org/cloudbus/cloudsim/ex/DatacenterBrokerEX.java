@@ -200,8 +200,8 @@ public class DatacenterBrokerEX extends DatacenterBroker {
 	} else {
 
 	    getCloudletReceivedList().add(cloudlet);
-	    Log.printLine(CloudSim.clock() + ": " + getName() + ": Cloudlet " + cloudlet.getCloudletId()
-		    + " received");
+	    Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Cloudlet ", cloudlet.getCloudletId(),
+		    " received");
 	    cloudletsSubmitted--;
 
 //	    if (getCloudletList().size() > 0 && cloudletsSubmitted == 0) {
@@ -356,12 +356,12 @@ public class DatacenterBrokerEX extends DatacenterBroker {
 	    }
 
 	    // Use the standard log for consistency ....
-	    Log.printLine(CloudSim.clock() + ": " + getName() + ": VM #" + vmId
-		    + " has been destroyed in Datacenter #" + datacenterId);
+	    Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": VM #", vmId,
+		    " has been destroyed in Datacenter #", datacenterId);
 	} else {
 	    // Use the standard log for consistency ....
-	    Log.printLine(CloudSim.clock() + ": " + getName() + ": Desctuction of VM #" + vmId
-		    + " failed in Datacenter #" + datacenterId);
+	    Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Desctuction of VM #", vmId,
+		    " failed in Datacenter #", datacenterId);
 	}
 
     }
@@ -401,8 +401,8 @@ public class DatacenterBrokerEX extends DatacenterBroker {
 	    int datacenterId = vm.getHost().getDatacenter().getId();
 	    String datacenterName = vm.getHost().getDatacenter().getName();
 
-	    Log.printLine(CloudSim.clock() + ": " + getName() + ": Trying to Destroy VM #" + vm.getId()
-		    + " in " + datacenterName);
+	    Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Trying to Destroy VM #", vm.getId(),
+		    " in ", datacenterName);
 
 	    // Tell the data centre to destroy it
 	    sendNow(datacenterId, CloudSimTags.VM_DESTROY_ACK, vm);
