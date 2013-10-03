@@ -19,8 +19,8 @@ import org.cloudbus.cloudsim.ex.web.WebSession;
 public class Route53EntryPoint extends BaseEntryPoint implements IEntryPoint {
 
     
-    // $0.750 per million queries – first 1 Billion queries / month
-    // $0.375 per million queries – over 1 Billion queries / month
+    // $0.750 per million queries - first 1 Billion queries / month
+    // $0.375 per million queries - over 1 Billion queries / month
     
     public Route53EntryPoint(IGeolocationService geoService, long appId) {
 	super(geoService, appId);
