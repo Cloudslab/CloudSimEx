@@ -23,7 +23,12 @@ do
 	    echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> - " $dir " - <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< "
 	    
 	    echo "Files:"
-	    echo "    " `ls -lah multi-cloud/stat/$dir | egrep "\.log$" | cut -b 1,14-128` 
+	    for f in `ls multi-cloud/stat/$dir | egrep "\.log$|\.csv$"`
+	    do
+		echo "   " `ls -lh multi-cloud/stat/$dir/$f | cut -c 13-120` 
+	    done
+
+	    echo
 	    echo
 	    head -n $sLen multi-cloud/stat/$dir/MultiCloudFramework.log
 	    echo "      ....       "
