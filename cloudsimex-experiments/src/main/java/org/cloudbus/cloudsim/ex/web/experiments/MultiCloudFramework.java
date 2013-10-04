@@ -948,7 +948,7 @@ public class MultiCloudFramework {
     }
 
     public static String formatLocation(IPMetadata metadata) {
-	String res = String.valueOf(metadata.getCountryIsoCode()) + ";" + String.valueOf(metadata.getCityName());
+	String res = String.valueOf(metadata.getCountryIsoCode()) + "," + String.valueOf(metadata.getCityName());
 	return res.length() < 20 ? res : res.substring(0, 16) + "...";
 
     }
