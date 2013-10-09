@@ -14,6 +14,10 @@ asciiChar<-function(n){
   rawToChar(as.raw(n), multiple=FALSE)
 }
 
+trim <- function (x) {
+  gsub("^\\s+|\\s+$", "", x)
+}
+
 toDateString<-function(sec, mask=c(F, T, F, F)) {
   #Start the day from 1
   days <- (sec %/% (24 * 3600)) + 1

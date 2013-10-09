@@ -53,10 +53,10 @@ readSessionsData <- function(basedir="multi-cloud-stat", baseline=T,
 }
 
 
-init = F
+init = T
 
 if(init) {
-  wldf=200
+  wldf=50
   n=30
   baselineEuroEC2 = readSessionsData(baseline=T, location="Euro", provider="EC2", wldf=wldf, n=n)
   baselineEuroGoogle = readSessionsData(baseline=T, location="Euro", provider="Google", wldf=wldf, n=n)
@@ -212,7 +212,7 @@ plotDelaySummary <- function(baselineDf, runDf, delta = 4, title = "Title...",
   return (plot)
 }
 
-plotAllDCsDelaySummary <-function (delta = 4, file = NA) {
+plotAllDCsDelaySummary <-function (delta = 4, file = NA, byDC = F) {
   
   openGraphsDevice(file)
   allFrames <- lst<- list(runEuroEC2, runEuroGoogle, 
@@ -228,15 +228,34 @@ plotAllDCsDelaySummary <-function (delta = 4, file = NA) {
       }
   }
   
-  euro <- plotDelaySummary(rbind(baselineEuroEC2, baselineEuroGoogle), rbind(runEuroEC2, runEuroGoogle),
-                                title="Euro", plotY = T, plotX = F, yLim = maxHeigth, delta) +
-    theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
-
-  us <- plotDelaySummary(rbind(baselineUSEC2, baselineUSGoogle), rbind(runUSEC2, runUSGoogle),
-                              title="US EC2", plotY = T, plotX = T, yLim = maxHeigth, delta) +
-    theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
+  if(!byDC) {
+    euro <- plotDelaySummary(rbind(baselineEuroEC2, baselineEuroGoogle), rbind(runEuroEC2, runEuroGoogle),
+                                  title="Euro", plotY = T, plotX = F, yLim = maxHeigth, delta) +
+      theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
   
-  grid.arrange(euro, us, nrow=2, heights=c(16, 20))
+    us <- plotDelaySummary(rbind(baselineUSEC2, baselineUSGoogle), rbind(runUSEC2, runUSGoogle),
+                                title="US", plotY = T, plotX = T, yLim = maxHeigth, delta) +
+      theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
+    
+    grid.arrange(euro, us, nrow=2, heights=c(16, 20))
+  } else {
+    euroEC2 <- plotDelaySummary(baselineEuroEC2, runEuroEC2,
+                             title="Euro EC2", plotY = T, plotX = F, yLim = maxHeigth, delta) +
+      theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
+    euroGoogle  <- plotDelaySummary(baselineEuroGoogle, runEuroGoogle,
+                                    title="Euro Google", plotY = T, plotX = F, yLim = maxHeigth, delta) +
+      theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
+    
+    usEC2 <- plotDelaySummary(baselineUSEC2, runUSEC2,
+                           title="US EC2", plotY = T, plotX = T, yLim = maxHeigth, delta) +
+      theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
+    usGoogle <- plotDelaySummary(baselineUSGoogle, runUSGoogle,
+                              title="US Google", plotY = T, plotX = T, yLim = maxHeigth, delta) +
+      theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
+    
+    grid.arrange(euroEC2, euroGoogle, usEC2, usGoogle, ncol=2, nrow=2, heights=c(16, 20),  widths=c(11, 9.5))
+    
+  }
   
   closeDevice(file)
 }
@@ -307,4 +326,5 @@ printSessionsSummary <- function (from=0, to=24) {
 }
 
 plotAllDCsSessionsSummary(file="multi-cloud-stat/sessions.pdf")
-plotAllDCsDelaySummary(file="multi-cloud-stat/delays.pdf")
+plotAllDCsDelaySummary(file="multi-cloud-stat/delays-DC.pdf", byDC = T)
+plotAllDCsDelaySummary(file="multi-cloud-stat/delays-REGION.pdf", byDC = F)

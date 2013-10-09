@@ -223,12 +223,12 @@ public class MultiCloudFramework {
 	
 	experiment.baseline = Boolean.parseBoolean(args[i++]);
 
-	experiment.experimentName = String.format("[%s]Exp-wldf(%d)-n(%d)",
+	experiment.experimentName = String.format("[%s]Exp-wldf(%d)-sla(%d)-n(%d)-db(%d)",
 		experiment.baseline? "Baseline" : "Run",
-		(int) experiment.wldFactor, experiment.latencySLA);
-	experiment.resultDIR = String.format("%swldf(%s)-%d-n-%d/", RESULT_DIR,
+		(int) experiment.wldFactor, experiment.latencySLA, experiment.n, experiment.numDBs);
+	experiment.resultDIR = String.format("%swldf(%s)-wldf-%d-sla-%d-n-%d-db-%d/", RESULT_DIR,
 		experiment.baseline ? "baseline" : "run",
-		(int) experiment.wldFactor, experiment.latencySLA);
+		(int) experiment.wldFactor, experiment.latencySLA, experiment.n, experiment.numDBs);
 	File resultDirFile = new File(experiment.resultDIR);
 	if (!resultDirFile.exists()) {
 	    resultDirFile.mkdir();

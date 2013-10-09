@@ -14,8 +14,8 @@ if [ ! -z "$1" ]
 
     if [ $1 == "openstack" ]
     then
-        sshTerm="err"
-	path="/experiments/cloudsimex/cloudsimex-experiments/multi-cloud/stat"
+        sshTerm="iaas@iaas.cis.unimelb.edu.au"
+	path="/home/iaas/nik/stat"
     fi
 fi
 
