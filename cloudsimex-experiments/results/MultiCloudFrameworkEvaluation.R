@@ -26,11 +26,15 @@ defTimeLabel <-function (data, delta = 4) {
 }
 
 readSessionsData <- function(basedir="multi-cloud-stat", baseline=T,
-                             wldf=50, n=30, location="Euro", provider="EC2") {
+                             wldf=50, n=1, sla=30, numdb=2, location="Euro", provider="EC2") {
+  
+  
   meta=if (location == "Euro") "[EU]" else "[US]"
   
   alg <- if (baseline) "baseline" else "run"
-  fileName <- paste0(basedir, "/wldf(", alg, ")-", wldf, "-n-", n , "/Sessions-Broker", location, provider, ".csv")
+  fileName <- paste0(basedir, "/wldf(", alg, ")-", wldf, "-n-", sla , "/Sessions-Broker", location, provider, ".csv")
+  #wldf(%s)-wldf-%d-sla-%d-n-%d-db-%d
+  #fileName <- gettextf("%s/wldf(%s)-wldf-%d-sla-%d-n-%d-db-%d/Sessions-Broker%s%s.csv", basedir, alg, wldf, sla, n, numdb, location, provider)
   print(paste("Parsing: ", fileName))
   
   data <- read.table(fileName, header = T, stringsAsFactors = F, quote = '"', sep = ";")
@@ -57,16 +61,19 @@ init = T
 
 if(init) {
   wldf=50
-  n=30
-  baselineEuroEC2 = readSessionsData(baseline=T, location="Euro", provider="EC2", wldf=wldf, n=n)
-  baselineEuroGoogle = readSessionsData(baseline=T, location="Euro", provider="Google", wldf=wldf, n=n)
-  baselineUSEC2 = readSessionsData(baseline=T, location="US", provider="EC2", wldf=wldf, n=n)
-  baselineUSGoogle = readSessionsData(baseline=T, location="US", provider="Google", wldf=wldf, n=n)
+  n=1
+  sla=30
+  numdb=2
+
+  baselineEuroEC2 = readSessionsData(baseline=T, location="Euro", provider="EC2", wldf=wldf, n=n,  sla=sla, numdb=numdb)
+  baselineEuroGoogle = readSessionsData(baseline=T, location="Euro", provider="Google", wldf=wldf, n=n,  sla=sla, numdb=numdb)
+  baselineUSEC2 = readSessionsData(baseline=T, location="US", provider="EC2", wldf=wldf, n=n,  sla=sla, numdb=numdb)
+  baselineUSGoogle = readSessionsData(baseline=T, location="US", provider="Google", wldf=wldf, n=n,  sla=sla, numdb=numdb)
   
-  runEuroEC2 = readSessionsData(baseline=F, location="Euro", provider="EC2", wldf=wldf, n=n)
-  runEuroGoogle = readSessionsData(baseline=F, location="Euro", provider="Google", wldf=wldf, n=n)
-  runUSEC2 = readSessionsData(baseline=F, location="US", provider="EC2", wldf=wldf, n=n)
-  runUSGoogle = readSessionsData(baseline=F, location="US", provider="Google", wldf=wldf, n=n)
+  runEuroEC2 = readSessionsData(baseline=F, location="Euro", provider="EC2", wldf=wldf, n=n,  sla=sla, numdb=numdb)
+  runEuroGoogle = readSessionsData(baseline=F, location="Euro", provider="Google", wldf=wldf, n=n,  sla=sla, numdb=numdb)
+  runUSEC2 = readSessionsData(baseline=F, location="US", provider="EC2", wldf=wldf, n=n,  sla=sla, numdb=numdb)
+  runUSGoogle = readSessionsData(baseline=F, location="US", provider="Google", wldf=wldf, n=n,  sla=sla, numdb=numdb)
 }
   
 plotSessionsSumary <- function(baselineDf, runDf, delta = 4, title = "Title...",
@@ -326,5 +333,5 @@ printSessionsSummary <- function (from=0, to=24) {
 }
 
 plotAllDCsSessionsSummary(file="multi-cloud-stat/sessions.pdf")
-plotAllDCsDelaySummary(file="multi-cloud-stat/delays-DC.pdf", byDC = T)
-plotAllDCsDelaySummary(file="multi-cloud-stat/delays-REGION.pdf", byDC = F)
+plotAllDCsDelaySummary(file="multi-cloud-stat/delaysDCs.pdf", byDC = T)
+plotAllDCsDelaySummary(file="multi-cloud-stat/delaysRegions.pdf", byDC = F)
