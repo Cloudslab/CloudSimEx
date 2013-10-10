@@ -56,8 +56,7 @@ readSessionsData <- function(basedir="multi-cloud-stat", baseline=T,
   data
 }
 
-
-init = T
+init = F
 
 if(init) {
   wldf=50
@@ -75,9 +74,84 @@ if(init) {
   runUSEC2 = readSessionsData(baseline=F, location="US", provider="EC2", wldf=wldf, n=n,  sla=sla, numdb=numdb)
   runUSGoogle = readSessionsData(baseline=F, location="US", provider="Google", wldf=wldf, n=n,  sla=sla, numdb=numdb)
 }
+
+
+adjustPlot <- function (plot, plotX=F, plotY=F, title=NULL, yLim=NA, plotLegend=T, yLab=NULL) {
+  plot <- plot +
+    theme_bw() + 
+    theme(axis.text.x = if(plotX) element_text(angle = 35, hjust = 1, vjust = 1, size = 7) else element_blank(),
+          axis.text.y = if(plotY) element_text(angle = 90, hjust = 0.5, size = 7) else element_blank(),
+          legend.key.size = unit(0.3, "cm"),
+          plot.title = element_text(size = 10),
+          strip.text.x = element_text(size = 7, angle = 0)) + 
+    xlab(NULL) +
+    ylab(if (plotY) yLab else NULL) +
+    ggtitle(title)
   
+  #if(yLim != NA) plot = plot + ylim(0,50000)
+  if(!is.na(yLim)) {
+    plot = plot +
+      scale_y_continuous(limits=c(0,yLim))
+  }
+  if(!plotY) {
+    plot = plot + theme(axis.ticks.y = element_blank())
+  }
+  if(!plotX) {
+    plot = plot + theme(axis.ticks.x = element_blank())
+  }
+  if(!plotLegend) {
+    plot = plot + guides(fill=FALSE)
+  }
+  return (plot)
+}
+
+plotLatencies <- function (file=NA) {
+  
+  baseline <- rbind(baselineEuroEC2, baselineEuroGoogle, baselineUSEC2, baselineUSGoogle)
+  run <- rbind(runEuroEC2, runEuroGoogle, runUSEC2, runUSGoogle)
+  
+  baseline$AlgLabel <- "Baseline"
+  run$AlgLabel <- "Current Work"
+  data <- rbind(baseline, run)
+
+  # The bars of the whiskers
+  whiskers <- with(boxplot(Latency ~ AlgLabel, data = data),
+                   data.frame(AlgLabel = names,
+                                      lower = stats[1, ],
+                                      upper = stats[5, ]))
+  openGraphsDevice(file)
+  
+  plot <- ggplot(data) + 
+    geom_boxplot(aes(x = AlgLabel, y = Latency), 
+                 width=0.5, position = position_dodge(width=0.2), 
+                 outlier.shape=NA, outlier.size=2) +
+    geom_segment(data = whiskers, aes(x = as.numeric(AlgLabel) - 0.1,
+                                      y = lower,
+                                      xend = as.numeric(AlgLabel) + 0.1,
+                                      yend = lower)) +
+    geom_segment(data = whiskers, aes(x = as.numeric(AlgLabel) - 0.1,
+                                      y = upper,
+                                      xend = as.numeric(AlgLabel) + 0.1,
+                                      yend = upper))
+  
+  # Define the y-biundaries of the boxplots
+  ylim1 = boxplot.stats(baseline$Latency)$stats[c(1, 5)]
+  ylim2 = boxplot.stats(run$Latency)$stats[c(1, 5)]
+  ylim = c(min(ylim1[1], ylim2[1]) * 0.8, max(ylim1[2], ylim2[2]) * 1.1)
+
+  p <- adjustPlot(plot=plot, 
+    plotX=T, plotY=T, title=NULL, yLim=NA, plotLegend=F, yLab="Latency") + 
+    theme(axis.text.x = element_text(angle = 0, hjust = 0.5, vjust=1, size = 10),
+          axis.text.y = element_text(angle = 90, hjust = 0.5, size = 9)) +  
+    coord_cartesian(ylim = ylim) +
+    stat_summary(aes(x = AlgLabel, y = Latency), fun.y = "mean", geom = "point", shape= 23, size= 2, fill="black")
+  
+  grid.arrange(p)
+  closeDevice(file)
+}
+
 plotSessionsSumary <- function(baselineDf, runDf, delta = 4, title = "Title...",
-                               legend=T, plotY=T, plotX=T, yLim = NA, debug = F) {
+                               plotLegend=T, plotY=T, plotX=T, yLim = 100, debug = F) {
   df<-data.frame(cat= NA, state= NA, time = NA, value = NA)
   labelList <- list()
   i <- 1
@@ -110,26 +184,14 @@ plotSessionsSumary <- function(baselineDf, runDf, delta = 4, title = "Title...",
   if(debug) print(df)
   
   plot <- ggplot() +
-  geom_bar(data=df,
+    geom_bar(data=df,
            aes(y = value, x = cat, fill = state),
            stat="identity", position='stack') +
-  theme_bw() + 
-  facet_grid( ~time) +
-  theme(axis.text.x = if(plotX) element_text(angle = 35, hjust = 1, vjust = 1) else element_blank(),
-        axis.text.y = if(plotY) element_text() else element_blank(),
-        legend.key.size = unit(0.4, "cm"),
-        plot.title = element_text(size = 10),
-        strip.text.x = element_text(size = 7, angle = 0)) + 
-  xlab(NULL) +
-  ylab(if (plotY) "# sessions" else NULL) +
-  scale_fill_manual(name="Session Outcome: ", values = c("#AA3929", "#F8A31B", "#556670")) +
-  ggtitle(title)
+    facet_grid( ~time)+
+    scale_fill_manual(name="Session Outcome: ", values = c("#AA3929", "#F8A31B", "#556670"))
   
-  #if(yLim != NA) plot = plot + ylim(0,50000)
-  if(!is.na(yLim)) plot = plot + scale_y_continuous(limits=c(0,yLim))
-  if(!legend) plot = plot + guides(fill=FALSE)
-  
-  return (plot)
+  return (adjustPlot(plot=plot, plotX=plotX, plotY=plotY, title=title, yLim=yLim,
+                     plotLegend=plotLegend, yLab="# sessions"))
 }
 
 #extract legend
@@ -159,32 +221,29 @@ plotAllDCsSessionsSummary <- function(delta = 4, file = NA) {
     }
   }
   
-  euroEC2 <- plotSessionsSumary(baselineEuroEC2, runEuroEC2, legend=F,
+  euroEC2 <- plotSessionsSumary(baselineEuroEC2, runEuroEC2, plotLegend=F,
                   title="Euro EC2", plotY = T, plotX = F, yLim = barHeigth, delta) +
     theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
-  euroGoogle <- plotSessionsSumary(baselineEuroGoogle, runEuroGoogle, legend=F,
+  euroGoogle <- plotSessionsSumary(baselineEuroGoogle, runEuroGoogle, plotLegend=F,
                   title="Euro Google", plotY = F, plotX = F, yLim = barHeigth,  delta) +
     theme(plot.margin = unit(c(0, 0, 0, 0.25), "lines"))
   
-  usEC2 <- plotSessionsSumary(baselineUSEC2, runUSEC2, legend=F, 
+  usEC2 <- plotSessionsSumary(baselineUSEC2, runUSEC2, plotLegend=F, 
                   title="US EC2", plotY = T, plotX = T, yLim = barHeigth, delta) +
     theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
-  usGoogle <- plotSessionsSumary(baselineUSGoogle, runUSGoogle, legend=F,
+  usGoogle <- plotSessionsSumary(baselineUSGoogle, runUSGoogle, plotLegend=F,
                   title="US Google", plotY = F, plotX = T, yLim = barHeigth, delta) +
     theme(plot.margin = unit(c(0, 0, 0, 0.25), "lines"))
-  
-  dummy <- plotSessionsSumary(baselineEuroEC2, runEuroEC2, legend=T) + 
-    theme(legend.position="bottom")
-  legend <- g_legend(dummy)
-  
-  widths=c(11, 9.5)
+    
+  widths=c(12, 11)
   grid.arrange(arrangeGrob(euroEC2 + theme(legend.position="none"),
                                  euroGoogle + theme(legend.position="none"),
                                  ncol=2, widths=widths),
-                     arrangeGrob(usEC2 + theme(legend.position="none"),
+               arrangeGrob(usEC2 + theme(legend.position="none"),
                                   usGoogle + theme(legend.position="none"),
                                  ncol=2, widths=widths),                 
-                     legend, nrow=3, heights=c(16, 20, 2))
+               g_legend(plotSessionsSumary(baselineEuroEC2, runEuroEC2, plotLegend=T) +  theme(legend.position="bottom")),
+               nrow=3, heights=c(16, 20, 2))
   
   closeDevice(file)
 }
@@ -203,20 +262,10 @@ plotDelaySummary <- function(baselineDf, runDf, delta = 4, title = "Title...",
   plot <- ggplot(merged, aes(x=AlgLabel, y=SumDelay)) + 
     geom_boxplot() + 
     theme_bw() + 
-    facet_wrap(~ TimeLabel, nrow=1) +
-    theme(axis.text.x = if(plotX) element_text(angle = 35, hjust = 1, vjust = 1) else element_blank(),
-          axis.text.y = if(plotY) element_text() else element_blank(),
-          legend.key.size = unit(0.4, "cm"),
-          plot.title = element_text(size = 10),
-          strip.text.x = element_text(size = 7, angle = 0)) + 
-    xlab(NULL) +
-    ylab(if (plotY) "Delay" else NULL) +
-    scale_fill_manual(name="Session Outcome: ", values = c("#AA3929", "#F8A31B", "#556670")) +
-    ggtitle(title)
+    facet_wrap(~ TimeLabel, nrow=1)
     
-  if(!is.na(yLim)) plot = plot + scale_y_continuous(limits=c(0,yLim))
-  
-  return (plot)
+  return (adjustPlot(plot=plot, plotX=plotX, plotY=plotY, title=title, yLim=yLim,
+                     plotLegend=F, yLab="Delay"))
 }
 
 plotAllDCsDelaySummary <-function (delta = 4, file = NA, byDC = F) {
@@ -250,14 +299,14 @@ plotAllDCsDelaySummary <-function (delta = 4, file = NA, byDC = F) {
                              title="Euro EC2", plotY = T, plotX = F, yLim = maxHeigth, delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
     euroGoogle  <- plotDelaySummary(baselineEuroGoogle, runEuroGoogle,
-                                    title="Euro Google", plotY = T, plotX = F, yLim = maxHeigth, delta) +
+                                    title="Euro Google", plotY = F, plotX = F, yLim = maxHeigth, delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
     
     usEC2 <- plotDelaySummary(baselineUSEC2, runUSEC2,
                            title="US EC2", plotY = T, plotX = T, yLim = maxHeigth, delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
     usGoogle <- plotDelaySummary(baselineUSGoogle, runUSGoogle,
-                              title="US Google", plotY = T, plotX = T, yLim = maxHeigth, delta) +
+                              title="US Google", plotY = F, plotX = T, yLim = maxHeigth, delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
     
     grid.arrange(euroEC2, euroGoogle, usEC2, usGoogle, ncol=2, nrow=2, heights=c(16, 20),  widths=c(11, 9.5))
@@ -332,6 +381,8 @@ printSessionsSummary <- function (from=0, to=24) {
   print(summaryDF(names, lst, from=from, to=to))
 }
 
-plotAllDCsSessionsSummary(file="multi-cloud-stat/sessions.pdf")
-plotAllDCsDelaySummary(file="multi-cloud-stat/delaysDCs.pdf", byDC = T)
-plotAllDCsDelaySummary(file="multi-cloud-stat/delaysRegions.pdf", byDC = F)
+#plotAllDCsSessionsSummary(file="multi-cloud-stat/sessions.pdf")
+#plotAllDCsDelaySummary(file="multi-cloud-stat/delaysDCs.pdf", byDC = T)
+#plotAllDCsDelaySummary(file="multi-cloud-stat/delaysRegions.pdf", byDC = F)
+#plotLatencies(file="multi-cloud-stat/latency.pdf")
+#printSessionsSummary()
