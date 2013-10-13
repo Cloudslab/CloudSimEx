@@ -90,8 +90,7 @@ adjustPlot <- function (plot, plotX=F, plotY=F, title=NULL, yLim=NA, plotLegend=
   
   #if(yLim != NA) plot = plot + ylim(0,50000)
   if(!is.na(yLim)) {
-    plot = plot +
-      scale_y_continuous(limits=c(0,yLim))
+    plot = plot + scale_y_continuous(limits=c(0,yLim))
   }
   if(!plotY) {
     plot = plot + theme(axis.ticks.y = element_blank())
@@ -151,7 +150,7 @@ plotLatencies <- function (file=NA) {
 }
 
 plotSessionsSumary <- function(baselineDf, runDf, delta = 4, title = "Title...",
-                               plotLegend=T, plotY=T, plotX=T, yLim = 100, debug = F) {
+                               plotLegend=T, plotY=T, plotX=T, yLim = NA, debug = F) {
   df<-data.frame(cat= NA, state= NA, time = NA, value = NA)
   labelList <- list()
   i <- 1
@@ -162,13 +161,13 @@ plotSessionsSumary <- function(baselineDf, runDf, delta = 4, title = "Title...",
     label <- paste0(toDateString(from),"-", if (t == 24) "24h" else toDateString(to))
     labelList <- append(labelList, label)
     for (s in c(STATE_SUCCESS, STATE_REJECT, STATE_FAIL)) {
-        n <- nrow(subset(baselineDf, 
+      n <- nrow(subset(baselineDf, 
                   (State == s) & (from <= StartTime) & (StartTime < to)))
-        if(n >= 0) {
-          df[i,] <- c("Baseline", s, label, n) 
-          i<-i+1
-        }
+      if(n >= 0) {
+        df[i,] <- c("Baseline", s, label, n) 
+        i<-i+1
       }
+    }
     for (s in c(STATE_SUCCESS, STATE_REJECT, STATE_FAIL)) {
       n <- nrow(subset(runDf, 
                        subset = State == s & from <= StartTime & StartTime < to))
