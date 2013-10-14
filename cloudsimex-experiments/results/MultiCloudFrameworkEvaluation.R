@@ -1,4 +1,5 @@
 source('util.R') 
+source('parseSimulation.R') 
 library(ggplot2)
 library(gridExtra)
 
@@ -9,6 +10,47 @@ STATE_FAIL = "Failed"
 MINUTE = 60.0
 HOUR = 60.0 * MINUTE
 DAY = 24 * HOUR
+
+init = T
+
+wldf=50
+n=1
+sla=30
+numdb=2
+outputDir="multi-cloud-stat"
+
+args <- commandArgs(trailingOnly = TRUE)
+print("Arguements:")
+print(args)
+
+
+dataDirName <- function (basedir="multi-cloud-stat", baseline, wldf, sla, n, numdb) {
+  alg <- if (baseline) "baseline" else "run"
+  dataDirName <- paste0(basedir, "/", "wldf(", alg, ")-", wldf, "-n-", sla)
+  #wldf(%s)-wldf-%d-sla-%d-n-%d-db-%d
+  #dataDirName <- gettextf("%s/wldf(%s)-wldf-%d-sla-%d-n-%d-db-%d", basedir, alg, wldf, sla, n, numdb)
+  return (dataDirName)
+}
+
+if(length(args) >= 1){
+  #setwd(args[1])
+  
+  init = T
+  wldf = as.numeric(gsub("[^0-9]", "", args[1]))
+  n = as.numeric(gsub("[^0-9]", "", args[2]))
+  sla = as.numeric(gsub("[^0-9]", "", args[3]))
+  numdb = as.numeric(gsub("[^0-9]", "", args[4]))
+  outputDir = dataDirName(baseline=F, wldf=wldf, sla=sla, n=n, numdb=numdb)
+  baeselinDir = dataDirName(baseline=T, wldf=wldf, sla=sla, n=n, numdb=numdb)
+  print(paste("Output dir is:", outputDir))
+  #dir.create(file.path(mainDir, subDir), showWarnings = FALSE)
+  
+  if (!file.exists(outputDir) || !file.exists(baeselinDir)) {
+    print("Data is not present... stopping analysis")
+    stop(call. = TRUE)
+  }
+}
+
 
 hourLabel <- function(time, delta = 4) {
   time = sapply( time, function(x)  {if (x == 24 * HOUR) x - 1 else x})
@@ -25,16 +67,15 @@ defTimeLabel <-function (data, delta = 4) {
   return (data)
 }
 
+
+
 readSessionsData <- function(basedir="multi-cloud-stat", baseline=T,
                              wldf=50, n=1, sla=30, numdb=2, location="Euro", provider="EC2") {
   
-  
   meta=if (location == "Euro") "[EU]" else "[US]"
-  
-  alg <- if (baseline) "baseline" else "run"
-  fileName <- paste0(basedir, "/wldf(", alg, ")-", wldf, "-n-", sla , "/Sessions-Broker", location, provider, ".csv")
-  #wldf(%s)-wldf-%d-sla-%d-n-%d-db-%d
-  #fileName <- gettextf("%s/wldf(%s)-wldf-%d-sla-%d-n-%d-db-%d/Sessions-Broker%s%s.csv", basedir, alg, wldf, sla, n, numdb, location, provider)
+
+  dataDirName <- dataDirName(baseline=baseline, wldf=wldf, n=n, sla=sla, numdb=numdb)
+  fileName <- paste0(dataDirName , "/Sessions-Broker", location, provider, ".csv")
   print(paste("Parsing: ", fileName))
   
   data <- read.table(fileName, header = T, stringsAsFactors = F, quote = '"', sep = ";")
@@ -56,13 +97,8 @@ readSessionsData <- function(basedir="multi-cloud-stat", baseline=T,
   data
 }
 
-init = F
 
 if(init) {
-  wldf=50
-  n=1
-  sla=30
-  numdb=2
 
   baselineEuroEC2 = readSessionsData(baseline=T, location="Euro", provider="EC2", wldf=wldf, n=n,  sla=sla, numdb=numdb)
   baselineEuroGoogle = readSessionsData(baseline=T, location="Euro", provider="Google", wldf=wldf, n=n,  sla=sla, numdb=numdb)
@@ -221,17 +257,17 @@ plotAllDCsSessionsSummary <- function(delta = 4, file = NA) {
   }
   
   euroEC2 <- plotSessionsSumary(baselineEuroEC2, runEuroEC2, plotLegend=F,
-                  title="Euro EC2", plotY = T, plotX = F, yLim = barHeigth, delta) +
+                  title="Euro EC2", plotY = T, plotX = F, yLim = barHeigth, delta=delta) +
     theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
   euroGoogle <- plotSessionsSumary(baselineEuroGoogle, runEuroGoogle, plotLegend=F,
-                  title="Euro Google", plotY = F, plotX = F, yLim = barHeigth,  delta) +
+                  title="Euro Google", plotY = F, plotX = F, yLim = barHeigth,  delta=delta) +
     theme(plot.margin = unit(c(0, 0, 0, 0.25), "lines"))
   
   usEC2 <- plotSessionsSumary(baselineUSEC2, runUSEC2, plotLegend=F, 
-                  title="US EC2", plotY = T, plotX = T, yLim = barHeigth, delta) +
+                  title="US EC2", plotY = T, plotX = T, yLim = barHeigth, delta=delta) +
     theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
   usGoogle <- plotSessionsSumary(baselineUSGoogle, runUSGoogle, plotLegend=F,
-                  title="US Google", plotY = F, plotX = T, yLim = barHeigth, delta) +
+                  title="US Google", plotY = F, plotX = T, yLim = barHeigth, delta=delta) +
     theme(plot.margin = unit(c(0, 0, 0, 0.25), "lines"))
     
   widths=c(12, 11)
@@ -268,7 +304,7 @@ plotDelaySummary <- function(baselineDf, runDf, delta = 4, title = "Title...",
 }
 
 plotAllDCsDelaySummary <-function (delta = 4, file = NA, byDC = F) {
-  
+
   openGraphsDevice(file)
   allFrames <- lst<- list(runEuroEC2, runEuroGoogle, 
                           runUSEC2, runUSGoogle,
@@ -285,27 +321,27 @@ plotAllDCsDelaySummary <-function (delta = 4, file = NA, byDC = F) {
   
   if(!byDC) {
     euro <- plotDelaySummary(rbind(baselineEuroEC2, baselineEuroGoogle), rbind(runEuroEC2, runEuroGoogle),
-                                  title="Euro", plotY = T, plotX = F, yLim = maxHeigth, delta) +
+                                  title="Euro", plotY = T, plotX = F, yLim = maxHeigth, delta=delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
   
     us <- plotDelaySummary(rbind(baselineUSEC2, baselineUSGoogle), rbind(runUSEC2, runUSGoogle),
-                                title="US", plotY = T, plotX = T, yLim = maxHeigth, delta) +
+                                title="US", plotY = T, plotX = T, yLim = maxHeigth, delta=delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
     
     grid.arrange(euro, us, nrow=2, heights=c(16, 20))
   } else {
     euroEC2 <- plotDelaySummary(baselineEuroEC2, runEuroEC2,
-                             title="Euro EC2", plotY = T, plotX = F, yLim = maxHeigth, delta) +
+                             title="Euro EC2", plotY = T, plotX = F, yLim = maxHeigth, delta=delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
     euroGoogle  <- plotDelaySummary(baselineEuroGoogle, runEuroGoogle,
-                                    title="Euro Google", plotY = F, plotX = F, yLim = maxHeigth, delta) +
+                                    title="Euro Google", plotY = F, plotX = F, yLim = maxHeigth, delta=delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
     
     usEC2 <- plotDelaySummary(baselineUSEC2, runUSEC2,
-                           title="US EC2", plotY = T, plotX = T, yLim = maxHeigth, delta) +
+                           title="US EC2", plotY = T, plotX = T, yLim = maxHeigth, delta=delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
     usGoogle <- plotDelaySummary(baselineUSGoogle, runUSGoogle,
-                              title="US Google", plotY = F, plotX = T, yLim = maxHeigth, delta) +
+                              title="US Google", plotY = F, plotX = T, yLim = maxHeigth, delta=delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
     
     grid.arrange(euroEC2, euroGoogle, usEC2, usGoogle, ncol=2, nrow=2, heights=c(16, 20),  widths=c(11, 9.5))
@@ -380,8 +416,23 @@ printSessionsSummary <- function (from=0, to=24) {
   print(summaryDF(names, lst, from=from, to=to))
 }
 
-#plotAllDCsSessionsSummary(file="multi-cloud-stat/sessions.pdf")
-#plotAllDCsDelaySummary(file="multi-cloud-stat/delaysDCs.pdf", byDC = T)
-#plotAllDCsDelaySummary(file="multi-cloud-stat/delaysRegions.pdf", byDC = F)
-#plotLatencies(file="multi-cloud-stat/latency.pdf")
-#printSessionsSummary()
+
+allDCsSessionsSummaryF = paste0(outputDir, "/sessions.pdf")
+allDCsDelaySummaryF = paste0(outputDir, "/delaysDCs.pdf")
+allRegDelaySummaryF = paste0(outputDir, "/delaysRegions.pdf")
+latenciesF = paste0(outputDir, "/latency.pdf")
+workloadF = paste0(outputDir, "/workloadFreqs.pdf") 
+sessSummaryF = paste0(outputDir, "/workloadFreqs.txt")
+
+plotAllDCsSessionsSummary(file=allDCsSessionsSummaryF)
+plotAllDCsDelaySummary(file=allDCsDelaySummaryF, byDC = T)
+plotAllDCsDelaySummary(file=allRegDelaySummaryF, byDC = F)
+plotLatencies(file=latenciesF)
+plotWorkload(file=workloadF, wldf=wldf, legendNames=c("Euro", "US")) 
+sink(sessSummaryF)
+printSessionsSummary()
+sink(NULL)
+
+outputArchive <- paste0("multi-cloud-stat/Analysis-wldf-", wldf, "-sla-", sla, "-n-", n, "-numdb-", numdb, ".zip")
+zip(outputArchive, files=c(allDCsSessionsSummaryF, allDCsDelaySummaryF, allRegDelaySummaryF,
+                           latenciesF, workloadF, sessSummaryF))

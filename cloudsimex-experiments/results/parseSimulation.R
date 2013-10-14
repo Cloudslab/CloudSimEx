@@ -272,11 +272,11 @@ plotComparisonSimExecPerf <- function(forWorkload, type, vmId, property="percent
 }
 
 
-plotWorkload <- function(file = NA) {
-  dc1Freqs <- createFreqsDF()
-  dc2Freqs <- createFreqsDF(offset = 12)
-  print(dc1Freqs)
-  print(dc2Freqs)
+plotWorkload <- function(file = NA, wldf=1, legendNames=c("DC1", "DC2")) {
+  dc1Freqs <- createFreqsDF(wldf=wldf)
+  dc2Freqs <- createFreqsDF(offset = 12, wldf=wldf)
+  #print(dc1Freqs)
+  #print(dc2Freqs)
   
   openGraphsDevice(file)
   
@@ -286,8 +286,8 @@ plotWorkload <- function(file = NA) {
   layout(layoutMatrix, widths = layoutWidths, heights = layoutHeigths, respect=T)
   
   fullScreen(hasTitle=F)
-  
-  plot(0, 0, ylim=c(0, 15 + max(max(dc1Freqs$freq), max(dc2Freqs$freq))), xlim=c(0, 24), type = "n", main = NA,
+  legendSpace <- if(wldf > 1) wldf*15 else 15
+  plot(0, 0, ylim=c(0, legendSpace + max(max(dc1Freqs$freq), max(dc2Freqs$freq))), xlim=c(0, 24), type = "n", main = NA,
        xlab = "Time after experiment's start",
        ylab = "Average Session Arrivals",
        xaxt='n',
@@ -301,22 +301,22 @@ plotWorkload <- function(file = NA) {
   labels <- sapply(xpos, function(x){paste0(x, 'h')})
   axis(side=1, at=xpos, labels=labels)
   
-  legend(0, 115, c("DC1", "DC2"),
+  legend(0*wldf, 100*wldf + legendSpace, legendNames,
          col = c("black","red"), lty = c(1,2), cex=0.7)
   closeDevice(file)
 }
 
-createFreqsDF <- function (offset = 0) {
+createFreqsDF <- function (offset = 0, wldf=1) {
   freqs <- data.frame(time = c( 0,  6,  6,  7,  7,  10,  10,  14,  14,  17,  17,  18,  18,  24),
-                      freq = c(10, 10, 30, 30, 50,  50, 100, 100,  50,  50,  30,  30,  10,  10))
+                      freq = c(10, 10, 30, 30, 50,  50, 100, 100,  50,  50,  30,  30,  10,  10) * wldf)
   freqs$time <- sapply(freqs$time, function(x) {if(offset == 0) x else (x + offset) %% 24})
   freqs <- freqs[order(freqs$time),]
   
   delta = 0.01
   for(i in 1:(nrow(freqs) - 1)) {
-    print(freqs[i, 1] == freqs[i+1, 1])
-    print(freqs[i, 1])
-    print(freqs[i+1, 1])
+    #print(freqs[i, 1] == freqs[i+1, 1])
+    #print(freqs[i, 1])
+    #print(freqs[i+1, 1])
     if (freqs[i, 1] == freqs[i+1, 1]) {
       freqs[i, 1] = freqs[i, 1] - delta
       freqs[i+1, 1] = freqs[i+1, 1] + delta
