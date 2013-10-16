@@ -76,7 +76,7 @@ public class IPMetadata {
 	helper.add("Country ISO", countryIsoCode);
 	helper.add("City", cityName);
 	helper.add("Post.Code", postalCode);
-	helper.add("Coords.",
+	helper.add("Coords",
 		latitude == null || longitude == null ? null : String.format("(%.2f,%.2f)", latitude, longitude));
 	helper.omitNullValues();
 	return helper.toString();

@@ -168,15 +168,18 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
 		int numRunning = 0;
 		double sumAvg = 0;
 		for (HddVm vm : lb.getAppServers()) {
-		    if (vm.getStatus() == VMStatus.RUNNING && srvToNumSessions.containsKey(vm.getId())) {
+		    double cpuUtil = vm.getCPUUtil();
+		    double ramUtil = vm.getRAMUtil();
+		    if (vm.getStatus() == VMStatus.RUNNING && srvToNumSessions.containsKey(vm.getId()) && (cpuUtil > 0 || ramUtil > 0)) {
 			numRunning++;
-			sumAvg += Math.min(vm.getCPUUtil() / srvToNumSessions.get(vm.getId()), vm.getCPUUtil()
-				/ srvToNumSessions.get(vm.getId()));
+			int numSessions = srvToNumSessions.get(vm.getId());
+			double nCapacity = numSessions / Math.max(cpuUtil, ramUtil); // f(vm)
+			sumAvg += 1 / nCapacity; // sum(1/f(vm))
 		    }
 		}
 
-		double avgSessionsPerVm = numRunning == 0 ? 1 : 1 / (sumAvg / numRunning);
-		return pricePerMinute.doubleValue() * avgSessionsPerVm;
+		double avgSessionsPerVm = numRunning == 0 ? 0 : sumAvg / numRunning; //sum(1/f(vm)) / |V|
+		return pricePerMinute.doubleValue() * avgSessionsPerVm; //p * sum(1/f(vm)) / |V|
 	    }
 	}
 
