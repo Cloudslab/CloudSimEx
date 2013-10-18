@@ -139,9 +139,9 @@ public class MultiCloudFramework {
     protected int simulationLength = (DAY + HOUR / 2);
     protected int step = 60;
 
-    protected int n = 1;
-    protected int latencySLA = 40;
-    protected double wldFactor = 200;
+    protected int n = 5;
+    protected int latencySLA = 30;
+    protected double wldFactor = 10;
     protected double monitoringPeriod = 0.01;
     protected double autoscalingPeriod = 10;
 
@@ -161,7 +161,7 @@ public class MultiCloudFramework {
     // Num of VMs in the DB layer 
     private int numDBs = 15;
 
-    private boolean baseline = true;
+    private boolean baseline = false;
 
     protected String experimentName = "Multi-Cloud Framework Experiment";
     public String resultDIR = RESULT_DIR;
@@ -553,6 +553,16 @@ public class MultiCloudFramework {
 			euroEC2Price.doubleValue(), usGooglePrice.doubleValue(), usEc2Price.doubleValue(), sum);
 	    }
 
+	    for(WebBroker b : new WebBroker[]{brokerEuroGoogle, brokerEuroEC2, brokerUSGoogle, brokerUSEC2}) {
+		CustomLog.printf("%-25s AS: $%.2f", 
+			b.toString(),
+			b.getVMBillingPolicy().bill(b.getLoadBalancers().get(1l).getAppServers(), DAY).doubleValue());
+		CustomLog.printf("%-25s DB: $%.2f", 
+			b.toString(),
+			b.getVMBillingPolicy().bill(b.getLoadBalancers().get(1l).getDbBalancer().getVMs(), DAY).doubleValue());
+	    }
+	    
+	    
 	    CustomLog.flush();
 
 	    System.err.println(experimentName + ": Archiving the results into: "

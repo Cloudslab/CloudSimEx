@@ -109,6 +109,7 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
 	    for (WebSession sess : sessions) {
 		CustomLog.printf("[Entry Point] Session %d will be assigned to %s", sess.getSessionId(),
 			broker.toString());
+		CustomLog.printf("[Entry Point] Price estimations: %s", costComparator.getReadableLatestPriceEstimations());
 	    }
 	    broker.submitSessionsDirectly(sessions, getAppId());
 	}
@@ -134,6 +135,9 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
 	// values.
 	private Map<WebBroker, Map<Integer, Integer>> brokersToMaps = new HashMap<>();
 	private Map<WebBroker, Boolean> overloadedDBLayer = new HashMap<>();
+	
+	private Map<WebBroker, Double> latestPriceEstimations = new HashMap<>();
+	private Map<WebBroker, String> readablePriceEstimations = new HashMap<>();
 
 	public CloudPriceComparator(final long appId) {
 	    super();
@@ -148,14 +152,19 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
 	    overloadedDBLayer.clear();
 	}
 
+	public Map<WebBroker, String> getReadableLatestPriceEstimations() {
+	    return readablePriceEstimations;
+	}
+
 	@Override
 	public int compare(final WebBroker b1, final WebBroker b2) {
 	    return Double.compare(definePrice(b1), definePrice(b2));
 	}
 
 	public double definePrice(final WebBroker b) {
+	    double res = 0;
 	    if (isDBLayerOverloaded(b)) {
-		return Double.MAX_VALUE;
+		res = Double.MAX_VALUE;
 	    } else {
 		ILoadBalancer lb = b.getLoadBalancers().get(appId);
 		BigDecimal pricePerMinute = b.getVMBillingPolicy().normalisedCostPerMinute(lb.getAppServers().get(0));
@@ -170,7 +179,7 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
 		for (HddVm vm : lb.getAppServers()) {
 		    double cpuUtil = vm.getCPUUtil();
 		    double ramUtil = vm.getRAMUtil();
-		    if (vm.getStatus() == VMStatus.RUNNING && srvToNumSessions.containsKey(vm.getId()) && (cpuUtil > 0 || ramUtil > 0)) {
+		    if (vm.getStatus() == VMStatus.RUNNING && srvToNumSessions.containsKey(vm.getId()) && (cpuUtil > 0.05 && ramUtil > 0)) {
 			numRunning++;
 			int numSessions = srvToNumSessions.get(vm.getId());
 			double nCapacity = numSessions / Math.max(cpuUtil, ramUtil); // f(vm)
@@ -178,9 +187,19 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
 		    }
 		}
 
-		double avgSessionsPerVm = numRunning == 0 ? 0 : sumAvg / numRunning; //sum(1/f(vm)) / |V|
-		return pricePerMinute.doubleValue() * avgSessionsPerVm; //p * sum(1/f(vm)) / |V|
+		//sum(1/f(vm)) / |V|
+		double avgSessionsPerVm = numRunning > 0 ? (sumAvg / numRunning) : (latestPriceEstimations.containsKey(b) ? latestPriceEstimations.get(b) : 0);
+		res = pricePerMinute.doubleValue() * avgSessionsPerVm; //p * sum(1/f(vm)) / |V|
+		res = numRunning > 0 ? res : (latestPriceEstimations.containsKey(b) ? latestPriceEstimations.get(b) : 0);
+
+		if (!latestPriceEstimations.containsKey(b) || latestPriceEstimations.get(b) != res) {
+//		    res = latestPriceEstimations.containsKey(b) ? (res + latestPriceEstimations.get(b))/2 : res;
+		    
+		    latestPriceEstimations.put(b, res);
+		    readablePriceEstimations.put(b, String.format("%.10f", res));
+		}
 	    }
+	    return res;
 	}
 
 	private boolean isDBLayerOverloaded(WebBroker b) {
