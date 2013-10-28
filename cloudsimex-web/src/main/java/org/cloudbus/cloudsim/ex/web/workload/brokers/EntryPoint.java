@@ -76,19 +76,22 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
 
 	    WebBroker selectedBroker = null;
 	    double bestLatencySoFar = Double.MAX_VALUE;
+	    double bestPrice = Double.MAX_VALUE;
 	    for (WebBroker eligibleBroker : eligibleBrokers) {
 		ILoadBalancer balancer = eligibleBroker.getLoadBalancers().get(getAppId());
 		if (balancer != null) {
 		    String ip = balancer.getIp();
 		    String clientIP = sess.getSourceIP();
 		    double latency = getGeoService().latency(ip, clientIP);
+		    double price = costComparator.latestPriceEstimations.get(eligibleBroker);
 
-		    if (latency < latencySLA) {
+		    if (latency < latencySLA && price != Double.MAX_VALUE) {
 			selectedBroker = eligibleBroker;
 			break;
-		    } else if (bestLatencySoFar > latency) {
+		    } else if ((bestLatencySoFar > latency || bestPrice == Double.MAX_VALUE) && (price != Double.MAX_VALUE || selectedBroker == null)) {
 			selectedBroker = eligibleBroker;
 			bestLatencySoFar = latency;
+			bestPrice = price;
 		    }
 		}
 	    }
@@ -136,7 +139,7 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
 	private Map<WebBroker, Map<Integer, Integer>> brokersToMaps = new HashMap<>();
 	private Map<WebBroker, Boolean> overloadedDBLayer = new HashMap<>();
 	
-	private Map<WebBroker, Double> latestPriceEstimations = new HashMap<>();
+	Map<WebBroker, Double> latestPriceEstimations = new HashMap<>();
 	private Map<WebBroker, String> readablePriceEstimations = new HashMap<>();
 
 	public CloudPriceComparator(final long appId) {
@@ -192,12 +195,12 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
 		res = pricePerMinute.doubleValue() * avgSessionsPerVm; //p * sum(1/f(vm)) / |V|
 		res = numRunning > 0 ? res : (latestPriceEstimations.containsKey(b) ? latestPriceEstimations.get(b) : 0);
 
-		if (!latestPriceEstimations.containsKey(b) || latestPriceEstimations.get(b) != res) {
+	    }
+	    if (!latestPriceEstimations.containsKey(b) || latestPriceEstimations.get(b) != res) {
 //		    res = latestPriceEstimations.containsKey(b) ? (res + latestPriceEstimations.get(b))/2 : res;
-		    
-		    latestPriceEstimations.put(b, res);
-		    readablePriceEstimations.put(b, String.format("%.10f", res));
-		}
+		
+		latestPriceEstimations.put(b, res);
+		readablePriceEstimations.put(b, String.format("%.10f", res));
 	    }
 	    return res;
 	}
