@@ -11,12 +11,12 @@ MINUTE = 60.0
 HOUR = 60.0 * MINUTE
 DAY = 24 * HOUR
 
-init = T
+init = F
 
 wldf=50
 n=1
 sla=30
-numdb=2
+numdb=1
 outputDir="multi-cloud-stat"
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -26,9 +26,9 @@ print(args)
 
 dataDirName <- function (basedir="multi-cloud-stat", baseline, wldf, sla, n, numdb) {
   alg <- if (baseline) "baseline" else "run"
-  dataDirName <- paste0(basedir, "/", "wldf(", alg, ")-", wldf, "-n-", sla)
+  #dataDirName <- paste0(basedir, "/", "wldf(", alg, ")-", wldf, "-n-", sla)
   #wldf(%s)-wldf-%d-sla-%d-n-%d-db-%d
-  #dataDirName <- gettextf("%s/wldf(%s)-wldf-%d-sla-%d-n-%d-db-%d", basedir, alg, wldf, sla, n, numdb)
+  dataDirName <- gettextf("%s/wldf(%s)-wldf-%d-sla-%d-n-%d-db-%d", basedir, alg, wldf, sla, n, numdb)
   return (dataDirName)
 }
 
@@ -115,8 +115,10 @@ if(init) {
 adjustPlot <- function (plot, plotX=F, plotY=F, title=NULL, yLim=NA, plotLegend=T, yLab=NULL) {
   plot <- plot +
     theme_bw() + 
-    theme(axis.text.x = if(plotX) element_text(angle = 35, hjust = 1, vjust = 1, size = 7) else element_blank(),
-          axis.text.y = if(plotY) element_text(angle = 90, hjust = 0.5, size = 7) else element_blank(),
+    theme(axis.text.x = if(plotX) element_text(angle = 35, hjust = 1, vjust = 1, size = 10) else element_blank(),
+          axis.text.y = if(plotY) element_text(angle = 90, hjust = 0.5, size = 10) else element_blank(),
+          axis.title.x = if(plotX) element_text(size = 15) else element_blank(),
+          axis.title.y = if(plotY) element_text(size = 15) else element_blank(),
           legend.key.size = unit(0.3, "cm"),
           plot.title = element_text(size = 10),
           strip.text.x = element_text(size = 7, angle = 0)) + 
@@ -176,9 +178,11 @@ plotLatencies <- function (file=NA) {
 
   p <- adjustPlot(plot=plot, 
     plotX=T, plotY=T, title=NULL, yLim=NA, plotLegend=F, yLab="Latency") + 
-    theme(axis.text.x = element_text(angle = 0, hjust = 0.5, vjust=1, size = 10),
-          axis.text.y = element_text(angle = 90, hjust = 0.5, size = 9)) +  
-    coord_cartesian(ylim = ylim) +
+    theme(axis.text.x = element_text(angle = 0, hjust = 0.5, vjust=1, size = 15),
+          axis.text.y = element_text(angle = 90, hjust = 0.5, size = 15),
+          axis.title.x = element_text(size = 25),
+          axis.title.y = element_text(size = 25)) +  
+          coord_cartesian(ylim = ylim) +
     stat_summary(aes(x = AlgLabel, y = Latency), fun.y = "mean", geom = "point", shape= 23, size= 2, fill="black")
   
   grid.arrange(p)
@@ -223,7 +227,7 @@ plotSessionsSumary <- function(baselineDf, runDf, delta = 4, title = "Title...",
            aes(y = value, x = cat, fill = state),
            stat="identity", position='stack') +
     facet_grid( ~time)+
-    scale_fill_manual(name="Session Outcome: ", values = c("#AA3929", "#F8A31B", "#556670"))
+    scale_fill_manual(name="Session Outcome: ", values = c("#AA3929", "#F8AF46", "#183324"))
   
   return (adjustPlot(plot=plot, plotX=plotX, plotY=plotY, title=title, yLim=yLim,
                      plotLegend=plotLegend, yLab="# sessions"))
@@ -238,7 +242,7 @@ g_legend<-function(a.gplot){
   return(legend)
 }
 
-plotAllDCsSessionsSummary <- function(delta = 4, file = NA) {
+plotAllDCsSessionsSummary <- function(delta = 6, file = NA) {
   openGraphsDevice(file)
   allFrames <- lst<- list(runEuroEC2, runEuroGoogle, 
                        runUSEC2, runUSGoogle,
@@ -301,9 +305,10 @@ plotDelaySummary <- function(baselineDf, runDf, delta = 4, title = "Title...",
     
   return (adjustPlot(plot=plot, plotX=plotX, plotY=plotY, title=title, yLim=yLim,
                      plotLegend=F, yLab="Delay"))
+  + ylab("Delay")
 }
 
-plotAllDCsDelaySummary <-function (delta = 4, file = NA, byDC = F) {
+plotAllDCsDelaySummary <-function (delta = 6, file = NA, byDC = F) {
 
   openGraphsDevice(file)
   allFrames <- lst<- list(runEuroEC2, runEuroGoogle, 
@@ -319,7 +324,7 @@ plotAllDCsDelaySummary <-function (delta = 4, file = NA, byDC = F) {
       }
   }
   
-  if(!byDC) {
+  if(byDC == F) {
     euro <- plotDelaySummary(rbind(baselineEuroEC2, baselineEuroGoogle), rbind(runEuroEC2, runEuroGoogle),
                                   title="Euro", plotY = T, plotX = F, yLim = maxHeigth, delta=delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
@@ -423,10 +428,11 @@ allRegDelaySummaryF = paste0(outputDir, "/delaysRegions.pdf")
 latenciesF = paste0(outputDir, "/latency.pdf")
 workloadF = paste0(outputDir, "/workloadFreqs.pdf") 
 sessSummaryF = paste0(outputDir, "/workloadFreqs.txt")
+delta=4
 
-plotAllDCsSessionsSummary(file=allDCsSessionsSummaryF)
-plotAllDCsDelaySummary(file=allDCsDelaySummaryF, byDC = T)
-plotAllDCsDelaySummary(file=allRegDelaySummaryF, byDC = F)
+plotAllDCsSessionsSummary(file=allDCsSessionsSummaryF, delta=delta)
+plotAllDCsDelaySummary(file=allDCsDelaySummaryF, byDC = T, delta=delta)
+plotAllDCsDelaySummary(file=allRegDelaySummaryF, byDC = F, delta=delta)
 plotLatencies(file=latenciesF)
 plotWorkload(file=workloadF, wldf=wldf, legendNames=c("Euro", "US")) 
 sink(sessSummaryF)
