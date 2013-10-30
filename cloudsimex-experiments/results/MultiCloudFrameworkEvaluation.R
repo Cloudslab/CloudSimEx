@@ -73,7 +73,7 @@ readSessionsData <- function(basedir="multi-cloud-stat", baseline=T,
                              wldf=50, n=1, sla=30, numdb=2, location="Euro", provider="EC2") {
   
   meta=if (location == "Euro") "[EU]" else "[US]"
-
+  
   dataDirName <- dataDirName(baseline=baseline, wldf=wldf, n=n, sla=sla, numdb=numdb)
   fileName <- paste0(dataDirName , "/Sessions-Broker", location, provider, ".csv")
   print(paste("Parsing: ", fileName))
@@ -92,14 +92,14 @@ readSessionsData <- function(basedir="multi-cloud-stat", baseline=T,
   
   # Set the state of each session...
   data[, "State"] = ifelse(data$Complete == "true", STATE_SUCCESS,
-    ifelse(data$Meta != meta, STATE_REJECT, STATE_FAIL) )
+                           ifelse(data$Meta != meta, STATE_REJECT, STATE_FAIL) )
   
   data
 }
 
 
 if(init) {
-
+  
   baselineEuroEC2 = readSessionsData(baseline=T, location="Euro", provider="EC2", wldf=wldf, n=n,  sla=sla, numdb=numdb)
   baselineEuroGoogle = readSessionsData(baseline=T, location="Euro", provider="Google", wldf=wldf, n=n,  sla=sla, numdb=numdb)
   baselineUSEC2 = readSessionsData(baseline=T, location="US", provider="EC2", wldf=wldf, n=n,  sla=sla, numdb=numdb)
@@ -150,12 +150,12 @@ plotLatencies <- function (file=NA) {
   baseline$AlgLabel <- "Baseline"
   run$AlgLabel <- "Current Work"
   data <- rbind(baseline, run)
-
+  
   # The bars of the whiskers
   whiskers <- with(boxplot(Latency ~ AlgLabel, data = data),
                    data.frame(AlgLabel = names,
-                                      lower = stats[1, ],
-                                      upper = stats[5, ]))
+                              lower = stats[1, ],
+                              upper = stats[5, ]))
   openGraphsDevice(file)
   
   plot <- ggplot(data) + 
@@ -175,14 +175,14 @@ plotLatencies <- function (file=NA) {
   ylim1 = boxplot.stats(baseline$Latency)$stats[c(1, 5)]
   ylim2 = boxplot.stats(run$Latency)$stats[c(1, 5)]
   ylim = c(min(ylim1[1], ylim2[1]) * 0.8, max(ylim1[2], ylim2[2]) * 1.1)
-
+  
   p <- adjustPlot(plot=plot, 
-    plotX=T, plotY=T, title=NULL, yLim=NA, plotLegend=F, yLab="Latency") + 
+                  plotX=T, plotY=T, title=NULL, yLim=NA, plotLegend=F, yLab="Latency") + 
     theme(axis.text.x = element_text(angle = 0, hjust = 0.5, vjust=1, size = 15),
           axis.text.y = element_text(angle = 90, hjust = 0.5, size = 15),
           axis.title.x = element_text(size = 25),
           axis.title.y = element_text(size = 25)) +  
-          coord_cartesian(ylim = ylim) +
+    coord_cartesian(ylim = ylim) +
     stat_summary(aes(x = AlgLabel, y = Latency), fun.y = "mean", geom = "point", shape= 23, size= 2, fill="black")
   
   grid.arrange(p)
@@ -197,12 +197,12 @@ plotSessionsSumary <- function(baselineDf, runDf, delta = 4, title = "Title...",
   for(t in seq(delta, 24, delta)){
     from<-(t-delta) * HOUR
     to <- t * HOUR
-       
+    
     label <- paste0(toDateString(from),"-", if (t == 24) "24h" else toDateString(to))
     labelList <- append(labelList, label)
     for (s in c(STATE_SUCCESS, STATE_REJECT, STATE_FAIL)) {
       n <- nrow(subset(baselineDf, 
-                  (State == s) & (from <= StartTime) & (StartTime < to)))
+                       (State == s) & (from <= StartTime) & (StartTime < to)))
       if(n >= 0) {
         df[i,] <- c("Baseline", s, label, n) 
         i<-i+1
@@ -224,8 +224,8 @@ plotSessionsSumary <- function(baselineDf, runDf, delta = 4, title = "Title...",
   
   plot <- ggplot() +
     geom_bar(data=df,
-           aes(y = value, x = cat, fill = state),
-           stat="identity", position='stack') +
+             aes(y = value, x = cat, fill = state),
+             stat="identity", position='stack') +
     facet_grid( ~time)+
     scale_fill_manual(name="Session Outcome: ", values = c("#AA3929", "#F8AF46", "#183324"))
   
@@ -245,9 +245,9 @@ g_legend<-function(a.gplot){
 plotAllDCsSessionsSummary <- function(delta = 6, file = NA) {
   openGraphsDevice(file)
   allFrames <- lst<- list(runEuroEC2, runEuroGoogle, 
-                       runUSEC2, runUSGoogle,
-                       baselineEuroEC2, baselineEuroGoogle, 
-                       baselineUSEC2, baselineUSGoogle)
+                          runUSEC2, runUSGoogle,
+                          baselineEuroEC2, baselineEuroGoogle, 
+                          baselineUSEC2, baselineUSGoogle)
   barHeigth <- 0
   for(frame in allFrames) {
     for(t in seq(delta, 24, delta)) {
@@ -261,26 +261,26 @@ plotAllDCsSessionsSummary <- function(delta = 6, file = NA) {
   }
   
   euroEC2 <- plotSessionsSumary(baselineEuroEC2, runEuroEC2, plotLegend=F,
-                  title="Euro EC2", plotY = T, plotX = F, yLim = barHeigth, delta=delta) +
+                                title="Euro EC2", plotY = T, plotX = F, yLim = barHeigth, delta=delta) +
     theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
   euroGoogle <- plotSessionsSumary(baselineEuroGoogle, runEuroGoogle, plotLegend=F,
-                  title="Euro Google", plotY = F, plotX = F, yLim = barHeigth,  delta=delta) +
+                                   title="Euro Google", plotY = F, plotX = F, yLim = barHeigth,  delta=delta) +
     theme(plot.margin = unit(c(0, 0, 0, 0.25), "lines"))
   
   usEC2 <- plotSessionsSumary(baselineUSEC2, runUSEC2, plotLegend=F, 
-                  title="US EC2", plotY = T, plotX = T, yLim = barHeigth, delta=delta) +
+                              title="US EC2", plotY = T, plotX = T, yLim = barHeigth, delta=delta) +
     theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
   usGoogle <- plotSessionsSumary(baselineUSGoogle, runUSGoogle, plotLegend=F,
-                  title="US Google", plotY = F, plotX = T, yLim = barHeigth, delta=delta) +
+                                 title="US Google", plotY = F, plotX = T, yLim = barHeigth, delta=delta) +
     theme(plot.margin = unit(c(0, 0, 0, 0.25), "lines"))
-    
+  
   widths=c(12, 11)
   grid.arrange(arrangeGrob(euroEC2 + theme(legend.position="none"),
-                                 euroGoogle + theme(legend.position="none"),
-                                 ncol=2, widths=widths),
+                           euroGoogle + theme(legend.position="none"),
+                           ncol=2, widths=widths),
                arrangeGrob(usEC2 + theme(legend.position="none"),
-                                  usGoogle + theme(legend.position="none"),
-                                 ncol=2, widths=widths),                 
+                           usGoogle + theme(legend.position="none"),
+                           ncol=2, widths=widths),                 
                g_legend(plotSessionsSumary(baselineEuroEC2, runEuroEC2, plotLegend=T) +  theme(legend.position="bottom")),
                nrow=3, heights=c(16, 20, 2))
   
@@ -302,14 +302,14 @@ plotDelaySummary <- function(baselineDf, runDf, delta = 4, title = "Title...",
     geom_boxplot() + 
     theme_bw() + 
     facet_wrap(~ TimeLabel, nrow=1)
-    
+  
   return (adjustPlot(plot=plot, plotX=plotX, plotY=plotY, title=title, yLim=yLim,
                      plotLegend=F, yLab="Delay"))
   + ylab("Delay")
 }
 
 plotAllDCsDelaySummary <-function (delta = 6, file = NA, byDC = F) {
-
+  
   openGraphsDevice(file)
   allFrames <- lst<- list(runEuroEC2, runEuroGoogle, 
                           runUSEC2, runUSGoogle,
@@ -317,36 +317,36 @@ plotAllDCsDelaySummary <-function (delta = 6, file = NA, byDC = F) {
                           baselineUSEC2, baselineUSGoogle)
   maxHeigth <- 0
   for(frame in allFrames) {
-      d <- subset(frame, State == STATE_SUCCESS)
-      n <- if(nrow(d) > 0) max(d$SumDelay) else 0
-      if(n > maxHeigth) {
-        maxHeigth <- n
-      }
+    d <- subset(frame, State == STATE_SUCCESS)
+    n <- if(nrow(d) > 0) max(d$SumDelay) else 0
+    if(n > maxHeigth) {
+      maxHeigth <- n
+    }
   }
   
   if(byDC == F) {
     euro <- plotDelaySummary(rbind(baselineEuroEC2, baselineEuroGoogle), rbind(runEuroEC2, runEuroGoogle),
-                                  title="Euro", plotY = T, plotX = F, yLim = maxHeigth, delta=delta) +
+                             title="Euro", plotY = T, plotX = F, yLim = maxHeigth, delta=delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
-  
+    
     us <- plotDelaySummary(rbind(baselineUSEC2, baselineUSGoogle), rbind(runUSEC2, runUSGoogle),
-                                title="US", plotY = T, plotX = T, yLim = maxHeigth, delta=delta) +
+                           title="US", plotY = T, plotX = T, yLim = maxHeigth, delta=delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
     
     grid.arrange(euro, us, nrow=2, heights=c(16, 20))
   } else {
     euroEC2 <- plotDelaySummary(baselineEuroEC2, runEuroEC2,
-                             title="Euro EC2", plotY = T, plotX = F, yLim = maxHeigth, delta=delta) +
+                                title="Euro EC2", plotY = T, plotX = F, yLim = maxHeigth, delta=delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
     euroGoogle  <- plotDelaySummary(baselineEuroGoogle, runEuroGoogle,
                                     title="Euro Google", plotY = F, plotX = F, yLim = maxHeigth, delta=delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
     
     usEC2 <- plotDelaySummary(baselineUSEC2, runUSEC2,
-                           title="US EC2", plotY = T, plotX = T, yLim = maxHeigth, delta=delta) +
+                              title="US EC2", plotY = T, plotX = T, yLim = maxHeigth, delta=delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
     usGoogle <- plotDelaySummary(baselineUSGoogle, runUSGoogle,
-                              title="US Google", plotY = F, plotX = T, yLim = maxHeigth, delta=delta) +
+                                 title="US Google", plotY = F, plotX = T, yLim = maxHeigth, delta=delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
     
     grid.arrange(euroEC2, euroGoogle, usEC2, usGoogle, ncol=2, nrow=2, heights=c(16, 20),  widths=c(11, 9.5))
@@ -371,17 +371,17 @@ summaryDF <- function (names, framesMatrix, from=0, to=24) {
       overall <- overall + nrow(data)
       nRow <- nRow + nrow(subset(data, ((from * HOUR)<= StartTime) & (StartTime <= (to * HOUR))))
       nSuc <- nSuc + nrow(subset(data, 
-                  State == STATE_SUCCESS & (from * HOUR)<= StartTime & StartTime <= (to * HOUR)))
+                                 State == STATE_SUCCESS & (from * HOUR)<= StartTime & StartTime <= (to * HOUR)))
       nRej <- nRej + nrow(subset(data, 
-                  State == STATE_REJECT & (from * HOUR)<= StartTime & StartTime <= (to * HOUR)))
+                                 State == STATE_REJECT & (from * HOUR)<= StartTime & StartTime <= (to * HOUR)))
       nFail <- nFail + nrow(subset(data,
-                  State == STATE_FAIL & (from * HOUR)<= StartTime & StartTime <= (to * HOUR))) 
+                                   State == STATE_FAIL & (from * HOUR)<= StartTime & StartTime <= (to * HOUR))) 
     }
     result[i, ] = c(names[i], nRow, nSuc, nFail, nRej, 
-                paste0(round(100 * nSuc / nRow, 2), "%"),    
-                paste0(round(100 * nFail / nRow, 2), "%"), 
-                paste0(round(100 * nRej / nRow, 2), "%"),
-                paste0(round(100 * nRow / overall, 2), "%"))
+                    paste0(round(100 * nSuc / nRow, 2), "%"),    
+                    paste0(round(100 * nFail / nRow, 2), "%"), 
+                    paste0(round(100 * nRej / nRow, 2), "%"),
+                    paste0(round(100 * nRow / overall, 2), "%"))
     i <- i + 1
   }
   result
@@ -411,7 +411,7 @@ printSessionsSummary <- function (from=0, to=24) {
     list(runUSEC2, runUSGoogle),
     list(baselineUSEC2, baselineUSGoogle))
   print(summaryDF(names, lst, from=from, to=to))
-
+  
   print("")
   print("Overall")
   names <- c("Run", "Baseline")
