@@ -212,8 +212,9 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
 		boolean result = true;
 		ILoadBalancer lb = b.getLoadBalancers().get(appId);
 		for (HddVm db : lb.getDbBalancer().getVMs()) {
-		    if (db.getStatus() == VMStatus.RUNNING && db.getCPUUtil() < OVERLOAD_UTIL
-			    && db.getRAMUtil() < OVERLOAD_UTIL && db.getDiskUtil() < OVERLOAD_UTIL) {
+		    if (db.getStatus() == VMStatus.INITIALISING ||
+			    (db.getStatus() == VMStatus.RUNNING && db.getCPUUtil() < OVERLOAD_UTIL
+			    && db.getRAMUtil() < OVERLOAD_UTIL && db.getDiskUtil() < OVERLOAD_UTIL)) {
 			result = false;
 			break;
 		    }
