@@ -272,17 +272,25 @@ plotComparisonSimExecPerf <- function(forWorkload, type, vmId, property="percent
 }
 
 
-plotWorkload <- function(file = NA, wldf=1, legendNames=c("DC1", "DC2")) {
+plotWorkload <- function(file = NA, wldf=1, legendNames=c("DC1", "DC2"), size=NA) {
   dc1Freqs <- createFreqsDF(wldf=wldf)
   dc2Freqs <- createFreqsDF(offset = 12, wldf=wldf)
   #print(dc1Freqs)
   #print(dc2Freqs)
   
-  openGraphsDevice(file)
+  fullScreen(hasTitle = T, keepLeftMargin = F, minBorder = 0)
+  par(mgp = c(0, 0.5, 0.5))
+  
+  
+  if(is.na(size)) {
+    openGraphsDevice(file)
+  } else {
+    openSizedGraphsDevice(file, width=size[1], height=size[2])
+  }
   
   layoutMatrix <- matrix(c(1), 1, 1, byrow = TRUE)
   layoutWidths=c(4.5)
-  layoutHeigths=c(3.2)
+  layoutHeigths=c(2.5)
   layout(layoutMatrix, widths = layoutWidths, heights = layoutHeigths, respect=T)
   
   fullScreen(hasTitle=F)

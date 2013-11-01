@@ -35,7 +35,7 @@ public class Parser {
 	    FilenameFilter filter = new FilenameFilter() {
 		@Override
 		public boolean accept(File dir, String name) {
-		    return name.endsWith(".csv");
+		    return name.endsWith(".csv") && name.startsWith("Sessions-Broker") ;
 		}
 	    };
 

@@ -154,6 +154,37 @@ openGraphsDevice <- function(file) {
   }
 }
 
+#Prepares to write the file with the given size. If file is NA does nothing 
+openSizedGraphsDevice <- function(file, width, height, unit="cm") {
+  if (unit=="cm") {
+    width = 0.39370 * width
+    height = 0.39370 * height
+  }
+  
+  ext = if(is.na(file)) {
+    ""
+  } else {
+    getExtension(file)
+  }
+  
+  if(ext == "pdf") {
+    pdf(file, width = width, height = height)
+  } else if(ext == "wmf") {
+    win.metafile(file, width = width, height = height)
+  } else if(ext == "png") {
+    png(file, width = width, height = height, units="in")
+  } else if(ext == "jpeg") {
+    jpeg(file, width = width, height = height, units="in")
+  } else if(ext == "bmp") {
+    bmp(file, width = width, height = height, units="in")
+  } else if(ext == "ps") {
+    postscript(file, width = width, height = height)
+  } else if(ext == "svg") {
+    svg(file, width = width, height = height)
+  }
+}
+
+
 #Closes the graphical device/stream associated with this file.
 # If the file is NA - nothing happens
 closeDevice <- function(file) {

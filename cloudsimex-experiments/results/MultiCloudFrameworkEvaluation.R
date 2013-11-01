@@ -11,9 +11,9 @@ MINUTE = 60.0
 HOUR = 60.0 * MINUTE
 DAY = 24 * HOUR
 
-init = F
+init = T
 
-wldf=50
+wldf=20
 n=1
 sla=30
 numdb=1
@@ -60,10 +60,11 @@ hourLabel <- function(time, delta = 4) {
 }
 
 defTimeLabel <-function (data, delta = 4) {
-  labelList = unique(lapply(seq(0, 23, delta), function(x) {hourLabel(x * HOUR, delta)} ))
-  data$TimeLabel <- hourLabel(data$StartTime, delta)
-  data$TimeLabel <- factor(data$TimeLabel, levels = as.vector(labelList))
-  
+  if (nrow(data) > 0) {
+    labelList = unique(lapply(seq(0, 23, delta), function(x) {hourLabel(x * HOUR, delta)} ))
+    data$TimeLabel <- hourLabel(data$StartTime, delta)
+    data$TimeLabel <- factor(data$TimeLabel, levels = as.vector(labelList))
+  }
   return (data)
 }
 
@@ -121,7 +122,7 @@ adjustPlot <- function (plot, plotX=F, plotY=F, title=NULL, yLim=NA, plotLegend=
           axis.title.y = if(plotY) element_text(size = 15) else element_blank(),
           legend.key.size = unit(0.3, "cm"),
           plot.title = element_text(size = 10),
-          strip.text.x = element_text(size = 7, angle = 0)) + 
+          strip.text.x = element_text(size = 9.5, angle = 0)) + 
     xlab(NULL) +
     ylab(if (plotY) yLab else NULL) +
     ggtitle(title)
@@ -156,12 +157,12 @@ plotLatencies <- function (file=NA) {
                    data.frame(AlgLabel = names,
                               lower = stats[1, ],
                               upper = stats[5, ]))
-  openGraphsDevice(file)
-  
+  openSizedGraphsDevice(file, width=20, height=7)
+
   plot <- ggplot(data) + 
     geom_boxplot(aes(x = AlgLabel, y = Latency), 
                  width=0.5, position = position_dodge(width=0.2), 
-                 outlier.shape=NA, outlier.size=2) +
+                 outlier.shape=NA, outlier.size=2) + 
     geom_segment(data = whiskers, aes(x = as.numeric(AlgLabel) - 0.1,
                                       y = lower,
                                       xend = as.numeric(AlgLabel) + 0.1,
@@ -169,7 +170,8 @@ plotLatencies <- function (file=NA) {
     geom_segment(data = whiskers, aes(x = as.numeric(AlgLabel) - 0.1,
                                       y = upper,
                                       xend = as.numeric(AlgLabel) + 0.1,
-                                      yend = upper))
+                                      yend = upper)) 
+    
   
   # Define the y-biundaries of the boxplots
   ylim1 = boxplot.stats(baseline$Latency)$stats[c(1, 5)]
@@ -179,11 +181,12 @@ plotLatencies <- function (file=NA) {
   p <- adjustPlot(plot=plot, 
                   plotX=T, plotY=T, title=NULL, yLim=NA, plotLegend=F, yLab="Latency") + 
     theme(axis.text.x = element_text(angle = 0, hjust = 0.5, vjust=1, size = 15),
-          axis.text.y = element_text(angle = 90, hjust = 0.5, size = 15),
-          axis.title.x = element_text(size = 25),
-          axis.title.y = element_text(size = 25)) +  
-    coord_cartesian(ylim = ylim) +
-    stat_summary(aes(x = AlgLabel, y = Latency), fun.y = "mean", geom = "point", shape= 23, size= 2, fill="black")
+          axis.text.y = element_text(angle = 0, hjust = 0.5, size = 15),
+          axis.title.x = element_text(size = 20),
+          axis.title.y = element_text(size = 20)) +  
+    #coord_cartesian(ylim = ylim) +
+    stat_summary(aes(x = AlgLabel, y = Latency), fun.y = "mean", geom = "point", shape= 23, size= 2, fill="black") +     
+    coord_flip(ylim = ylim)
   
   grid.arrange(p)
   closeDevice(file)
@@ -243,7 +246,7 @@ g_legend<-function(a.gplot){
 }
 
 plotAllDCsSessionsSummary <- function(delta = 6, file = NA) {
-  openGraphsDevice(file)
+  openSizedGraphsDevice(file, width=20, height=17)
   allFrames <- lst<- list(runEuroEC2, runEuroGoogle, 
                           runUSEC2, runUSGoogle,
                           baselineEuroEC2, baselineEuroGoogle, 
@@ -261,17 +264,17 @@ plotAllDCsSessionsSummary <- function(delta = 6, file = NA) {
   }
   
   euroEC2 <- plotSessionsSumary(baselineEuroEC2, runEuroEC2, plotLegend=F,
-                                title="Euro EC2", plotY = T, plotX = F, yLim = barHeigth, delta=delta) +
+                                title="DC-EU-E", plotY = T, plotX = F, yLim = barHeigth, delta=delta) +
     theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
   euroGoogle <- plotSessionsSumary(baselineEuroGoogle, runEuroGoogle, plotLegend=F,
-                                   title="Euro Google", plotY = F, plotX = F, yLim = barHeigth,  delta=delta) +
+                                   title="DC-EU-G", plotY = F, plotX = F, yLim = barHeigth,  delta=delta) +
     theme(plot.margin = unit(c(0, 0, 0, 0.25), "lines"))
   
   usEC2 <- plotSessionsSumary(baselineUSEC2, runUSEC2, plotLegend=F, 
-                              title="US EC2", plotY = T, plotX = T, yLim = barHeigth, delta=delta) +
+                              title="DC-US-E", plotY = T, plotX = T, yLim = barHeigth, delta=delta) +
     theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
   usGoogle <- plotSessionsSumary(baselineUSGoogle, runUSGoogle, plotLegend=F,
-                                 title="US Google", plotY = F, plotX = T, yLim = barHeigth, delta=delta) +
+                                 title="DC-US-G", plotY = F, plotX = T, yLim = barHeigth, delta=delta) +
     theme(plot.margin = unit(c(0, 0, 0, 0.25), "lines"))
   
   widths=c(12, 11)
@@ -310,7 +313,8 @@ plotDelaySummary <- function(baselineDf, runDf, delta = 4, title = "Title...",
 
 plotAllDCsDelaySummary <-function (delta = 6, file = NA, byDC = F) {
   
-  openGraphsDevice(file)
+  #openGraphsDevice(file)
+  openSizedGraphsDevice(file, width=20, height=16)
   allFrames <- lst<- list(runEuroEC2, runEuroGoogle, 
                           runUSEC2, runUSGoogle,
                           baselineEuroEC2, baselineEuroGoogle, 
@@ -326,7 +330,7 @@ plotAllDCsDelaySummary <-function (delta = 6, file = NA, byDC = F) {
   
   if(byDC == F) {
     euro <- plotDelaySummary(rbind(baselineEuroEC2, baselineEuroGoogle), rbind(runEuroEC2, runEuroGoogle),
-                             title="Euro", plotY = T, plotX = F, yLim = maxHeigth, delta=delta) +
+                             title="Europe", plotY = T, plotX = F, yLim = maxHeigth, delta=delta) +
       theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
     
     us <- plotDelaySummary(rbind(baselineUSEC2, baselineUSGoogle), rbind(runUSEC2, runUSGoogle),
@@ -434,7 +438,7 @@ plotAllDCsSessionsSummary(file=allDCsSessionsSummaryF, delta=delta)
 plotAllDCsDelaySummary(file=allDCsDelaySummaryF, byDC = T, delta=delta)
 plotAllDCsDelaySummary(file=allRegDelaySummaryF, byDC = F, delta=delta)
 plotLatencies(file=latenciesF)
-plotWorkload(file=workloadF, wldf=wldf, legendNames=c("Euro", "US")) 
+plotWorkload(file=workloadF, wldf=wldf, legendNames=c("EU", "US"), size=c(25, 12)) 
 sink(sessSummaryF)
 printSessionsSummary()
 sink(NULL)
