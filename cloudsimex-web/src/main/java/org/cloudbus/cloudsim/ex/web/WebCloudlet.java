@@ -19,9 +19,8 @@ import org.cloudbus.cloudsim.ex.util.Textualize;
  * @author nikolay.grozev
  * 
  */
-@Textualize(properties = { "CloudletId", "SessionId", "Ram", "VmId", "Delay", "IdealStartTime", "ExecStartTime",
-	"CloudletLength", "CloudletIOLength",
-	"ActualCPUTime", "FinishTime", "CloudletStatusString", "Finished" })
+@Textualize(properties = { "CloudletId", "SessionId", "Ram", "VmId", "Delay", "IdealStartTime", "ExecStartTime", "CloudletLength", "CloudletIOLength",
+        "ActualCPUTime", "FinishTime", "CloudletStatusString", "Finished" })
 public class WebCloudlet extends HddCloudlet {
 
     private final double idealStartTime;
@@ -41,20 +40,14 @@ public class WebCloudlet extends HddCloudlet {
      * @param data
      *            - the data used by this cloudlet.
      * @param dataModifying
-     * 		  - whether this cloudlets modifies the data it accesses.
+     *            - whether this cloudlets modifies the data it accesses.
      * @param record
      *            - the record flag, as specified by the parent class.
      */
-    public WebCloudlet(final double idealStartTime,
-	    final long cloudletLength,
-	    final long cloudletIOLength,
-	    final double ram,
-	    final int userId,
-	    final boolean dataModifying,
-	    final DataItem data,
-	    final boolean record) {
-	super(cloudletLength, cloudletIOLength, 1, 1, ram, userId, dataModifying, data, record);
-	this.idealStartTime = idealStartTime;
+    public WebCloudlet(final double idealStartTime, final long cloudletLength, final long cloudletIOLength, final double ram, final int userId,
+            final boolean dataModifying, final DataItem data, final boolean record) {
+        super(cloudletLength, cloudletIOLength, 1, 1, ram, userId, dataModifying, data, record);
+        this.idealStartTime = idealStartTime;
     }
 
     /**
@@ -71,42 +64,39 @@ public class WebCloudlet extends HddCloudlet {
      * @param data
      *            - the data used by this cloudlet.
      * @param dataModifying
-     * 		  - whether this cloudlets modifies the data it accesses.
+     *            - whether this cloudlets modifies the data it accesses.
      */
-    public WebCloudlet(final double idealStartTime,
-	    final long cloudletLength,
-	    final long cloudletIOLength,
-	    final double ram,
-	    final int userId,
-	    final boolean dataModifying,
-	    final DataItem data) {
-	this(idealStartTime, cloudletLength, cloudletIOLength, ram, userId, dataModifying, data, false);
+    public WebCloudlet(final double idealStartTime, final long cloudletLength, final long cloudletIOLength, final double ram, final int userId,
+            final boolean dataModifying, final DataItem data) {
+        this(idealStartTime, cloudletLength, cloudletIOLength, ram, userId, dataModifying, data, false);
     }
-
 
     /**
      * Returns the ideal start time of this web cloudlet.
+     * 
      * @return the ideal start time of this web cloudlet.
      */
     public double getIdealStartTime() {
-	return idealStartTime;
+        return idealStartTime;
     }
 
     /**
      * Returns the id of the session this cloudlet belongs to.
+     * 
      * @return the id of the session this cloudlet belongs to.
      */
     public int getSessionId() {
-	return sessionId;
+        return sessionId;
     }
 
     /**
      * Sets the session id of the session this cloudlet belongs to.
+     * 
      * @param sessionId
      *            - the new session id.
      */
     public void setSessionId(final int sessionId) {
-	this.sessionId = sessionId;
+        this.sessionId = sessionId;
     }
 
     /**
@@ -116,8 +106,8 @@ public class WebCloudlet extends HddCloudlet {
      * @return the delay in the start time, as described above.
      */
     public double getDelay() {
-	double delay = getExecStartTime() - getIdealStartTime();
-	return delay < 0 ? -1 : delay;
+        double delay = getExecStartTime() - getIdealStartTime();
+        return delay < 0 ? -1 : delay;
     }
 
 }

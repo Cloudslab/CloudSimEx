@@ -31,8 +31,8 @@ public abstract class FrequencyFunction {
      *            - the unit of the frequency function.
      */
     public FrequencyFunction(double unit) {
-	super();
-	this.unit = unit;
+        super();
+        this.unit = unit;
     }
 
     /**
@@ -41,7 +41,7 @@ public abstract class FrequencyFunction {
      * @return - the unit of the frequency function.
      */
     public double getUnit() {
-	return unit;
+        return unit;
     }
 
     /**

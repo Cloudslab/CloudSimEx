@@ -24,8 +24,8 @@ public class DataItem {
      *            - the size of the data in this data item in megabytes.
      */
     public DataItem(final int dataSize) {
-	super();
-	this.dataSize = dataSize;
+        super();
+        this.dataSize = dataSize;
     }
 
     /**
@@ -34,7 +34,7 @@ public class DataItem {
      * @return the id
      */
     public int getId() {
-	return id;
+        return id;
     }
 
     /**
@@ -43,7 +43,7 @@ public class DataItem {
      * @return the data size in megabytes.
      */
     public int getDataSize() {
-	return dataSize;
+        return dataSize;
     }
 
 }

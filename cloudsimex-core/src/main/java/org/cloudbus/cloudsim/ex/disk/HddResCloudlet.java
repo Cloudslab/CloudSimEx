@@ -23,7 +23,7 @@ public class HddResCloudlet extends ResCloudlet {
      *            - the new cloudlet.
      */
     public HddResCloudlet(final HddCloudlet cloudlet) {
-	super(cloudlet);
+        super(cloudlet);
     }
 
     /*
@@ -33,7 +33,7 @@ public class HddResCloudlet extends ResCloudlet {
      */
     @Override
     public HddCloudlet getCloudlet() {
-	return (HddCloudlet) super.getCloudlet();
+        return (HddCloudlet) super.getCloudlet();
     }
 
     /**
@@ -42,7 +42,7 @@ public class HddResCloudlet extends ResCloudlet {
      * @return the number of harddisks utilized by the cloudlet.
      */
     public double getNumberOfHdds() {
-	return getCloudlet().getNumberOfHddPes();
+        return getCloudlet().getNumberOfHddPes();
     }
 
     /**
@@ -54,13 +54,13 @@ public class HddResCloudlet extends ResCloudlet {
      *            - the number of served IO instructions.
      */
     public void updateCloudletFinishedSoFar(final long cpuFinishedSoFar, final long ioFinishedSoFar) {
-	updateCloudletFinishedSoFar(cpuFinishedSoFar);
-	// Do not allow addition of mips to the IOFinishedSoFar variable, if the
-	// IO part of the cloudlet is finished. This is needed to avoid
-	// overflow of the variable.
-	if (getRemainingCloudletIOLength() > 0) {
-	    cloudletIOFinishedSoFar += ioFinishedSoFar;
-	}
+        updateCloudletFinishedSoFar(cpuFinishedSoFar);
+        // Do not allow addition of mips to the IOFinishedSoFar variable, if the
+        // IO part of the cloudlet is finished. This is needed to avoid
+        // overflow of the variable.
+        if (getRemainingCloudletIOLength() > 0) {
+            cloudletIOFinishedSoFar += ioFinishedSoFar;
+        }
     }
 
     /*
@@ -70,12 +70,12 @@ public class HddResCloudlet extends ResCloudlet {
      */
     @Override
     public void updateCloudletFinishedSoFar(final long miLength) {
-	// Do not allow addition of mips to the finishedSoFar variable, if the
-	// CPU part of the cloudlet is finished. This is needed to avoid
-	// overflow of the variable
-	if (getRemainingCloudletLength() > 0) {
-	    super.updateCloudletFinishedSoFar(miLength);
-	}
+        // Do not allow addition of mips to the finishedSoFar variable, if the
+        // CPU part of the cloudlet is finished. This is needed to avoid
+        // overflow of the variable
+        if (getRemainingCloudletLength() > 0) {
+            super.updateCloudletFinishedSoFar(miLength);
+        }
     }
 
     /**
@@ -84,8 +84,8 @@ public class HddResCloudlet extends ResCloudlet {
      * @return how many instructions are left from the aggregated cloudlet.
      */
     public long getRemainingCloudletIOLength() {
-	long length = getCloudlet().getCloudletTotalIOLength() * Consts.MILLION - cloudletIOFinishedSoFar;
-	return length < 0 ? 0 : (long) Math.floor(length / Consts.MILLION);
+        long length = getCloudlet().getCloudletTotalIOLength() * Consts.MILLION - cloudletIOFinishedSoFar;
+        return length < 0 ? 0 : (long) Math.floor(length / Consts.MILLION);
     }
 
     /**
@@ -96,7 +96,7 @@ public class HddResCloudlet extends ResCloudlet {
      *         of both CPU and IO.
      */
     public boolean isDone() {
-	return getRemainingCloudletIOLength() == 0 && getRemainingCloudletLength() == 0;
+        return getRemainingCloudletIOLength() == 0 && getRemainingCloudletLength() == 0;
     }
 
 }

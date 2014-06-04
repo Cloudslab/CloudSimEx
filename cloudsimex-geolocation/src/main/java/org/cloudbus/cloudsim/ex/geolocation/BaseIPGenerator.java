@@ -25,7 +25,7 @@ public abstract class BaseIPGenerator implements IPGenerator {
      *            - the country codes for this generator.
      */
     public BaseIPGenerator(final Set<String> countryCodes) {
-	this.countryCodes = Collections.unmodifiableSet(countryCodes);
+        this.countryCodes = Collections.unmodifiableSet(countryCodes);
     }
 
     /**
@@ -37,25 +37,25 @@ public abstract class BaseIPGenerator implements IPGenerator {
      *            - a seed if we need to get the same behavior again and again.
      */
     public BaseIPGenerator(final Set<String> countryCodes, final long seed) {
-	this.countryCodes = Collections.unmodifiableSet(countryCodes);
-	random.setSeed(seed);
+        this.countryCodes = Collections.unmodifiableSet(countryCodes);
+        random.setSeed(seed);
     }
 
     @Override
     public Set<String> getCountryCodes() {
-	return countryCodes;
+        return countryCodes;
     }
 
     @Override
     public String pollRandomIP(final IGeolocationService service, final int attempts) {
-	for (int i = 0; i < attempts || attempts == -1; i++) {
-	    String ip = pollRandomIP();
-	    IPMetadata metadata = service.getMetaData(ip);
-	    if (metadata != null && getCountryCodes().contains(metadata.getCountryIsoCode())) {
-		return ip;
-	    }
-	}
-	return null;
+        for (int i = 0; i < attempts || attempts == -1; i++) {
+            String ip = pollRandomIP();
+            IPMetadata metadata = service.getMetaData(ip);
+            if (metadata != null && getCountryCodes().contains(metadata.getCountryIsoCode())) {
+                return ip;
+            }
+        }
+        return null;
     }
 
     /**
@@ -65,6 +65,6 @@ public abstract class BaseIPGenerator implements IPGenerator {
      * @return the random object.
      */
     protected Random getRandom() {
-	return random;
+        return random;
     }
 }

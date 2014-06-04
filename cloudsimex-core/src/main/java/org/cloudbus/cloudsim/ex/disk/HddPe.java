@@ -28,10 +28,10 @@ public class HddPe extends Pe {
      *            - the data items in this harddisk. Must not be null.
      */
     public HddPe(final PeProvisioner peProvisioner, final Collection<DataItem> dataItems) {
-	super(Id.pollId(HddPe.class), peProvisioner);
-	for (DataItem item : dataItems) {
-	    data.put(item.getId(), item);
-	}
+        super(Id.pollId(HddPe.class), peProvisioner);
+        for (DataItem item : dataItems) {
+            data.put(item.getId(), item);
+        }
     }
 
     /**
@@ -43,7 +43,7 @@ public class HddPe extends Pe {
      *            - the data items in this harddisk. Must not be null.
      */
     public HddPe(final PeProvisioner peProvisioner, final DataItem... dataItems) {
-	this(peProvisioner, Arrays.asList(dataItems));
+        this(peProvisioner, Arrays.asList(dataItems));
     }
 
     /**
@@ -52,7 +52,7 @@ public class HddPe extends Pe {
      * @return a view of the data items stored in this harddisk.
      */
     public Collection<DataItem> getData() {
-	return data.values();
+        return data.values();
     }
 
     /**
@@ -65,7 +65,7 @@ public class HddPe extends Pe {
      *         harddisk. If not on the disk - then null is returned.
      */
     public DataItem getDataItem(final int id) {
-	return data.get(id);
+        return data.get(id);
     }
 
     /**
@@ -76,7 +76,7 @@ public class HddPe extends Pe {
      * @return if a data item with the specified id.
      */
     public boolean containsDataItem(final int id) {
-	return data.containsKey(id);
+        return data.containsKey(id);
     }
 
 }

@@ -49,145 +49,131 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
      * @param ramThreshold
      *            - the RAM threshold. Must be in the interval [0, 1].
      */
-    public CompressLoadBalancer(WebBroker broker, final long appId, final String ip, final List<HddVm> appServers,
-	    final IDBBalancer dbBalancer, double cpuThreshold, double ramThreshold) {
-	super(appId, ip, appServers, dbBalancer);
-	this.cpuThreshold = cpuThreshold;
-	this.ramThreshold = ramThreshold;
+    public CompressLoadBalancer(WebBroker broker, final long appId, final String ip, final List<HddVm> appServers, final IDBBalancer dbBalancer,
+            double cpuThreshold, double ramThreshold) {
+        super(appId, ip, appServers, dbBalancer);
+        this.cpuThreshold = cpuThreshold;
+        this.ramThreshold = ramThreshold;
 
-	this.broker = broker;
-	cpuUtilReverseComparator = new CPUUtilisationComparator();
+        this.broker = broker;
+        cpuUtilReverseComparator = new CPUUtilisationComparator();
     }
 
     @Override
     public void assignToServers(final WebSession... sessions) {
-	// Filter all sessions without an assigned application server
-	List<WebSession> noAppServSessions = new ArrayList<>(Arrays.asList(sessions));
-	for (ListIterator<WebSession> iter = noAppServSessions.listIterator(); iter.hasNext();) {
-	    WebSession sess = iter.next();
-	    if (sess.getAppVmId() != null) {
-		iter.remove();
-	    }
-	}
+        // Filter all sessions without an assigned application server
+        List<WebSession> noAppServSessions = new ArrayList<>(Arrays.asList(sessions));
+        for (ListIterator<WebSession> iter = noAppServSessions.listIterator(); iter.hasNext();) {
+            WebSession sess = iter.next();
+            if (sess.getAppVmId() != null) {
+                iter.remove();
+            }
+        }
 
-	updateNumberOfSessions(noAppServSessions, (int) CloudSim.clock());
+        updateNumberOfSessions(noAppServSessions, (int) CloudSim.clock());
 
-	List<HddVm> runingVMs = getRunningAppServers();
-	// No running AS servers - log an error
-	if (runingVMs.isEmpty()) {
-	    for (WebSession session : noAppServSessions) {
-		if (getAppServers().isEmpty()) {
-		    CustomLog.printf(Level.SEVERE,
-			    "Load Balancer(%s): session %d cannot be scheduled, as there are no AS servers",
-			    this.broker.toString(),
-			    session.getSessionId());
-		} else {
-		    CustomLog
-			    .printf(Level.SEVERE,
-				    "[Load Balancer](%s): session %d cannot be scheduled, as all AS servers are either booting or terminated",
-				    this.broker.toString(),
-				    session.getSessionId());
-		}
-	    }
-	} else {// Assign to one of the running VMs
-	    for (WebSession session : noAppServSessions) {
-		List<HddVm> vms = new ArrayList<>(runingVMs);
-		Map<Integer, Integer> usedASServers = this.broker.getASServersToNumSessions();
-		cpuUtilReverseComparator.setUsedASServers(usedASServers.keySet());
-		Collections.sort(vms, cpuUtilReverseComparator);
+        List<HddVm> runingVMs = getRunningAppServers();
+        // No running AS servers - log an error
+        if (runingVMs.isEmpty()) {
+            for (WebSession session : noAppServSessions) {
+                if (getAppServers().isEmpty()) {
+                    CustomLog.printf(Level.SEVERE, "Load Balancer(%s): session %d cannot be scheduled, as there are no AS servers", this.broker.toString(),
+                            session.getSessionId());
+                } else {
+                    CustomLog.printf(Level.SEVERE, "[Load Balancer](%s): session %d cannot be scheduled, as all AS servers are either booting or terminated",
+                            this.broker.toString(), session.getSessionId());
+                }
+            }
+        } else {// Assign to one of the running VMs
+            for (WebSession session : noAppServSessions) {
+                List<HddVm> vms = new ArrayList<>(runingVMs);
+                Map<Integer, Integer> usedASServers = this.broker.getASServersToNumSessions();
+                cpuUtilReverseComparator.setUsedASServers(usedASServers.keySet());
+                Collections.sort(vms, cpuUtilReverseComparator);
 
-		// For debug purposes:
-		debugSB.setLength(0);
-		for (HddVm vm : vms) {
-		    debugSB.append(String.format("%s[%s] cpu(%.2f), ram(%.2f), cdlts(%d), sess(%d); ",
-			    vm, (usedASServers.containsKey(vm.getId()) ? "" : "FREE, ") + vm.getStatus(),
-			    vm.getCPUUtil(), vm.getRAMUtil(), vm.getCloudletScheduler().getCloudletExecList().size(),
-			    !usedASServers.containsKey(vm.getId()) ? 0 : usedASServers.get(vm.getId())));
-		}
+                // For debug purposes:
+                debugSB.setLength(0);
+                for (HddVm vm : vms) {
+                    debugSB.append(String.format("%s[%s] cpu(%.2f), ram(%.2f), cdlts(%d), sess(%d); ", vm, (usedASServers.containsKey(vm.getId()) ? ""
+                            : "FREE, ") + vm.getStatus(), vm.getCPUUtil(), vm.getRAMUtil(), vm.getCloudletScheduler().getCloudletExecList().size(),
+                            !usedASServers.containsKey(vm.getId()) ? 0 : usedASServers.get(vm.getId())));
+                }
 
-		HddVm hostVM = vms.get(vms.size() - 1);
-		for (HddVm vm : vms) {
-		    if (vm.getCPUUtil() < cpuThreshold && vm.getRAMUtil() < ramThreshold && !vm.isOutOfMemory()) {
-			hostVM = vm;
-			break;
-		    }
-		}
+                HddVm hostVM = vms.get(vms.size() - 1);
+                for (HddVm vm : vms) {
+                    if (vm.getCPUUtil() < cpuThreshold && vm.getRAMUtil() < ramThreshold && !vm.isOutOfMemory()) {
+                        hostVM = vm;
+                        break;
+                    }
+                }
 
-		session.setAppVmId(hostVM.getId());
-		CustomLog
-			.printf(
-				"[Load Balancer](%s): Assigning sesssion %d to %s[%s] cpu(%.2f), ram(%.2f), cdlts(%d), sess(%d);",
-				broker, session.getSessionId(), hostVM, hostVM.getStatus(),
-				hostVM.getCPUUtil(), hostVM.getRAMUtil(), hostVM.getCloudletScheduler()
-					.getCloudletExecList()
-					.size(),
-				!usedASServers.containsKey(hostVM.getId()) ? 0 : usedASServers.get(hostVM.getId()));
-		CustomLog.printf("[Load Balancer](%s), Candidate VMs: %s", broker, debugSB);
+                session.setAppVmId(hostVM.getId());
+                CustomLog.printf("[Load Balancer](%s): Assigning sesssion %d to %s[%s] cpu(%.2f), ram(%.2f), cdlts(%d), sess(%d);", broker,
+                        session.getSessionId(), hostVM, hostVM.getStatus(), hostVM.getCPUUtil(), hostVM.getRAMUtil(), hostVM.getCloudletScheduler()
+                                .getCloudletExecList().size(), !usedASServers.containsKey(hostVM.getId()) ? 0 : usedASServers.get(hostVM.getId()));
+                CustomLog.printf("[Load Balancer](%s), Candidate VMs: %s", broker, debugSB);
 
-		// Log the state of the DB servers
-		debugSB.setLength(0);
-		for (HddVm dbVm : getDbBalancer().getVMs()) {
-		    debugSB.append(String.format("%s cpu(%.2f), ram(%.2f), disk(%.2f), cdlts(%d);",
-			    dbVm, dbVm.getCPUUtil(), dbVm.getRAMUtil(), dbVm.getDiskUtil(),
-			    dbVm.getCloudletScheduler().getCloudletExecList().size()));
-		}
-		CustomLog.printf("[Load Balancer](%s), DB VMs: %s", broker, debugSB);
-	    }
+                // Log the state of the DB servers
+                debugSB.setLength(0);
+                for (HddVm dbVm : getDbBalancer().getVMs()) {
+                    debugSB.append(String.format("%s cpu(%.2f), ram(%.2f), disk(%.2f), cdlts(%d);", dbVm, dbVm.getCPUUtil(), dbVm.getRAMUtil(),
+                            dbVm.getDiskUtil(), dbVm.getCloudletScheduler().getCloudletExecList().size()));
+                }
+                CustomLog.printf("[Load Balancer](%s), DB VMs: %s", broker, debugSB);
+            }
 
-	    // Set the DB VM
-	    for (WebSession session : sessions) {
-		if (session.getDbBalancer() == null) {
-		    session.setDbBalancer(getDbBalancer());
-		}
-	    }
-	}
+            // Set the DB VM
+            for (WebSession session : sessions) {
+                if (session.getDbBalancer() == null) {
+                    session.setDbBalancer(getDbBalancer());
+                }
+            }
+        }
     }
 
     private void updateNumberOfSessions(List<WebSession> noAppServSessions, int time) {
-	int secsToKeep = 60;
-	if (noAppServSessions == null || !noAppServSessions.isEmpty()) {
-	    secsToArrivals.put(time,
-		    !secsToArrivals.containsKey(time) ? noAppServSessions.size() : secsToArrivals.get(time)
-			    + noAppServSessions.size());
-	}
-	for (Iterator<Integer> iter = secsToArrivals.keySet().iterator(); iter.hasNext();) {
-	    int recorededTime = iter.next();
-	    if (recorededTime + secsToKeep < time) {
-		iter.remove();
-	    } else {
-		break;
-	    }
-	}
+        int secsToKeep = 60;
+        if (noAppServSessions == null || !noAppServSessions.isEmpty()) {
+            secsToArrivals.put(time, !secsToArrivals.containsKey(time) ? noAppServSessions.size() : secsToArrivals.get(time) + noAppServSessions.size());
+        }
+        for (Iterator<Integer> iter = secsToArrivals.keySet().iterator(); iter.hasNext();) {
+            int recorededTime = iter.next();
+            if (recorededTime + secsToKeep < time) {
+                iter.remove();
+            } else {
+                break;
+            }
+        }
     }
 
     public int getNumSessionsOverLastMinute() {
-	updateNumberOfSessions(null, (int) CloudSim.clock());
-	int result = 0;
-	for (Map.Entry<Integer, Integer> e : secsToArrivals.entrySet()) {
-	    result += e.getValue();
-	}
-	return result;
+        updateNumberOfSessions(null, (int) CloudSim.clock());
+        int result = 0;
+        for (Map.Entry<Integer, Integer> e : secsToArrivals.entrySet()) {
+            result += e.getValue();
+        }
+        return result;
     }
 
     private static class CPUUtilisationComparator implements Comparator<MonitoredVMex> {
 
-	private Set<Integer> usedASServers;
+        private Set<Integer> usedASServers;
 
-	public void setUsedASServers(Set<Integer> usedASServers) {
-	    this.usedASServers = usedASServers;
-	}
+        public void setUsedASServers(Set<Integer> usedASServers) {
+            this.usedASServers = usedASServers;
+        }
 
-	@Override
-	public int compare(final MonitoredVMex vm1, final MonitoredVMex vm2) {
-	    if (!usedASServers.contains(vm1.getId()) && !usedASServers.contains(vm2.getId())) {
-		return 0;
-	    } else if (!usedASServers.contains(vm1.getId())) {
-		return 1;
-	    } else if (!usedASServers.contains(vm2.getId())) {
-		return -1;
-	    } else {
-		return -Double.compare(vm1.getCPUUtil(), vm2.getCPUUtil());
-	    }
-	}
+        @Override
+        public int compare(final MonitoredVMex vm1, final MonitoredVMex vm2) {
+            if (!usedASServers.contains(vm1.getId()) && !usedASServers.contains(vm2.getId())) {
+                return 0;
+            } else if (!usedASServers.contains(vm1.getId())) {
+                return 1;
+            } else if (!usedASServers.contains(vm2.getId())) {
+                return -1;
+            } else {
+                return -Double.compare(vm1.getCPUUtil(), vm2.getCPUUtil());
+            }
+        }
     }
 }

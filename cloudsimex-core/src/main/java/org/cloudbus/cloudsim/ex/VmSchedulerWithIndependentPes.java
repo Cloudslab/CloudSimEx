@@ -29,63 +29,63 @@ public abstract class VmSchedulerWithIndependentPes<P extends Pe> extends VmSche
     private final LinkedHashMap<P, VmScheduler> peIdsToSchedulers = new LinkedHashMap<>();
 
     public VmSchedulerWithIndependentPes(final List<P> pelist) {
-	super(pelist);
-	for (P pe : pelist) {
-	    peIdsToSchedulers.put(pe, createSchedulerFroPe(pe));
-	}
+        super(pelist);
+        for (P pe : pelist) {
+            peIdsToSchedulers.put(pe, createSchedulerFroPe(pe));
+        }
     }
 
     @Override
     public List<Double> getAllocatedMipsForVm(final Vm vm) {
-	List<Double> result = new ArrayList<>();
-	for (Map.Entry<P, VmScheduler> entry : peIdsToSchedulers.entrySet()) {
-	    P pe = entry.getKey();
-	    VmScheduler scheduler = entry.getValue();
-	    if (doesVmUse(vm, pe)) {
-		List<Double> alloc = scheduler.getAllocatedMipsForVm(vm);
-		result.add(alloc.get(0));
-	    } else {
-		result.add(0.0);
-	    }
-	}
+        List<Double> result = new ArrayList<>();
+        for (Map.Entry<P, VmScheduler> entry : peIdsToSchedulers.entrySet()) {
+            P pe = entry.getKey();
+            VmScheduler scheduler = entry.getValue();
+            if (doesVmUse(vm, pe)) {
+                List<Double> alloc = scheduler.getAllocatedMipsForVm(vm);
+                result.add(alloc.get(0));
+            } else {
+                result.add(0.0);
+            }
+        }
 
-	return result;
+        return result;
     }
 
     @Override
     public boolean allocatePesForVm(final Vm vm, final List<Double> mipsShare) {
-	boolean result = true;
-	int i = 0;
-	for (Map.Entry<P, VmScheduler> entry : peIdsToSchedulers.entrySet()) {
-	    P pe = entry.getKey();
-	    VmScheduler scheduler = entry.getValue();
-	    if (doesVmUse(vm, pe)) {
-		// Call the scheduler of the i-th Pe with the i-th value from
-		// the mipsShare
-		result &= scheduler.allocatePesForVm(vm, mipsShare.subList(i, i + 1));
-	    }
-	    i++;
-	}
-	return result;
+        boolean result = true;
+        int i = 0;
+        for (Map.Entry<P, VmScheduler> entry : peIdsToSchedulers.entrySet()) {
+            P pe = entry.getKey();
+            VmScheduler scheduler = entry.getValue();
+            if (doesVmUse(vm, pe)) {
+                // Call the scheduler of the i-th Pe with the i-th value from
+                // the mipsShare
+                result &= scheduler.allocatePesForVm(vm, mipsShare.subList(i, i + 1));
+            }
+            i++;
+        }
+        return result;
     }
 
     @Override
     public void deallocatePesForVm(final Vm vm) {
-	for (Map.Entry<P, VmScheduler> entry : peIdsToSchedulers.entrySet()) {
-	    P pe = entry.getKey();
-	    VmScheduler scheduler = entry.getValue();
-	    if (doesVmUse(vm, pe)) {
-		scheduler.deallocatePesForVm(vm);
-	    }
-	}
+        for (Map.Entry<P, VmScheduler> entry : peIdsToSchedulers.entrySet()) {
+            P pe = entry.getKey();
+            VmScheduler scheduler = entry.getValue();
+            if (doesVmUse(vm, pe)) {
+                scheduler.deallocatePesForVm(vm);
+            }
+        }
     }
 
     @Override
     public void deallocatePesForAllVms() {
-	for (Map.Entry<P, VmScheduler> entry : peIdsToSchedulers.entrySet()) {
-	    VmScheduler scheduler = entry.getValue();
-	    scheduler.deallocatePesForAllVms();
-	}
+        for (Map.Entry<P, VmScheduler> entry : peIdsToSchedulers.entrySet()) {
+            VmScheduler scheduler = entry.getValue();
+            scheduler.deallocatePesForAllVms();
+        }
     }
 
     /**

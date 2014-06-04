@@ -61,23 +61,23 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      * @post $none
      */
     public HddCloudletSchedulerTimeShared() {
-	super();
+        super();
 
-	// We replace the ArrayList from the parent with a LindedList, since we
-	// need better performance for insertion/deletion etc.
-	cloudletWaitingList = new LinkedList<>();
-	cloudletExecList = new LinkedList<>();
-	cloudletPausedList = new LinkedList<>();
-	cloudletFinishedList = new LinkedList<>();
-	cloudletFailedList = new LinkedList<>();
+        // We replace the ArrayList from the parent with a LindedList, since we
+        // need better performance for insertion/deletion etc.
+        cloudletWaitingList = new LinkedList<>();
+        cloudletExecList = new LinkedList<>();
+        cloudletPausedList = new LinkedList<>();
+        cloudletFinishedList = new LinkedList<>();
+        cloudletFailedList = new LinkedList<>();
     }
 
     public HddVm getVm() {
-	return vm;
+        return vm;
     }
 
     public void setVm(final HddVm vm) {
-	this.vm = vm;
+        this.vm = vm;
     }
 
     /**
@@ -86,7 +86,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      * @return the current IO Mips share.
      */
     public List<Double> getCurrentIOMipsShare() {
-	return currentIOMipsShare;
+        return currentIOMipsShare;
     }
 
     /**
@@ -96,7 +96,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      *            - the current IO Mips share.
      */
     public void setCurrentIOMipsShare(final List<Double> currentIOMipsShare) {
-	this.currentIOMipsShare = currentIOMipsShare;
+        this.currentIOMipsShare = currentIOMipsShare;
     }
 
     /**
@@ -115,7 +115,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      */
     @Override
     public double updateVmProcessing(final double currentTime, final List<Double> mipsShare) {
-	return updateVmProcessing(currentTime, mipsShare, Arrays.<Double> asList());
+        return updateVmProcessing(currentTime, mipsShare, Arrays.<Double> asList());
     }
 
     /**
@@ -125,108 +125,99 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      * @param iopsShare
      * @return
      */
-    public double updateVmProcessing(final double currentTime, final List<Double> mipsShare,
-	    final List<Double> iopsShare) {
-	CustomLog.printf(Level.FINEST, "\nupdateVmProcessing(currentTime=%f, mipsShare=%s,final iopsShare=%s)",
-		currentTime, mipsShare.toString(), iopsShare.toString());
+    public double updateVmProcessing(final double currentTime, final List<Double> mipsShare, final List<Double> iopsShare) {
+        CustomLog.printf(Level.FINEST, "\nupdateVmProcessing(currentTime=%f, mipsShare=%s,final iopsShare=%s)", currentTime, mipsShare.toString(),
+                iopsShare.toString());
 
-	setCurrentMipsShare(mipsShare);
-	setCurrentIOMipsShare(iopsShare);
+        setCurrentMipsShare(mipsShare);
+        setCurrentIOMipsShare(iopsShare);
 
-	if (getCloudletExecList().isEmpty()) {
-	    setPreviousTime(currentTime);
-	    return 0.0;
-	}
+        if (getCloudletExecList().isEmpty()) {
+            setPreviousTime(currentTime);
+            return 0.0;
+        }
 
-	double timeSpam = currentTime - getPreviousTime();
+        double timeSpam = currentTime - getPreviousTime();
 
-	double cpuCapacity = getCPUCapacity(mipsShare);
-	int[] disksToNumCloudlets = disksToNumCloudlets();
-	int[] disksToNumCopy = Arrays.copyOf(disksToNumCloudlets, disksToNumCloudlets.length);
-	for (ListIterator<HddResCloudlet> iter = this.<HddResCloudlet> getCloudletExecList().listIterator(); iter
-		.hasNext();) {
-	    HddResCloudlet rcl = iter.next();
-	    long cpuFinishedSoFar =
-		    (long) (cpuCapacity * timeSpam * rcl.getNumberOfPes() * Consts.MILLION);
-	    long ioFinishedSoFar =
-		    (long) (getIOCapacity(iopsShare, disksToNumCloudlets, rcl) * timeSpam * rcl.getNumberOfHdds() * Consts.MILLION);
+        double cpuCapacity = getCPUCapacity(mipsShare);
+        int[] disksToNumCloudlets = disksToNumCloudlets();
+        int[] disksToNumCopy = Arrays.copyOf(disksToNumCloudlets, disksToNumCloudlets.length);
+        for (ListIterator<HddResCloudlet> iter = this.<HddResCloudlet> getCloudletExecList().listIterator(); iter.hasNext();) {
+            HddResCloudlet rcl = iter.next();
+            long cpuFinishedSoFar = (long) (cpuCapacity * timeSpam * rcl.getNumberOfPes() * Consts.MILLION);
+            long ioFinishedSoFar = (long) (getIOCapacity(iopsShare, disksToNumCloudlets, rcl) * timeSpam * rcl.getNumberOfHdds() * Consts.MILLION);
 
-	    rcl.updateCloudletFinishedSoFar(cpuFinishedSoFar, ioFinishedSoFar);
+            rcl.updateCloudletFinishedSoFar(cpuFinishedSoFar, ioFinishedSoFar);
 
-	    // Check if it is finished now ... after we just updated it
-	    long remainingLength = rcl.getRemainingCloudletLength();
-	    long remainingIOLength = rcl.getRemainingCloudletIOLength();
-	    if (remainingLength == 0 && remainingIOLength == 0) {
-		cloudletFinish(rcl);
-		iter.remove();
+            // Check if it is finished now ... after we just updated it
+            long remainingLength = rcl.getRemainingCloudletLength();
+            long remainingIOLength = rcl.getRemainingCloudletIOLength();
+            if (remainingLength == 0 && remainingIOLength == 0) {
+                cloudletFinish(rcl);
+                iter.remove();
 
-		// Update the disksToNumCopy, since it is expensive to recompute
-		updateDisksToNumMapping(disksToNumCopy, rcl);
-	    }
-	}
+                // Update the disksToNumCopy, since it is expensive to recompute
+                updateDisksToNumMapping(disksToNumCopy, rcl);
+            }
+        }
 
-	double nextEvent = computeNextEventTime(currentTime, mipsShare, iopsShare, disksToNumCopy);
-	setPreviousTime(currentTime);
+        double nextEvent = computeNextEventTime(currentTime, mipsShare, iopsShare, disksToNumCopy);
+        setPreviousTime(currentTime);
 
-	return nextEvent;
+        return nextEvent;
     }
 
     private void updateDisksToNumMapping(int[] disksToNumCopy, HddResCloudlet rcl) {
-	List<? extends HddPe> pes = getVm().getHost().getHddList();
-	DataItem dataItem = rcl.getCloudlet().getData();
-	if (dataItem != null && rcl.getRemainingCloudletIOLength() == 0) {
-	    for (int i = 0; i < pes.size(); i++) {
-		// Does the cloudlet use the disk
-		if (pes.get(i).containsDataItem(dataItem.getId())) {
-		    disksToNumCopy[i]--;
-		    break;
-		}
-	    }
-	}
+        List<? extends HddPe> pes = getVm().getHost().getHddList();
+        DataItem dataItem = rcl.getCloudlet().getData();
+        if (dataItem != null && rcl.getRemainingCloudletIOLength() == 0) {
+            for (int i = 0; i < pes.size(); i++) {
+                // Does the cloudlet use the disk
+                if (pes.get(i).containsDataItem(dataItem.getId())) {
+                    disksToNumCopy[i]--;
+                    break;
+                }
+            }
+        }
     }
 
-    private double computeNextEventTime(final double currentTime, final List<Double> mipsShare,
-	    final List<Double> iopsShare, int[] disksToNumCloudlets) {
-	// check finished cloudlets
-	double nextEvent = Double.MAX_VALUE;
+    private double computeNextEventTime(final double currentTime, final List<Double> mipsShare, final List<Double> iopsShare, int[] disksToNumCloudlets) {
+        // check finished cloudlets
+        double nextEvent = Double.MAX_VALUE;
 
-	double cpuCapacity = getCPUCapacity(mipsShare);
-	// int[] disksToNumCloudlets = disksToNumCloudlets();
+        double cpuCapacity = getCPUCapacity(mipsShare);
+        // int[] disksToNumCloudlets = disksToNumCloudlets();
 
-	// estimate finish time of cloudlets
-	for (HddResCloudlet rcl : this.<HddResCloudlet> getCloudletExecList()) {
-	    double estimatedFinishCPUTime = rcl.getRemainingCloudletLength() == 0 ? Double.NaN :
-		    currentTime
-			    + (rcl.getRemainingCloudletLength() / (cpuCapacity * rcl.getNumberOfPes()));
-	    double estimatedFinishIOTime = rcl.getRemainingCloudletIOLength() == 0 ? Double.NaN
-		    :
-		    currentTime
-			    + (rcl.getRemainingCloudletIOLength() / (getIOCapacity(iopsShare, disksToNumCloudlets, rcl) * rcl
-				    .getNumberOfHdds()));
+        // estimate finish time of cloudlets
+        for (HddResCloudlet rcl : this.<HddResCloudlet> getCloudletExecList()) {
+            double estimatedFinishCPUTime = rcl.getRemainingCloudletLength() == 0 ? Double.NaN : currentTime
+                    + (rcl.getRemainingCloudletLength() / (cpuCapacity * rcl.getNumberOfPes()));
+            double estimatedFinishIOTime = rcl.getRemainingCloudletIOLength() == 0 ? Double.NaN : currentTime
+                    + (rcl.getRemainingCloudletIOLength() / (getIOCapacity(iopsShare, disksToNumCloudlets, rcl) * rcl.getNumberOfHdds()));
 
-	    double estimatedFinishTime = nanMin(estimatedFinishCPUTime, estimatedFinishIOTime);
+            double estimatedFinishTime = nanMin(estimatedFinishCPUTime, estimatedFinishIOTime);
 
-	    if (!Double.isNaN(estimatedFinishTime) && estimatedFinishTime - currentTime < CloudSim.getMinTimeBetweenEvents()) {
-		estimatedFinishTime = currentTime + CloudSim.getMinTimeBetweenEvents();
-	    }
+            if (!Double.isNaN(estimatedFinishTime) && estimatedFinishTime - currentTime < CloudSim.getMinTimeBetweenEvents()) {
+                estimatedFinishTime = currentTime + CloudSim.getMinTimeBetweenEvents();
+            }
 
-	    if (!Double.isNaN(estimatedFinishTime) && estimatedFinishTime < nextEvent) {
-		nextEvent = estimatedFinishTime;
-	    }
-	}
-	return nextEvent;
+            if (!Double.isNaN(estimatedFinishTime) && estimatedFinishTime < nextEvent) {
+                nextEvent = estimatedFinishTime;
+            }
+        }
+        return nextEvent;
     }
 
     private static double nanMin(final double estimatedFinishCPUTime, final double estimatedFinishIOTime) {
-	double estimatedFinishTime = Double.NaN;
-	if (Double.isNaN(estimatedFinishCPUTime)) {
-	    estimatedFinishTime = estimatedFinishIOTime;
-	} else if (Double.isNaN(estimatedFinishIOTime)) {
-	    estimatedFinishTime = estimatedFinishCPUTime;
-	} else {
-	    estimatedFinishTime = Math.min(estimatedFinishCPUTime, estimatedFinishIOTime);
-	}
-	return estimatedFinishTime;
+        double estimatedFinishTime = Double.NaN;
+        if (Double.isNaN(estimatedFinishCPUTime)) {
+            estimatedFinishTime = estimatedFinishIOTime;
+        } else if (Double.isNaN(estimatedFinishIOTime)) {
+            estimatedFinishTime = estimatedFinishCPUTime;
+        } else {
+            estimatedFinishTime = Math.min(estimatedFinishCPUTime, estimatedFinishIOTime);
+        }
+        return estimatedFinishTime;
     }
 
     // private void removeFinishedCloudlets() {
@@ -283,27 +274,27 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
     // }
 
     private double getIOCapacity(final List<Double> mipsShare, int[] diskToCloudlets, final HddResCloudlet rcl) {
-	DataItem dataItem = rcl.getCloudlet().getData();
-	double result = 0;
-	if (dataItem != null && rcl.getRemainingCloudletIOLength() > 0) {
-	    List<? extends HddPe> pes = getVm().getHost().getHddList();
+        DataItem dataItem = rcl.getCloudlet().getData();
+        double result = 0;
+        if (dataItem != null && rcl.getRemainingCloudletIOLength() > 0) {
+            List<? extends HddPe> pes = getVm().getHost().getHddList();
 
-	    // Get the index of the disk, containing the data item
-	    int hddIndxInHost = -1;
-	    for (int i = 0; i < pes.size(); i++) {
-		if (pes.get(i).containsDataItem(dataItem.getId())) {
-		    hddIndxInHost = i;
-		    break;
-		}
-	    }
+            // Get the index of the disk, containing the data item
+            int hddIndxInHost = -1;
+            for (int i = 0; i < pes.size(); i++) {
+                if (pes.get(i).containsDataItem(dataItem.getId())) {
+                    hddIndxInHost = i;
+                    break;
+                }
+            }
 
-	    if (hddIndxInHost >= 0) {
-		// The result is the IOPS of the harddisk divided by the number
-		// of cloudlets using it
-		result = mipsShare.get(hddIndxInHost) / diskToCloudlets[hddIndxInHost];
-	    }
-	}
-	return result;
+            if (hddIndxInHost >= 0) {
+                // The result is the IOPS of the harddisk divided by the number
+                // of cloudlets using it
+                result = mipsShare.get(hddIndxInHost) / diskToCloudlets[hddIndxInHost];
+            }
+        }
+        return result;
     }
 
     /**
@@ -314,21 +305,21 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      * @return how many cloudlets use each of the disks.
      */
     private int[] disksToNumCloudlets() {
-	List<? extends HddPe> pes = getVm().getHost().getHddList();
-	int[] res = new int[pes.size()];
-	for (HddResCloudlet rcl : this.<HddResCloudlet> getCloudletExecList()) {
-	    DataItem dataItem = rcl.getCloudlet().getData();
-	    if (dataItem != null && rcl.getRemainingCloudletIOLength() > 0) {
-		for (int i = 0; i < pes.size(); i++) {
-		    // Does the cloudlet use the disk
-		    if (pes.get(i).containsDataItem(dataItem.getId())) {
-			res[i]++;
-			break;
-		    }
-		}
-	    }
-	}
-	return res;
+        List<? extends HddPe> pes = getVm().getHost().getHddList();
+        int[] res = new int[pes.size()];
+        for (HddResCloudlet rcl : this.<HddResCloudlet> getCloudletExecList()) {
+            DataItem dataItem = rcl.getCloudlet().getData();
+            if (dataItem != null && rcl.getRemainingCloudletIOLength() > 0) {
+                for (int i = 0; i < pes.size(); i++) {
+                    // Does the cloudlet use the disk
+                    if (pes.get(i).containsDataItem(dataItem.getId())) {
+                        res[i]++;
+                        break;
+                    }
+                }
+            }
+        }
+        return res;
     }
 
     // private void updateDiskToNumCloudlets(int[] disksToNum,
@@ -349,28 +340,28 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
     // }
 
     private double getCPUCapacity(final List<Double> mipsShare) {
-	double capacity = 0.0;
-	int cpus = 0;
-	for (Double mips : mipsShare) {
-	    capacity += mips;
-	    if (mips > 0.0) {
-		cpus++;
-	    }
-	}
+        double capacity = 0.0;
+        int cpus = 0;
+        for (Double mips : mipsShare) {
+            capacity += mips;
+            if (mips > 0.0) {
+                cpus++;
+            }
+        }
 
-	int pesInUse = 0;
-	for (HddResCloudlet rcl : this.<HddResCloudlet> getCloudletExecList()) {
-	    if (rcl.getRemainingCloudletLength() != 0) {
-		pesInUse += rcl.getNumberOfPes();
-	    }
-	}
+        int pesInUse = 0;
+        for (HddResCloudlet rcl : this.<HddResCloudlet> getCloudletExecList()) {
+            if (rcl.getRemainingCloudletLength() != 0) {
+                pesInUse += rcl.getNumberOfPes();
+            }
+        }
 
-	if (pesInUse > cpus) {
-	    capacity /= pesInUse;
-	} else {
-	    capacity /= cpus;
-	}
-	return capacity;
+        if (pesInUse > cpus) {
+            capacity /= pesInUse;
+        } else {
+            capacity /= cpus;
+        }
+        return capacity;
     }
 
     /**
@@ -384,33 +375,33 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      */
     @Override
     public HddCloudlet cloudletCancel(final int cloudletId) {
-	// First, looks in the finished queue
-	int position = ResCloudletList.getPositionById(getCloudletFinishedList(), cloudletId);
+        // First, looks in the finished queue
+        int position = ResCloudletList.getPositionById(getCloudletFinishedList(), cloudletId);
 
-	if (position >= 0) {
-	    return this.<HddResCloudlet> getCloudletFinishedList().remove(position).getCloudlet();
-	}
+        if (position >= 0) {
+            return this.<HddResCloudlet> getCloudletFinishedList().remove(position).getCloudlet();
+        }
 
-	// Then searches in the exec list
-	position = ResCloudletList.getPositionById(getCloudletExecList(), cloudletId);
+        // Then searches in the exec list
+        position = ResCloudletList.getPositionById(getCloudletExecList(), cloudletId);
 
-	if (position >= 0) {
-	    HddResCloudlet rcl = this.<HddResCloudlet> getCloudletExecList().remove(position);
-	    if (rcl.isDone()) {
-		cloudletFinish(rcl);
-	    } else {
-		rcl.setCloudletStatus(HddCloudlet.CANCELED);
-	    }
-	    return rcl.getCloudlet();
-	}
+        if (position >= 0) {
+            HddResCloudlet rcl = this.<HddResCloudlet> getCloudletExecList().remove(position);
+            if (rcl.isDone()) {
+                cloudletFinish(rcl);
+            } else {
+                rcl.setCloudletStatus(HddCloudlet.CANCELED);
+            }
+            return rcl.getCloudlet();
+        }
 
-	// Now, looks in the paused queue
-	position = ResCloudletList.getPositionById(getCloudletPausedList(), cloudletId);
-	if (position >= 0) {
-	    return this.<HddResCloudlet> getCloudletPausedList().remove(position).getCloudlet();
-	}
+        // Now, looks in the paused queue
+        position = ResCloudletList.getPositionById(getCloudletPausedList(), cloudletId);
+        if (position >= 0) {
+            return this.<HddResCloudlet> getCloudletPausedList().remove(position).getCloudlet();
+        }
 
-	return null;
+        return null;
     }
 
     /**
@@ -424,20 +415,20 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      */
     @Override
     public boolean cloudletPause(final int cloudletId) {
-	int position = ResCloudletList.getPositionById(getCloudletExecList(), cloudletId);
+        int position = ResCloudletList.getPositionById(getCloudletExecList(), cloudletId);
 
-	if (position >= 0) {
-	    // remove cloudlet from the exec list and put it in the paused list
-	    HddResCloudlet rcl = this.<HddResCloudlet> getCloudletExecList().remove(position);
-	    if (rcl.isDone()) {
-		cloudletFinish(rcl);
-	    } else {
-		rcl.setCloudletStatus(HddCloudlet.PAUSED);
-		getCloudletPausedList().add(rcl);
-	    }
-	    return true;
-	}
-	return false;
+        if (position >= 0) {
+            // remove cloudlet from the exec list and put it in the paused list
+            HddResCloudlet rcl = this.<HddResCloudlet> getCloudletExecList().remove(position);
+            if (rcl.isDone()) {
+                cloudletFinish(rcl);
+            } else {
+                rcl.setCloudletStatus(HddCloudlet.PAUSED);
+                getCloudletPausedList().add(rcl);
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -451,9 +442,9 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void cloudletFinish(final ResCloudlet rcl) {
-	rcl.setCloudletStatus(HddCloudlet.SUCCESS);
-	rcl.finalizeCloudlet();
-	((List) getCloudletFinishedList()).add(rcl);
+        rcl.setCloudletStatus(HddCloudlet.SUCCESS);
+        rcl.finalizeCloudlet();
+        ((List) getCloudletFinishedList()).add(rcl);
     }
 
     /**
@@ -468,31 +459,27 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
     // Changed
     @Override
     public double cloudletResume(final int cloudletId) {
-	int position = ResCloudletList.getPositionById(getCloudletPausedList(), cloudletId);
+        int position = ResCloudletList.getPositionById(getCloudletPausedList(), cloudletId);
 
-	if (position >= 0) {
-	    HddResCloudlet rgl = this.<HddResCloudlet> getCloudletPausedList().remove(position);
-	    rgl.setCloudletStatus(HddCloudlet.INEXEC);
-	    getCloudletExecList().add(rgl);
+        if (position >= 0) {
+            HddResCloudlet rgl = this.<HddResCloudlet> getCloudletPausedList().remove(position);
+            rgl.setCloudletStatus(HddCloudlet.INEXEC);
+            getCloudletExecList().add(rgl);
 
-	    // calculate the expected time for cloudlet completion
-	    // first: how many PEs do we have?
+            // calculate the expected time for cloudlet completion
+            // first: how many PEs do we have?
 
-	    double remainingLength = rgl.getRemainingCloudletLength();
-	    double remainingIOLength = rgl.getRemainingCloudletIOLength();
-	    double estimatedFinishCPUTime = remainingLength == 0 ? Double.NaN :
-		    CloudSim.clock()
-			    + (remainingLength / (getCPUCapacity(getCurrentMipsShare()) * rgl.getNumberOfPes()));
-	    double estimatedFinishIOTime = remainingIOLength == 0 ? Double.NaN
-		    :
-		    CloudSim.clock()
-			    + (remainingIOLength / (getIOCapacity(getCurrentIOMipsShare(), disksToNumCloudlets(), rgl) * rgl
-				    .getNumberOfHdds()));
+            double remainingLength = rgl.getRemainingCloudletLength();
+            double remainingIOLength = rgl.getRemainingCloudletIOLength();
+            double estimatedFinishCPUTime = remainingLength == 0 ? Double.NaN : CloudSim.clock()
+                    + (remainingLength / (getCPUCapacity(getCurrentMipsShare()) * rgl.getNumberOfPes()));
+            double estimatedFinishIOTime = remainingIOLength == 0 ? Double.NaN : CloudSim.clock()
+                    + (remainingIOLength / (getIOCapacity(getCurrentIOMipsShare(), disksToNumCloudlets(), rgl) * rgl.getNumberOfHdds()));
 
-	    return nanMin(estimatedFinishCPUTime, estimatedFinishIOTime);
-	}
+            return nanMin(estimatedFinishCPUTime, estimatedFinishIOTime);
+        }
 
-	return 0.0;
+        return 0.0;
     }
 
     /**
@@ -510,39 +497,37 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
     // Changed
     @Override
     public double cloudletSubmit(final Cloudlet cloudlet, final double fileTransferTime) {
-	HddCloudlet hddCloudlet = (HddCloudlet) cloudlet;
+        HddCloudlet hddCloudlet = (HddCloudlet) cloudlet;
 
-	HddResCloudlet rcl = new HddResCloudlet(hddCloudlet);
-	rcl.setCloudletStatus(HddCloudlet.INEXEC);
-	for (int i = 0; i < hddCloudlet.getNumberOfPes(); i++) {
-	    rcl.setMachineAndPeId(0, i);
-	}
+        HddResCloudlet rcl = new HddResCloudlet(hddCloudlet);
+        rcl.setCloudletStatus(HddCloudlet.INEXEC);
+        for (int i = 0; i < hddCloudlet.getNumberOfPes(); i++) {
+            rcl.setMachineAndPeId(0, i);
+        }
 
-	if (containsDataFor(rcl)) {
-	    getCloudletExecList().add(rcl);
+        if (containsDataFor(rcl)) {
+            getCloudletExecList().add(rcl);
 
-	    // use the current capacity to estimate the extra amount of
-	    // time to file transferring. It must be added to the cloudlet
-	    // length
-	    double extraSize = getCPUCapacity(getCurrentMipsShare()) * fileTransferTime;
-	    long cpuLength = (long) (hddCloudlet.getCloudletLength() + extraSize);
-	    long ioLength = hddCloudlet.getCloudletIOLength();
-	    hddCloudlet.setCloudletLength(cpuLength);
-	    hddCloudlet.setCloudletIOLength(ioLength);
+            // use the current capacity to estimate the extra amount of
+            // time to file transferring. It must be added to the cloudlet
+            // length
+            double extraSize = getCPUCapacity(getCurrentMipsShare()) * fileTransferTime;
+            long cpuLength = (long) (hddCloudlet.getCloudletLength() + extraSize);
+            long ioLength = hddCloudlet.getCloudletIOLength();
+            hddCloudlet.setCloudletLength(cpuLength);
+            hddCloudlet.setCloudletIOLength(ioLength);
 
-	    double cpuEst = hddCloudlet.getCloudletLength() == 0 ? Double.NaN :
-		    hddCloudlet.getCloudletLength() / getCPUCapacity(getCurrentMipsShare());
-	    double ioEst = hddCloudlet.getCloudletIOLength() == 0 ? Double.NaN :
-		    hddCloudlet.getCloudletIOLength()
-			    / getIOCapacity(getCurrentIOMipsShare(), disksToNumCloudlets(), rcl);
+            double cpuEst = hddCloudlet.getCloudletLength() == 0 ? Double.NaN : hddCloudlet.getCloudletLength() / getCPUCapacity(getCurrentMipsShare());
+            double ioEst = hddCloudlet.getCloudletIOLength() == 0 ? Double.NaN : hddCloudlet.getCloudletIOLength()
+                    / getIOCapacity(getCurrentIOMipsShare(), disksToNumCloudlets(), rcl);
 
-	    return nanMin(cpuEst, ioEst);
-	} else {
-	    CustomLog.printf("Cloudlet %d could not be served on VM %d, since its data item #%d is not accessible.",
-		    hddCloudlet.getCloudletId(), getVm().getId(), hddCloudlet.getData().getId());
-	    failCloudlet(rcl);
-	    return 0;
-	}
+            return nanMin(cpuEst, ioEst);
+        } else {
+            CustomLog.printf("Cloudlet %d could not be served on VM %d, since its data item #%d is not accessible.", hddCloudlet.getCloudletId(), getVm()
+                    .getId(), hddCloudlet.getData().getId());
+            failCloudlet(rcl);
+            return 0;
+        }
     }
 
     /*
@@ -552,7 +537,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      */
     @Override
     public double cloudletSubmit(final Cloudlet cloudlet) {
-	return cloudletSubmit(cloudlet, 0.0);
+        return cloudletSubmit(cloudlet, 0.0);
     }
 
     /**
@@ -566,15 +551,15 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      */
     @Override
     public int getCloudletStatus(final int cloudletId) {
-	int position = ResCloudletList.getPositionById(getCloudletExecList(), cloudletId);
-	if (position >= 0) {
-	    return getCloudletExecList().get(position).getCloudletStatus();
-	}
-	position = ResCloudletList.getPositionById(getCloudletExecList(), cloudletId);
-	if (position >= 0) {
-	    return getCloudletPausedList().get(position).getCloudletStatus();
-	}
-	return -1;
+        int position = ResCloudletList.getPositionById(getCloudletExecList(), cloudletId);
+        if (position >= 0) {
+            return getCloudletExecList().get(position).getCloudletStatus();
+        }
+        position = ResCloudletList.getPositionById(getCloudletExecList(), cloudletId);
+        if (position >= 0) {
+            return getCloudletPausedList().get(position).getCloudletStatus();
+        }
+        return -1;
     }
 
     /**
@@ -586,11 +571,11 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      */
     @Override
     public double getTotalUtilizationOfCpu(final double time) {
-	double totalUtilization = 0;
-	for (HddResCloudlet gl : this.<HddResCloudlet> getCloudletExecList()) {
-	    totalUtilization += gl.getCloudlet().getUtilizationOfCpu(time);
-	}
-	return totalUtilization;
+        double totalUtilization = 0;
+        for (HddResCloudlet gl : this.<HddResCloudlet> getCloudletExecList()) {
+            totalUtilization += gl.getCloudlet().getUtilizationOfCpu(time);
+        }
+        return totalUtilization;
     }
 
     /**
@@ -604,7 +589,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      */
     @Override
     public boolean isFinishedCloudlets() {
-	return !getCloudletFinishedList().isEmpty();
+        return !getCloudletFinishedList().isEmpty();
     }
 
     /**
@@ -614,7 +599,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      * @return $true if there is at least one failed cloudlet; $false otherwise
      */
     public boolean isFailedCloudlets() {
-	return !getCloudletFailedList().isEmpty();
+        return !getCloudletFailedList().isEmpty();
     }
 
     /**
@@ -627,10 +612,10 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      */
     @Override
     public HddCloudlet getNextFinishedCloudlet() {
-	if (!getCloudletFinishedList().isEmpty()) {
-	    return this.<HddResCloudlet> getCloudletFinishedList().remove(0).getCloudlet();
-	}
-	return null;
+        if (!getCloudletFinishedList().isEmpty()) {
+            return this.<HddResCloudlet> getCloudletFinishedList().remove(0).getCloudlet();
+        }
+        return null;
     }
 
     /**
@@ -640,10 +625,10 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      * @return a failed cloudlet
      */
     public Cloudlet getNextFailedCloudlet() {
-	if (!getCloudletFailedList().isEmpty()) {
-	    return getCloudletFailedList().remove(0).getCloudlet();
-	}
-	return null;
+        if (!getCloudletFailedList().isEmpty()) {
+            return getCloudletFailedList().remove(0).getCloudlet();
+        }
+        return null;
     }
 
     /**
@@ -655,7 +640,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      */
     @Override
     public int runningCloudlets() {
-	return getCloudletExecList().size();
+        return getCloudletExecList().size();
     }
 
     /**
@@ -667,9 +652,9 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      */
     @Override
     public Cloudlet migrateCloudlet() {
-	HddResCloudlet rgl = this.<HddResCloudlet> getCloudletExecList().remove(0);
-	rgl.finalizeCloudlet();
-	return rgl.getCloudlet();
+        HddResCloudlet rgl = this.<HddResCloudlet> getCloudletExecList().remove(0);
+        rgl.finalizeCloudlet();
+        return rgl.getCloudlet();
     }
 
     /*
@@ -679,8 +664,8 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      */
     @Override
     public List<Double> getCurrentRequestedMips() {
-	List<Double> mipsShare = new ArrayList<Double>();
-	return mipsShare;
+        List<Double> mipsShare = new ArrayList<Double>();
+        return mipsShare;
     }
 
     /*
@@ -692,7 +677,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      */
     @Override
     public double getTotalCurrentAvailableMipsForCloudlet(final ResCloudlet rcl, final List<Double> mipsShare) {
-	return getCPUCapacity(getCurrentMipsShare());
+        return getCPUCapacity(getCurrentMipsShare());
     }
 
     /*
@@ -704,7 +689,7 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      */
     @Override
     public double getTotalCurrentAllocatedMipsForCloudlet(final ResCloudlet rcl, final double time) {
-	return 0.0;
+        return 0.0;
     }
 
     /*
@@ -716,8 +701,8 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      */
     @Override
     public double getTotalCurrentRequestedMipsForCloudlet(final ResCloudlet rcl, final double time) {
-	// TODO Auto-generated method stub
-	return 0.0;
+        // TODO Auto-generated method stub
+        return 0.0;
     }
 
     /*
@@ -729,11 +714,11 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      */
     @Override
     public double getCurrentRequestedUtilizationOfRam() {
-	double ram = 0;
-	for (ResCloudlet cloudlet : cloudletExecList) {
-	    ram += cloudlet.getCloudlet().getUtilizationOfRam(CloudSim.clock());
-	}
-	return ram;
+        double ram = 0;
+        for (ResCloudlet cloudlet : cloudletExecList) {
+            ram += cloudlet.getCloudlet().getUtilizationOfRam(CloudSim.clock());
+        }
+        return ram;
     }
 
     /*
@@ -745,66 +730,64 @@ public class HddCloudletSchedulerTimeShared extends CloudletScheduler {
      */
     @Override
     public double getCurrentRequestedUtilizationOfBw() {
-	double bw = 0;
-	for (ResCloudlet cloudlet : cloudletExecList) {
-	    bw += cloudlet.getCloudlet().getUtilizationOfBw(CloudSim.clock());
-	}
-	return bw;
+        double bw = 0;
+        for (ResCloudlet cloudlet : cloudletExecList) {
+            bw += cloudlet.getCloudlet().getUtilizationOfBw(CloudSim.clock());
+        }
+        return bw;
     }
 
     public List<Double> getCurrentRequestedIOMips() {
-	List<Double> ioMipsShare = new ArrayList<>();
-	return ioMipsShare;
+        List<Double> ioMipsShare = new ArrayList<>();
+        return ioMipsShare;
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void failAllCloudlets() {
-	for (ListIterator<HddResCloudlet> iter = this.<HddResCloudlet> getCloudletExecList().listIterator(); iter
-		.hasNext();) {
-	    HddResCloudlet hddResCloudlet = iter.next();
-	    iter.remove();
-	    hddResCloudlet.setCloudletStatus(Cloudlet.FAILED);
-	    ((List) cloudletFailedList).add(hddResCloudlet);
-	}
+        for (ListIterator<HddResCloudlet> iter = this.<HddResCloudlet> getCloudletExecList().listIterator(); iter.hasNext();) {
+            HddResCloudlet hddResCloudlet = iter.next();
+            iter.remove();
+            hddResCloudlet.setCloudletStatus(Cloudlet.FAILED);
+            ((List) cloudletFailedList).add(hddResCloudlet);
+        }
 
-	for (ListIterator<HddResCloudlet> iter = this.<HddResCloudlet> getCloudletPausedList().listIterator(); iter
-		.hasNext();) {
-	    HddResCloudlet hddResCloudlet = iter.next();
-	    iter.remove();
-	    hddResCloudlet.setCloudletStatus(Cloudlet.FAILED);
-	    ((List) cloudletFailedList).add(hddResCloudlet);
-	}
+        for (ListIterator<HddResCloudlet> iter = this.<HddResCloudlet> getCloudletPausedList().listIterator(); iter.hasNext();) {
+            HddResCloudlet hddResCloudlet = iter.next();
+            iter.remove();
+            hddResCloudlet.setCloudletStatus(Cloudlet.FAILED);
+            ((List) cloudletFailedList).add(hddResCloudlet);
+        }
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void failCloudlet(final HddResCloudlet hddResCloudlet) {
-	getCloudletExecList().remove(hddResCloudlet);
-	getCloudletFailedList().remove(hddResCloudlet);
-	hddResCloudlet.setCloudletStatus(Cloudlet.FAILED);
-	((List) cloudletFailedList).add(hddResCloudlet);
+        getCloudletExecList().remove(hddResCloudlet);
+        getCloudletFailedList().remove(hddResCloudlet);
+        hddResCloudlet.setCloudletStatus(Cloudlet.FAILED);
+        ((List) cloudletFailedList).add(hddResCloudlet);
     }
 
     private boolean containsDataFor(final HddResCloudlet rcl) {
-	DataItem dataItem = rcl.getCloudlet().getData();
-	boolean result = dataItem == null;
+        DataItem dataItem = rcl.getCloudlet().getData();
+        boolean result = dataItem == null;
 
-	if (dataItem != null) {
-	    List<? extends HddPe> pes = getVm().getHost().getHddList();
-	    for (HddPe pe : pes) {
-		if (pe.containsDataItem(dataItem.getId()) && vm.getHddsIds().contains(pe.getId())) {
-		    result = true;
-		    break;
-		}
-	    }
-	}
+        if (dataItem != null) {
+            List<? extends HddPe> pes = getVm().getHost().getHddList();
+            for (HddPe pe : pes) {
+                if (pe.containsDataItem(dataItem.getId()) && vm.getHddsIds().contains(pe.getId())) {
+                    result = true;
+                    break;
+                }
+            }
+        }
 
-	return result;
+        return result;
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void addFailedCloudlet(final HddCloudlet cl) throws Exception {
-	cl.setCloudletStatus(Cloudlet.FAILED);
-	((List) getCloudletFailedList()).add(new HddResCloudlet(cl));
+        cl.setCloudletStatus(Cloudlet.FAILED);
+        ((List) getCloudletFailedList()).add(new HddResCloudlet(cl));
     }
 
 }

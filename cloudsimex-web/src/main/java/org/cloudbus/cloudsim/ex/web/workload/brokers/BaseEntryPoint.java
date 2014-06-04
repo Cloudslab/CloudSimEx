@@ -33,23 +33,23 @@ public abstract class BaseEntryPoint implements IEntryPoint {
      *            - the latency SLA of the application.
      */
     public BaseEntryPoint(final IGeolocationService geoService, final long appId) {
-	this.geoService = geoService;
-	this.appId = appId;
+        this.geoService = geoService;
+        this.appId = appId;
 
     }
 
     @Override
     public void registerBroker(final WebBroker broker) {
-	if (!brokers.contains(broker)) {
-	    brokers.add(broker);
-	    broker.addEntryPoint(this);
-	}
+        if (!brokers.contains(broker)) {
+            brokers.add(broker);
+            broker.addEntryPoint(this);
+        }
     }
 
     @Override
     public void deregisterBroker(final WebBroker webBroker) {
-	brokers.remove(webBroker);
-	webBroker.removeEntryPoint(this);
+        brokers.remove(webBroker);
+        webBroker.removeEntryPoint(this);
     }
 
     /**
@@ -57,24 +57,24 @@ public abstract class BaseEntryPoint implements IEntryPoint {
      */
     @Override
     public void dispatchSessions(List<WebSession> webSessions) {
-	sessionsDispatched += webSessions.size();
+        sessionsDispatched += webSessions.size();
     }
 
     @Override
     public long getAppId() {
-	return appId;
+        return appId;
     }
 
     public List<WebBroker> getBrokers() {
-	return brokers;
+        return brokers;
     }
 
     public IGeolocationService getGeoService() {
-	return geoService;
+        return geoService;
     }
 
     public List<WebSession> getCanceledSessions() {
-	return canceledSessions;
+        return canceledSessions;
     }
 
     /**
@@ -84,6 +84,6 @@ public abstract class BaseEntryPoint implements IEntryPoint {
      */
     @Override
     public long getSessionsDispatched() {
-	return sessionsDispatched;
+        return sessionsDispatched;
     }
 }

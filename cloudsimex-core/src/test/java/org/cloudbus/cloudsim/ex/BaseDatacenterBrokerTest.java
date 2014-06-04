@@ -54,94 +54,90 @@ public abstract class BaseDatacenterBrokerTest {
     protected VMex vm2;
 
     public BaseDatacenterBrokerTest() {
-	super();
+        super();
     }
 
     public void setUp() throws Exception {
-	CustomLog.configLogger(TestUtil.LOG_PROPS);
+        CustomLog.configLogger(TestUtil.LOG_PROPS);
 
-	int numBrokers = 1;
-	boolean trace_flag = false;
+        int numBrokers = 1;
+        boolean trace_flag = false;
 
-	CloudSim.init(numBrokers, Calendar.getInstance(), trace_flag);
+        CloudSim.init(numBrokers, Calendar.getInstance(), trace_flag);
 
-	datacenter = createDatacenterWithSingleHostAndSingleDisk("TestDatacenter");
+        datacenter = createDatacenterWithSingleHostAndSingleDisk("TestDatacenter");
 
-	// Create Broker
-	broker = createBroker();
+        // Create Broker
+        broker = createBroker();
 
-	// Create virtual machines
-	List<Vm> vmlist = new ArrayList<Vm>();
+        // Create virtual machines
+        List<Vm> vmlist = new ArrayList<Vm>();
 
-	// create two VMs
-	vm1 = createVM();
-	vm2 = createVM();
+        // create two VMs
+        vm1 = createVM();
+        vm2 = createVM();
 
-	// add the VMs to the vmList
-	vmlist.add(vm1);
-	vmlist.add(vm2);
+        // add the VMs to the vmList
+        vmlist.add(vm1);
+        vmlist.add(vm2);
 
-	// submit vm list to the broker
-	broker.submitVmList(vmlist);
+        // submit vm list to the broker
+        broker.submitVmList(vmlist);
     }
 
     protected DatacenterBrokerEX createBroker() throws Exception {
-	return new DatacenterBrokerEX("Broker", SIM_LENGTH);
+        return new DatacenterBrokerEX("Broker", SIM_LENGTH);
     }
 
     protected Cloudlet createCloudlet(final double cloudletDuration) {
-	UtilizationModel utilizationModel = new UtilizationModelFull();
-	return new Cloudlet(Id.pollId(Cloudlet.class), (int) (VM_MIPS * cloudletDuration),
-		1, 0, 0, utilizationModel, utilizationModel, utilizationModel);
+        UtilizationModel utilizationModel = new UtilizationModelFull();
+        return new Cloudlet(Id.pollId(Cloudlet.class), (int) (VM_MIPS * cloudletDuration), 1, 0, 0, utilizationModel, utilizationModel, utilizationModel);
     }
 
     protected List<Vm> createVms(final int vmNum) {
-	List<Vm> result = new ArrayList<>();
-	for (int i = 0; i < vmNum; i++) {
-	    result.add(createVM());
-	}
-	return result;
+        List<Vm> result = new ArrayList<>();
+        for (int i = 0; i < vmNum; i++) {
+            result.add(createVM());
+        }
+        return result;
     }
 
     protected VMex createVM() {
-	int pesNumber = 1; // number of cpus
-	String vmm = "Xen"; // VMM name
+        int pesNumber = 1; // number of cpus
+        String vmm = "Xen"; // VMM name
 
-	return new VMex("TestVM", broker.getId(), VM_MIPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
-		new CloudletSchedulerTimeShared());
+        return new VMex("TestVM", broker.getId(), VM_MIPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm, new CloudletSchedulerTimeShared());
     }
 
     protected DatacenterEX createDatacenterWithSingleHostAndSingleDisk(final String name) {
-	List<Host> hostList = new ArrayList<Host>();
-	List<Pe> peList = new ArrayList<>();
+        List<Host> hostList = new ArrayList<Host>();
+        List<Pe> peList = new ArrayList<>();
 
-	peList.add(new Pe(Id.pollId(Pe.class), new PeProvisionerSimple(HOST_MIPS)));
-	hostList.add(new Host(Id.pollId(Host.class), new RamProvisionerSimple(HOST_RAM),
-		new BwProvisionerSimple(HOST_BW), HOST_STORAGE, peList,
-		new VmSchedulerTimeShared(peList)));
+        peList.add(new Pe(Id.pollId(Pe.class), new PeProvisionerSimple(HOST_MIPS)));
+        hostList.add(new Host(Id.pollId(Host.class), new RamProvisionerSimple(HOST_RAM), new BwProvisionerSimple(HOST_BW), HOST_STORAGE, peList,
+                new VmSchedulerTimeShared(peList)));
 
-	String arch = "x86";
-	String os = "Linux";
-	String vmm = "Xen";
-	double time_zone = 10.0;
-	double cost = 3.0;
-	double costPerMem = 0.05;
-	double costPerStorage = 0.001;
-	double costPerBw = 0.0;
-	LinkedList<Storage> storageList = new LinkedList<Storage>();
+        String arch = "x86";
+        String os = "Linux";
+        String vmm = "Xen";
+        double time_zone = 10.0;
+        double cost = 3.0;
+        double costPerMem = 0.05;
+        double costPerStorage = 0.001;
+        double costPerBw = 0.0;
+        LinkedList<Storage> storageList = new LinkedList<Storage>();
 
-	DatacenterCharacteristics characteristics = new DatacenterCharacteristics(
-		arch, os, vmm, hostList, time_zone, cost, costPerMem,
-		costPerStorage, costPerBw);
+        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(arch, os, vmm, hostList, time_zone, cost, costPerMem, costPerStorage,
+                costPerBw);
 
-	DatacenterEX datacenter = null;
-	try {
-	    datacenter = new DatacenterEX(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
-	} catch (Exception e) {
-	    e.printStackTrace();
-	}
+        DatacenterEX datacenter = null;
+        try {
+            datacenter = new DatacenterEX(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-	return datacenter;
+        return datacenter;
     }
 
 }

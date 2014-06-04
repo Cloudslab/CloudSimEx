@@ -26,7 +26,7 @@ public class CompositeGenerator<T> implements IGenerator<Collection<T>> {
      *            contain nulls and must not be empty.
      */
     public CompositeGenerator(final Collection<IGenerator<T>> generators) {
-	this.generators = generators;
+        this.generators = generators;
     }
 
     /**
@@ -38,7 +38,7 @@ public class CompositeGenerator<T> implements IGenerator<Collection<T>> {
      */
     @SafeVarargs
     public CompositeGenerator(final IGenerator<T>... generators) {
-	this(Arrays.asList(generators));
+        this(Arrays.asList(generators));
     }
 
     /*
@@ -48,14 +48,14 @@ public class CompositeGenerator<T> implements IGenerator<Collection<T>> {
      */
     @Override
     public Collection<T> peek() {
-	List<T> result = new ArrayList<>();
-	for (IGenerator<T> gen : generators) {
-	    T peeked = gen.peek();
-	    if (peeked != null) {
-		result.add(peeked);
-	    }
-	}
-	return result.isEmpty() ? null : result;
+        List<T> result = new ArrayList<>();
+        for (IGenerator<T> gen : generators) {
+            T peeked = gen.peek();
+            if (peeked != null) {
+                result.add(peeked);
+            }
+        }
+        return result.isEmpty() ? null : result;
     }
 
     /*
@@ -65,14 +65,14 @@ public class CompositeGenerator<T> implements IGenerator<Collection<T>> {
      */
     @Override
     public Collection<T> poll() {
-	List<T> result = new ArrayList<>();
-	for (IGenerator<T> gen : generators) {
-	    T polled = gen.poll();
-	    if (polled != null) {
-		result.add(polled);
-	    }
-	}
-	return result.isEmpty() ? null : result;
+        List<T> result = new ArrayList<>();
+        for (IGenerator<T> gen : generators) {
+            T polled = gen.poll();
+            if (polled != null) {
+                result.add(polled);
+            }
+        }
+        return result.isEmpty() ? null : result;
     }
 
     /*
@@ -82,12 +82,12 @@ public class CompositeGenerator<T> implements IGenerator<Collection<T>> {
      */
     @Override
     public boolean isEmpty() {
-	for (IGenerator<T> gen : generators) {
-	    if (!gen.isEmpty()) {
-		return false;
-	    }
-	}
-	return true;
+        for (IGenerator<T> gen : generators) {
+            if (!gen.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /*
@@ -97,9 +97,9 @@ public class CompositeGenerator<T> implements IGenerator<Collection<T>> {
      */
     @Override
     public void notifyOfTime(final double time) {
-	for (IGenerator<T> gen : generators) {
-	    gen.notifyOfTime(time);
-	}
+        for (IGenerator<T> gen : generators) {
+            gen.notifyOfTime(time);
+        }
     }
 
 }

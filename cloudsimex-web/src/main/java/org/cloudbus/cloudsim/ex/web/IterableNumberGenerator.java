@@ -17,13 +17,13 @@ public class IterableNumberGenerator<N extends Number> implements NumberGenerato
     private final Iterator<N> iter;
 
     public IterableNumberGenerator(final Iterable<N> collection) {
-	super();
-	this.iter = collection.iterator();
+        super();
+        this.iter = collection.iterator();
     }
 
     @Override
     public N nextValue() {
-	return iter.hasNext() ? iter.next() : null;
+        return iter.hasNext() ? iter.next() : null;
     }
 
 }

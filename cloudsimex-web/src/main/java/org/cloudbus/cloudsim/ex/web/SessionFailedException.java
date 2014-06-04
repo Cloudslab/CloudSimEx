@@ -19,23 +19,23 @@ public class SessionFailedException extends RuntimeException {
      * 
      */
     public SessionFailedException(int sessionId) {
-	this.sessionId = sessionId;
+        this.sessionId = sessionId;
     }
 
     /**
      * @param message
      */
     public SessionFailedException(int sessionId, String message) {
-	super(message);
-	this.sessionId = sessionId;
+        super(message);
+        this.sessionId = sessionId;
     }
 
     /**
      * @param cause
      */
     public SessionFailedException(int sessionId, Throwable cause) {
-	super(cause);
-	this.sessionId = sessionId;
+        super(cause);
+        this.sessionId = sessionId;
     }
 
     /**
@@ -43,8 +43,8 @@ public class SessionFailedException extends RuntimeException {
      * @param cause
      */
     public SessionFailedException(int sessionId, String message, Throwable cause) {
-	super(message, cause);
-	this.sessionId = sessionId;
+        super(message, cause);
+        this.sessionId = sessionId;
     }
 
     /**
@@ -53,10 +53,9 @@ public class SessionFailedException extends RuntimeException {
      * @param enableSuppression
      * @param writableStackTrace
      */
-    public SessionFailedException(int sessionId, String message, Throwable cause, boolean enableSuppression,
-	    boolean writableStackTrace) {
-	super(message, cause, enableSuppression, writableStackTrace);
-	this.sessionId = sessionId;
+    public SessionFailedException(int sessionId, String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+        this.sessionId = sessionId;
     }
 
     /**
@@ -65,6 +64,6 @@ public class SessionFailedException extends RuntimeException {
      * @return the id of the failed session.
      */
     public int getSessionId() {
-	return sessionId;
+        return sessionId;
     }
 }

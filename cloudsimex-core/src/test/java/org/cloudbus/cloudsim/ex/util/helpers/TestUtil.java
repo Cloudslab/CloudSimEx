@@ -21,8 +21,8 @@ public class TestUtil {
      */
     public static Properties LOG_PROPS = new Properties();
     static {
-	// LOG_PROPS.put(CustomLog.LOG_LEVEL_PROP_KEY, Level.FINEST.getName());
-	LOG_PROPS.put("ShutStandardLogger", "true");
+        // LOG_PROPS.put(CustomLog.LOG_LEVEL_PROP_KEY, Level.FINEST.getName());
+        LOG_PROPS.put("ShutStandardLogger", "true");
     }
 
     /**
@@ -45,8 +45,8 @@ public class TestUtil {
      * @return a newly seeded gausian (normal distribution) number generator.
      */
     public static NumberGenerator<Double> createSeededGaussian(final double mean, final double stDev) {
-	Random rng = new MersenneTwisterRNG(TestUtil.SEED_ARRAY);
-	return new GaussianGenerator(mean, stDev, rng);
+        Random rng = new MersenneTwisterRNG(TestUtil.SEED_ARRAY);
+        return new GaussianGenerator(mean, stDev, rng);
     }
 
 }

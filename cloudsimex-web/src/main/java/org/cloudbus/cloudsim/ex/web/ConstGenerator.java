@@ -19,31 +19,31 @@ public class ConstGenerator<T> implements IGenerator<T> {
      *            - the value for the generator. Must not be null
      */
     public ConstGenerator(final T value) {
-	super();
-	if (value == null) {
-	    throw new IllegalArgumentException("Only non-null values allowed as values of this genrator.");
-	}
-	this.value = value;
+        super();
+        if (value == null) {
+            throw new IllegalArgumentException("Only non-null values allowed as values of this genrator.");
+        }
+        this.value = value;
     }
 
     @Override
     public T peek() {
-	return value;
+        return value;
     }
 
     @Override
     public T poll() {
-	return value;
+        return value;
     }
 
     @Override
     public boolean isEmpty() {
-	return false;
+        return false;
     }
 
     @Override
     public void notifyOfTime(final double time) {
-	// Do nothing
+        // Do nothing
     }
 
 }

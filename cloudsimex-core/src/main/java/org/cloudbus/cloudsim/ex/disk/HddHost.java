@@ -38,13 +38,12 @@ public class HddHost extends Host {
      * @param vmHDDScheduler
      *            - the IO scheduler.
      */
-    public HddHost(final RamProvisioner ramProvisioner, final BwProvisioner bwProvisioner, final long storage,
-	    final List<? extends Pe> peList, final List<? extends HddPe> hddList, final VmScheduler vmCPUScheduler,
-	    final VmSchedulerWithIndependentPes<HddPe> vmHDDScheduler) {
-	super(Id.pollId(HddHost.class), ramProvisioner, bwProvisioner, storage, peList, vmCPUScheduler);
-	this.hddIOScheduler = vmHDDScheduler;
-	this.hddList = hddList;
-	setFailed(false);
+    public HddHost(final RamProvisioner ramProvisioner, final BwProvisioner bwProvisioner, final long storage, final List<? extends Pe> peList,
+            final List<? extends HddPe> hddList, final VmScheduler vmCPUScheduler, final VmSchedulerWithIndependentPes<HddPe> vmHDDScheduler) {
+        super(Id.pollId(HddHost.class), ramProvisioner, bwProvisioner, storage, peList, vmCPUScheduler);
+        this.hddIOScheduler = vmHDDScheduler;
+        this.hddList = hddList;
+        setFailed(false);
     }
 
     /*
@@ -54,19 +53,19 @@ public class HddHost extends Host {
      */
     @Override
     public double updateVmsProcessing(final double currentTime) {
-	double smallerTime = Double.MAX_VALUE;
+        double smallerTime = Double.MAX_VALUE;
 
-	for (HddVm vm : getVmList()) {
-	    List<Double> mips = getVmScheduler().getAllocatedMipsForVm(vm);
-	    List<Double> iops = getHddIOScheduler().getAllocatedMipsForVm(vm);
-	    double time = vm.updateVmProcessing(currentTime, mips, iops);
+        for (HddVm vm : getVmList()) {
+            List<Double> mips = getVmScheduler().getAllocatedMipsForVm(vm);
+            List<Double> iops = getHddIOScheduler().getAllocatedMipsForVm(vm);
+            double time = vm.updateVmProcessing(currentTime, mips, iops);
 
-	    if (time > 0.0 && time < smallerTime) {
-		smallerTime = time;
-	    }
-	}
+            if (time > 0.0 && time < smallerTime) {
+                smallerTime = time;
+            }
+        }
 
-	return smallerTime;
+        return smallerTime;
     }
 
     /*
@@ -76,24 +75,23 @@ public class HddHost extends Host {
      */
     @Override
     public boolean vmCreate(final Vm vm) {
-	boolean allocationOfHDD = false;
-	Host prevHost = vm.getHost();
-	vm.setHost(this);
+        boolean allocationOfHDD = false;
+        Host prevHost = vm.getHost();
+        vm.setHost(this);
 
-	boolean allocatednOfCPUFlag = super.vmCreate(vm);
-	HddVm hddVm = (HddVm) vm;
-	allocationOfHDD = allocatednOfCPUFlag
-		&& getHddIOScheduler().allocatePesForVm(hddVm, hddVm.getCurrentRequestedIOMips());
+        boolean allocatednOfCPUFlag = super.vmCreate(vm);
+        HddVm hddVm = (HddVm) vm;
+        allocationOfHDD = allocatednOfCPUFlag && getHddIOScheduler().allocatePesForVm(hddVm, hddVm.getCurrentRequestedIOMips());
 
-	if (allocatednOfCPUFlag && !allocationOfHDD) {
-	    getRamProvisioner().deallocateRamForVm(hddVm);
-	    getBwProvisioner().deallocateBwForVm(hddVm);
-	    deallocatePesForVm(hddVm);
-	    getHddIOScheduler().deallocatePesForVm(hddVm);
-	    hddVm.setHost(prevHost);
-	}
+        if (allocatednOfCPUFlag && !allocationOfHDD) {
+            getRamProvisioner().deallocateRamForVm(hddVm);
+            getBwProvisioner().deallocateBwForVm(hddVm);
+            deallocatePesForVm(hddVm);
+            getHddIOScheduler().deallocatePesForVm(hddVm);
+            hddVm.setHost(prevHost);
+        }
 
-	return allocationOfHDD;
+        return allocationOfHDD;
     }
 
     /*
@@ -104,7 +102,7 @@ public class HddHost extends Host {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public List<HddVm> getVmList() {
-	return (List) super.getVmList();
+        return (List) super.getVmList();
     }
 
     /**
@@ -113,7 +111,7 @@ public class HddHost extends Host {
      * @return the numbder of unused/free harddrives.
      */
     public int getNumberOfFreeHdds() {
-	return PeList.getNumberOfFreePes(getHddList());
+        return PeList.getNumberOfFreePes(getHddList());
     }
 
     /**
@@ -122,7 +120,7 @@ public class HddHost extends Host {
      * @return the total MIPS.
      */
     public int getTotalIOMips() {
-	return PeList.getTotalMips(getHddList());
+        return PeList.getTotalMips(getHddList());
     }
 
     /*
@@ -132,10 +130,10 @@ public class HddHost extends Host {
      */
     @Override
     public boolean setFailed(final boolean failed) {
-	if (getHddList() != null) {
-	    PeList.setStatusFailed(getHddList(), failed);
-	}
-	return super.setFailed(failed);
+        if (getHddList() != null) {
+            PeList.setStatusFailed(getHddList(), failed);
+        }
+        return super.setFailed(failed);
     }
 
     /*
@@ -145,8 +143,8 @@ public class HddHost extends Host {
      */
     @Override
     public boolean setFailed(final String resName, final boolean failed) {
-	PeList.setStatusFailed(getHddList(), resName, getId(), failed);
-	return super.setFailed(resName, failed);
+        PeList.setStatusFailed(getHddList(), resName, getId(), failed);
+        return super.setFailed(resName, failed);
     }
 
     /**
@@ -159,7 +157,7 @@ public class HddHost extends Host {
      * @return if the status was set correctly0.
      */
     public boolean setHddStatus(final int peId, final int status) {
-	return PeList.setPeStatus(getHddList(), peId, status);
+        return PeList.setPeStatus(getHddList(), peId, status);
     }
 
     /**
@@ -168,7 +166,7 @@ public class HddHost extends Host {
      * @return the list of all hard disks of this host.
      */
     public List<? extends HddPe> getHddList() {
-	return hddList;
+        return hddList;
     }
 
     /**
@@ -177,7 +175,7 @@ public class HddHost extends Host {
      * @return the hdds number
      */
     public int getNumberOfHdds() {
-	return getHddList().size();
+        return getHddList().size();
     }
 
     /**
@@ -188,7 +186,7 @@ public class HddHost extends Host {
      *         operations among VMs.
      */
     public VmSchedulerWithIndependentPes<HddPe> getHddIOScheduler() {
-	return hddIOScheduler;
+        return hddIOScheduler;
     }
 
 }

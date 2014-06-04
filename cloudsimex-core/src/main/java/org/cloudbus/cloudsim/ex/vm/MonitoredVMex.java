@@ -44,11 +44,10 @@ public class MonitoredVMex extends VMex {
      *            - the historical period, used to determine the utilisation at
      *            runtime.
      */
-    public MonitoredVMex(final String name, final int userId, final double mips, final int numberOfPes, int ram,
-	    final long bw, final long size, final String vmm, final CloudletScheduler cloudletScheduler,
-	    final double summaryPeriodLength) {
-	super(name, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
-	this.summaryPeriodLength = summaryPeriodLength;
+    public MonitoredVMex(final String name, final int userId, final double mips, final int numberOfPes, int ram, final long bw, final long size,
+            final String vmm, final CloudletScheduler cloudletScheduler, final double summaryPeriodLength) {
+        super(name, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
+        this.summaryPeriodLength = summaryPeriodLength;
     }
 
     /**
@@ -69,15 +68,14 @@ public class MonitoredVMex extends VMex {
      *            - the historical period, used to determine the utilisation at
      *            runtime.
      */
-    public MonitoredVMex(final String name, final int userId, final double mips, final int numberOfPes, final int ram,
-	    final long bw, final long size, final String vmm, final CloudletScheduler cloudletScheduler,
-	    final VMMetadata metadata, final double summaryPeriodLength) {
-	super(name, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, metadata);
-	this.summaryPeriodLength = summaryPeriodLength;
+    public MonitoredVMex(final String name, final int userId, final double mips, final int numberOfPes, final int ram, final long bw, final long size,
+            final String vmm, final CloudletScheduler cloudletScheduler, final VMMetadata metadata, final double summaryPeriodLength) {
+        super(name, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, metadata);
+        this.summaryPeriodLength = summaryPeriodLength;
     }
 
     protected double getSummaryPeriodLength() {
-	return summaryPeriodLength;
+        return summaryPeriodLength;
     }
 
     /**
@@ -92,19 +90,19 @@ public class MonitoredVMex extends VMex {
      */
     public void updatePerformance(final double cpuUtil, final double ramUtil, final double diskUtil) {
 
-	if (summaryPeriodLength >= 0) {
-	    double currTime = getCurrentTime();
+        if (summaryPeriodLength >= 0) {
+            double currTime = getCurrentTime();
 
-	    if (!newPerfDataAvailableFlag && this.lastUtilMeasurement[0] == cpuUtil
-		    && this.lastUtilMeasurement[1] == ramUtil && this.lastUtilMeasurement[2] == diskUtil) {
-		this.newPerfDataAvailableFlag = false;
-	    } else {
-		this.newPerfDataAvailableFlag = true;
-	    }
+            if (!newPerfDataAvailableFlag && this.lastUtilMeasurement[0] == cpuUtil && this.lastUtilMeasurement[1] == ramUtil
+                    && this.lastUtilMeasurement[2] == diskUtil) {
+                this.newPerfDataAvailableFlag = false;
+            } else {
+                this.newPerfDataAvailableFlag = true;
+            }
 
-	    data.put(currTime, cpuUtil, ramUtil, diskUtil);
-	    cleanupOldData(currTime);
-	}
+            data.put(currTime, cpuUtil, ramUtil, diskUtil);
+            cleanupOldData(currTime);
+        }
     }
 
     /**
@@ -113,7 +111,7 @@ public class MonitoredVMex extends VMex {
      * @return the current CPU utilisation as a number in the range [0,1].
      */
     public double getCPUUtil() {
-	return getAveragedPerformance(getCurrentTime())[0];
+        return getAveragedPerformance(getCurrentTime())[0];
     }
 
     /**
@@ -122,7 +120,7 @@ public class MonitoredVMex extends VMex {
      * @return the current RAM utilisation as a number in the range [0,1].
      */
     public double getRAMUtil() {
-	return getAveragedPerformance(getCurrentTime())[1];
+        return getAveragedPerformance(getCurrentTime())[1];
     }
 
     /**
@@ -131,7 +129,7 @@ public class MonitoredVMex extends VMex {
      * @return the current Disk utilisation as a number in the range [0,1].
      */
     public double getDiskUtil() {
-	return getAveragedPerformance(getCurrentTime())[2];
+        return getAveragedPerformance(getCurrentTime())[2];
     }
 
     /**
@@ -144,46 +142,46 @@ public class MonitoredVMex extends VMex {
      *         in the from [cp_util, ram_util, disk_util].
      */
     public double[] getAveragedUtil() {
-	return getAveragedPerformance(getCurrentTime());
+        return getAveragedPerformance(getCurrentTime());
     }
 
     private double[] getAveragedPerformance(final double currTime) {
-	// If there has not been any update - return the cached value
-	if (!newPerfDataAvailableFlag) {
-	    return this.lastUtilMeasurement;
-	} else {
-	    cleanupOldData(currTime);
-	    double[] result = computerAvgData();
+        // If there has not been any update - return the cached value
+        if (!newPerfDataAvailableFlag) {
+            return this.lastUtilMeasurement;
+        } else {
+            cleanupOldData(currTime);
+            double[] result = computerAvgData();
 
-	    // Cache the value for further usage
-	    newPerfDataAvailableFlag = false;
-	    lastUtilMeasurement = result;
+            // Cache the value for further usage
+            newPerfDataAvailableFlag = false;
+            lastUtilMeasurement = result;
 
-	    return result;
-	}
+            return result;
+        }
     }
 
     private double[] computerAvgData() {
-	double[] result = new double[] { 0, 0, 0 };
-	if (summaryPeriodLength >= 0) {
-	    result = data.computerAvgData();
-	}
-	return result;
+        double[] result = new double[] { 0, 0, 0 };
+        if (summaryPeriodLength >= 0) {
+            result = data.computerAvgData();
+        }
+        return result;
     }
 
     private void cleanupOldData(final double currTime) {
-	data.cleanUp(currTime, summaryPeriodLength);
+        data.cleanUp(currTime, summaryPeriodLength);
     }
 
     @Override
     public MonitoredVMex clone(final CloudletScheduler scheduler) {
-	if (!getClass().equals(MonitoredVMex.class)) {
-	    throw new IllegalStateException("The operation is undefined for subclass: " + getClass().getCanonicalName());
-	}
+        if (!getClass().equals(MonitoredVMex.class)) {
+            throw new IllegalStateException("The operation is undefined for subclass: " + getClass().getCanonicalName());
+        }
 
-	MonitoredVMex result = new MonitoredVMex(getName(), getUserId(), getMips(), getNumberOfPes(), getRam(),
-		getBw(), getSize(), getVmm(), scheduler, getMetadata().clone(), getSummaryPeriodLength());
-	return result;
+        MonitoredVMex result = new MonitoredVMex(getName(), getUserId(), getMips(), getNumberOfPes(), getRam(), getBw(), getSize(), getVmm(), scheduler,
+                getMetadata().clone(), getSummaryPeriodLength());
+        return result;
     }
 
     /**
@@ -194,7 +192,7 @@ public class MonitoredVMex extends VMex {
      *         data.
      */
     public MonitoredData getMonitoredData() {
-	return data;
+        return data;
     }
 
     /**
@@ -206,178 +204,179 @@ public class MonitoredVMex extends VMex {
      */
     public static class MonitoredData {
 
-	private static int MAX_POOL_SIZE = 500;
+        private static int MAX_POOL_SIZE = 500;
 
-	/**
-	 * We don't want to create new arrays every time - this creates too much
-	 * garbage. That's why we need to keep a pool of unused array objects,
-	 * which we reuse.
-	 */
-	private List<double[]> arrayPool = new ArrayList<>();
-	private List<MutableDouble> doublePool = new ArrayList<>();
+        /**
+         * We don't want to create new arrays every time - this creates too much
+         * garbage. That's why we need to keep a pool of unused array objects,
+         * which we reuse.
+         */
+        private List<double[]> arrayPool = new ArrayList<>();
+        private List<MutableDouble> doublePool = new ArrayList<>();
 
-	private ArrayList<MutablePair<MutableDouble, double[]>> data = new ArrayList<>();
-	private int startIdx = 0;
-	private int endIdx = 0;
-	/** If there is not monitoring data. */
-	private boolean empty = true;
+        private ArrayList<MutablePair<MutableDouble, double[]>> data = new ArrayList<>();
+        private int startIdx = 0;
+        private int endIdx = 0;
+        /** If there is not monitoring data. */
+        private boolean empty = true;
 
-	/**
-	 * Keeping the sums of all observations, to avoid excessive looping over
-	 * the observations.
-	 */
-	private double[] measurementsSums = new double[] { 0, 0, 0 };
-	/**
-	 * The number/count of all observations. We keep it in a variable to
-	 * avoid looping.
-	 */
-	private int measurementsCount = 0;
+        /**
+         * Keeping the sums of all observations, to avoid excessive looping over
+         * the observations.
+         */
+        private double[] measurementsSums = new double[] { 0, 0, 0 };
+        /**
+         * The number/count of all observations. We keep it in a variable to
+         * avoid looping.
+         */
+        private int measurementsCount = 0;
 
-	public void put(double time, final double cpuUtil, final double ramUtil, final double diskUtil) {
-	    double[] util = getPooledArray(cpuUtil, ramUtil, diskUtil);
-	    MutableDouble pooledTime = getPooledDouble(time);
-	    if (empty) {
-		data.add(startIdx, new MutablePair<MutableDouble, double[]>(pooledTime, util));
-		endIdx = startIdx;
+        public void put(double time, final double cpuUtil, final double ramUtil, final double diskUtil) {
+            double[] util = getPooledArray(cpuUtil, ramUtil, diskUtil);
+            MutableDouble pooledTime = getPooledDouble(time);
+            if (empty) {
+                data.add(startIdx, new MutablePair<MutableDouble, double[]>(pooledTime, util));
+                endIdx = startIdx;
 
-		// If startIdx is in the beginning of the list and endIdx is in
-		// the end...
-	    } else if (data.isEmpty() || (startIdx == 0 && endIdx == data.size() - 1)) {
-		data.add(new MutablePair<MutableDouble, double[]>(pooledTime, util));
-		endIdx = data.size() - 1;
+                // If startIdx is in the beginning of the list and endIdx is in
+                // the end...
+            } else if (data.isEmpty() || (startIdx == 0 && endIdx == data.size() - 1)) {
+                data.add(new MutablePair<MutableDouble, double[]>(pooledTime, util));
+                endIdx = data.size() - 1;
 
-		// If endIdx is not at the end or just before startIdx
-	    } else if (endIdx < data.size() - 1 && (startIdx < endIdx || endIdx + 1 < startIdx)) {
-		endIdx++;
+                // If endIdx is not at the end or just before startIdx
+            } else if (endIdx < data.size() - 1 && (startIdx < endIdx || endIdx + 1 < startIdx)) {
+                endIdx++;
 
-		MutablePair<MutableDouble, double[]> entry = data.get(endIdx);
-		entry.setLeft(pooledTime);
-		entry.setRight(util);
+                MutablePair<MutableDouble, double[]> entry = data.get(endIdx);
+                entry.setLeft(pooledTime);
+                entry.setRight(util);
 
-		// If endIdx is at the end and startIdx is not in the beginning
-	    } else if (startIdx > 0 && endIdx == data.size() - 1) {
-		endIdx = 0;
+                // If endIdx is at the end and startIdx is not in the beginning
+            } else if (startIdx > 0 && endIdx == data.size() - 1) {
+                endIdx = 0;
 
-		MutablePair<MutableDouble, double[]> entry = data.get(endIdx);
-		entry.setLeft(pooledTime);
-		entry.setRight(util);
+                MutablePair<MutableDouble, double[]> entry = data.get(endIdx);
+                entry.setLeft(pooledTime);
+                entry.setRight(util);
 
-		// If endIdx is is just before startIdx
-	    } else if (endIdx + 1 == startIdx) {
-		endIdx++;
-		startIdx++;
-		data.add(endIdx, new MutablePair<>(pooledTime, util));
-	    } else {
-		// Something went wrong...
-		throw new IllegalStateException("Ivalid state of counters: start=" + startIdx + " end=" + endIdx);
-	    }
+                // If endIdx is is just before startIdx
+            } else if (endIdx + 1 == startIdx) {
+                endIdx++;
+                startIdx++;
+                data.add(endIdx, new MutablePair<>(pooledTime, util));
+            } else {
+                // Something went wrong...
+                throw new IllegalStateException("Ivalid state of counters: start=" + startIdx + " end=" + endIdx);
+            }
 
-	    for (int i = 0; i < util.length; i++) {
-		measurementsSums[i] += util[i];
-	    }
-	    this.measurementsCount++;
-	    empty = false;
-	}
+            for (int i = 0; i < util.length; i++) {
+                measurementsSums[i] += util[i];
+            }
+            this.measurementsCount++;
+            empty = false;
+        }
 
-	public void cleanUp(double currTime, double summaryPeriodLength) {
-	    if (empty || summaryPeriodLength < 0) {
-		return;
-	    }
+        public void cleanUp(double currTime, double summaryPeriodLength) {
+            if (empty || summaryPeriodLength < 0) {
+                return;
+            }
 
-	    while (data.get(startIdx).getLeft().doubleValue() < currTime - summaryPeriodLength && startIdx != endIdx) {
-		for (int i = 0; i < data.get(startIdx).getRight().length; i++) {
-		    measurementsSums[i] -= data.get(startIdx).getRight()[i];
-		}
-		measurementsCount--;
+            while (data.get(startIdx).getLeft().doubleValue() < currTime - summaryPeriodLength && startIdx != endIdx) {
+                for (int i = 0; i < data.get(startIdx).getRight().length; i++) {
+                    measurementsSums[i] -= data.get(startIdx).getRight()[i];
+                }
+                measurementsCount--;
 
-		// Pool the objects, so we can reuse them.
-		arrayPool.add(data.get(startIdx).getRight());
-		doublePool.add(data.get(startIdx).getLeft());
+                // Pool the objects, so we can reuse them.
+                arrayPool.add(data.get(startIdx).getRight());
+                doublePool.add(data.get(startIdx).getLeft());
 
-		startIdx = (startIdx + 1) % data.size();
-	    }
+                startIdx = (startIdx + 1) % data.size();
+            }
 
-	    if (startIdx == endIdx && data.get(startIdx).getLeft().doubleValue() < currTime - summaryPeriodLength) {
-		for (int i = 0; i < measurementsSums.length; i++) {
-		    measurementsSums[i] = 0;
-		}
-		measurementsCount = 0;
+            if (startIdx == endIdx && data.get(startIdx).getLeft().doubleValue() < currTime - summaryPeriodLength) {
+                for (int i = 0; i < measurementsSums.length; i++) {
+                    measurementsSums[i] = 0;
+                }
+                measurementsCount = 0;
 
-		// Pool the objects, so we can reuse them.
-		arrayPool.add(data.get(startIdx).getRight());
-		doublePool.add(data.get(startIdx).getLeft());
+                // Pool the objects, so we can reuse them.
+                arrayPool.add(data.get(startIdx).getRight());
+                doublePool.add(data.get(startIdx).getLeft());
 
-		empty = true;
-		startIdx = 0;
-		endIdx = 0;
-	    }
-	}
+                empty = true;
+                startIdx = 0;
+                endIdx = 0;
+            }
+        }
 
-	public double[] computerAvgData() {
-	    double[] result = new double[] { 0, 0, 0 };
-	    if (measurementsCount > 0) {
-		for (int i = 0; i < result.length; i++) {
-		    result[i] = measurementsSums[i] / measurementsCount;
-		}
-	    }
-	    return result;
-	}
+        public double[] computerAvgData() {
+            double[] result = new double[] { 0, 0, 0 };
+            if (measurementsCount > 0) {
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = measurementsSums[i] / measurementsCount;
+                }
+            }
+            return result;
+        }
 
-	/**
-	 * Return the number of utilisation records.
-	 * 
-	 * @return the number of utilisation records.
-	 */
-	public int size() {
-	    if (endIdx == startIdx) {
-		return empty ? 0 : 1;
-	    } else if (endIdx > startIdx) {
-		return endIdx - startIdx + 1;
-	    } else {
-		return data.size() - (startIdx - endIdx) + 1;
-	    }
-	}
+        /**
+         * Return the number of utilisation records.
+         * 
+         * @return the number of utilisation records.
+         */
+        public int size() {
+            if (endIdx == startIdx) {
+                return empty ? 0 : 1;
+            } else if (endIdx > startIdx) {
+                return endIdx - startIdx + 1;
+            } else {
+                return data.size() - (startIdx - endIdx) + 1;
+            }
+        }
 
-	private double[] getPooledArray(final double cpuUtil, final double ramUtil, final double diskUtil) {
-	    if (arrayPool.isEmpty()) {
-		return new double[] { cpuUtil, ramUtil, diskUtil };
-	    } else {
-		double[] res = arrayPool.remove(arrayPool.size() - 1);
-		res[0] = cpuUtil;
-		res[1] = ramUtil;
-		res[2] = diskUtil;
-		
-		if(arrayPool.size() > MAX_POOL_SIZE) {
-		    arrayPool.clear();
-		}
-		
-		return res;
-	    }
-	}
-	private MutableDouble getPooledDouble(final double dbl) {
-	    if (doublePool.isEmpty()) {
-		return new MutableDouble(dbl);
-	    } else {
-		MutableDouble res = doublePool.remove(doublePool.size() - 1);
-		res.setValue(dbl);
-		
-		if(doublePool.size() > MAX_POOL_SIZE) {
-		    doublePool.clear();
-		}
-		
-		return res;
-	    }
-	}
+        private double[] getPooledArray(final double cpuUtil, final double ramUtil, final double diskUtil) {
+            if (arrayPool.isEmpty()) {
+                return new double[] { cpuUtil, ramUtil, diskUtil };
+            } else {
+                double[] res = arrayPool.remove(arrayPool.size() - 1);
+                res[0] = cpuUtil;
+                res[1] = ramUtil;
+                res[2] = diskUtil;
 
-	/**
-	 * Returns the size of the used undrlying data structure. Used for
-	 * testing purposes.
-	 * 
-	 * @return the size of the used undrlying data structure.
-	 */
-	public int dataSize() {
-	    return data.size();
-	}
+                if (arrayPool.size() > MAX_POOL_SIZE) {
+                    arrayPool.clear();
+                }
+
+                return res;
+            }
+        }
+
+        private MutableDouble getPooledDouble(final double dbl) {
+            if (doublePool.isEmpty()) {
+                return new MutableDouble(dbl);
+            } else {
+                MutableDouble res = doublePool.remove(doublePool.size() - 1);
+                res.setValue(dbl);
+
+                if (doublePool.size() > MAX_POOL_SIZE) {
+                    doublePool.clear();
+                }
+
+                return res;
+            }
+        }
+
+        /**
+         * Returns the size of the used undrlying data structure. Used for
+         * testing purposes.
+         * 
+         * @return the size of the used undrlying data structure.
+         */
+        public int dataSize() {
+            return data.size();
+        }
     }
 
 }

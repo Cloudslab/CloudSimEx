@@ -38,105 +38,106 @@ public class InMemoryBufferredHandler extends Handler {
      *            - the size of the buffer. Must be positive.
      */
     public InMemoryBufferredHandler(final Handler handler, final int bufferSize) {
-	super();
-	if (bufferSize <= 0) {
-	    throw new IllegalAccessError("The size of the buffer must be positive");
-	}
-	this.handler = handler;
+        super();
+        if (bufferSize <= 0) {
+            throw new IllegalAccessError("The size of the buffer must be positive");
+        }
+        this.handler = handler;
 
-	records = new LogRecord[bufferSize];
+        records = new LogRecord[bufferSize];
     }
 
     @Override
     public void publish(final LogRecord record) {
-	if (!isLoggable(record) && record.getLevel().intValue() >= handler.getLevel().intValue()) {
-	    return;
-	}
+        if (!isLoggable(record) && record.getLevel().intValue() >= handler.getLevel().intValue()) {
+            return;
+        }
 
-	records[idx] = record;
-	idx++;
+        records[idx] = record;
+        idx++;
 
-	if (idx == records.length) {
-	    emptyBuffer();
-	}
+        if (idx == records.length) {
+            emptyBuffer();
+        }
     }
 
     @Override
     public void flush() {
-	emptyBuffer();
-	handler.flush();
+        emptyBuffer();
+        handler.flush();
     }
 
     public void emptyBuffer() {
-//	handler.publish(new LogRecord(Level.SEVERE, "Pushing " + idx + " messages together"));
-	for (int i = 0; i < idx; i++) {
-	    handler.publish(records[i]);
-	    records[i] = null;
-	}
-	idx = 0;
+        // handler.publish(new LogRecord(Level.SEVERE, "Pushing " + idx +
+        // " messages together"));
+        for (int i = 0; i < idx; i++) {
+            handler.publish(records[i]);
+            records[i] = null;
+        }
+        idx = 0;
     }
 
     @Override
     public void close() throws SecurityException {
-	try {
-	    flush();
-	    handler.flush();
-	} finally {
-	    handler.close();
-	}
+        try {
+            flush();
+            handler.flush();
+        } finally {
+            handler.close();
+        }
     }
 
     @Override
     public boolean isLoggable(LogRecord record) {
-	return record != null && handler.isLoggable(record);
+        return record != null && handler.isLoggable(record);
     }
 
     @Override
     public void setFilter(Filter newFilter) throws SecurityException {
-	handler.setFilter(newFilter);
+        handler.setFilter(newFilter);
     }
 
     @Override
     public Filter getFilter() {
-	return handler.getFilter();
+        return handler.getFilter();
     }
 
     @Override
     public void setFormatter(Formatter newFormatter) throws SecurityException {
-	handler.setFormatter(newFormatter);
+        handler.setFormatter(newFormatter);
     }
 
     @Override
     public Formatter getFormatter() {
-	return handler.getFormatter();
+        return handler.getFormatter();
     }
 
     @Override
     public synchronized void setLevel(Level newLevel) throws SecurityException {
-	handler.setLevel(newLevel);
+        handler.setLevel(newLevel);
     }
 
     @Override
     public synchronized Level getLevel() {
-	return handler.getLevel();
+        return handler.getLevel();
     }
 
     @Override
     public void setEncoding(String encoding) throws SecurityException, UnsupportedEncodingException {
-	handler.setEncoding(encoding);
+        handler.setEncoding(encoding);
     }
 
     @Override
     public String getEncoding() {
-	return handler.getEncoding();
+        return handler.getEncoding();
     }
 
     @Override
     public void setErrorManager(ErrorManager em) {
-	handler.setErrorManager(em);
+        handler.setErrorManager(em);
     }
 
     public ErrorManager getErrorManager() {
-	return handler.getErrorManager();
+        return handler.getErrorManager();
     }
 }

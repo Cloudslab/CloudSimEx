@@ -27,31 +27,32 @@ public class PeriodicStochasticFrequencyFunction extends FrequencyFunction {
     private double nullPoint;
     private CompositeValuedSet valuedSet;
 
-    public PeriodicStochasticFrequencyFunction(double unit, double periodLength, double nullPoint,
-	    CompositeValuedSet valuedSet) {
-	super(unit);
-	this.periodLength = periodLength;
-	this.nullPoint = nullPoint;
-	this.valuedSet = valuedSet;
+    public PeriodicStochasticFrequencyFunction(double unit, double periodLength, double nullPoint, CompositeValuedSet valuedSet) {
+        super(unit);
+        this.periodLength = periodLength;
+        this.nullPoint = nullPoint;
+        this.valuedSet = valuedSet;
     }
 
     /*
      * (non-Javadoc)
-     * @see org.cloudbus.cloudsim.incubator.web.workload.freq.FrequencyFunction#getFrequency(double)
+     * 
+     * @see org.cloudbus.cloudsim.incubator.web.workload.freq.FrequencyFunction#
+     * getFrequency(double)
      */
     @Override
     public int getFrequency(double time) {
-	double periodOffset = 0;
-	if (time >= nullPoint) {
-	    periodOffset = time - nullPoint;
-	    int timesPeriod = (int) (periodOffset / periodLength);
-	    periodOffset -= timesPeriod * periodLength;
-	} else {
-	    periodOffset = nullPoint - time;
-	    int timesPeriod = (int) (periodOffset / periodLength);
-	    periodOffset -= timesPeriod * periodLength;
-	    periodOffset = periodLength - periodOffset;
-	}
-	return Math.max(0, (int) valuedSet.getValue(periodOffset));
+        double periodOffset = 0;
+        if (time >= nullPoint) {
+            periodOffset = time - nullPoint;
+            int timesPeriod = (int) (periodOffset / periodLength);
+            periodOffset -= timesPeriod * periodLength;
+        } else {
+            periodOffset = nullPoint - time;
+            int timesPeriod = (int) (periodOffset / periodLength);
+            periodOffset -= timesPeriod * periodLength;
+            periodOffset = periodLength - periodOffset;
+        }
+        return Math.max(0, (int) valuedSet.getValue(periodOffset));
     }
 }

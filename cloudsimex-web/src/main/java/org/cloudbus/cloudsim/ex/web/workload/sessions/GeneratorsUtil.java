@@ -24,51 +24,51 @@ public class GeneratorsUtil {
     }
 
     public static Map<String, NumberGenerator<Double>> parseGenerators(final InputStream in) throws IOException {
-	return toGenerators(parseStream(in));
+        return toGenerators(parseStream(in));
     }
 
     public static Map<String, NumberGenerator<Double>> toGenerators(final Map<String, List<Double>> values) {
-	Map<String, NumberGenerator<Double>> result = new HashMap<>();
-	for (Map.Entry<String, List<Double>> e : values.entrySet()) {
-	    result.put(e.getKey(), new IterableNumberGenerator<>(e.getValue()));
-	}
-	return result;
+        Map<String, NumberGenerator<Double>> result = new HashMap<>();
+        for (Map.Entry<String, List<Double>> e : values.entrySet()) {
+            result.put(e.getKey(), new IterableNumberGenerator<>(e.getValue()));
+        }
+        return result;
     }
 
     public static Map<String, List<Double>> parseStream(final InputStream in) throws IOException {
-	BufferedReader br = new BufferedReader(new InputStreamReader(in));
-	return parseReader(br);
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        return parseReader(br);
     }
 
     public static Map<String, List<Double>> parseReader(final BufferedReader br) throws IOException {
-	String line = br.readLine();
-	List<String> headers = new ArrayList<>();
-	for (String s : line.replaceAll("\"", "").replace("\\s+", "").split(",")) {
-	    headers.add(s.trim());
-	}
+        String line = br.readLine();
+        List<String> headers = new ArrayList<>();
+        for (String s : line.replaceAll("\"", "").replace("\\s+", "").split(",")) {
+            headers.add(s.trim());
+        }
 
-	Map<String, List<Double>> values = new HashMap<String, List<Double>>();
+        Map<String, List<Double>> values = new HashMap<String, List<Double>>();
 
-	while ((line = br.readLine()) != null) {
-	    List<Double> lineValues = new ArrayList<>();
-	    for (String s : line.split(",")) {
-		lineValues.add(Double.parseDouble(s.replaceAll("\"", "").replace("\\s+", "").trim()));
-	    }
-	    for (int i = 0; i < headers.size(); i++) {
-		if (!values.containsKey(headers.get(i))) {
-		    values.put(headers.get(i), new ArrayList<Double>());
-		}
-		values.get(headers.get(i)).add(lineValues.get(i));
-	    }
-	}
-	return values;
+        while ((line = br.readLine()) != null) {
+            List<Double> lineValues = new ArrayList<>();
+            for (String s : line.split(",")) {
+                lineValues.add(Double.parseDouble(s.replaceAll("\"", "").replace("\\s+", "").trim()));
+            }
+            for (int i = 0; i < headers.size(); i++) {
+                if (!values.containsKey(headers.get(i))) {
+                    values.put(headers.get(i), new ArrayList<Double>());
+                }
+                values.get(headers.get(i)).add(lineValues.get(i));
+            }
+        }
+        return values;
     }
-    
+
     public static Map<String, List<Double>> cloneDefs(Map<String, List<Double>> defs) {
-	Map<String, List<Double>> values = new HashMap<String, List<Double>>();
-	for(Map.Entry<String, List<Double>> e : defs.entrySet()) {
-	    values.put(e.getKey(), new ArrayList<>(e.getValue()));
-	}
-	return values;
+        Map<String, List<Double>> values = new HashMap<String, List<Double>>();
+        for (Map.Entry<String, List<Double>> e : defs.entrySet()) {
+            values.put(e.getKey(), new ArrayList<>(e.getValue()));
+        }
+        return values;
     }
 }

@@ -35,34 +35,33 @@ public class GeoIP2IPGeneratorTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-	CustomLog.configLogger(TestUtil.LOG_PROPS);
-	generator = new GeoIP2IPGenerator(COUNTRY_CODES, TEST_FILE, TestUtil.SEED);
-	service = new GeoIP2PingERService(new File("GeoLite2-City.mmdb"), new File("PingTablePingER.tsv"), new File(
-		"MonitoringSitesPingER.csv"));
+        CustomLog.configLogger(TestUtil.LOG_PROPS);
+        generator = new GeoIP2IPGenerator(COUNTRY_CODES, TEST_FILE, TestUtil.SEED);
+        service = new GeoIP2PingERService(new File("GeoLite2-City.mmdb"), new File("PingTablePingER.tsv"), new File("MonitoringSitesPingER.csv"));
     }
 
     @Test
     public void testIPGeneration() {
-	final int TEST_SIZE = 10_000;
-	final double DOUBLE_PRECISION = 0.01;
+        final int TEST_SIZE = 10_000;
+        final double DOUBLE_PRECISION = 0.01;
 
-	Map<String, Integer> counts = new HashMap<>();
-	for (String code : COUNTRY_CODES) {
-	    counts.put(code, 0);
-	}
-	for (int i = 0; i < TEST_SIZE; i++) {
-	    String ip = generator.pollRandomIP(service, -1);
-	    String code = service.getMetaData(ip).getCountryIsoCode();
-	    if (COUNTRY_CODES.contains(code)) {
-		counts.put(code, counts.get(code) + 1);
-	    } else {
-		fail("IP " + Objects.toString(ip) + " is in location " + Objects.toString(code));
-	    }
-	}
+        Map<String, Integer> counts = new HashMap<>();
+        for (String code : COUNTRY_CODES) {
+            counts.put(code, 0);
+        }
+        for (int i = 0; i < TEST_SIZE; i++) {
+            String ip = generator.pollRandomIP(service, -1);
+            String code = service.getMetaData(ip).getCountryIsoCode();
+            if (COUNTRY_CODES.contains(code)) {
+                counts.put(code, counts.get(code) + 1);
+            } else {
+                fail("IP " + Objects.toString(ip) + " is in location " + Objects.toString(code));
+            }
+        }
 
-	assertEquals(NUM_AU_IPS_IN_TEST / IPS_IN_COUNTRY_CODES, counts.get("AU") / (double) TEST_SIZE, DOUBLE_PRECISION);
-	assertEquals(NUM_CN_IPS_IN_TEST / IPS_IN_COUNTRY_CODES, counts.get("CN") / (double) TEST_SIZE, DOUBLE_PRECISION);
-	assertEquals(NUM_JP_IPS_IN_TEST / IPS_IN_COUNTRY_CODES, counts.get("JP") / (double) TEST_SIZE, DOUBLE_PRECISION);
-	assertFalse(counts.containsKey("TH"));
+        assertEquals(NUM_AU_IPS_IN_TEST / IPS_IN_COUNTRY_CODES, counts.get("AU") / (double) TEST_SIZE, DOUBLE_PRECISION);
+        assertEquals(NUM_CN_IPS_IN_TEST / IPS_IN_COUNTRY_CODES, counts.get("CN") / (double) TEST_SIZE, DOUBLE_PRECISION);
+        assertEquals(NUM_JP_IPS_IN_TEST / IPS_IN_COUNTRY_CODES, counts.get("JP") / (double) TEST_SIZE, DOUBLE_PRECISION);
+        assertFalse(counts.containsKey("TH"));
     }
 }

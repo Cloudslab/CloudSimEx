@@ -59,98 +59,96 @@ public class ExperimentsRunner {
      * @throws Exception
      *             - if something goes wrong.
      */
-    public static synchronized void runExperiments(
-	    final List<ExperimentDefinition> experimentsDefs,
-	    final int numFreeCPUs) throws Exception {
+    public static synchronized void runExperiments(final List<ExperimentDefinition> experimentsDefs, final int numFreeCPUs) throws Exception {
 
-	if (!experimentsDefs.isEmpty()) {
-	    // Prints the pid of the current process... so we know who to kill
-	    printPIDInformation();
+        if (!experimentsDefs.isEmpty()) {
+            // Prints the pid of the current process... so we know who to kill
+            printPIDInformation();
 
-	    // If this process dies - kill the spawn subprocesses.
-	    addHookToKillProcesses();
+            // If this process dies - kill the spawn subprocesses.
+            addHookToKillProcesses();
 
-	    // If possible leave the requested processors free
-	    int cores = Runtime.getRuntime().availableProcessors();
-	    int coresToUse = cores <= numFreeCPUs ? 1 : cores - numFreeCPUs;
+            // If possible leave the requested processors free
+            int cores = Runtime.getRuntime().availableProcessors();
+            int coresToUse = cores <= numFreeCPUs ? 1 : cores - numFreeCPUs;
 
-	    ExecutorService pool = Executors.newFixedThreadPool(coresToUse);
-	    Collection<Future<?>> futures = new ArrayList<Future<?>>();
+            ExecutorService pool = Executors.newFixedThreadPool(coresToUse);
+            Collection<Future<?>> futures = new ArrayList<Future<?>>();
 
-	    for (final ExperimentDefinition def : experimentsDefs) {
-		Runnable runnable = new Runnable() {
-		    @Override
-		    public void run() {
-			int resultStatus;
-			try {
-			    resultStatus = exec(def);
-			} catch (IOException | InterruptedException e) {
-			    resultStatus = 1;
-			}
-			if (resultStatus != 0) {
-			    System.err.println("!!! Experiment " + def.getMainClass().getCanonicalName() + " has failed!!!");
-			}
-		    }
-		};
-		futures.add(pool.submit(runnable));
-	    }
+            for (final ExperimentDefinition def : experimentsDefs) {
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        int resultStatus;
+                        try {
+                            resultStatus = exec(def);
+                        } catch (IOException | InterruptedException e) {
+                            resultStatus = 1;
+                        }
+                        if (resultStatus != 0) {
+                            System.err.println("!!! Experiment " + def.getMainClass().getCanonicalName() + " has failed!!!");
+                        }
+                    }
+                };
+                futures.add(pool.submit(runnable));
+            }
 
-	    // Wait until all are finished
-	    for (Future<?> future : futures) {
-		future.get();
-	    }
+            // Wait until all are finished
+            for (Future<?> future : futures) {
+                future.get();
+            }
 
-	    pool.shutdown();
-	}
-	System.err.println();
-	System.err.println("All experiments are finished");
+            pool.shutdown();
+        }
+        System.err.println();
+        System.err.println("All experiments are finished");
     }
 
     @SuppressWarnings("unused")
     private static int[] getHeapArgs() {
-	RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
-	List<String> arguments = runtimeMxBean.getInputArguments();
-	int minMem = 64;
-	int maxMem = 2;
-	for (String arg : arguments) {
-	    char lastChar = arg.charAt(arg.length());
-	    if (arg.startsWith("-Xmx")) {
-		maxMem = Integer.parseInt(arg.trim().replaceAll("[^\\d]", ""));
-		maxMem = normaliseToMegabytes(maxMem, lastChar);
-	    } else if (arg.startsWith("-Xms")) {
-		minMem = Integer.parseInt(arg.trim().replaceAll("[^\\d]", ""));
-		minMem = normaliseToMegabytes(minMem, lastChar);
-	    }
-	}
-	return new int[] { maxMem, minMem };
+        RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
+        List<String> arguments = runtimeMxBean.getInputArguments();
+        int minMem = 64;
+        int maxMem = 2;
+        for (String arg : arguments) {
+            char lastChar = arg.charAt(arg.length());
+            if (arg.startsWith("-Xmx")) {
+                maxMem = Integer.parseInt(arg.trim().replaceAll("[^\\d]", ""));
+                maxMem = normaliseToMegabytes(maxMem, lastChar);
+            } else if (arg.startsWith("-Xms")) {
+                minMem = Integer.parseInt(arg.trim().replaceAll("[^\\d]", ""));
+                minMem = normaliseToMegabytes(minMem, lastChar);
+            }
+        }
+        return new int[] { maxMem, minMem };
     }
 
     private static int normaliseToMegabytes(int mem, char lastChar) {
-	int res = mem;
-	if (lastChar == 'g' || lastChar == 'G') {
-	    res = mem * 1024;
-	} else if (lastChar == 'k' || lastChar == 'K') {
-	    res = mem / 1024;
-	} else if (lastChar != 'm' || lastChar == 'M') {
-	    res = mem / 1048576;
-	}
-	return res;
+        int res = mem;
+        if (lastChar == 'g' || lastChar == 'G') {
+            res = mem * 1024;
+        } else if (lastChar == 'k' || lastChar == 'K') {
+            res = mem / 1024;
+        } else if (lastChar != 'm' || lastChar == 'M') {
+            res = mem / 1048576;
+        }
+        return res;
     }
 
     private synchronized static void addHookToKillProcesses() {
-	if (shutdownHook == null) {
-	    shutdownHook = new Thread() {
-		@Override
-		public void run() {
-		    System.err.println("Killing subprocesses...");
-		    for (Process p : PROCESSES) {
-			p.destroy();
-		    }
-		    System.err.println("All subprocesses are killed. Shutting down.");
-		}
-	    };
-	    Runtime.getRuntime().addShutdownHook(shutdownHook);
-	}
+        if (shutdownHook == null) {
+            shutdownHook = new Thread() {
+                @Override
+                public void run() {
+                    System.err.println("Killing subprocesses...");
+                    for (Process p : PROCESSES) {
+                        p.destroy();
+                    }
+                    System.err.println("All subprocesses are killed. Shutting down.");
+                }
+            };
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
+        }
     }
 
     /**
@@ -163,72 +161,68 @@ public class ExperimentsRunner {
      * @throws IOException
      * @throws InterruptedException
      */
-    private static int exec(final ExperimentDefinition def)
-	    throws IOException,
-	    InterruptedException {
-	String javaHome = System.getProperty("java.home");
-	String javaBin = javaHome +
-		File.separator + "bin" +
-		File.separator + "java";
-	String classpath = System.getProperty("java.class.path");
-	String className = def.getMainClass().getCanonicalName();
+    private static int exec(final ExperimentDefinition def) throws IOException, InterruptedException {
+        String javaHome = System.getProperty("java.home");
+        String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
+        String classpath = System.getProperty("java.class.path");
+        String className = def.getMainClass().getCanonicalName();
 
-	List<String> vmParams = new ArrayList<>();
-	List<String> appParams = new ArrayList<>();
-	
-	if(def.getMaxMem() > 0) {
-	    vmParams.add("-Xmx" + def.getMaxMem() + "m");
-	}
-	if(def.getMinMem() > 0) {
-	    vmParams.add("-Xms" + def.getMinMem() + "m");
-	}
-	
-	for (String param : def.getArguements()) {
-	    if (param.startsWith("-X") || param.startsWith("-D")) {
-		vmParams.add(param);
-	    } else {
-		appParams.add(param);
-	    }
-	}
+        List<String> vmParams = new ArrayList<>();
+        List<String> appParams = new ArrayList<>();
 
-	List<String> processBuilderList = new ArrayList<>();
-	processBuilderList.add(javaBin);
-	processBuilderList.addAll(vmParams);
-	processBuilderList.addAll(Arrays.asList("-cp", classpath, className));
-	processBuilderList.addAll(appParams);
-	ProcessBuilder builder = new ProcessBuilder((String[]) processBuilderList.toArray(new String[0]));
+        if (def.getMaxMem() > 0) {
+            vmParams.add("-Xmx" + def.getMaxMem() + "m");
+        }
+        if (def.getMinMem() > 0) {
+            vmParams.add("-Xms" + def.getMinMem() + "m");
+        }
 
-	// Redirect the standard I/O to here (this process)
-	builder.inheritIO();
+        for (String param : def.getArguements()) {
+            if (param.startsWith("-X") || param.startsWith("-D")) {
+                vmParams.add(param);
+            } else {
+                appParams.add(param);
+            }
+        }
 
-	// Start the process
-	Process process = builder.start();
+        List<String> processBuilderList = new ArrayList<>();
+        processBuilderList.add(javaBin);
+        processBuilderList.addAll(vmParams);
+        processBuilderList.addAll(Arrays.asList("-cp", classpath, className));
+        processBuilderList.addAll(appParams);
+        ProcessBuilder builder = new ProcessBuilder((String[]) processBuilderList.toArray(new String[0]));
 
-	// Keep a reference to the process, so that it can be killed
-	PROCESSES.add(process);
+        // Redirect the standard I/O to here (this process)
+        builder.inheritIO();
 
-	// Wait until the process is done.
-	process.waitFor();
+        // Start the process
+        Process process = builder.start();
 
-	// Return the status of the process
-	return process.exitValue();
+        // Keep a reference to the process, so that it can be killed
+        PROCESSES.add(process);
+
+        // Wait until the process is done.
+        process.waitFor();
+
+        // Return the status of the process
+        return process.exitValue();
     }
 
     private static void printPIDInformation() throws IOException {
-	if (SystemUtils.IS_OS_LINUX) {
-	    byte[] bo = new byte[100];
-	    String[] cmd = { "bash", "-c", "echo $PPID" };
-	    Process p = Runtime.getRuntime().exec(cmd);
-	    p.getInputStream().read(bo);
+        if (SystemUtils.IS_OS_LINUX) {
+            byte[] bo = new byte[100];
+            String[] cmd = { "bash", "-c", "echo $PPID" };
+            Process p = Runtime.getRuntime().exec(cmd);
+            p.getInputStream().read(bo);
 
-	    String pid = new String(bo).trim();
-	    System.err.println("Main process Id (PID) is: " + pid + ". Use: ");
-	    System.err.println("\tkill -SIGINT " + pid);
-	    System.err.println("to kill all experiments");
-	    System.err.println();
-	} else {
-	    // TODO implement for other OS-es or in a platform independent way
-	    System.err.println("Could not detect the PID of the current processess ...");
-	}
+            String pid = new String(bo).trim();
+            System.err.println("Main process Id (PID) is: " + pid + ". Use: ");
+            System.err.println("\tkill -SIGINT " + pid);
+            System.err.println("to kill all experiments");
+            System.err.println();
+        } else {
+            // TODO implement for other OS-es or in a platform independent way
+            System.err.println("Could not detect the PID of the current processess ...");
+        }
     }
 }

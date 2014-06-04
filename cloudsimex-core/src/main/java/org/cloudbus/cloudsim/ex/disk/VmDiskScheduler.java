@@ -19,17 +19,17 @@ import org.cloudbus.cloudsim.ex.VmSchedulerWithIndependentPes;
 public class VmDiskScheduler extends VmSchedulerWithIndependentPes<HddPe> {
 
     public VmDiskScheduler(final List<HddPe> pelist) {
-	super(pelist);
+        super(pelist);
     }
 
     @Override
     protected VmScheduler createSchedulerFroPe(final HddPe pe) {
-	return new VmSchedulerTimeSharedOverSubscription(Arrays.asList(pe));
+        return new VmSchedulerTimeSharedOverSubscription(Arrays.asList(pe));
     }
 
     @Override
     protected boolean doesVmUse(final Vm vm, final Pe pe) {
-	return (vm instanceof HddVm) ? ((HddVm) vm).getHddsIds().contains(pe.getId()) : false;
+        return (vm instanceof HddVm) ? ((HddVm) vm).getHddsIds().contains(pe.getId()) : false;
     }
 
 }

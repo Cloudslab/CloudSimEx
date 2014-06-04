@@ -36,54 +36,53 @@ public abstract class BaseWebLoadBalancer implements ILoadBalancer {
      *            - the balancer of the DB cloudlets among DB servers. Must not
      *            be null.
      */
-    public BaseWebLoadBalancer(final long appId, final String ip, final List<HddVm> appServers,
-	    final IDBBalancer dbBalancer) {
-	super();
-	this.appId = appId;
-	id = Id.pollId(SimpleWebLoadBalancer.class);
-	this.appServers = appServers;
-	this.dbBalancer = dbBalancer;
-	this.ip = ip;
+    public BaseWebLoadBalancer(final long appId, final String ip, final List<HddVm> appServers, final IDBBalancer dbBalancer) {
+        super();
+        this.appId = appId;
+        id = Id.pollId(SimpleWebLoadBalancer.class);
+        this.appServers = appServers;
+        this.dbBalancer = dbBalancer;
+        this.ip = ip;
     }
 
     @Override
     public long getId() {
-	return id;
+        return id;
     }
 
     @Override
     public long getAppId() {
-	return appId;
+        return appId;
     }
 
     @Override
     public String getIp() {
-	return ip;
+        return ip;
     }
 
     @Override
     public void registerAppServer(final HddVm vm) {
-	appServers.add(vm);
+        appServers.add(vm);
     }
 
     @Override
     public List<HddVm> getAppServers() {
-	return appServers;
+        return appServers;
     }
 
     @Override
     public List<HddVm> getRunningAppServers() {
-	List<HddVm> result = new ArrayList<>();
-	for(HddVm vm : getAppServers()) {
-	    if(vm.getStatus() == VMStatus.RUNNING) {
-		result.add(vm);
-	    }
-	}
-	return result;
+        List<HddVm> result = new ArrayList<>();
+        for (HddVm vm : getAppServers()) {
+            if (vm.getStatus() == VMStatus.RUNNING) {
+                result.add(vm);
+            }
+        }
+        return result;
     }
-    
+
     @Override
     public IDBBalancer getDbBalancer() {
-	return dbBalancer;
+        return dbBalancer;
     }
 }

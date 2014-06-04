@@ -23,7 +23,7 @@ public enum VMStatus {
     private final Set<VMStatus> validPrevStates = new HashSet<>();
 
     private VMStatus(final VMStatus... statuses) {
-	validPrevStates.addAll(Arrays.asList(statuses));
+        validPrevStates.addAll(Arrays.asList(statuses));
     }
 
     /**
@@ -34,7 +34,7 @@ public enum VMStatus {
      * @return if the param status can be a successor of this status.
      */
     public boolean isValidNextState(final VMStatus stat) {
-	return stat.validPrevStates.contains(this);
+        return stat.validPrevStates.contains(this);
     }
 
 }

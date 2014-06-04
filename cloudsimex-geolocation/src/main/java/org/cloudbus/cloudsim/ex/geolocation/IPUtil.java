@@ -18,13 +18,13 @@ public class IPUtil {
      *         representation.
      */
     public static String convertIPv4(final int ip) {
-	int lastByteMask = 0b11111111;
-	int i1 = ip >>> 24;
-	int i2 = ip >> 16 & lastByteMask;
-	int i3 = ip >> 8 & lastByteMask;
-	int i4 = ip & lastByteMask;
+        int lastByteMask = 0b11111111;
+        int i1 = ip >>> 24;
+        int i2 = ip >> 16 & lastByteMask;
+        int i3 = ip >> 8 & lastByteMask;
+        int i4 = ip & lastByteMask;
 
-	return String.format("%d.%d.%d.%d", i1, i2, i3, i4);
+        return String.format("%d.%d.%d.%d", i1, i2, i3, i4);
     }
 
 }

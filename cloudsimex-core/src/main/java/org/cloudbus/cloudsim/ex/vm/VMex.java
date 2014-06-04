@@ -41,10 +41,9 @@ public class VMex extends Vm {
      * @param vmm
      * @param cloudletScheduler
      */
-    public VMex(final String name, final int userId, final double mips, final int numberOfPes, final int ram,
-	    final long bw, final long size, final String vmm,
-	    final CloudletScheduler cloudletScheduler) {
-	this(name, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, new VMMetadata());
+    public VMex(final String name, final int userId, final double mips, final int numberOfPes, final int ram, final long bw, final long size, final String vmm,
+            final CloudletScheduler cloudletScheduler) {
+        this(name, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, new VMMetadata());
 
     }
 
@@ -63,12 +62,11 @@ public class VMex extends Vm {
      * @param cloudletScheduler
      * @param metadata
      */
-    public VMex(final String name, final int userId, final double mips, final int numberOfPes, final int ram,
-	    final long bw, final long size, final String vmm,
-	    final CloudletScheduler cloudletScheduler, final VMMetadata metadata) {
-	super(Id.pollId(Vm.class), userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
-	this.name = name;
-	this.metadata = metadata;
+    public VMex(final String name, final int userId, final double mips, final int numberOfPes, final int ram, final long bw, final long size, final String vmm,
+            final CloudletScheduler cloudletScheduler, final VMMetadata metadata) {
+        super(Id.pollId(Vm.class), userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
+        this.name = name;
+        this.metadata = metadata;
     }
 
     // Unfortunately the super class already has a boolean property if the VM is
@@ -78,23 +76,21 @@ public class VMex extends Vm {
 
     @Override
     public void setBeingInstantiated(final boolean beingInstantiated) {
-	if (status != null && status != VMStatus.INITIALISING) {
-	    throw new IllegalStateException("The initiated status can not be set if the VM is in " +
-		    status.name() + " state.");
-	}
+        if (status != null && status != VMStatus.INITIALISING) {
+            throw new IllegalStateException("The initiated status can not be set if the VM is in " + status.name() + " state.");
+        }
 
-	super.setBeingInstantiated(beingInstantiated);
-	setStatus(super.isBeingInstantiated() ? VMStatus.INITIALISING : VMStatus.RUNNING);
+        super.setBeingInstantiated(beingInstantiated);
+        setStatus(super.isBeingInstantiated() ? VMStatus.INITIALISING : VMStatus.RUNNING);
     }
 
     @Override
     public boolean isBeingInstantiated() {
-	if ((super.isBeingInstantiated() && status != null && status != VMStatus.INITIALISING)
-		|| (!super.isBeingInstantiated() && status == VMStatus.INITIALISING)) {
-	    throw new IllegalStateException("The initiated states are not in synch. state: " + status.name()
-		    + " init flag:" + super.isBeingInstantiated());
-	}
-	return super.isBeingInstantiated();
+        if ((super.isBeingInstantiated() && status != null && status != VMStatus.INITIALISING)
+                || (!super.isBeingInstantiated() && status == VMStatus.INITIALISING)) {
+            throw new IllegalStateException("The initiated states are not in synch. state: " + status.name() + " init flag:" + super.isBeingInstantiated());
+        }
+        return super.isBeingInstantiated();
     }
 
     /**
@@ -103,7 +99,7 @@ public class VMex extends Vm {
      * @return the status of the VM.
      */
     public VMStatus getStatus() {
-	return status;
+        return status;
     }
 
     /**
@@ -117,22 +113,22 @@ public class VMex extends Vm {
      *            - the new status to set. Must not be null.
      */
     public void setStatus(final VMStatus status) {
-	switch (status) {
-	    case INITIALISING:
-		setSubmissionTime(getCurrentTime());
-		break;
-	    case RUNNING:
-		setStartTime(getCurrentTime());
-		break;
-	    case TERMINATED:
-		setEndTime(getCurrentTime());
-		break;
-	    default:
-		throw new IllegalArgumentException("Unknown status " + status.name());
-	}
+        switch (status) {
+        case INITIALISING:
+            setSubmissionTime(getCurrentTime());
+            break;
+        case RUNNING:
+            setStartTime(getCurrentTime());
+            break;
+        case TERMINATED:
+            setEndTime(getCurrentTime());
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown status " + status.name());
+        }
 
-	this.status = status;
-	super.setBeingInstantiated(VMStatus.INITIALISING == status);
+        this.status = status;
+        super.setBeingInstantiated(VMStatus.INITIALISING == status);
     }
 
     /**
@@ -141,7 +137,7 @@ public class VMex extends Vm {
      * @return the submission time.
      */
     public double getSubmissionTime() {
-	return submissionTime;
+        return submissionTime;
     }
 
     /**
@@ -151,7 +147,7 @@ public class VMex extends Vm {
      *            - the new submission time.
      */
     private void setSubmissionTime(double submissionTime) {
-	this.submissionTime = submissionTime;
+        this.submissionTime = submissionTime;
     }
 
     /**
@@ -160,7 +156,7 @@ public class VMex extends Vm {
      * @return - the starting time (after it has booted) of this VM.
      */
     public double getStartTime() {
-	return startTime;
+        return startTime;
     }
 
     /**
@@ -171,7 +167,7 @@ public class VMex extends Vm {
      *            after the submission time.
      */
     private void setStartTime(double startTime) {
-	this.startTime = startTime;
+        this.startTime = startTime;
     }
 
     /**
@@ -181,7 +177,7 @@ public class VMex extends Vm {
      * @return the ending time (due to failure or termination) of this VM.
      */
     public double getEndTime() {
-	return endTime;
+        return endTime;
     }
 
     /**
@@ -191,7 +187,7 @@ public class VMex extends Vm {
      *            - the end time. Must be after the starting time.
      */
     private void setEndTime(double endTime) {
-	this.endTime = endTime;
+        this.endTime = endTime;
     }
 
     /**
@@ -202,8 +198,8 @@ public class VMex extends Vm {
      *         booting).
      */
     public double getTimeAfterBooting() {
-	double endTime = getEndTime() < 0 ? getCurrentTime() : getEndTime();
-	return endTime - startTime;
+        double endTime = getEndTime() < 0 ? getCurrentTime() : getEndTime();
+        return endTime - startTime;
     }
 
     /**
@@ -212,8 +208,8 @@ public class VMex extends Vm {
      * @return the duration for which this VM has existed (after its creation).
      */
     public double getTimeAfterSubmission() {
-	double endTime = getEndTime() < 0 ? getCurrentTime() : getEndTime();
-	return endTime - submissionTime;
+        double endTime = getEndTime() < 0 ? getCurrentTime() : getEndTime();
+        return endTime - submissionTime;
     }
 
     /**
@@ -222,7 +218,7 @@ public class VMex extends Vm {
      * @return the name of the VM.
      */
     public String getName() {
-	return name;
+        return name;
     }
 
     /**
@@ -231,7 +227,7 @@ public class VMex extends Vm {
      * @return the metadata of this VM.
      */
     public VMMetadata getMetadata() {
-	return metadata;
+        return metadata;
     }
 
     /**
@@ -240,11 +236,11 @@ public class VMex extends Vm {
      * @return if the VM is finished returns its lifetime period. Otherwise - 0;
      */
     public double getLifeDuration() {
-	if (!EnumSet.of(VMStatus.INITIALISING, VMStatus.RUNNING).contains(getStatus())) {
-	    return getEndTime() - getStartTime();
-	} else {
-	    return 0;
-	}
+        if (!EnumSet.of(VMStatus.INITIALISING, VMStatus.RUNNING).contains(getStatus())) {
+            return getEndTime() - getStartTime();
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -254,7 +250,7 @@ public class VMex extends Vm {
      * @return the current simulation time.
      */
     protected double getCurrentTime() {
-	return CloudSim.clock();
+        return CloudSim.clock();
     }
 
     /**
@@ -268,18 +264,16 @@ public class VMex extends Vm {
      * @return a deep copy of this VM.
      */
     public VMex clone(final CloudletScheduler scheduler) {
-	if (!getClass().equals(VMex.class)) {
-	    throw new IllegalStateException("The operation is undefined for subclass: " + getClass().getCanonicalName());
-	}
+        if (!getClass().equals(VMex.class)) {
+            throw new IllegalStateException("The operation is undefined for subclass: " + getClass().getCanonicalName());
+        }
 
-	VMex result = new VMex(getName(), getUserId(), getMips(), getNumberOfPes(), getRam(), getBw(), getSize(),
-		getVmm(),
-		scheduler, getMetadata().clone());
-	return result;
+        VMex result = new VMex(getName(), getUserId(), getMips(), getNumberOfPes(), getRam(), getBw(), getSize(), getVmm(), scheduler, getMetadata().clone());
+        return result;
     }
 
     @Override
     public String toString() {
-	return String.format("VM(%s, %d)", Objects.toString(getName(), "N/A"), getId());
+        return String.format("VM(%s, %d)", Objects.toString(getName(), "N/A"), getId());
     }
 }

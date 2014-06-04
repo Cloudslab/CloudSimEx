@@ -9,8 +9,8 @@ package org.cloudbus.cloudsim.ex.util;
  */
 public class ExperimentDefinition {
 
-    public static int GIGABYTE_IN_MEGA = 1024; 
-    
+    public static int GIGABYTE_IN_MEGA = 1024;
+
     private Class<?> mainClass;
     private int maxMem;
     private int minMem;
@@ -30,28 +30,27 @@ public class ExperimentDefinition {
      * @param arguements
      *            - JVM and program arguements.
      */
-    public ExperimentDefinition(Class<?> mainClass, int maxMem, int minMem,
-	    String... arguements) {
-	super();
-	this.mainClass = mainClass;
-	this.maxMem = maxMem;
-	this.minMem = minMem;
-	this.arguements = arguements;
+    public ExperimentDefinition(Class<?> mainClass, int maxMem, int minMem, String... arguements) {
+        super();
+        this.mainClass = mainClass;
+        this.maxMem = maxMem;
+        this.minMem = minMem;
+        this.arguements = arguements;
     }
 
     public Class<?> getMainClass() {
-	return mainClass;
+        return mainClass;
     }
 
     public int getMaxMem() {
-	return maxMem;
+        return maxMem;
     }
 
     public int getMinMem() {
-	return minMem;
+        return minMem;
     }
 
     public String[] getArguements() {
-	return arguements;
+        return arguements;
     }
 }

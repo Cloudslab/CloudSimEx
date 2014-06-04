@@ -29,12 +29,12 @@ public class RandomListGenerator<T> implements IGenerator<T> {
      *            positive double.
      */
     public RandomListGenerator(final Map<T, Double> valuesAndFreqs) {
-	double sum = 0;
-	for (Map.Entry<T, Double> e : valuesAndFreqs.entrySet()) {
-	    sum += e.getValue();
-	    values.put(e.getKey(), sum);
-	}
-	maxValue = sum;
+        double sum = 0;
+        for (Map.Entry<T, Double> e : valuesAndFreqs.entrySet()) {
+            sum += e.getValue();
+            values.put(e.getKey(), sum);
+        }
+        maxValue = sum;
     }
 
     /**
@@ -44,51 +44,52 @@ public class RandomListGenerator<T> implements IGenerator<T> {
      *            - values mapped to probabilities. Must not be null and must
      *            not aggregate null values. The probabilities can be any
      *            positive double.
-     * @param seed - a seed.
+     * @param seed
+     *            - a seed.
      */
     public RandomListGenerator(final Map<T, Double> valuesAndFreqs, final long seed) {
-	this(valuesAndFreqs);
-	rand.setSeed(seed);
+        this(valuesAndFreqs);
+        rand.setSeed(seed);
     }
 
     @Override
     public T peek() {
-	if (peeked == null) {
-	    peeked = generateValue();
-	}
-	return peeked;
+        if (peeked == null) {
+            peeked = generateValue();
+        }
+        return peeked;
     }
 
     @Override
     public T poll() {
-	T result = peeked;
-	if (peeked != null) {
-	    peeked = generateValue();
-	} else {
-	    result = generateValue();
-	}
-	return result;
+        T result = peeked;
+        if (peeked != null) {
+            peeked = generateValue();
+        } else {
+            result = generateValue();
+        }
+        return result;
     }
 
     @Override
     public boolean isEmpty() {
-	return false;
+        return false;
     }
 
     @Override
     public void notifyOfTime(double time) {
-	// Do nothing
+        // Do nothing
     }
 
     private T generateValue() {
-	double r = rand.nextDouble() * maxValue;
-	T result = null;
-	for (Map.Entry<T, Double> e : values.entrySet()) {
-	    if (r <= e.getValue()) {
-		result = e.getKey();
-		break;
-	    }
-	}
-	return result;
+        double r = rand.nextDouble() * maxValue;
+        T result = null;
+        for (Map.Entry<T, Double> e : values.entrySet()) {
+            if (r <= e.getValue()) {
+                result = e.getKey();
+                break;
+            }
+        }
+        return result;
     }
 }

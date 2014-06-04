@@ -105,8 +105,7 @@ public class CustomLog {
      */
     public final static Level DEFAULT_LEVEL = Level.INFO;
 
-    private static final Logger LOGGER = Logger.getLogger(CustomLog.class
-	    .getPackage().getName());
+    private static final Logger LOGGER = Logger.getLogger(CustomLog.class.getPackage().getName());
 
     /** Buffer to avoid creating new string builder upon every print. */
     private static StringBuilder builder = new StringBuilder();
@@ -125,12 +124,11 @@ public class CustomLog {
      *            - the message.
      */
     public static void print(final Level level, final Object message) {
-	if (isLevelHighEnough(level)) {
-	    LOGGER.log(level == null ? DEFAULT_LEVEL : level,
-		    String.valueOf(message));
-	}
+        if (isLevelHighEnough(level)) {
+            LOGGER.log(level == null ? DEFAULT_LEVEL : level, String.valueOf(message));
+        }
     }
-    
+
     /**
      * Prints the message passed as an object. Simply uses toString
      * implementation. Uses the default log level.
@@ -139,7 +137,7 @@ public class CustomLog {
      *            - the message.
      */
     public static void print(final Object message) {
-	print(DEFAULT_LEVEL, message);
+        print(DEFAULT_LEVEL, message);
     }
 
     /**
@@ -151,14 +149,13 @@ public class CustomLog {
      *            - the messages.
      */
     public static void printConcat(final Level level, final Object... messages) {
-	if (isLevelHighEnough(level)) {
-	    builder.setLength(0); // Clear the buffer
-	    for (int i = 0; i < messages.length; i++) {
-		builder.append(String.valueOf(messages[i]));
-	    }
-	    LOGGER.log(level == null ? DEFAULT_LEVEL : level,
-		    String.valueOf(builder));
-	}
+        if (isLevelHighEnough(level)) {
+            builder.setLength(0); // Clear the buffer
+            for (int i = 0; i < messages.length; i++) {
+                builder.append(String.valueOf(messages[i]));
+            }
+            LOGGER.log(level == null ? DEFAULT_LEVEL : level, String.valueOf(builder));
+        }
     }
 
     /**
@@ -168,7 +165,7 @@ public class CustomLog {
      *            - the messages.
      */
     public static void printConcat(final Object... messages) {
-	printConcat(DEFAULT_LEVEL, messages);
+        printConcat(DEFAULT_LEVEL, messages);
     }
 
     /**
@@ -180,16 +177,15 @@ public class CustomLog {
      *            - the messages.
      */
     public static void printConcatLine(final Level level, final Object... messages) {
-	if (isLevelHighEnough(level)) {
-	    builder.setLength(0); // Clear the buffer
-	    for (int i = 0; i < messages.length; i++) {
-		builder.append(String.valueOf(messages[i]));
-	    }
-	    LOGGER.log(level == null ? DEFAULT_LEVEL : level,
-		    String.valueOf(builder));
-	}
+        if (isLevelHighEnough(level)) {
+            builder.setLength(0); // Clear the buffer
+            for (int i = 0; i < messages.length; i++) {
+                builder.append(String.valueOf(messages[i]));
+            }
+            LOGGER.log(level == null ? DEFAULT_LEVEL : level, String.valueOf(builder));
+        }
     }
-    
+
     /**
      * Prints a line with the concatenated messages.
      * 
@@ -197,9 +193,9 @@ public class CustomLog {
      *            - the messages.
      */
     public static void printConcatLine(final Object... messages) {
-	printConcatLine(DEFAULT_LEVEL, messages);
+        printConcatLine(DEFAULT_LEVEL, messages);
     }
-    
+
     /**
      * Prints a line with the message to the log.
      * 
@@ -209,9 +205,9 @@ public class CustomLog {
      *            - the message. Must not be null.
      */
     public static void printLine(final Level level, final String msg) {
-	if (isLevelHighEnough(level)) {
-	    LOGGER.log(level == null ? DEFAULT_LEVEL : level, msg);
-	}
+        if (isLevelHighEnough(level)) {
+            LOGGER.log(level == null ? DEFAULT_LEVEL : level, msg);
+        }
     }
 
     /**
@@ -221,7 +217,7 @@ public class CustomLog {
      *            - the message. Must not be null.
      */
     public static void printLine(final String msg) {
-	printLine(DEFAULT_LEVEL, msg);
+        printLine(DEFAULT_LEVEL, msg);
     }
 
     /**
@@ -234,17 +230,14 @@ public class CustomLog {
      *            - the level. If null the default level is used
      * @param args
      */
-    public static void printf(final Level level, final String format,
-	    final Object... args) {
-	if (isLevelHighEnough(level)) {
-	    LOGGER.log(level == null ? DEFAULT_LEVEL : level,
-		    String.format(format, args));
-	}
+    public static void printf(final Level level, final String format, final Object... args) {
+        if (isLevelHighEnough(level)) {
+            LOGGER.log(level == null ? DEFAULT_LEVEL : level, String.format(format, args));
+        }
     }
 
     public static boolean isLevelHighEnough(final Level level) {
-	return (level == null && DEFAULT_LEVEL.intValue() >= granularityLevel.intValue())
-		|| (level != null && level.intValue() >= granularityLevel.intValue());
+        return (level == null && DEFAULT_LEVEL.intValue() >= granularityLevel.intValue()) || (level != null && level.intValue() >= granularityLevel.intValue());
     }
 
     /**
@@ -256,7 +249,7 @@ public class CustomLog {
      * @param args
      */
     public static void printf(final String format, final Object... args) {
-	printf(DEFAULT_LEVEL, String.format(format, args));
+        printf(DEFAULT_LEVEL, String.format(format, args));
     }
 
     /**
@@ -270,9 +263,8 @@ public class CustomLog {
      * @param properties
      *            - the properties to use for the header.
      */
-    public static void printHeader(final Class<?> klass, final String delim,
-	    final String[] properties) {
-	CustomLog.printLine(TextUtil.getCaptionLine(klass, delim, properties));
+    public static void printHeader(final Class<?> klass, final String delim, final String[] properties) {
+        CustomLog.printLine(TextUtil.getCaptionLine(klass, delim, properties));
     }
 
     /**
@@ -287,7 +279,7 @@ public class CustomLog {
      *            - the properties to use for the header.
      */
     public static void printHeader(final Class<?> klass, final String delim) {
-	CustomLog.printLine(TextUtil.getCaptionLine(klass, delim));
+        CustomLog.printLine(TextUtil.getCaptionLine(klass, delim));
     }
 
     /**
@@ -298,7 +290,7 @@ public class CustomLog {
      *            - the class. Must not be null.
      */
     public static void printHeader(final Class<?> klass) {
-	CustomLog.printLine(TextUtil.getCaptionLine(klass));
+        CustomLog.printLine(TextUtil.getCaptionLine(klass));
     }
 
     /**
@@ -312,9 +304,8 @@ public class CustomLog {
      * @param properties
      *            - the properties to print. If null the default props are used.
      */
-    public static void printLineForObject(final Object o, final String delim,
-	    String[] properties) {
-	CustomLog.print(TextUtil.getTxtLine(o, delim, properties));
+    public static void printLineForObject(final Object o, final String delim, String[] properties) {
+        CustomLog.print(TextUtil.getTxtLine(o, delim, properties));
     }
 
     /**
@@ -325,7 +316,7 @@ public class CustomLog {
      *            - the object. Must not be null.
      */
     public static void printLineForObject(final Object o) {
-	CustomLog.print(TextUtil.getTxtLine(o));
+        CustomLog.print(TextUtil.getTxtLine(o));
     }
 
     /**
@@ -338,7 +329,7 @@ public class CustomLog {
      *            - the delimeter to use.
      */
     public static void printLineForObject(final Object o, final String delim) {
-	CustomLog.print(TextUtil.getTxtLine(o, delim));
+        CustomLog.print(TextUtil.getTxtLine(o, delim));
     }
 
     /**
@@ -352,37 +343,35 @@ public class CustomLog {
      * @param list
      *            - list of objects. All objects, must be of type klass.
      */
-    public static void printResults(final Class<?> klass, String[] properties,
-	    final List<?>... lines) {
-	if (klass != null) {
-	    // Print header line
-	    printHeader(klass, TextUtil.DEFAULT_DELIM, properties);
-	}
+    public static void printResults(final Class<?> klass, String[] properties, final List<?>... lines) {
+        if (klass != null) {
+            // Print header line
+            printHeader(klass, TextUtil.DEFAULT_DELIM, properties);
+        }
 
-	// Print details for each element
-	for (List<?> list : lines) {
-	    for (Object o : list) {
-		printLineForObject(o, TextUtil.DEFAULT_DELIM, properties);
-	    }
-	}
+        // Print details for each element
+        for (List<?> list : lines) {
+            for (Object o : list) {
+                printLineForObject(o, TextUtil.DEFAULT_DELIM, properties);
+            }
+        }
     }
 
     @SafeVarargs
     public static <F> void printResults(final Class<? extends F> klass, String[] properties,
-	    final LinkedHashMap<String, Function<? extends F, String>> virtualProps,
-	    final List<F>... lines) {
-	if (klass != null) {
-	    // Print header line
-	    CustomLog.printLine(TextUtil.getCaptionLine(klass, TextUtil.DEFAULT_DELIM, properties,
-		    virtualProps.keySet().toArray(new String[virtualProps.size()])));
-	}
+            final LinkedHashMap<String, Function<? extends F, String>> virtualProps, final List<F>... lines) {
+        if (klass != null) {
+            // Print header line
+            CustomLog.printLine(TextUtil.getCaptionLine(klass, TextUtil.DEFAULT_DELIM, properties,
+                    virtualProps.keySet().toArray(new String[virtualProps.size()])));
+        }
 
-	// Print details for each element
-	for (List<F> list : lines) {
-	    for (F o : list) {
-		CustomLog.print(TextUtil.getTxtLine(o, TextUtil.DEFAULT_DELIM, properties, false, virtualProps));
-	    }
-	}
+        // Print details for each element
+        for (List<F> list : lines) {
+            for (F o : list) {
+                CustomLog.print(TextUtil.getTxtLine(o, TextUtil.DEFAULT_DELIM, properties, false, virtualProps));
+            }
+        }
     }
 
     /**
@@ -394,37 +383,34 @@ public class CustomLog {
      * @param list
      *            - list of objects. All objects, must be of type klass.
      */
-    public static void printResults(final Class<?> klass,
-	    final List<?>... lines) {
-	if (klass != null) {
-	    // Print header line
-	    printHeader(klass);
-	}
+    public static void printResults(final Class<?> klass, final List<?>... lines) {
+        if (klass != null) {
+            // Print header line
+            printHeader(klass);
+        }
 
-	// Print details for each cloudlet
-	for (List<?> list : lines) {
-	    for (Object o : list) {
-		printLineForObject(o);
-	    }
-	}
+        // Print details for each cloudlet
+        for (List<?> list : lines) {
+            for (Object o : list) {
+                printLineForObject(o);
+            }
+        }
     }
 
     @SafeVarargs
-    public static <F> void printResults(final Class<? extends F> klass,
-	    final LinkedHashMap<String, Function<? extends F, String>> virtualProps,
-	    final List<F>... lines) {
-	if (klass != null) {
-	    // Print header line
-	    CustomLog.printLine(TextUtil.getCaptionLine(klass, TextUtil.DEFAULT_DELIM, null,
-		    virtualProps.keySet().toArray(new String[virtualProps.size()])));
-	}
+    public static <F> void printResults(final Class<? extends F> klass, final LinkedHashMap<String, Function<? extends F, String>> virtualProps,
+            final List<F>... lines) {
+        if (klass != null) {
+            // Print header line
+            CustomLog.printLine(TextUtil.getCaptionLine(klass, TextUtil.DEFAULT_DELIM, null, virtualProps.keySet().toArray(new String[virtualProps.size()])));
+        }
 
-	// Print details for each cloudlet
-	for (List<F> list : lines) {
-	    for (F o : list) {
-		CustomLog.print(TextUtil.getTxtLine(o, TextUtil.DEFAULT_DELIM, null, false, virtualProps));
-	    }
-	}
+        // Print details for each cloudlet
+        for (List<F> list : lines) {
+            for (F o : list) {
+                CustomLog.print(TextUtil.getTxtLine(o, TextUtil.DEFAULT_DELIM, null, false, virtualProps));
+            }
+        }
     }
 
     /**
@@ -438,9 +424,8 @@ public class CustomLog {
      * @param list
      *            - list of objects. All objects, must be of type klass.
      */
-    public static void printResults(final Class<?> klass, final String delim,
-	    final List<?>... lines) {
-	printResults(klass, delim, lines);
+    public static void printResults(final Class<?> klass, final String delim, final List<?>... lines) {
+        printResults(klass, delim, lines);
     }
 
     /**
@@ -456,15 +441,14 @@ public class CustomLog {
      * @param list
      *            - list of objects. All objects, must be of type klass.
      */
-    public static void printResults(final Class<?> klass, final String delim,
-	    final String[] properties, final List<?>... lines) {
-	if (klass != null) {
-	    // Print header line
-	    printHeader(klass, delim, properties);
-	}
+    public static void printResults(final Class<?> klass, final String delim, final String[] properties, final List<?>... lines) {
+        if (klass != null) {
+            // Print header line
+            printHeader(klass, delim, properties);
+        }
 
-	// Print details for each cloudlet
-	printResultsWithoutHeader(klass, delim, properties, lines);
+        // Print details for each cloudlet
+        printResultsWithoutHeader(klass, delim, properties, lines);
     }
 
     /**
@@ -480,15 +464,13 @@ public class CustomLog {
      * @param list
      *            - list of objects. All objects, must be of type klass.
      */
-    public static void printResultsWithoutHeader(final Class<?> klass,
-	    final String delim, final String[] properties,
-	    final List<?>... lines) {
-	// Print details for each cloudlet
-	for (List<?> list : lines) {
-	    for (Object o : list) {
-		printLineForObject(o, delim, properties);
-	    }
-	}
+    public static void printResultsWithoutHeader(final Class<?> klass, final String delim, final String[] properties, final List<?>... lines) {
+        // Print details for each cloudlet
+        for (List<?> list : lines) {
+            for (Object o : list) {
+                printLineForObject(o, delim, properties);
+            }
+        }
     }
 
     /**
@@ -502,14 +484,13 @@ public class CustomLog {
      * @param list
      *            - list of objects. All objects, must be of type klass.
      */
-    public static void printResultsWithoutHeader(final Class<?> klass,
-	    final String delim, final List<?>... lines) {
-	// Print details for each cloudlet
-	for (List<?> list : lines) {
-	    for (Object o : list) {
-		printLineForObject(o, delim);
-	    }
-	}
+    public static void printResultsWithoutHeader(final Class<?> klass, final String delim, final List<?>... lines) {
+        // Print details for each cloudlet
+        for (List<?> list : lines) {
+            for (Object o : list) {
+                printLineForObject(o, delim);
+            }
+        }
     }
 
     /**
@@ -522,11 +503,10 @@ public class CustomLog {
      * @param exc
      *            - the exception to log.
      */
-    public static void logError(final Level level, final String message,
-	    final Throwable exc) {
-	if (isLevelHighEnough(level)) {
-	    LOGGER.log(level, message, exc);
-	}
+    public static void logError(final Level level, final String message, final Throwable exc) {
+        if (isLevelHighEnough(level)) {
+            LOGGER.log(level, message, exc);
+        }
     }
 
     /**
@@ -538,7 +518,7 @@ public class CustomLog {
      *            - the exception to log.
      */
     public static void logError(final String message, final Throwable exc) {
-	logError(DEFAULT_LEVEL, message, exc);
+        logError(DEFAULT_LEVEL, message, exc);
     }
 
     /**
@@ -547,7 +527,7 @@ public class CustomLog {
      * @return - if this logger is disabled.
      */
     public static boolean isDisabled() {
-	return LOGGER.getLevel().equals(Level.OFF);
+        return LOGGER.getLevel().equals(Level.OFF);
     }
 
     /**
@@ -560,7 +540,7 @@ public class CustomLog {
      *            - the new output. Must not be null.
      */
     public static void setOutput(final OutputStream output) {
-	LOGGER.addHandler(new StreamHandler(output, formatter));
+        LOGGER.addHandler(new StreamHandler(output, formatter));
     }
 
     /**
@@ -574,33 +554,25 @@ public class CustomLog {
      * @throws IOException
      *             - if something goes wrong with the I/O.
      */
-    public static void configLogger(final Properties props)
-	    throws SecurityException, IOException {
-	final String fileName = props.containsKey(FILE_PATH_PROP_KEY) ? props
-		.getProperty(FILE_PATH_PROP_KEY).toString() : null;
-	final String format = props.getProperty(LOG_FORMAT_PROP_KEY,
-		"getLevel;getMessage").toString().trim();
-	final boolean prefixCloudSimClock = Boolean.parseBoolean(props
-		.getProperty(LOG_CLOUD_SIM_CLOCK_PROP_KEY, "false").toString().trim());
-	final boolean prefixReadableCloudSimClock = Boolean.parseBoolean(props
-		.getProperty(LOG_READABLE_CLOUD_SIM_CLOCK_PROP_KEY, "false").toString().trim());
-	final boolean prefixRealTimeClock = Boolean.parseBoolean(props
-		.getProperty(LOG_CLOUD_REAL_TIME_PROP_KEY, "false").toString().trim());
-	final boolean shutStandardMessages =
-		Boolean.parseBoolean(props.getProperty(SHUT_STANDART_LOGGER_PROP_KEY, "false").toString().trim());
-	granularityLevel = Level.parse(props.getProperty(LOG_LEVEL_PROP_KEY,
-		DEFAULT_LEVEL.getName()).toString());
-	bufferSize = Integer.parseInt(props.getProperty(BUFFER_SIZE_PROP_KEY, "-1").toString().trim());
+    public static void configLogger(final Properties props) throws SecurityException, IOException {
+        final String fileName = props.containsKey(FILE_PATH_PROP_KEY) ? props.getProperty(FILE_PATH_PROP_KEY).toString() : null;
+        final String format = props.getProperty(LOG_FORMAT_PROP_KEY, "getLevel;getMessage").toString().trim();
+        final boolean prefixCloudSimClock = Boolean.parseBoolean(props.getProperty(LOG_CLOUD_SIM_CLOCK_PROP_KEY, "false").toString().trim());
+        final boolean prefixReadableCloudSimClock = Boolean.parseBoolean(props.getProperty(LOG_READABLE_CLOUD_SIM_CLOCK_PROP_KEY, "false").toString().trim());
+        final boolean prefixRealTimeClock = Boolean.parseBoolean(props.getProperty(LOG_CLOUD_REAL_TIME_PROP_KEY, "false").toString().trim());
+        final boolean shutStandardMessages = Boolean.parseBoolean(props.getProperty(SHUT_STANDART_LOGGER_PROP_KEY, "false").toString().trim());
+        granularityLevel = Level.parse(props.getProperty(LOG_LEVEL_PROP_KEY, DEFAULT_LEVEL.getName()).toString());
+        bufferSize = Integer.parseInt(props.getProperty(BUFFER_SIZE_PROP_KEY, "-1").toString().trim());
 
-	if (shutStandardMessages) {
-	    Log.setOutput(new NullOutputStream());
-	    Log.disable();
-	}
+        if (shutStandardMessages) {
+            Log.setOutput(new NullOutputStream());
+            Log.disable();
+        }
 
-	LOGGER.setUseParentHandlers(false);
-	formatter = new CustomFormatter(prefixCloudSimClock, prefixReadableCloudSimClock, prefixRealTimeClock, format);
+        LOGGER.setUseParentHandlers(false);
+        formatter = new CustomFormatter(prefixCloudSimClock, prefixReadableCloudSimClock, prefixRealTimeClock, format);
 
-	redirectToFile(fileName);
+        redirectToFile(fileName);
     }
 
     /**
@@ -611,7 +583,7 @@ public class CustomLog {
      *            to the standard output.
      */
     public static void redirectToFile(final String fileName) {
-	redirectToFile(fileName, false);
+        redirectToFile(fileName, false);
     }
 
     /**
@@ -625,38 +597,37 @@ public class CustomLog {
      * 
      */
     public static void redirectToFile(final String fileName, Boolean append) {
-	closeAndRemoveHandlers();
+        closeAndRemoveHandlers();
 
-	if (fileName != null) {
-	    System.err.println("Rediricting output to "
-		    + new File(fileName).getAbsolutePath());
-	}
+        if (fileName != null) {
+            System.err.println("Rediricting output to " + new File(fileName).getAbsolutePath());
+        }
 
-	try {
-	    Handler handler = fileName != null ? new FileHandler(fileName, append) : new ConsoleHandler();
-	    handler.setLevel(granularityLevel);
-	    handler.setFormatter(formatter);
+        try {
+            Handler handler = fileName != null ? new FileHandler(fileName, append) : new ConsoleHandler();
+            handler.setLevel(granularityLevel);
+            handler.setFormatter(formatter);
 
-	    Handler bufferedHandler = buffer(handler);
+            Handler bufferedHandler = buffer(handler);
 
-	    LOGGER.addHandler(bufferedHandler);
-	    LOGGER.setLevel(granularityLevel);
+            LOGGER.addHandler(bufferedHandler);
+            LOGGER.setLevel(granularityLevel);
 
-	} catch (SecurityException | IOException e) {
-	    e.printStackTrace();
-	}
+        } catch (SecurityException | IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * Redirects this logger to the standard output.
      */
     public static void redirectToConsole() {
-	redirectToFile(null);
+        redirectToFile(null);
     }
 
     private static Handler buffer(Handler handler) {
-	Handler wrapHandler = bufferSize > 0 ? new InMemoryBufferredHandler(handler, bufferSize) : handler;
-	return wrapHandler;
+        Handler wrapHandler = bufferSize > 0 ? new InMemoryBufferredHandler(handler, bufferSize) : handler;
+        return wrapHandler;
     }
 
     /**
@@ -664,75 +635,75 @@ public class CustomLog {
      * the program
      */
     public static void closeAndRemoveHandlers() {
-	for (Handler h : LOGGER.getHandlers()) {
-	    LOGGER.removeHandler(h);
-	    h.flush();
-	    h.close();
-	}
+        for (Handler h : LOGGER.getHandlers()) {
+            LOGGER.removeHandler(h);
+            h.flush();
+            h.close();
+        }
     }
 
     /**
      * Flushes the buffers, if any.
      */
     public static void flush() {
-	for (Handler h : LOGGER.getHandlers()) {
-	    h.flush();
-	}
+        for (Handler h : LOGGER.getHandlers()) {
+            h.flush();
+        }
     }
 
     private static class CustomFormatter extends Formatter {
 
-	private final boolean prefixCloudSimClock;
-	private final boolean prefixReadableCloudSimClock;
-	private final boolean prefixRealTimeClock;
-	private final String format;
-	SimpleFormatter defaultFormatter = new SimpleFormatter();
+        private final boolean prefixCloudSimClock;
+        private final boolean prefixReadableCloudSimClock;
+        private final boolean prefixRealTimeClock;
+        private final String format;
+        SimpleFormatter defaultFormatter = new SimpleFormatter();
 
-	public CustomFormatter(final boolean prefixCloudSimClock, final boolean prefixReadableCloudSimClock,
-		final boolean prefixRealTimeClock, final String format) {
-	    super();
-	    this.prefixCloudSimClock = prefixCloudSimClock;
-	    this.prefixReadableCloudSimClock = prefixReadableCloudSimClock;
-	    this.prefixRealTimeClock = prefixRealTimeClock;
-	    this.format = format;
-	}
+        public CustomFormatter(final boolean prefixCloudSimClock, final boolean prefixReadableCloudSimClock, final boolean prefixRealTimeClock,
+                final String format) {
+            super();
+            this.prefixCloudSimClock = prefixCloudSimClock;
+            this.prefixReadableCloudSimClock = prefixReadableCloudSimClock;
+            this.prefixRealTimeClock = prefixRealTimeClock;
+            this.format = format;
+        }
 
-	@Override
-	public String format(final LogRecord record) {
-	    final String[] methodCalls = format.split(";");
-	    final StringBuffer result = new StringBuffer();
-	    if (prefixRealTimeClock) {
-		result.append(TextUtil.getTimeFormat().format(new Date(record.getMillis())) + "\t");
-	    }
-	    if (prefixCloudSimClock) {
-		result.append(TextUtil.toString(CloudSim.clock()) + "\t");
-	    }
-	    if (prefixReadableCloudSimClock) {
-		result.append(TextUtil.getReadableTime(CloudSim.clock()) + "\t");
-	    }
+        @Override
+        public String format(final LogRecord record) {
+            final String[] methodCalls = format.split(";");
+            final StringBuffer result = new StringBuffer();
+            if (prefixRealTimeClock) {
+                result.append(TextUtil.getTimeFormat().format(new Date(record.getMillis())) + "\t");
+            }
+            if (prefixCloudSimClock) {
+                result.append(TextUtil.toString(CloudSim.clock()) + "\t");
+            }
+            if (prefixReadableCloudSimClock) {
+                result.append(TextUtil.getReadableTime(CloudSim.clock()) + "\t");
+            }
 
-	    // If there is an exception - use the standard formatter
-	    if (record.getThrown() != null) {
-		result.append(defaultFormatter.format(record));
-	    } else {
-		int i = 0;
-		for (String method : methodCalls) {
-		    try {
-			result.append(record.getClass().getMethod(method).invoke(record));
-		    } catch (Exception e) {
-			System.err.println("Error in logging:");
-			e.printStackTrace(System.err);
-			System.exit(1);
-		    }
-		    if (i++ < methodCalls.length - 1) {
-			result.append('\t');
-		    }
-		}
-	    }
+            // If there is an exception - use the standard formatter
+            if (record.getThrown() != null) {
+                result.append(defaultFormatter.format(record));
+            } else {
+                int i = 0;
+                for (String method : methodCalls) {
+                    try {
+                        result.append(record.getClass().getMethod(method).invoke(record));
+                    } catch (Exception e) {
+                        System.err.println("Error in logging:");
+                        e.printStackTrace(System.err);
+                        System.exit(1);
+                    }
+                    if (i++ < methodCalls.length - 1) {
+                        result.append('\t');
+                    }
+                }
+            }
 
-	    result.append(TextUtil.NEW_LINE);
+            result.append(TextUtil.NEW_LINE);
 
-	    return result.toString();
-	}
+            return result.toString();
+        }
     }
 }

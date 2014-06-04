@@ -70,18 +70,17 @@ public class TextUtil {
      *            - the delimter.
      * @return a line for the headers.
      */
-    public static String getCaptionLine(final List<String> headers, final List<? extends Class<?>> headerClasses,
-	    final String delim) {
-	StringBuffer buffer = new StringBuffer();
-	int i = 0;
-	for (String h : headers) {
-	    buffer.append(headerClasses == null || headerClasses.isEmpty() ? h : formatHeader(h, headerClasses.get(i)));
-	    if (i < headers.size() - 1) {
-		buffer.append(delim);
-	    }
-	    i++;
-	}
-	return buffer.toString();
+    public static String getCaptionLine(final List<String> headers, final List<? extends Class<?>> headerClasses, final String delim) {
+        StringBuffer buffer = new StringBuffer();
+        int i = 0;
+        for (String h : headers) {
+            buffer.append(headerClasses == null || headerClasses.isEmpty() ? h : formatHeader(h, headerClasses.get(i)));
+            if (i < headers.size() - 1) {
+                buffer.append(delim);
+            }
+            i++;
+        }
+        return buffer.toString();
     }
 
     /**
@@ -108,26 +107,25 @@ public class TextUtil {
      *            line as well.
      * @return
      */
-    public static String getTxtLine(final List<?> objects, final List<String> headers, final String delimeter,
-	    final boolean includeFieldNames) {
-	StringBuffer result = new StringBuffer();
+    public static String getTxtLine(final List<?> objects, final List<String> headers, final String delimeter, final boolean includeFieldNames) {
+        StringBuffer result = new StringBuffer();
 
-	for (int i = 0; i < objects.size(); i++) {
-	    String txt = toString(objects.get(i));
-	    String propName = headers.get(i);
-	    if (includeFieldNames) {
-		result.append(propName + "=" + txt);
-	    } else {
-		if (propName.length() > txt.length()) {
-		    txt = String.format("%" + propName.length() + "s", txt);
-		}
-		result.append(txt);
-	    }
+        for (int i = 0; i < objects.size(); i++) {
+            String txt = toString(objects.get(i));
+            String propName = headers.get(i);
+            if (includeFieldNames) {
+                result.append(propName + "=" + txt);
+            } else {
+                if (propName.length() > txt.length()) {
+                    txt = String.format("%" + propName.length() + "s", txt);
+                }
+                result.append(txt);
+            }
 
-	    result.append(i < objects.size() - 1 ? delimeter : "");
-	}
+            result.append(i < objects.size() - 1 ? delimeter : "");
+        }
 
-	return result.toString();
+        return result.toString();
     }
 
     /**
@@ -152,7 +150,7 @@ public class TextUtil {
      * @return formated line of text, as described above.
      */
     public static String getTxtLine(final Object obj) {
-	return getTxtLine(obj, DEFAULT_DELIM);
+        return getTxtLine(obj, DEFAULT_DELIM);
     }
 
     /**
@@ -186,7 +184,7 @@ public class TextUtil {
      * @return formated line of text, as described above.
      */
     public static String getTxtLine(final Object obj, final String delimeter) {
-	return getTxtLine(obj, delimeter, null, false);
+        return getTxtLine(obj, delimeter, null, false);
     }
 
     /**
@@ -212,7 +210,7 @@ public class TextUtil {
      * @return formated line of text, as described above.
      */
     public static String getTxtLine(final Object obj, final String[] properties) {
-	return getTxtLine(obj, DEFAULT_DELIM, properties, false);
+        return getTxtLine(obj, DEFAULT_DELIM, properties, false);
     }
 
     /**
@@ -246,7 +244,7 @@ public class TextUtil {
      * @return formated line of text, as described above.
      */
     public static String getTxtLine(final Object obj, final String delimeter, final String[] properties) {
-	return getTxtLine(obj, delimeter, properties, false);
+        return getTxtLine(obj, delimeter, properties, false);
     }
 
     /**
@@ -288,35 +286,34 @@ public class TextUtil {
      *            line as well.
      * @return formated line of text, as described above.
      */
-    public static String getTxtLine(final Object obj, final String delimeter, final String[] properties,
-	    final boolean includeFieldNames) {
-	StringBuffer result = new StringBuffer();
-	List<Method> methods = extractGetMethodsForClass(obj.getClass(), properties);
-	int i = 0;
-	for (Method m : methods) {
-	    Object methodRes = null;
-	    try {
-		methodRes = m.invoke(obj);
-	    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-		methodRes = "ERR " + e.getMessage();
-	    }
+    public static String getTxtLine(final Object obj, final String delimeter, final String[] properties, final boolean includeFieldNames) {
+        StringBuffer result = new StringBuffer();
+        List<Method> methods = extractGetMethodsForClass(obj.getClass(), properties);
+        int i = 0;
+        for (Method m : methods) {
+            Object methodRes = null;
+            try {
+                methodRes = m.invoke(obj);
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                methodRes = "ERR " + e.getMessage();
+            }
 
-	    String propName = getPropName(m);
-	    String mTxt = toString(methodRes);
-	    if (includeFieldNames) {
-		result.append(propName + "=" + mTxt);
-	    } else {
-		if (propName.length() > mTxt.length()) {
-		    mTxt = String.format("%" + propName.length() + "s", mTxt);
-		}
-		result.append(mTxt);
-	    }
+            String propName = getPropName(m);
+            String mTxt = toString(methodRes);
+            if (includeFieldNames) {
+                result.append(propName + "=" + mTxt);
+            } else {
+                if (propName.length() > mTxt.length()) {
+                    mTxt = String.format("%" + propName.length() + "s", mTxt);
+                }
+                result.append(mTxt);
+            }
 
-	    result.append(i < methods.size() - 1 ? delimeter : "");
-	    i++;
-	}
+            result.append(i < methods.size() - 1 ? delimeter : "");
+            i++;
+        }
 
-	return result.toString();
+        return result.toString();
     }
 
     /**
@@ -350,36 +347,33 @@ public class TextUtil {
      * @return
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static <F> String getTxtLine(final F obj,
-	    final String delimeter,
-	    final String[] properties,
-	    final boolean includeFieldNames,
-	    final LinkedHashMap<String, Function<? extends F, String>> virtualProps) {
-	StringBuffer result = new StringBuffer(getTxtLine(obj, delimeter, properties, includeFieldNames));
-	if (!virtualProps.isEmpty()) {
-	    result.append(delimeter);
+    public static <F> String getTxtLine(final F obj, final String delimeter, final String[] properties, final boolean includeFieldNames,
+            final LinkedHashMap<String, Function<? extends F, String>> virtualProps) {
+        StringBuffer result = new StringBuffer(getTxtLine(obj, delimeter, properties, includeFieldNames));
+        if (!virtualProps.isEmpty()) {
+            result.append(delimeter);
 
-	    int i = 0;
-	    for ( Map.Entry prop : virtualProps.entrySet()) {
-		String propName = (String) prop.getKey();
-		String propRes = ((Function<F, String>) prop.getValue()).apply(obj);
+            int i = 0;
+            for (Map.Entry prop : virtualProps.entrySet()) {
+                String propName = (String) prop.getKey();
+                String propRes = ((Function<F, String>) prop.getValue()).apply(obj);
 
-		String txt = toString(propRes);
-		if (includeFieldNames) {
-		    result.append(propName + "=" + txt);
-		} else {
-		    if (propName.length() > txt.length()) {
-			txt = String.format("%" + propName.length() + "s", txt);
-		    }
-		    result.append(txt);
-		}
+                String txt = toString(propRes);
+                if (includeFieldNames) {
+                    result.append(propName + "=" + txt);
+                } else {
+                    if (propName.length() > txt.length()) {
+                        txt = String.format("%" + propName.length() + "s", txt);
+                    }
+                    result.append(txt);
+                }
 
-		result.append(i < virtualProps.size() - 1 ? delimeter : "");
-		i++;
-	    }
-	}
+                result.append(i < virtualProps.size() - 1 ? delimeter : "");
+                i++;
+            }
+        }
 
-	return result.toString();
+        return result.toString();
     }
 
     /**
@@ -404,7 +398,7 @@ public class TextUtil {
      * @return formated line of text, as described above.
      */
     public static String getCaptionLine(final Class<?> clazz) {
-	return getCaptionLine(clazz, DEFAULT_DELIM);
+        return getCaptionLine(clazz, DEFAULT_DELIM);
     }
 
     /**
@@ -433,7 +427,7 @@ public class TextUtil {
      * @return formated line of text, as described above.
      */
     public static String getCaptionLine(final Class<?> clazz, final String delimeter) {
-	return getCaptionLine(clazz, delimeter, null);
+        return getCaptionLine(clazz, delimeter, null);
     }
 
     /**
@@ -466,7 +460,7 @@ public class TextUtil {
      * @return formated line of text, as described above.
      */
     public static String getCaptionLine(final Class<?> clazz, final String[] properties) {
-	return getCaptionLine(clazz, DEFAULT_DELIM, properties);
+        return getCaptionLine(clazz, DEFAULT_DELIM, properties);
     }
 
     /**
@@ -502,21 +496,21 @@ public class TextUtil {
      * @return formated line of text, as described above.
      */
     public static String getCaptionLine(final Class<?> clazz, final String delimeter, final String[] properties) {
-	StringBuffer result = new StringBuffer();
-	List<Method> methods = extractGetMethodsForClass(clazz, properties);
-	int i = 0;
-	for (Method m : methods) {
-	    String propEntry = getPropName(m);
-	    Class<?> returnType = Primitives.wrap(m.getReturnType());
+        StringBuffer result = new StringBuffer();
+        List<Method> methods = extractGetMethodsForClass(clazz, properties);
+        int i = 0;
+        for (Method m : methods) {
+            String propEntry = getPropName(m);
+            Class<?> returnType = Primitives.wrap(m.getReturnType());
 
-	    propEntry = formatHeader(propEntry, returnType);
+            propEntry = formatHeader(propEntry, returnType);
 
-	    result.append(propEntry);
-	    result.append(i < methods.size() - 1 ? delimeter : "");
-	    i++;
-	}
+            result.append(propEntry);
+            result.append(i < methods.size() - 1 ? delimeter : "");
+            i++;
+        }
 
-	return result.toString();
+        return result.toString();
     }
 
     /**
@@ -538,116 +532,107 @@ public class TextUtil {
      *            class.
      * @return
      */
-    public static String getCaptionLine(final Class<?> clazz, final String delimeter, final String[] properties,
-	    final String[] virtualProps) {
-	StringBuffer result = new StringBuffer(getCaptionLine(clazz, delimeter, properties));
-	if (virtualProps.length > 0) {
-	    result.append(delimeter);
-	    int i = 0;
-	    for (String prop : virtualProps) {
-		result.append(formatHeader(prop, String.class));
-		result.append(i < virtualProps.length - 1 ? delimeter : "");
-		i++;
-	    }
-	}
+    public static String getCaptionLine(final Class<?> clazz, final String delimeter, final String[] properties, final String[] virtualProps) {
+        StringBuffer result = new StringBuffer(getCaptionLine(clazz, delimeter, properties));
+        if (virtualProps.length > 0) {
+            result.append(delimeter);
+            int i = 0;
+            for (String prop : virtualProps) {
+                result.append(formatHeader(prop, String.class));
+                result.append(i < virtualProps.length - 1 ? delimeter : "");
+                i++;
+            }
+        }
 
-	return result.toString();
+        return result.toString();
     }
 
     @SuppressWarnings("unchecked")
     private static String formatHeader(String header, final Class<?> entryType) {
-	if (Double.class.equals(entryType) || Float.class.equals(entryType)
-		&& header.length() < SIZE_OF_DBL_STRINGS) {
-	    header = String.format("%" + SIZE_OF_DBL_STRINGS + "s", header);
-	} else if (Number.class.isAssignableFrom(entryType) && header.length() < SIZE_OF_INT_STRINGS) {
-	    header = String.format("%" + SIZE_OF_INT_STRINGS + "s", header);
-	} else if (entryType != null && entryType.isEnum()) {
-	    header =
-		    String.format("%" + getEnumTxtSize((Class<? extends Enum<?>>) entryType) + "s", header);
-	} else if (String.class.isAssignableFrom(entryType)) {
-	    header = toString(header);
-	}
-	return header;
+        if (Double.class.equals(entryType) || Float.class.equals(entryType) && header.length() < SIZE_OF_DBL_STRINGS) {
+            header = String.format("%" + SIZE_OF_DBL_STRINGS + "s", header);
+        } else if (Number.class.isAssignableFrom(entryType) && header.length() < SIZE_OF_INT_STRINGS) {
+            header = String.format("%" + SIZE_OF_INT_STRINGS + "s", header);
+        } else if (entryType != null && entryType.isEnum()) {
+            header = String.format("%" + getEnumTxtSize((Class<? extends Enum<?>>) entryType) + "s", header);
+        } else if (String.class.isAssignableFrom(entryType)) {
+            header = toString(header);
+        }
+        return header;
     }
 
     private static List<Method> extractGetMethodsForClass(final Class<?> clazz1, final String[] properties) {
-	List<Method> methods = null;
-	Class<?> clazz = clazz1;
+        List<Method> methods = null;
+        Class<?> clazz = clazz1;
 
-	Textualize classAnnotation = clazz1.getAnnotation(Textualize.class);
-	String[] allowedProps = properties != null ? properties :
-		classAnnotation != null ? classAnnotation.properties() : null;
+        Textualize classAnnotation = clazz1.getAnnotation(Textualize.class);
+        String[] allowedProps = properties != null ? properties : classAnnotation != null ? classAnnotation.properties() : null;
 
-	if (!GET_METHODS.containsKey(clazz)) {
-	    methods = new ArrayList<>();
-	    do {
-		// Defined in the class methods (not inherited)
-		List<Method> clazzMethods = new LinkedList<Method>(Arrays.asList(clazz.getDeclaredMethods()));
+        if (!GET_METHODS.containsKey(clazz)) {
+            methods = new ArrayList<>();
+            do {
+                // Defined in the class methods (not inherited)
+                List<Method> clazzMethods = new LinkedList<Method>(Arrays.asList(clazz.getDeclaredMethods()));
 
-		// Remove duplicated methods with super classes
-		List<Method> copyofMethods = new ArrayList<>(methods);
-		for (Method method : copyofMethods)
-		    for (Method clazzMethod : clazzMethods) {
-			if (clazzMethod.getName() == method.getName())
-			    methods.remove(method);
-		    }
+                // Remove duplicated methods with super classes
+                List<Method> copyofMethods = new ArrayList<>(methods);
+                for (Method method : copyofMethods)
+                    for (Method clazzMethod : clazzMethods) {
+                        if (clazzMethod.getName() == method.getName())
+                            methods.remove(method);
+                    }
 
-		// Sort them by name... since getDeclaredMethods does not
-		// guarantee order
-		Collections.sort(clazzMethods, MethodsAlphaComparator.METHOD_CMP);
+                // Sort them by name... since getDeclaredMethods does not
+                // guarantee order
+                Collections.sort(clazzMethods, MethodsAlphaComparator.METHOD_CMP);
 
-		methods.addAll(clazzMethods);
-		clazz = clazz.getSuperclass();
-	    } while (clazz != null);
+                methods.addAll(clazzMethods);
+                clazz = clazz.getSuperclass();
+            } while (clazz != null);
 
-	    // Filter methods that are not getters and are not in the annotation
-	    // (if annotation is specified)
-	    for (ListIterator<Method> iter = methods.listIterator(); iter.hasNext();) {
-		Method m = iter.next();
-		if (allowedProps != null && !isAllowedGetter(m, allowedProps)) {
-		    iter.remove();
-		} else if (classAnnotation == null && !isGetter(m)) {
-		    iter.remove();
-		}
-	    }
+            // Filter methods that are not getters and are not in the annotation
+            // (if annotation is specified)
+            for (ListIterator<Method> iter = methods.listIterator(); iter.hasNext();) {
+                Method m = iter.next();
+                if (allowedProps != null && !isAllowedGetter(m, allowedProps)) {
+                    iter.remove();
+                } else if (classAnnotation == null && !isGetter(m)) {
+                    iter.remove();
+                }
+            }
 
-	    // Sort by the order defined in the annotation
-	    if (allowedProps != null) {
-		Collections.sort(methods, new MethodsListIndexComparator(Arrays.asList(allowedProps)));
-	    }
+            // Sort by the order defined in the annotation
+            if (allowedProps != null) {
+                Collections.sort(methods, new MethodsListIndexComparator(Arrays.asList(allowedProps)));
+            }
 
-	    methods = Collections.unmodifiableList(methods);
-	    GET_METHODS.put(clazz, methods);
-	}
-	return GET_METHODS.get(clazz);
+            methods = Collections.unmodifiableList(methods);
+            GET_METHODS.put(clazz, methods);
+        }
+        return GET_METHODS.get(clazz);
     }
 
     private static String getPropName(final Method getter) {
-	return isBoolGetter(getter) ? getter.getName().substring(2) :
-		isGetter(getter) ? getter.getName().substring(3) : getter.getName();
+        return isBoolGetter(getter) ? getter.getName().substring(2) : isGetter(getter) ? getter.getName().substring(3) : getter.getName();
     }
 
     private static boolean isAllowedGetter(final Method m, final String[] allowedProps) {
-	HashSet<String> allowedProperties = new HashSet<>(Arrays.asList(allowedProps));
-	return isGetter(m) && allowedProperties.contains(getPropName(m));
+        HashSet<String> allowedProperties = new HashSet<>(Arrays.asList(allowedProps));
+        return isGetter(m) && allowedProperties.contains(getPropName(m));
     }
 
     private static boolean isGetter(final Method m) {
-	return isBoolGetter(m) || isStandardGetter(m);
+        return isBoolGetter(m) || isStandardGetter(m);
     }
 
     private static boolean isStandardGetter(final Method m) {
-	return Modifier.isPublic(m.getModifiers()) &&
-		m.getParameterTypes().length == 0 &&
-		m.getName().matches(STANDARD_GET_REGEX) &&
-		!Primitives.wrap(m.getReturnType()).equals(Boolean.class);
+        return Modifier.isPublic(m.getModifiers()) && m.getParameterTypes().length == 0 && m.getName().matches(STANDARD_GET_REGEX)
+                && !Primitives.wrap(m.getReturnType()).equals(Boolean.class);
     }
 
     private static boolean isBoolGetter(final Method m) {
-	return Modifier.isPublic(m.getModifiers()) &&
-		m.getParameterTypes().length == 0 &&
-		m.getName().matches(BOOLGET_REGEX) &&
-		Primitives.wrap(m.getReturnType()).equals(Boolean.class);
+        return Modifier.isPublic(m.getModifiers()) && m.getParameterTypes().length == 0 && m.getName().matches(BOOLGET_REGEX)
+                && Primitives.wrap(m.getReturnType()).equals(Boolean.class);
     }
 
     /**
@@ -658,41 +643,40 @@ public class TextUtil {
      * @return - the textual representation of the specified object.
      */
     public static String toString(final Object obj) {
-	String result = "";
-	Class<?> clazz = Primitives.wrap(obj.getClass());
-	if (clazz.equals(Double.class) || clazz.equals(Float.class)) {
-	    result = String.format("%" + SIZE_OF_DBL_STRINGS + "s", TextUtil.DEC_FORMAT.format(obj));
-	} else if (clazz.equals(Boolean.class)) {
-	    result = String.valueOf(obj);
-	} else if (Number.class.isAssignableFrom(clazz)) {
-	    result = String.format("%" + SIZE_OF_INT_STRINGS + "s", obj);
-	} else if (obj instanceof Date) {
-	    result = getDateFormat().format(obj);
-	} else if (obj instanceof Collection<?> || obj.getClass().isArray()) {
-	    result = "[...]";
-	} else if (obj instanceof Enum<?>) {
-	    result =
-		    String.format("%" + getEnumTxtSize(((Enum<?>) obj).getDeclaringClass()) + "s", String.valueOf(obj));
-	} else if (obj instanceof Class) {
-	    result = ((Class<?>) obj).getSimpleName();
-	    // If toString is not predefined ...
-	} else if (String.valueOf(obj).startsWith(obj.getClass().getCanonicalName() + "@")) {
-	    result = "ref<" + obj.hashCode() + ">";
-	} else {
-	    result = String.format("%" + SIZE_OF_STRINGS + "s", String.valueOf(obj));
-	}
-	return result;
+        String result = "";
+        Class<?> clazz = Primitives.wrap(obj.getClass());
+        if (clazz.equals(Double.class) || clazz.equals(Float.class)) {
+            result = String.format("%" + SIZE_OF_DBL_STRINGS + "s", TextUtil.DEC_FORMAT.format(obj));
+        } else if (clazz.equals(Boolean.class)) {
+            result = String.valueOf(obj);
+        } else if (Number.class.isAssignableFrom(clazz)) {
+            result = String.format("%" + SIZE_OF_INT_STRINGS + "s", obj);
+        } else if (obj instanceof Date) {
+            result = getDateFormat().format(obj);
+        } else if (obj instanceof Collection<?> || obj.getClass().isArray()) {
+            result = "[...]";
+        } else if (obj instanceof Enum<?>) {
+            result = String.format("%" + getEnumTxtSize(((Enum<?>) obj).getDeclaringClass()) + "s", String.valueOf(obj));
+        } else if (obj instanceof Class) {
+            result = ((Class<?>) obj).getSimpleName();
+            // If toString is not predefined ...
+        } else if (String.valueOf(obj).startsWith(obj.getClass().getCanonicalName() + "@")) {
+            result = "ref<" + obj.hashCode() + ">";
+        } else {
+            result = String.format("%" + SIZE_OF_STRINGS + "s", String.valueOf(obj));
+        }
+        return result;
     }
 
     private static int getEnumTxtSize(final Class<? extends Enum<?>> enumClass) {
-	int result = 0;
-	for (Enum<?> e : enumClass.getEnumConstants()) {
-	    int len = String.valueOf(e).length();
-	    if (len > result) {
-		result = len;
-	    }
-	}
-	return result;
+        int result = 0;
+        for (Enum<?> e : enumClass.getEnumConstants()) {
+            int len = String.valueOf(e).length();
+            if (len > result) {
+                result = len;
+            }
+        }
+        return result;
     }
 
     /**
@@ -701,7 +685,7 @@ public class TextUtil {
      * @return the format for dates.
      */
     public static DateFormat getDateFormat() {
-	return FULL_DATE_FORMAT;
+        return FULL_DATE_FORMAT;
     }
 
     /**
@@ -710,48 +694,48 @@ public class TextUtil {
      * @return the format for dates, that prints only the time of the day.
      */
     public static DateFormat getTimeFormat() {
-	return TIME_DATE_FORMAT;
+        return TIME_DATE_FORMAT;
     }
 
     public static String getReadableTime(double time) {
-	int days = ((int) time / (24 * 3600));
-	int hours = ((int) time / 3600);
-	int minutes = (int) time / 60;
-	int rest = (int) time % 60;
+        int days = ((int) time / (24 * 3600));
+        int hours = ((int) time / 3600);
+        int minutes = (int) time / 60;
+        int rest = (int) time % 60;
 
-	// Now normalize the values
-	hours = hours % 24;
-	minutes = minutes % 60;
-	return String.format("%2d:%2d:%2d:%2d", days, hours, minutes, rest);
+        // Now normalize the values
+        hours = hours % 24;
+        minutes = minutes % 60;
+        return String.format("%2d:%2d:%2d:%2d", days, hours, minutes, rest);
     }
 
     private static class MethodsAlphaComparator implements Comparator<Method> {
-	static MethodsAlphaComparator METHOD_CMP = new MethodsAlphaComparator();
+        static MethodsAlphaComparator METHOD_CMP = new MethodsAlphaComparator();
 
-	private MethodsAlphaComparator() {
-	};
+        private MethodsAlphaComparator() {
+        };
 
-	@Override
-	public int compare(final Method o1, final Method o2) {
-	    String prop1 = getPropName(o1);
-	    String prop2 = getPropName(o2);
-	    return prop1.compareTo(prop2);
-	}
+        @Override
+        public int compare(final Method o1, final Method o2) {
+            String prop1 = getPropName(o1);
+            String prop2 = getPropName(o2);
+            return prop1.compareTo(prop2);
+        }
     }
 
     private static class MethodsListIndexComparator implements Comparator<Method> {
-	private List<String> properties = null;
+        private List<String> properties = null;
 
-	public MethodsListIndexComparator(final List<String> properties) {
-	    super();
-	    this.properties = properties;
-	}
+        public MethodsListIndexComparator(final List<String> properties) {
+            super();
+            this.properties = properties;
+        }
 
-	@Override
-	public int compare(final Method o1, final Method o2) {
-	    String prop1 = getPropName(o1);
-	    String prop2 = getPropName(o2);
-	    return Integer.valueOf(properties.indexOf(prop1)).compareTo(properties.indexOf(prop2));
-	}
+        @Override
+        public int compare(final Method o1, final Method o2) {
+            String prop1 = getPropName(o1);
+            String prop2 = getPropName(o2);
+            return Integer.valueOf(properties.indexOf(prop1)).compareTo(properties.indexOf(prop2));
+        }
     }
 }

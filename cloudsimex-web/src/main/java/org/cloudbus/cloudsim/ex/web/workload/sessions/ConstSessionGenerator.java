@@ -58,20 +58,19 @@ public class ConstSessionGenerator implements ISessionGenerator {
      * @param metadata
      *            - the metadata of the generated session.
      */
-    public ConstSessionGenerator(final long asCloudletLength, final int asRam, final long dbCloudletLength,
-	    final int dbRam, final long dbCloudletIOLength, final double duration, final int numberOfCloudlets,
-	    final boolean modifiesData, final DataItem data, final String... metadata) {
-	super();
-	this.asCloudletLength = asCloudletLength;
-	this.asRam = asRam;
-	this.dbCloudletLength = dbCloudletLength;
-	this.dbRam = dbRam;
-	this.dbCloudletIOLength = dbCloudletIOLength;
-	this.duration = duration;
-	this.numberOfCloudlets = numberOfCloudlets;
-	this.modifiesData = modifiesData;
-	this.data = data;
-	this.metadata = metadata;
+    public ConstSessionGenerator(final long asCloudletLength, final int asRam, final long dbCloudletLength, final int dbRam, final long dbCloudletIOLength,
+            final double duration, final int numberOfCloudlets, final boolean modifiesData, final DataItem data, final String... metadata) {
+        super();
+        this.asCloudletLength = asCloudletLength;
+        this.asRam = asRam;
+        this.dbCloudletLength = dbCloudletLength;
+        this.dbRam = dbRam;
+        this.dbCloudletIOLength = dbCloudletIOLength;
+        this.duration = duration;
+        this.numberOfCloudlets = numberOfCloudlets;
+        this.modifiesData = modifiesData;
+        this.data = data;
+        this.metadata = metadata;
     }
 
     /**
@@ -92,10 +91,9 @@ public class ConstSessionGenerator implements ISessionGenerator {
      * @param metadata
      *            - the metadata of the generated session.
      */
-    public ConstSessionGenerator(final long asCloudletLength, final int asRam, final long dbCloudletLength,
-	    final int dbRam, final long dbCloudletIOLength, final boolean modifiesData, final DataItem data,
-	    final String... metadata) {
-	this(asCloudletLength, asRam, dbCloudletLength, dbRam, dbCloudletIOLength, -1, -1, modifiesData, data, metadata);
+    public ConstSessionGenerator(final long asCloudletLength, final int asRam, final long dbCloudletLength, final int dbRam, final long dbCloudletIOLength,
+            final boolean modifiesData, final DataItem data, final String... metadata) {
+        this(asCloudletLength, asRam, dbCloudletLength, dbRam, dbCloudletIOLength, -1, -1, modifiesData, data, metadata);
     }
 
     /*
@@ -107,26 +105,23 @@ public class ConstSessionGenerator implements ISessionGenerator {
      */
     @Override
     public WebSession generateSessionAt(final double time) {
-	double startTime = duration > 0 ? time : -1;
-	double endTime = duration > 0 ? time + duration : -1;
+        double startTime = duration > 0 ? time : -1;
+        double endTime = duration > 0 ? time + duration : -1;
 
-	Map<String, NumberGenerator<Double>> asGenerators = new HashMap<>();
-	asGenerators.put(StatGenerator.CLOUDLET_LENGTH, new ConstantGenerator<>((double) asCloudletLength));
-	asGenerators.put(StatGenerator.CLOUDLET_RAM, new ConstantGenerator<>((double) asRam));
-	IGenerator<WebCloudlet> appServerCloudLets = new StatGenerator(asGenerators, startTime, endTime, null);
+        Map<String, NumberGenerator<Double>> asGenerators = new HashMap<>();
+        asGenerators.put(StatGenerator.CLOUDLET_LENGTH, new ConstantGenerator<>((double) asCloudletLength));
+        asGenerators.put(StatGenerator.CLOUDLET_RAM, new ConstantGenerator<>((double) asRam));
+        IGenerator<WebCloudlet> appServerCloudLets = new StatGenerator(asGenerators, startTime, endTime, null);
 
-	Map<String, NumberGenerator<? extends Number>> dbGenerators = new HashMap<>();
-	dbGenerators.put(StatGenerator.CLOUDLET_LENGTH, new ConstantGenerator<Double>((double) dbCloudletLength));
-	dbGenerators.put(StatGenerator.CLOUDLET_RAM, new ConstantGenerator<Double>((double) dbRam));
-	dbGenerators.put(StatGenerator.CLOUDLET_IO, new ConstantGenerator<Double>((double) dbCloudletIOLength));
-	dbGenerators.put(StatGenerator.CLOUDLET_MODIFIES_DATA,
-		new ConstantGenerator<Integer>(modifiesData ? 1 : 0));
+        Map<String, NumberGenerator<? extends Number>> dbGenerators = new HashMap<>();
+        dbGenerators.put(StatGenerator.CLOUDLET_LENGTH, new ConstantGenerator<Double>((double) dbCloudletLength));
+        dbGenerators.put(StatGenerator.CLOUDLET_RAM, new ConstantGenerator<Double>((double) dbRam));
+        dbGenerators.put(StatGenerator.CLOUDLET_IO, new ConstantGenerator<Double>((double) dbCloudletIOLength));
+        dbGenerators.put(StatGenerator.CLOUDLET_MODIFIES_DATA, new ConstantGenerator<Integer>(modifiesData ? 1 : 0));
 
-	CompositeGenerator<? extends WebCloudlet> dbServerCloudLets =
-		new CompositeGenerator<>(new StatGenerator(dbGenerators, startTime, endTime, data));
+        CompositeGenerator<? extends WebCloudlet> dbServerCloudLets = new CompositeGenerator<>(new StatGenerator(dbGenerators, startTime, endTime, data));
 
-	return new WebSession(appServerCloudLets, dbServerCloudLets, -1,
-		numberOfCloudlets, time + duration, metadata);
+        return new WebSession(appServerCloudLets, dbServerCloudLets, -1, numberOfCloudlets, time + duration, metadata);
     }
 
 }

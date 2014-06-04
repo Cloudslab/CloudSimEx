@@ -65,131 +65,119 @@ public class WebSession_TestCloudletsStatus_Test {
 
     @Before
     public void setUp() throws Exception {
-	CustomLog.configLogger(TestUtil.LOG_PROPS);
+        CustomLog.configLogger(TestUtil.LOG_PROPS);
 
-	int numBrokers = 1;
-	boolean trace_flag = false;
+        int numBrokers = 1;
+        boolean trace_flag = false;
 
-	CloudSim.init(numBrokers, Calendar.getInstance(), trace_flag);
+        CloudSim.init(numBrokers, Calendar.getInstance(), trace_flag);
 
-	datacenter = createDatacenterWithSingleHostAndSingleDisk("TestDatacenter");
+        datacenter = createDatacenterWithSingleHostAndSingleDisk("TestDatacenter");
 
-	// Create Broker
-	broker = new WebBroker("Broker", 5, 100, datacenter.getId());
+        // Create Broker
+        broker = new WebBroker("Broker", 5, 100, datacenter.getId());
 
-	// Create virtual machines
-	List<Vm> vmlist = new ArrayList<Vm>();
+        // Create virtual machines
+        List<Vm> vmlist = new ArrayList<Vm>();
 
-	int pesNumber = 1; // number of cpus
-	String vmm = "Xen"; // VMM name
+        int pesNumber = 1; // number of cpus
+        String vmm = "Xen"; // VMM name
 
-	// create two VMs
-	vm1 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-	vm2 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-		VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
+        // create two VMs
+        vm1 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
+			VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
+        vm2 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
+			VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
-	// add the VMs to the vmList
-	vmlist.add(vm1);
+        // add the VMs to the vmList
+        vmlist.add(vm1);
 
-	// submit vm list to the broker
-	broker.submitVmList(vmlist);
+        // submit vm list to the broker
+        broker.submitVmList(vmlist);
     }
 
     @Test
     public void testWebSessions() {
-	broker.submitVmList(Arrays.asList(vm2));
+        broker.submitVmList(Arrays.asList(vm2));
 
-	double factor1 = 0.5;
-	double factor2 = 0.25;
-	WebCloudlet asCl1 = new WebCloudlet(0, (int) (VM_MIPS * factor1),
-		0, 10, broker.getId(), false, null);
-	WebCloudlet asCl2 = new WebCloudlet(0, (int) (VM_MIPS * factor2),
-		0, 10, broker.getId(), false, null);
+        double factor1 = 0.5;
+        double factor2 = 0.25;
+        WebCloudlet asCl1 = new WebCloudlet(0, (int) (VM_MIPS * factor1), 0, 10, broker.getId(), false, null);
+        WebCloudlet asCl2 = new WebCloudlet(0, (int) (VM_MIPS * factor2), 0, 10, broker.getId(), false, null);
 
-	WebCloudlet dbCl1 = new WebCloudlet(0, (int) (VM_MIPS * factor2),
-		(int) (HOST_MIOPS * factor2), 10, broker.getId(), false, dataItem1);
-	WebCloudlet dbCl2 = new WebCloudlet(0, (int) (VM_MIPS * factor1),
-		(int) (HOST_MIOPS * factor1), 10, broker.getId(), false, dataItem1);
+        WebCloudlet dbCl1 = new WebCloudlet(0, (int) (VM_MIPS * factor2), (int) (HOST_MIOPS * factor2), 10, broker.getId(), false, dataItem1);
+        WebCloudlet dbCl2 = new WebCloudlet(0, (int) (VM_MIPS * factor1), (int) (HOST_MIOPS * factor1), 10, broker.getId(), false, dataItem1);
 
-	IGenerator<WebCloudlet> generatorAS = new
-		IterableGenerator<>(Arrays.asList(asCl1, asCl2));
-	CompositeGenerator<WebCloudlet> generatorDB =
-		new CompositeGenerator<>(new IterableGenerator<>(Arrays.asList(dbCl1,
-			dbCl2)));
+        IGenerator<WebCloudlet> generatorAS = new IterableGenerator<>(Arrays.asList(asCl1, asCl2));
+        CompositeGenerator<WebCloudlet> generatorDB = new CompositeGenerator<>(new IterableGenerator<>(Arrays.asList(dbCl1, dbCl2)));
 
-	ILoadBalancer balancer = new SimpleWebLoadBalancer(1, "127.0.0.1", Arrays.asList(vm1),
-		new SimpleDBBalancer(vm2));
-	broker.addLoadBalancer(balancer);
+        ILoadBalancer balancer = new SimpleWebLoadBalancer(1, "127.0.0.1", Arrays.asList(vm1), new SimpleDBBalancer(vm2));
+        broker.addLoadBalancer(balancer);
 
-	WebSession session = new WebSession(generatorAS, generatorDB,
-		broker.getId(), 2, -1);
-	// session.setAppVmId(vm1.getId());
-	// session.setDbBalancer(vm2.getId());
+        WebSession session = new WebSession(generatorAS, generatorDB, broker.getId(), 2, -1);
+        // session.setAppVmId(vm1.getId());
+        // session.setDbBalancer(vm2.getId());
 
-	double delay = 1; // Give time for the VM to boot...
-	broker.submitSessionsAtTime(Arrays.asList(session), balancer.getAppId(), delay);
+        double delay = 1; // Give time for the VM to boot...
+        broker.submitSessionsAtTime(Arrays.asList(session), balancer.getAppId(), delay);
 
-	CloudSim.startSimulation();
-	List<HddCloudlet> resultList = broker.getCloudletReceivedList();
-	CloudSim.stopSimulation();
+        CloudSim.startSimulation();
+        List<HddCloudlet> resultList = broker.getCloudletReceivedList();
+        CloudSim.stopSimulation();
 
-	assertEquals(4, resultList.size());
+        assertEquals(4, resultList.size());
 
-	assertEquals(asCl1.getExecStartTime(), dbCl1.getExecStartTime(), DELTA);
-	assertEquals(asCl2.getExecStartTime(), dbCl2.getExecStartTime(), DELTA);
+        assertEquals(asCl1.getExecStartTime(), dbCl1.getExecStartTime(), DELTA);
+        assertEquals(asCl2.getExecStartTime(), dbCl2.getExecStartTime(), DELTA);
 
-	assertTrue(asCl1.isFinished());
-	assertTrue(asCl2.isFinished());
-	assertTrue(dbCl1.isFinished());
-	assertTrue(dbCl2.isFinished());
+        assertTrue(asCl1.isFinished());
+        assertTrue(asCl2.isFinished());
+        assertTrue(dbCl1.isFinished());
+        assertTrue(dbCl2.isFinished());
 
-	double asCl1Len = asCl1.getFinishTime() - asCl1.getExecStartTime();
-	double asCl2Len = asCl2.getFinishTime() - asCl2.getExecStartTime();
-	double dbCl1Len = dbCl1.getFinishTime() - dbCl1.getExecStartTime();
-	double dbCl2Len = dbCl2.getFinishTime() - dbCl2.getExecStartTime();
+        double asCl1Len = asCl1.getFinishTime() - asCl1.getExecStartTime();
+        double asCl2Len = asCl2.getFinishTime() - asCl2.getExecStartTime();
+        double dbCl1Len = dbCl1.getFinishTime() - dbCl1.getExecStartTime();
+        double dbCl2Len = dbCl2.getFinishTime() - dbCl2.getExecStartTime();
 
-	assertTrue(asCl1Len > dbCl1Len);
-	assertTrue(asCl2Len < dbCl2Len);
+        assertTrue(asCl1Len > dbCl1Len);
+        assertTrue(asCl2Len < dbCl2Len);
     }
 
     private DatacenterEX createDatacenterWithSingleHostAndSingleDisk(final String name) {
-	List<Host> hostList = new ArrayList<Host>();
+        List<Host> hostList = new ArrayList<Host>();
 
-	List<Pe> peList = new ArrayList<>();
-	List<HddPe> hddList = new ArrayList<>();
+        List<Pe> peList = new ArrayList<>();
+        List<HddPe> hddList = new ArrayList<>();
 
-	peList.add(new Pe(Id.pollId(Pe.class), new PeProvisionerSimple(HOST_MIPS)));
-	dataItem1 = new DataItem(ITEM_SIZE);
-	hddList.add(new HddPe(new PeProvisionerSimple(HOST_MIOPS), dataItem1));
+        peList.add(new Pe(Id.pollId(Pe.class), new PeProvisionerSimple(HOST_MIPS)));
+        dataItem1 = new DataItem(ITEM_SIZE);
+        hddList.add(new HddPe(new PeProvisionerSimple(HOST_MIOPS), dataItem1));
 
-	hostList.add(new HddHost(new RamProvisionerSimple(HOST_RAM),
-		new BwProvisionerSimple(HOST_BW), HOST_STORAGE, peList, hddList,
-		new VmSchedulerTimeShared(peList), new VmDiskScheduler(hddList)));
+        hostList.add(new HddHost(new RamProvisionerSimple(HOST_RAM), new BwProvisionerSimple(HOST_BW), HOST_STORAGE, peList, hddList,
+                new VmSchedulerTimeShared(peList), new VmDiskScheduler(hddList)));
 
-	String arch = "x86";
-	String os = "Linux";
-	String vmm = "Xen";
-	double time_zone = 10.0;
-	double cost = 3.0;
-	double costPerMem = 0.05;
-	double costPerStorage = 0.001;
-	double costPerBw = 0.0;
-	LinkedList<Storage> storageList = new LinkedList<Storage>();
+        String arch = "x86";
+        String os = "Linux";
+        String vmm = "Xen";
+        double time_zone = 10.0;
+        double cost = 3.0;
+        double costPerMem = 0.05;
+        double costPerStorage = 0.001;
+        double costPerBw = 0.0;
+        LinkedList<Storage> storageList = new LinkedList<Storage>();
 
-	DatacenterCharacteristics characteristics = new DatacenterCharacteristics(
-		arch, os, vmm, hostList, time_zone, cost, costPerMem,
-		costPerStorage, costPerBw);
+        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(arch, os, vmm, hostList, time_zone, cost, costPerMem, costPerStorage,
+                costPerBw);
 
-	DatacenterEX datacenter = null;
-	try {
-	    datacenter = new HddDataCenter(name, characteristics,
-		    new VmAllocationPolicySimple(hostList), storageList, 0);
-	} catch (Exception e) {
-	    e.printStackTrace();
-	}
+        DatacenterEX datacenter = null;
+        try {
+            datacenter = new HddDataCenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-	return datacenter;
+        return datacenter;
     }
 
 }

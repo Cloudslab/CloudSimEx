@@ -45,7 +45,7 @@ public class GaussianByTypeBootDelay implements IVMBootDelayDistribution {
      *            of VMs which are not present in this mapping is considered 0.
      */
     public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs) {
-	this(delayDefs, (byte[]) null, 0.0);
+        this(delayDefs, (byte[]) null, 0.0);
     }
 
     /**
@@ -57,9 +57,8 @@ public class GaussianByTypeBootDelay implements IVMBootDelayDistribution {
      *            - a value to be returned when evaluating VMs, which are not
      *            present in the aforementioned mapping.
      */
-    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs,
-	    final double defaultVal) {
-	this(delayDefs, (byte[]) null, defaultVal);
+    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs, final double defaultVal) {
+        this(delayDefs, (byte[]) null, defaultVal);
     }
 
     /**
@@ -73,7 +72,7 @@ public class GaussianByTypeBootDelay implements IVMBootDelayDistribution {
      * @param defaultVal
      */
     public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs, final byte[] seed) {
-	this(delayDefs, seed, 0);
+        this(delayDefs, seed, 0);
     }
 
     /**
@@ -87,9 +86,8 @@ public class GaussianByTypeBootDelay implements IVMBootDelayDistribution {
      *            seed gen policy is used.
      * @param defaultVal
      */
-    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs,
-	    final SeedGenerator seedGen) {
-	this(delayDefs, seedGen, 0);
+    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs, final SeedGenerator seedGen) {
+        this(delayDefs, seedGen, 0);
     }
 
     /**
@@ -103,9 +101,8 @@ public class GaussianByTypeBootDelay implements IVMBootDelayDistribution {
      *            - a value to be returned when evaluating VMs, which are not
      *            present in the aforementioned mapping.
      */
-    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs,
-	    final byte[] seed, final double defaultVal) {
-	this(delayDefs, seed, null, defaultVal);
+    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs, final byte[] seed, final double defaultVal) {
+        this(delayDefs, seed, null, defaultVal);
     }
 
     /**
@@ -120,54 +117,52 @@ public class GaussianByTypeBootDelay implements IVMBootDelayDistribution {
      *            - a value to be returned when evaluating VMs, which are not
      *            present in the aforementioned mapping.
      */
-    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs,
-	    final SeedGenerator seedGen, final double defaultVal) {
-	this(delayDefs, null, seedGen, defaultVal);
+    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs, final SeedGenerator seedGen, final double defaultVal) {
+        this(delayDefs, null, seedGen, defaultVal);
     }
 
-    private GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs,
-	    final byte[] seed, SeedGenerator seedGen, final double defaultVal) {
-	Random merseneGenerator = null;
-	if (seed == null) {
-	    try {
-		merseneGenerator = seedGen == null ? new MersenneTwisterRNG() : new MersenneTwisterRNG(seedGen);
-	    } catch (SeedException e) {
-		merseneGenerator = new MersenneTwisterRNG();
-	    }
-	} else {
-	    merseneGenerator = new MersenneTwisterRNG(seed);
-	}
+    private GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs, final byte[] seed, SeedGenerator seedGen,
+            final double defaultVal) {
+        Random merseneGenerator = null;
+        if (seed == null) {
+            try {
+                merseneGenerator = seedGen == null ? new MersenneTwisterRNG() : new MersenneTwisterRNG(seedGen);
+            } catch (SeedException e) {
+                merseneGenerator = new MersenneTwisterRNG();
+            }
+        } else {
+            merseneGenerator = new MersenneTwisterRNG(seed);
+        }
 
-	this.defaultValue = defaultVal;
+        this.defaultValue = defaultVal;
 
-	for (Map.Entry<Pair<String, String>, Pair<Double, Double>> entry : delayDefs.entrySet()) {
-	    this.delayGenerators.put(entry.getKey(),
-		    new GaussianGenerator(entry.getValue().getLeft(), entry.getValue().getRight(), merseneGenerator));
-	}
+        for (Map.Entry<Pair<String, String>, Pair<Double, Double>> entry : delayDefs.entrySet()) {
+            this.delayGenerators.put(entry.getKey(), new GaussianGenerator(entry.getValue().getLeft(), entry.getValue().getRight(), merseneGenerator));
+        }
     }
 
     @Override
     public double getDelay(final Vm vm) {
-	double result = defaultValue;
-	if (vm instanceof VMex) {
-	    VMex vmex = (VMex) vm;
-	    NumberGenerator<Double> gaussianGenerator = null;
-	    Pair<String, String> key = BaseCustomerVmBillingPolicy.keyOf(vmex);
-	    Pair<String, String> partialKey1 = ImmutablePair.of(vmex.getMetadata().getType(), (String) null);
-	    Pair<String, String> partialKey2 = ImmutablePair.of((String) null, vmex.getMetadata().getOS());
+        double result = defaultValue;
+        if (vm instanceof VMex) {
+            VMex vmex = (VMex) vm;
+            NumberGenerator<Double> gaussianGenerator = null;
+            Pair<String, String> key = BaseCustomerVmBillingPolicy.keyOf(vmex);
+            Pair<String, String> partialKey1 = ImmutablePair.of(vmex.getMetadata().getType(), (String) null);
+            Pair<String, String> partialKey2 = ImmutablePair.of((String) null, vmex.getMetadata().getOS());
 
-	    if (delayGenerators.containsKey(key)) {
-		gaussianGenerator = delayGenerators.get(key);
-	    } else if (delayGenerators.containsKey(partialKey1)) {
-		gaussianGenerator = delayGenerators.get(partialKey1);
-	    } else if (delayGenerators.containsKey(partialKey2)) {
-		gaussianGenerator = delayGenerators.get(partialKey2);
-	    }
+            if (delayGenerators.containsKey(key)) {
+                gaussianGenerator = delayGenerators.get(key);
+            } else if (delayGenerators.containsKey(partialKey1)) {
+                gaussianGenerator = delayGenerators.get(partialKey1);
+            } else if (delayGenerators.containsKey(partialKey2)) {
+                gaussianGenerator = delayGenerators.get(partialKey2);
+            }
 
-	    if (gaussianGenerator != null) {
-		result = gaussianGenerator.nextValue();
-	    }
-	}
-	return result;
+            if (gaussianGenerator != null) {
+                result = gaussianGenerator.nextValue();
+            }
+        }
+        return result;
     }
 }

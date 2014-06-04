@@ -16,7 +16,7 @@ import org.cloudbus.cloudsim.ex.util.TextUtil;
 public class HddCloudlet extends Cloudlet {
 
     private static final UtilizationModelFull UTIL_MODEL_FULL = new UtilizationModelFull();
-    
+
     private int numberOfHddPes = 1;
     protected long cloudletIOLength;
     protected final double ram;
@@ -34,27 +34,19 @@ public class HddCloudlet extends Cloudlet {
      * @param userId
      * @param data
      * @param dataModifying
-     * 		  - whether this cloudlets modifies the data it accesses.
+     *            - whether this cloudlets modifies the data it accesses.
      * @param record
      */
-    public HddCloudlet(final long cloudletLength,
-	    final long cloudletIOLength,
-	    final int pesNumber,
-	    final int numberOfHddPes,
-	    final double ram,
-	    final int userId,
-	    final boolean dataModifying,
-	    final DataItem data,
-	    final boolean record) {
+    public HddCloudlet(final long cloudletLength, final long cloudletIOLength, final int pesNumber, final int numberOfHddPes, final double ram,
+            final int userId, final boolean dataModifying, final DataItem data, final boolean record) {
 
-	super(Id.pollId(Cloudlet.class), cloudletLength, pesNumber, 0, 0, UTIL_MODEL_FULL,
-		UTIL_MODEL_FULL, UTIL_MODEL_FULL, record);
-	this.ram = ram;
-	this.cloudletIOLength = cloudletIOLength;
-	this.data = data;
-	this.numberOfHddPes = numberOfHddPes;
-	this.dataModifying = dataModifying;
-	setUserId(userId);
+        super(Id.pollId(Cloudlet.class), cloudletLength, pesNumber, 0, 0, UTIL_MODEL_FULL, UTIL_MODEL_FULL, UTIL_MODEL_FULL, record);
+        this.ram = ram;
+        this.cloudletIOLength = cloudletIOLength;
+        this.data = data;
+        this.numberOfHddPes = numberOfHddPes;
+        this.dataModifying = dataModifying;
+        setUserId(userId);
     }
 
     /**
@@ -65,18 +57,13 @@ public class HddCloudlet extends Cloudlet {
      * @param ram
      * @param userId
      * @param dataModifying
-     * 		  - whether this cloudlets modifies the data it accesses.
+     *            - whether this cloudlets modifies the data it accesses.
      * @param data
      * @param record
      */
-    public HddCloudlet(final long cloudletLength,
-	    final long cloudletIOLength,
-	    final double ram,
-	    final int userId,
-	    final boolean dataModifying,
-	    final DataItem data,
-	    final boolean record) {
-	this(cloudletLength, cloudletIOLength, 1, 1, ram, userId, dataModifying, data, record);
+    public HddCloudlet(final long cloudletLength, final long cloudletIOLength, final double ram, final int userId, final boolean dataModifying,
+            final DataItem data, final boolean record) {
+        this(cloudletLength, cloudletIOLength, 1, 1, ram, userId, dataModifying, data, record);
     }
 
     /**
@@ -87,16 +74,12 @@ public class HddCloudlet extends Cloudlet {
      * @param ram
      * @param userId
      * @param dataModifying
-     * 		  - whether this cloudlets modifies the data it accesses.
+     *            - whether this cloudlets modifies the data it accesses.
      * @param data
      */
-    public HddCloudlet(final long cloudletLength,
-	    final long cloudletIOLength,
-	    final double ram,
-	    final int userId,
-	    final boolean dataModifying,
-	    final DataItem data) {
-	this(cloudletLength, cloudletIOLength, 1, 1, ram, userId, dataModifying, data, false);
+    public HddCloudlet(final long cloudletLength, final long cloudletIOLength, final double ram, final int userId, final boolean dataModifying,
+            final DataItem data) {
+        this(cloudletLength, cloudletIOLength, 1, 1, ram, userId, dataModifying, data, false);
     }
 
     /**
@@ -105,7 +88,7 @@ public class HddCloudlet extends Cloudlet {
      * @return the amount of ram memory used in megabytes.
      */
     public double getRam() {
-	return ram;
+        return ram;
     }
 
     /**
@@ -114,7 +97,7 @@ public class HddCloudlet extends Cloudlet {
      * @return the number of Harddisks this host has.
      */
     public int getNumberOfHddPes() {
-	return numberOfHddPes;
+        return numberOfHddPes;
     }
 
     /**
@@ -125,7 +108,7 @@ public class HddCloudlet extends Cloudlet {
      *            or 0.
      */
     public void setNumberOfHddPes(final int numberOfHddPes) {
-	this.numberOfHddPes = numberOfHddPes;
+        this.numberOfHddPes = numberOfHddPes;
     }
 
     /**
@@ -134,11 +117,11 @@ public class HddCloudlet extends Cloudlet {
      * @return the total length of this cloudlet in terms of IO operations.
      */
     public long getCloudletTotalIOLength() {
-	return getCloudletIOLength() * getNumberOfHddPes();
+        return getCloudletIOLength() * getNumberOfHddPes();
     }
 
     public long getCloudletIOLength() {
-	return cloudletIOLength;
+        return cloudletIOLength;
     }
 
     /**
@@ -149,7 +132,7 @@ public class HddCloudlet extends Cloudlet {
      *            Must be a positive number.
      */
     public void setCloudletIOLength(final long cloudletIOLength) {
-	this.cloudletIOLength = cloudletIOLength;
+        this.cloudletIOLength = cloudletIOLength;
     }
 
     /**
@@ -158,28 +141,31 @@ public class HddCloudlet extends Cloudlet {
      * @return - the data used by this cloudlet.
      */
     public DataItem getData() {
-	return data;
+        return data;
     }
 
     /**
      * Returns if this cloudlet modifies the data it accesses.
+     * 
      * @return if this cloudlet modifies the data it accesses.
      */
     public boolean isDataModifying() {
-	return dataModifying;
+        return dataModifying;
     }
 
     /**
      * Sets if this cloudlet modifies the data it accesses.
-     * @param dataModifying - if this cloudlet modifies the data it accesses.
+     * 
+     * @param dataModifying
+     *            - if this cloudlet modifies the data it accesses.
      */
     public void setDataModifying(final boolean dataModifying) {
-	this.dataModifying = dataModifying;
+        this.dataModifying = dataModifying;
     }
 
     @Override
     public String toString() {
-	return TextUtil.getTxtLine(this, "\t", null,  true);
+        return TextUtil.getTxtLine(this, "\t", null, true);
     }
 
 }

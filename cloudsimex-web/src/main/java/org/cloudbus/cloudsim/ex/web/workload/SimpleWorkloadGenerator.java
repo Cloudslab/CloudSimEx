@@ -43,15 +43,13 @@ public class SimpleWorkloadGenerator implements IWorkloadGenerator {
      * @param count
      *            - the number of generations to do. Null is infinity.
      */
-    public SimpleWorkloadGenerator(final int sessionsNumber, final ISessionGenerator sessGen, final Double startTime,
-	    final Double endTime,
-	    final Integer count) {
-	super();
-	this.sessionsNumber = sessionsNumber;
-	this.sessGen = sessGen;
-	this.startTime = startTime;
-	this.endTime = endTime;
-	this.count = count;
+    public SimpleWorkloadGenerator(final int sessionsNumber, final ISessionGenerator sessGen, final Double startTime, final Double endTime, final Integer count) {
+        super();
+        this.sessionsNumber = sessionsNumber;
+        this.sessGen = sessGen;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.count = count;
     }
 
     /**
@@ -63,9 +61,9 @@ public class SimpleWorkloadGenerator implements IWorkloadGenerator {
      *            - the generator of the sessions which is used.
      */
     public SimpleWorkloadGenerator(final int sessionsNumber, final ISessionGenerator sessGen) {
-	super();
-	this.sessionsNumber = sessionsNumber;
-	this.sessGen = sessGen;
+        super();
+        this.sessionsNumber = sessionsNumber;
+        this.sessGen = sessGen;
     }
 
     /*
@@ -77,21 +75,21 @@ public class SimpleWorkloadGenerator implements IWorkloadGenerator {
      */
     @Override
     public Map<Double, List<WebSession>> generateSessions(final double startTime, final double periodLen) {
-	boolean generate = this.startTime == null || this.startTime <= startTime;
-	generate &= this.endTime == null || this.endTime >= startTime;
-	generate &= this.count == null || this.count > 0;
+        boolean generate = this.startTime == null || this.startTime <= startTime;
+        generate &= this.endTime == null || this.endTime >= startTime;
+        generate &= this.count == null || this.count > 0;
 
-	Map<Double, List<WebSession>> result = new HashMap<>();
-	if (generate) {
-	    this.count--;
-	    for (int i = 0; i < sessionsNumber; i++) {
-		double startAt = startTime;// + Math.random() * periodLen;
-		if (!result.containsKey(startAt)) {
-		    result.put(startAt, new ArrayList<WebSession>());
-		}
-		result.get(startAt).add(sessGen.generateSessionAt(startAt));
-	    }
-	}
-	return result;
+        Map<Double, List<WebSession>> result = new HashMap<>();
+        if (generate) {
+            this.count--;
+            for (int i = 0; i < sessionsNumber; i++) {
+                double startAt = startTime;// + Math.random() * periodLen;
+                if (!result.containsKey(startAt)) {
+                    result.put(startAt, new ArrayList<WebSession>());
+                }
+                result.get(startAt).add(sessGen.generateSessionAt(startAt));
+            }
+        }
+        return result;
     }
 }

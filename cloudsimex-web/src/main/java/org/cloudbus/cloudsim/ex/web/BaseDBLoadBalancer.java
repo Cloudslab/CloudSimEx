@@ -9,7 +9,7 @@ import org.cloudbus.cloudsim.ex.disk.HddVm;
  * Implements common functionalities for DB load balancers
  * 
  * @author nikolay.grozev
- *
+ * 
  */
 public abstract class BaseDBLoadBalancer implements IDBBalancer {
 
@@ -22,7 +22,7 @@ public abstract class BaseDBLoadBalancer implements IDBBalancer {
      *            - The list of DB vms to distribute cloudlets among.
      */
     public BaseDBLoadBalancer(final List<HddVm> dbVms) {
-	this.dbVms = dbVms;
+        this.dbVms = dbVms;
     }
 
     /**
@@ -32,18 +32,17 @@ public abstract class BaseDBLoadBalancer implements IDBBalancer {
      *            - The list of DB vms to distribute cloudlets among.
      */
     public BaseDBLoadBalancer(final HddVm... dbVms) {
-	this(Arrays.asList(dbVms));
+        this(Arrays.asList(dbVms));
     }
-
 
     @Override
     public List<HddVm> getVMs() {
-	return dbVms;
+        return dbVms;
     }
 
     @Override
     public void setVms(final List<HddVm> vms) {
-	dbVms = vms;
+        dbVms = vms;
     }
 
 }

@@ -42,7 +42,7 @@ public class StatWorkloadGenerator implements IWorkloadGenerator {
      *            - generator for sessions.
      */
     public StatWorkloadGenerator(final byte[] seed, final FrequencyFunction freqFun, final ISessionGenerator sessGen) {
-	this(null, seed, freqFun, sessGen);
+        this(null, seed, freqFun, sessGen);
     }
 
     /**
@@ -58,7 +58,7 @@ public class StatWorkloadGenerator implements IWorkloadGenerator {
      *            - generator for sessions.
      */
     public StatWorkloadGenerator(SeedGenerator seedGen, final FrequencyFunction freqFun, final ISessionGenerator sessGen) {
-	this(seedGen, null, freqFun, sessGen);
+        this(seedGen, null, freqFun, sessGen);
     }
 
     /**
@@ -70,27 +70,26 @@ public class StatWorkloadGenerator implements IWorkloadGenerator {
      *            - generator for sessions.
      */
     public StatWorkloadGenerator(final FrequencyFunction freqFun, final ISessionGenerator sessGen) {
-	this(null, null, freqFun, sessGen);
+        this(null, null, freqFun, sessGen);
     }
 
-    private StatWorkloadGenerator(SeedGenerator seedGen, final byte[] seed, final FrequencyFunction freqFun,
-	    final ISessionGenerator sessGen) {
-	super();
-	this.freqFun = freqFun;
-	this.sessGen = sessGen;
+    private StatWorkloadGenerator(SeedGenerator seedGen, final byte[] seed, final FrequencyFunction freqFun, final ISessionGenerator sessGen) {
+        super();
+        this.freqFun = freqFun;
+        this.sessGen = sessGen;
 
-	Random newRNG = null;
-	if (seed == null) {
-	    try {
-		newRNG = seedGen == null ? new MersenneTwisterRNG() : new MersenneTwisterRNG(seedGen);
-	    } catch (SeedException e) {
-		newRNG = new MersenneTwisterRNG();
-	    }
+        Random newRNG = null;
+        if (seed == null) {
+            try {
+                newRNG = seedGen == null ? new MersenneTwisterRNG() : new MersenneTwisterRNG(seedGen);
+            } catch (SeedException e) {
+                newRNG = new MersenneTwisterRNG();
+            }
 
-	} else {
-	    newRNG = new MersenneTwisterRNG(seed);
-	}
-	rng = newRNG;
+        } else {
+            newRNG = new MersenneTwisterRNG(seed);
+        }
+        rng = newRNG;
     }
 
     /**
@@ -104,29 +103,29 @@ public class StatWorkloadGenerator implements IWorkloadGenerator {
      */
     @Override
     public Map<Double, List<WebSession>> generateSessions(final double startTime, final double periodLen) {
-	double unit = freqFun.getUnit();
-	double freq = freqFun.getFrequency(startTime);
+        double unit = freqFun.getUnit();
+        double freq = freqFun.getFrequency(startTime);
 
-	Map<Double, List<WebSession>> timesToSessions = new LinkedHashMap<>();
-	if (freq > 0) {
-	    // The frequency within this period
-	    double freqInLen = freq * (periodLen / unit);
-	    NumberGenerator<Integer> poiss = new PoissonGenerator(freqInLen, rng);
-	    int numberOfSessions = poiss.nextValue();
+        Map<Double, List<WebSession>> timesToSessions = new LinkedHashMap<>();
+        if (freq > 0) {
+            // The frequency within this period
+            double freqInLen = freq * (periodLen / unit);
+            NumberGenerator<Integer> poiss = new PoissonGenerator(freqInLen, rng);
+            int numberOfSessions = poiss.nextValue();
 
-	    // Distribute uniformly the created sessions
-	    double timeStep = periodLen / numberOfSessions;
-	    for (int i = 0; i < numberOfSessions; i++) {
-		double sessionTime = startTime + i * timeStep;
-		if (!timesToSessions.containsKey(sessionTime)) {
-		    timesToSessions.put(sessionTime, new ArrayList<WebSession>());
-		}
+            // Distribute uniformly the created sessions
+            double timeStep = periodLen / numberOfSessions;
+            for (int i = 0; i < numberOfSessions; i++) {
+                double sessionTime = startTime + i * timeStep;
+                if (!timesToSessions.containsKey(sessionTime)) {
+                    timesToSessions.put(sessionTime, new ArrayList<WebSession>());
+                }
 
-		timesToSessions.get(sessionTime).add(sessGen.generateSessionAt(sessionTime));
-	    }
-	}
+                timesToSessions.get(sessionTime).add(sessGen.generateSessionAt(sessionTime));
+            }
+        }
 
-	return timesToSessions;
+        return timesToSessions;
     }
 
 }

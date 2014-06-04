@@ -46,17 +46,16 @@ public class WorkloadGeneratorTest {
 
     @Test
     public void testConstantFreqFunScenario() {
-	freqFunction = new ConstFreqFunction(FREQ_UNIT, FREQ_VALUE);
-	sessionGenerator = new ConstSessionGenerator(AS_CLOUDLET_LENGTH, AS_RAM, DB_CLOUDLET_LENGTH, DB_RAM,
-		DB_CLOUDLET_IO_LENGTH, false, data, metadata);
+        freqFunction = new ConstFreqFunction(FREQ_UNIT, FREQ_VALUE);
+        sessionGenerator = new ConstSessionGenerator(AS_CLOUDLET_LENGTH, AS_RAM, DB_CLOUDLET_LENGTH, DB_RAM, DB_CLOUDLET_IO_LENGTH, false, data, metadata);
 
-	workloadGenerator = new StatWorkloadGenerator(TestUtil.SEED_ARRAY, freqFunction, sessionGenerator);
+        workloadGenerator = new StatWorkloadGenerator(TestUtil.SEED_ARRAY, freqFunction, sessionGenerator);
 
-	// Test with different ratios of the lengths
-	testWebSessionGeneration(0.11);
-	testWebSessionGeneration(1);
-	testWebSessionGeneration(3);
-	testWebSessionGeneration(5.7);
+        // Test with different ratios of the lengths
+        testWebSessionGeneration(0.11);
+        testWebSessionGeneration(1);
+        testWebSessionGeneration(3);
+        testWebSessionGeneration(5.7);
     }
 
     /**
@@ -66,33 +65,33 @@ public class WorkloadGeneratorTest {
      *            function
      */
     private void testWebSessionGeneration(final double timesLen) {
-	double startTime = 15;
-	double periodLen = FREQ_UNIT * timesLen;
-	double expectedFreq = FREQ_VALUE * timesLen;
+        double startTime = 15;
+        double periodLen = FREQ_UNIT * timesLen;
+        double expectedFreq = FREQ_VALUE * timesLen;
 
-	DescriptiveStatistics countStat = new DescriptiveStatistics();
-	for (int i = 0; i < REPEAT_STAT; i++) {
-	    Map<Double, List<WebSession>> result = workloadGenerator.generateSessions(startTime, periodLen);
-	    countStat.addValue(result.size());
+        DescriptiveStatistics countStat = new DescriptiveStatistics();
+        for (int i = 0; i < REPEAT_STAT; i++) {
+            Map<Double, List<WebSession>> result = workloadGenerator.generateSessions(startTime, periodLen);
+            countStat.addValue(result.size());
 
-	    for (Map.Entry<Double, List<WebSession>> entry : result.entrySet()) {
-		assertTrue(entry.getKey() > startTime - DELTA);
-		assertTrue(entry.getKey() < startTime + periodLen + DELTA);
+            for (Map.Entry<Double, List<WebSession>> entry : result.entrySet()) {
+                assertTrue(entry.getKey() > startTime - DELTA);
+                assertTrue(entry.getKey() < startTime + periodLen + DELTA);
 
-		// Assert the metadata has been generated successfully
-		for (WebSession sess : entry.getValue()) {
-		    assertArrayEquals(metadata, sess.getMetadata());
-		}
-	    }
-	}
+                // Assert the metadata has been generated successfully
+                for (WebSession sess : entry.getValue()) {
+                    assertArrayEquals(metadata, sess.getMetadata());
+                }
+            }
+        }
 
-	// Check that the mean is indeed as expected
-	assertEquals(expectedFreq, countStat.getMean(), DELTA);
-	// The variance converges less slowly... so we need bigger delta, or
-	// more runs of the test. We choose bigger delta, since we want well
-	// performing tests.
-	double varDelta = 20 * DELTA;
-	assertEquals(expectedFreq, countStat.getVariance(), varDelta);
+        // Check that the mean is indeed as expected
+        assertEquals(expectedFreq, countStat.getMean(), DELTA);
+        // The variance converges less slowly... so we need bigger delta, or
+        // more runs of the test. We choose bigger delta, since we want well
+        // performing tests.
+        double varDelta = 20 * DELTA;
+        assertEquals(expectedFreq, countStat.getVariance(), varDelta);
     }
 
 }

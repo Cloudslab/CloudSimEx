@@ -22,10 +22,8 @@ public class StatGenerator extends BaseStatGenerator<WebCloudlet> {
      * @param data
      *            - the data used by the generator, or null if no data is used.
      */
-    public StatGenerator(
-	    final Map<String, ? extends NumberGenerator<? extends Number>> randomGenerators,
-		    final DataItem data) {
-	super(randomGenerators, data);
+    public StatGenerator(final Map<String, ? extends NumberGenerator<? extends Number>> randomGenerators, final DataItem data) {
+        super(randomGenerators, data);
     }
 
     /**
@@ -41,10 +39,9 @@ public class StatGenerator extends BaseStatGenerator<WebCloudlet> {
      * @param data
      *            - the data used by the generator, or null if no data is used.
      */
-    public StatGenerator(
-	    final Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators,
-		    final double startTime, final double endTime, final DataItem data) {
-	super(seqGenerators, startTime, endTime, data);
+    public StatGenerator(final Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators, final double startTime, final double endTime,
+            final DataItem data) {
+        super(seqGenerators, startTime, endTime, data);
     }
 
     /*
@@ -54,17 +51,16 @@ public class StatGenerator extends BaseStatGenerator<WebCloudlet> {
      */
     @Override
     protected WebCloudlet create(final double idealStartTime) {
-	Double cpuLen = generateNumericValue(CLOUDLET_LENGTH);
-	Double ram = generateNumericValue(CLOUDLET_RAM);
-	Double ioLen = generateNumericValue(CLOUDLET_IO);
-	Boolean modifiesData = generateBooleanValue(CLOUDLET_MODIFIES_DATA);
+        Double cpuLen = generateNumericValue(CLOUDLET_LENGTH);
+        Double ram = generateNumericValue(CLOUDLET_RAM);
+        Double ioLen = generateNumericValue(CLOUDLET_IO);
+        Boolean modifiesData = generateBooleanValue(CLOUDLET_MODIFIES_DATA);
 
-	if(cpuLen == null || ram == null || ioLen == null || modifiesData == null) {
-	    return null;
-	} else {
-	    return new WebCloudlet(idealStartTime, cpuLen.longValue(), ioLen.longValue(), ram, -1,
-		modifiesData, getData());
-	}
+        if (cpuLen == null || ram == null || ioLen == null || modifiesData == null) {
+            return null;
+        } else {
+            return new WebCloudlet(idealStartTime, cpuLen.longValue(), ioLen.longValue(), ram, -1, modifiesData, getData());
+        }
     }
 
 }

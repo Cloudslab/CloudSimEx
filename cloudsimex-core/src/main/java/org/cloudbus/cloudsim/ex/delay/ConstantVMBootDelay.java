@@ -20,11 +20,11 @@ public class ConstantVMBootDelay implements IVMBootDelayDistribution {
      *            - the constant delay. Must not be negative.
      */
     public ConstantVMBootDelay(final double delay) {
-	this.delay = delay;
+        this.delay = delay;
     }
 
     @Override
     public double getDelay(final Vm vm) {
-	return delay;
+        return delay;
     }
 }

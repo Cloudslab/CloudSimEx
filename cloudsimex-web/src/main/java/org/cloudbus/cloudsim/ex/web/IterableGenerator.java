@@ -18,61 +18,67 @@ public class IterableGenerator<T> implements IGenerator<T> {
 
     /**
      * Creates the iterable generator with the list of prefetched instances.
+     * 
      * @param collection
      */
-    public IterableGenerator(@SuppressWarnings("unchecked") T ... collection) {
-	this(Arrays.asList(collection));
+    public IterableGenerator(@SuppressWarnings("unchecked") T... collection) {
+        this(Arrays.asList(collection));
     }
 
     /**
      * Creates the iterable generator with the list of prefetched instances.
+     * 
      * @param collection
      */
     public IterableGenerator(final Iterable<T> collection) {
-	this.iterator = collection.iterator();
+        this.iterator = collection.iterator();
     }
 
     /**
      * (non-Javadoc)
+     * 
      * @see org.cloudbus.cloudsim.ex.web.IGenerator#peek()
      */
     @Override
     public T peek() {
-	peeked = peeked == null && iterator.hasNext() ? iterator.next() : peeked;
-	return peeked;
+        peeked = peeked == null && iterator.hasNext() ? iterator.next() : peeked;
+        return peeked;
     }
 
     /**
      * (non-Javadoc)
+     * 
      * @see org.cloudbus.cloudsim.ex.web.IGenerator#poll()
      */
     @Override
     public T poll() {
-	T result = peeked;
-	if (peeked != null) {
-	    peeked = null;
-	} else if (iterator.hasNext()) {
-	    result = iterator.next();
-	}
-	return result;
+        T result = peeked;
+        if (peeked != null) {
+            peeked = null;
+        } else if (iterator.hasNext()) {
+            result = iterator.next();
+        }
+        return result;
     }
 
     /**
      * (non-Javadoc)
+     * 
      * @see org.cloudbus.cloudsim.ex.web.IGenerator#isEmpty()
      */
     @Override
     public boolean isEmpty() {
-	return peek() == null;
+        return peek() == null;
     }
 
     /**
      * (non-Javadoc)
+     * 
      * @see org.cloudbus.cloudsim.ex.web.IGenerator#notifyOfTime(double)
      */
     @Override
     public void notifyOfTime(final double time) {
-	// Do nothing
+        // Do nothing
     }
 
 }

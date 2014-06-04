@@ -20,7 +20,7 @@ public abstract class VmSchedulerMapVmsToPes<P extends Pe> extends VmSchedulerWi
     private final Map<Integer, List<Integer>> vmsToPes = new HashMap<>();
 
     public VmSchedulerMapVmsToPes(final List<P> pelist) {
-	super(pelist);
+        super(pelist);
     }
 
     /**
@@ -32,17 +32,17 @@ public abstract class VmSchedulerMapVmsToPes<P extends Pe> extends VmSchedulerWi
      *            - the id of the pe.
      */
     public void map(final int vmid, final int peid) {
-	if (vmsToPes.containsKey(vmid)) {
-	    vmsToPes.get(vmid).add(peid);
-	} else {
-	    vmsToPes.put(vmid, new ArrayList<Integer>());
-	    vmsToPes.get(vmid).add(peid);
-	}
+        if (vmsToPes.containsKey(vmid)) {
+            vmsToPes.get(vmid).add(peid);
+        } else {
+            vmsToPes.put(vmid, new ArrayList<Integer>());
+            vmsToPes.get(vmid).add(peid);
+        }
     }
 
     @Override
     public boolean doesVmUse(final Vm vm, final Pe pe) {
-	return vmsToPes.containsKey(vm.getId()) && vmsToPes.get(vm.getId()).contains(pe.getId());
+        return vmsToPes.containsKey(vm.getId()) && vmsToPes.get(vm.getId()).contains(pe.getId());
     }
 
 }

@@ -77,8 +77,8 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      *             - from the superclass.
      */
     public DatacenterBrokerEX(final String name, final double lifeLength) throws Exception {
-	super(name);
-	this.lifeLength = lifeLength;
+        super(name);
+        this.lifeLength = lifeLength;
     }
 
     /**
@@ -87,7 +87,7 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      * @return the billing policy, used by this broker.
      */
     public IVmBillingPolicy getVMBillingPolicy() {
-	return vmBillingPolicy;
+        return vmBillingPolicy;
     }
 
     /**
@@ -98,7 +98,7 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      *            unavailable.
      */
     public void setVMBillingPolicy(IVmBillingPolicy vmBillingPolicy) {
-	this.vmBillingPolicy = vmBillingPolicy;
+        this.vmBillingPolicy = vmBillingPolicy;
     }
 
     /**
@@ -107,7 +107,7 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      * @return the number of requested VM destructions.
      */
     public int getVmDestructsRequested() {
-	return vmDestructsRequested;
+        return vmDestructsRequested;
     }
 
     /**
@@ -118,7 +118,7 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      *            integer or 0.
      */
     public void setVmDestructsRequested(int vmDestructsRequested) {
-	this.vmDestructsRequested = vmDestructsRequested;
+        this.vmDestructsRequested = vmDestructsRequested;
     }
 
     /**
@@ -127,7 +127,7 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      * @return the number of acknowledged VM destructions.
      */
     public int getVmDestructsAcks() {
-	return vmDestructsAcks;
+        return vmDestructsAcks;
     }
 
     /**
@@ -137,14 +137,14 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      *            - acknowledged VM destructions. A valid positive integer or 0.
      */
     public void setVmDestructsAcks(int vmDestructsAcks) {
-	this.vmDestructsAcks = vmDestructsAcks;
+        this.vmDestructsAcks = vmDestructsAcks;
     }
 
     /**
      * Increments the counter of VM destruction acknowledgments.
      */
     protected void incrementVmDesctructsAcks() {
-	vmDestructsAcks++;
+        vmDestructsAcks++;
     }
 
     /**
@@ -153,64 +153,63 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      * @return if this broker has started to respond to events.
      */
     protected boolean isStarted() {
-	return started;
+        return started;
     }
 
     @Override
     public void processEvent(SimEvent ev) {
-	if (!started) {
-	    started = true;
+        if (!started) {
+            started = true;
 
-	    for (ListIterator<PresetEvent> iter = presetEvents.listIterator(); iter.hasNext();) {
-		PresetEvent event = iter.next();
-		send(event.id, event.delay, event.tag, event.data);
-		iter.remove();
-	    }
+            for (ListIterator<PresetEvent> iter = presetEvents.listIterator(); iter.hasNext();) {
+                PresetEvent event = iter.next();
+                send(event.id, event.delay, event.tag, event.data);
+                iter.remove();
+            }
 
-	    // Tell the broker to destroy itself after its lifeline.
-	    if (getLifeLength() > 0) {
-		send(getId(), getLifeLength(), BROKER_DESTROY_ITSELF_NOW, null);
-	    }
-	}
+            // Tell the broker to destroy itself after its lifeline.
+            if (getLifeLength() > 0) {
+                send(getId(), getLifeLength(), BROKER_DESTROY_ITSELF_NOW, null);
+            }
+        }
 
-	switch (ev.getTag()) {
-	    case CloudSimTags.VM_CREATE_ACK:
-		int[] data = (int[]) ev.getData();
-		int vmId = data[1];
+        switch (ev.getTag()) {
+        case CloudSimTags.VM_CREATE_ACK:
+            int[] data = (int[]) ev.getData();
+            int vmId = data[1];
 
-		Vm vm = VmList.getById(getVmList(), vmId);
-		if (vm.isBeingInstantiated()) {
-		    vm.setBeingInstantiated(false);
-		}
-		processVmCreate(ev);
-		break;
+            Vm vm = VmList.getById(getVmList(), vmId);
+            if (vm.isBeingInstantiated()) {
+                vm.setBeingInstantiated(false);
+            }
+            processVmCreate(ev);
+            break;
 
-	    default:
-		super.processEvent(ev);
-		break;
-	}
+        default:
+            super.processEvent(ev);
+            break;
+        }
     }
 
     @Override
     protected void processCloudletReturn(SimEvent ev) {
-	Cloudlet cloudlet = (Cloudlet) ev.getData();
-	if (getLifeLength() <= 0) {
-	    // Will kill the broker if there are no more cloudlets.
-	    super.processCloudletReturn(ev);
-	} else {
+        Cloudlet cloudlet = (Cloudlet) ev.getData();
+        if (getLifeLength() <= 0) {
+            // Will kill the broker if there are no more cloudlets.
+            super.processCloudletReturn(ev);
+        } else {
 
-	    getCloudletReceivedList().add(cloudlet);
-	    Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Cloudlet ", cloudlet.getCloudletId(),
-		    " received");
-	    cloudletsSubmitted--;
+            getCloudletReceivedList().add(cloudlet);
+            Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Cloudlet ", cloudlet.getCloudletId(), " received");
+            cloudletsSubmitted--;
 
-//	    if (getCloudletList().size() > 0 && cloudletsSubmitted == 0) {
-//		// all the cloudlets sent finished. It means that some bount
-//		// cloudlet is waiting its VM be created
-//		clearDatacenters();
-//		createVmsInDatacenter(0);
-//	    }
-	}
+            // if (getCloudletList().size() > 0 && cloudletsSubmitted == 0) {
+            // // all the cloudlets sent finished. It means that some bount
+            // // cloudlet is waiting its VM be created
+            // clearDatacenters();
+            // createVmsInDatacenter(0);
+            // }
+        }
     }
 
     /**
@@ -219,7 +218,7 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      * @return the list of preset events.
      */
     protected List<PresetEvent> getPresetEvents() {
-	return presetEvents;
+        return presetEvents;
     }
 
     /**
@@ -232,7 +231,7 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      * @param delay
      */
     public void presetEvent(final int id, final int tag, final Object data, final double delay) {
-	presetEvents.add(new PresetEvent(id, tag, data, delay));
+        presetEvents.add(new PresetEvent(id, tag, data, delay));
     }
 
     /**
@@ -242,11 +241,11 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      * @param delay
      */
     public void createVmsAfter(List<? extends Vm> vms, double delay) {
-	if (started) {
-	    send(getId(), delay, BROKER_SUBMIT_VMS_NOW, vms);
-	} else {
-	    presetEvent(getId(), BROKER_SUBMIT_VMS_NOW, vms, delay);
-	}
+        if (started) {
+            send(getId(), delay, BROKER_SUBMIT_VMS_NOW, vms);
+        } else {
+            presetEvent(getId(), BROKER_SUBMIT_VMS_NOW, vms, delay);
+        }
     }
 
     /**
@@ -259,11 +258,11 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      *            - the period to wait for.
      */
     public void destroyVMsAfter(final List<? extends Vm> vms, double delay) {
-	if (started) {
-	    send(getId(), delay, BROKER_DESTROY_VMS_NOW, vms);
-	} else {
-	    presetEvent(getId(), BROKER_DESTROY_VMS_NOW, vms, delay);
-	}
+        if (started) {
+            send(getId(), delay, BROKER_DESTROY_VMS_NOW, vms);
+        } else {
+            presetEvent(getId(), BROKER_DESTROY_VMS_NOW, vms, delay);
+        }
     }
 
     /**
@@ -276,103 +275,101 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      *            - the delay.
      */
     public void submitCloudletList(List<Cloudlet> cloudlets, double delay) {
-	if (started) {
-	    send(getId(), delay, BROKER_CLOUDLETS_NOW, cloudlets);
-	} else {
-	    presetEvent(getId(), BROKER_CLOUDLETS_NOW, cloudlets, delay);
-	}
+        if (started) {
+            send(getId(), delay, BROKER_CLOUDLETS_NOW, cloudlets);
+        } else {
+            presetEvent(getId(), BROKER_CLOUDLETS_NOW, cloudlets, delay);
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     protected void processOtherEvent(SimEvent ev) {
-	switch (ev.getTag()) {
-	    case CloudSimTags.VM_DESTROY_ACK:
-		processVMDestroy(ev);
-		break;
-	    case BROKER_DESTROY_VMS_NOW:
-		destroyVMList((List<Vm>) ev.getData());
-		break;
-	    case BROKER_SUBMIT_VMS_NOW:
-		submitVmList((List<Vm>) ev.getData());
-		// TODO Is the following valid when multiple data centres are
-		// handled with a single broker?
-		for (int nextDatacenterId : getDatacenterIdsList()) {
-		    createVmsInDatacenter(nextDatacenterId);
-		}
-		break;
-	    case BROKER_CLOUDLETS_NOW:
-		submitCloudletList((List<Cloudlet>) ev.getData());
-		submitCloudlets();
-		break;
-	    case BROKER_DESTROY_ITSELF_NOW:
-		closeDownBroker();
-		break;
-	    default:
-		super.processOtherEvent(ev);
-		break;
-	}
+        switch (ev.getTag()) {
+        case CloudSimTags.VM_DESTROY_ACK:
+            processVMDestroy(ev);
+            break;
+        case BROKER_DESTROY_VMS_NOW:
+            destroyVMList((List<Vm>) ev.getData());
+            break;
+        case BROKER_SUBMIT_VMS_NOW:
+            submitVmList((List<Vm>) ev.getData());
+            // TODO Is the following valid when multiple data centres are
+            // handled with a single broker?
+            for (int nextDatacenterId : getDatacenterIdsList()) {
+                createVmsInDatacenter(nextDatacenterId);
+            }
+            break;
+        case BROKER_CLOUDLETS_NOW:
+            submitCloudletList((List<Cloudlet>) ev.getData());
+            submitCloudlets();
+            break;
+        case BROKER_DESTROY_ITSELF_NOW:
+            closeDownBroker();
+            break;
+        default:
+            super.processOtherEvent(ev);
+            break;
+        }
     }
 
     /**
      * Terminates the broker, releases all its resources and state.
      */
     public void closeDownBroker() {
-	for (Vm vm : getVmList()) {
-	    finilizeVM(vm);
-	}
-	clearDatacenters();
-	finishExecution();
+        for (Vm vm : getVmList()) {
+            finilizeVM(vm);
+        }
+        clearDatacenters();
+        finishExecution();
     }
 
     private void processVMDestroy(SimEvent ev) {
-	int[] data = (int[]) ev.getData();
-	int datacenterId = data[0];
-	int vmId = data[1];
-	int result = data[2];
+        int[] data = (int[]) ev.getData();
+        int datacenterId = data[0];
+        int vmId = data[1];
+        int result = data[2];
 
-	if (result == CloudSimTags.TRUE) {
-	    Vm vm = VmList.getById(getVmsCreatedList(), vmId);
+        if (result == CloudSimTags.TRUE) {
+            Vm vm = VmList.getById(getVmsCreatedList(), vmId);
 
-	    // One more ack. to consider
-	    incrementVmDesctructsAcks();
+            // One more ack. to consider
+            incrementVmDesctructsAcks();
 
-	    // Remove the vm from the created list
-	    getVmsCreatedList().remove(vm);
-	    finilizeVM(vm);
+            // Remove the vm from the created list
+            getVmsCreatedList().remove(vm);
+            finilizeVM(vm);
 
-	    // Kill all cloudlets associated with this VM
-	    for (Cloudlet cloudlet : getCloudletSubmittedList()) {
-		if (!cloudlet.isFinished() && vmId == cloudlet.getVmId()) {
-		    try {
-			vm.getCloudletScheduler().cloudletCancel(cloudlet.getCloudletId());
-			cloudlet.setCloudletStatus(Cloudlet.FAILED_RESOURCE_UNAVAILABLE);
-		    } catch (Exception e) {
-			CustomLog.logError(Level.SEVERE, e.getMessage(), e);
-		    }
+            // Kill all cloudlets associated with this VM
+            for (Cloudlet cloudlet : getCloudletSubmittedList()) {
+                if (!cloudlet.isFinished() && vmId == cloudlet.getVmId()) {
+                    try {
+                        vm.getCloudletScheduler().cloudletCancel(cloudlet.getCloudletId());
+                        cloudlet.setCloudletStatus(Cloudlet.FAILED_RESOURCE_UNAVAILABLE);
+                    } catch (Exception e) {
+                        CustomLog.logError(Level.SEVERE, e.getMessage(), e);
+                    }
 
-		    sendNow(cloudlet.getUserId(), CloudSimTags.CLOUDLET_RETURN, cloudlet);
-		}
-	    }
+                    sendNow(cloudlet.getUserId(), CloudSimTags.CLOUDLET_RETURN, cloudlet);
+                }
+            }
 
-	    // Use the standard log for consistency ....
-	    Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": VM #", vmId,
-		    " has been destroyed in Datacenter #", datacenterId);
-	} else {
-	    // Use the standard log for consistency ....
-	    Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Desctuction of VM #", vmId,
-		    " failed in Datacenter #", datacenterId);
-	}
+            // Use the standard log for consistency ....
+            Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": VM #", vmId, " has been destroyed in Datacenter #", datacenterId);
+        } else {
+            // Use the standard log for consistency ....
+            Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Desctuction of VM #", vmId, " failed in Datacenter #", datacenterId);
+        }
 
     }
 
     private void finilizeVM(final Vm vm) {
-	if (vm instanceof VMex) {
-	    VMex vmEX = ((VMex) vm);
-	    if (vmEX.getStatus() != VMStatus.TERMINATED) {
-		vmEX.setStatus(VMStatus.TERMINATED);
-	    }
-	}
+        if (vm instanceof VMex) {
+            VMex vmEX = ((VMex) vm);
+            if (vmEX.getStatus() != VMStatus.TERMINATED) {
+                vmEX.setStatus(VMStatus.TERMINATED);
+            }
+        }
     }
 
     /**
@@ -382,39 +379,37 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      *            - the vms to terminate. Must not be null.
      */
     public void destroyVMList(final List<? extends Vm> vms) {
-	if (getVmDestructsAcks() != getVmsDestroyed()) {
-	    throw new IllegalStateException("#" + getVmsDestroyed() +
-		    " have been marked for termination, but only #"
-		    + getVmDestructsAcks() + " acknowlegdements have been received.");
-	}
+        if (getVmDestructsAcks() != getVmsDestroyed()) {
+            throw new IllegalStateException("#" + getVmsDestroyed() + " have been marked for termination, but only #" + getVmDestructsAcks()
+                    + " acknowlegdements have been received.");
+        }
 
-	int requestedVmTerminations = 0;
-	for (final Vm vm : vms) {
-	    if (vm.getHost() == null || vm.getHost().getDatacenter() == null) {
-		Log.print("VM " + vm.getId() + " has not been assigned in a valid way and can not be terminated.");
-		continue;
-	    }
+        int requestedVmTerminations = 0;
+        for (final Vm vm : vms) {
+            if (vm.getHost() == null || vm.getHost().getDatacenter() == null) {
+                Log.print("VM " + vm.getId() + " has not been assigned in a valid way and can not be terminated.");
+                continue;
+            }
 
-	    // Update the cloudlets before we send the kill event
-	    vm.getHost().updateVmsProcessing(CloudSim.clock());
+            // Update the cloudlets before we send the kill event
+            vm.getHost().updateVmsProcessing(CloudSim.clock());
 
-	    int datacenterId = vm.getHost().getDatacenter().getId();
-	    String datacenterName = vm.getHost().getDatacenter().getName();
+            int datacenterId = vm.getHost().getDatacenter().getId();
+            String datacenterName = vm.getHost().getDatacenter().getName();
 
-	    Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Trying to Destroy VM #", vm.getId(),
-		    " in ", datacenterName);
+            Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Trying to Destroy VM #", vm.getId(), " in ", datacenterName);
 
-	    // Tell the data centre to destroy it
-	    sendNow(datacenterId, CloudSimTags.VM_DESTROY_ACK, vm);
-	    requestedVmTerminations++;
-	}
+            // Tell the data centre to destroy it
+            sendNow(datacenterId, CloudSimTags.VM_DESTROY_ACK, vm);
+            requestedVmTerminations++;
+        }
 
-	setVmsDestroyed(requestedVmTerminations);
-	setVmDestructsAcks(0);
+        setVmsDestroyed(requestedVmTerminations);
+        setVmDestructsAcks(0);
     }
 
     public double getLifeLength() {
-	return lifeLength;
+        return lifeLength;
     }
 
     /**
@@ -430,21 +425,21 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      *             - if the billing policy has not been set.
      */
     public BigDecimal bill(final Integer... datacenterIds) {
-	Set<Integer> dcIds = new HashSet<>(Arrays.asList(datacenterIds));
-	List<Vm> toBill = new ArrayList<>();
+        Set<Integer> dcIds = new HashSet<>(Arrays.asList(datacenterIds));
+        List<Vm> toBill = new ArrayList<>();
 
-	for (Vm vm : getVmList()) {
-	    if (dcIds.isEmpty() || dcIds.contains(getVmsToDatacentersMap().get(vm))) {
-		toBill.add(vm);
-	    }
-	}
+        for (Vm vm : getVmList()) {
+            if (dcIds.isEmpty() || dcIds.contains(getVmsToDatacentersMap().get(vm))) {
+                toBill.add(vm);
+            }
+        }
 
-	return vmBillingPolicy.bill(toBill);
+        return vmBillingPolicy.bill(toBill);
     }
 
     @Override
     public String toString() {
-	return String.valueOf(String.format("Broker(%s, %d)", Objects.toString(getName(), "N/A"), getId()));
+        return String.valueOf(String.format("Broker(%s, %d)", Objects.toString(getName(), "N/A"), getId()));
     }
 
     /**
@@ -456,17 +451,17 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      * 
      */
     protected static class PresetEvent {
-	final int id;
-	final int tag;
-	final Object data;
-	final double delay;
+        final int id;
+        final int tag;
+        final Object data;
+        final double delay;
 
-	public PresetEvent(final int id, final int tag, final Object data, final double delay) {
-	    super();
-	    this.id = id;
-	    this.tag = tag;
-	    this.data = data;
-	    this.delay = delay;
-	}
+        public PresetEvent(final int id, final int tag, final Object data, final double delay) {
+            super();
+            this.id = id;
+            this.tag = tag;
+            this.data = data;
+            this.delay = delay;
+        }
     }
 }

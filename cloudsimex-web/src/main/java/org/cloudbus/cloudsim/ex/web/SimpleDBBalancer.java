@@ -29,7 +29,7 @@ public class SimpleDBBalancer extends BaseDBLoadBalancer implements IDBBalancer 
      *            - The list of DB vms to distribute cloudlets among.
      */
     public SimpleDBBalancer(final List<HddVm> dbVms) {
-	super(dbVms);
+        super(dbVms);
     }
 
     /**
@@ -39,7 +39,7 @@ public class SimpleDBBalancer extends BaseDBLoadBalancer implements IDBBalancer 
      *            - The list of DB vms to distribute cloudlets among.
      */
     public SimpleDBBalancer(final HddVm... dbVms) {
-	super(Arrays.asList(dbVms));
+        super(Arrays.asList(dbVms));
     }
 
     /*
@@ -51,26 +51,25 @@ public class SimpleDBBalancer extends BaseDBLoadBalancer implements IDBBalancer 
      */
     @Override
     public void allocateToServer(final HddCloudlet cloudlet) {
-	label:
-	for (HddVm vm : getVMs()) {
-	    for (HddPe hdd : vm.getHost().getHddList()) {
-		if (vm.getHddsIds().contains(hdd.getId()) && hdd.containsDataItem(cloudlet.getData().getId())) {
-		    cloudlet.setVmId(vm.getId());
-		    break label;
-		}
-	    }
-	}
+        label: for (HddVm vm : getVMs()) {
+            for (HddPe hdd : vm.getHost().getHddList()) {
+                if (vm.getHddsIds().contains(hdd.getId()) && hdd.containsDataItem(cloudlet.getData().getId())) {
+                    cloudlet.setVmId(vm.getId());
+                    break label;
+                }
+            }
+        }
 
-	// If the cloudlet has not yet been assigned a VM
-	if (cloudlet.getVmId() == -1) {
-	    CustomLog.printf("Cloudlet %d could not be assigned a DB VM, since no VM has its data item %d",
-		    cloudlet.getCloudletId(), cloudlet.getData().getId());
+        // If the cloudlet has not yet been assigned a VM
+        if (cloudlet.getVmId() == -1) {
+            CustomLog.printf("Cloudlet %d could not be assigned a DB VM, since no VM has its data item %d", cloudlet.getCloudletId(), cloudlet.getData()
+                    .getId());
 
-	    try {
-		cloudlet.setCloudletStatus(Cloudlet.FAILED);
-	    } catch (Exception e) {
-		CustomLog.logError(Level.SEVERE, "Unexpected error occurred", e);
-	    }
-	}
+            try {
+                cloudlet.setCloudletStatus(Cloudlet.FAILED);
+            } catch (Exception e) {
+                CustomLog.logError(Level.SEVERE, "Unexpected error occurred", e);
+            }
+        }
     }
 }

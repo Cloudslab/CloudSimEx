@@ -78,14 +78,12 @@ public class WebBroker extends MonitoringBorkerEX {
      *             - if something goes wrong. See the documentation of the super
      *             class.
      */
-    public WebBroker(final String name, final double refreshPeriod, final double lifeLength,
-	    final double monitoringPeriod, final double autoscalePeriod, final int dataCenterId,
-	    final String... metadata)
-	    throws Exception {
-	super(name, lifeLength, monitoringPeriod, autoscalePeriod);
-	this.stepPeriod = refreshPeriod;
-	this.dataCenterId = dataCenterId;
-	this.metadata = metadata;
+    public WebBroker(final String name, final double refreshPeriod, final double lifeLength, final double monitoringPeriod, final double autoscalePeriod,
+            final int dataCenterId, final String... metadata) throws Exception {
+        super(name, lifeLength, monitoringPeriod, autoscalePeriod);
+        this.stepPeriod = refreshPeriod;
+        this.dataCenterId = dataCenterId;
+        this.metadata = metadata;
     }
 
     /**
@@ -105,9 +103,8 @@ public class WebBroker extends MonitoringBorkerEX {
      *             - if something goes wrong. See the documentation of the super
      *             class.
      */
-    public WebBroker(final String name, final double refreshPeriod, final double lifeLength, final int dataCenterId)
-	    throws Exception {
-	this(name, refreshPeriod, lifeLength, -1, -1, dataCenterId);
+    public WebBroker(final String name, final double refreshPeriod, final double lifeLength, final int dataCenterId) throws Exception {
+        this(name, refreshPeriod, lifeLength, -1, -1, dataCenterId);
     }
 
     /**
@@ -116,7 +113,7 @@ public class WebBroker extends MonitoringBorkerEX {
      * @return the id of the datacentre that this web broker handles.
      */
     public int getDataCenterId() {
-	return dataCenterId;
+        return dataCenterId;
     }
 
     /**
@@ -126,11 +123,11 @@ public class WebBroker extends MonitoringBorkerEX {
      *         them.
      */
     public List<WebSession> getCanceledSessions() {
-	return canceledSessions;
+        return canceledSessions;
     }
 
     public String[] getMetadata() {
-	return metadata;
+        return metadata;
     }
 
     /**
@@ -139,9 +136,9 @@ public class WebBroker extends MonitoringBorkerEX {
      * @return the sessions that were successfully served.
      */
     public List<WebSession> getServedSessions() {
-	List<WebSession> result = new ArrayList<>(completedSessions);
-	result.addAll(activeSessions.values());
-	return result;
+        List<WebSession> result = new ArrayList<>(completedSessions);
+        result.addAll(activeSessions.values());
+        return result;
     }
 
     /**
@@ -150,35 +147,34 @@ public class WebBroker extends MonitoringBorkerEX {
      * @return the load balancers of this broker.
      */
     public Map<Long, ILoadBalancer> getLoadBalancers() {
-	return appsToLoadBalancers;
+        return appsToLoadBalancers;
     }
 
     public double getStepPeriod() {
-	return stepPeriod;
+        return stepPeriod;
     }
 
     @Override
     public void processEvent(final SimEvent ev) {
-	if (!isTimerRunning) {
-	    isTimerRunning = true;
-	    sendNow(getId(), TIMER_TAG);
-	}
+        if (!isTimerRunning) {
+            isTimerRunning = true;
+            sendNow(getId(), TIMER_TAG);
+        }
 
-	super.processEvent(ev);
+        super.processEvent(ev);
     }
 
     public void submitSessions(final List<WebSession> webSessions, final long appId) {
-	if (entryPoins.containsKey(appId)) {
-	    IEntryPoint entryPoint = entryPoins.get(appId);
+        if (entryPoins.containsKey(appId)) {
+            IEntryPoint entryPoint = entryPoins.get(appId);
 
-	    for (WebSession sess : webSessions) {
-		CustomLog.printf("[Broker](%s) Session %d has arrived in the Entry Point of %s", toString(),
-			sess.getSessionId(), getName());
-	    }
-	    entryPoint.dispatchSessions(webSessions);
-	} else {
-	    submitSessionsDirectly(webSessions, appId);
-	}
+            for (WebSession sess : webSessions) {
+                CustomLog.printf("[Broker](%s) Session %d has arrived in the Entry Point of %s", toString(), sess.getSessionId(), getName());
+            }
+            entryPoint.dispatchSessions(webSessions);
+        } else {
+            submitSessionsDirectly(webSessions, appId);
+        }
     }
 
     /**
@@ -188,42 +184,40 @@ public class WebBroker extends MonitoringBorkerEX {
      *            - the new web sessions.
      */
     /* pack access */void submitSessionsDirectly(final List<WebSession> webSessions, final long appId) {
-	if (!CloudSim.running()) {
-	    submitSessionsAtTime(webSessions, appId, 0);
-	} else {
-	    for (WebSession session : webSessions) {
-		appsToLoadBalancers.get(appId).assignToServers(session);
+        if (!CloudSim.running()) {
+            submitSessionsAtTime(webSessions, appId, 0);
+        } else {
+            for (WebSession session : webSessions) {
+                appsToLoadBalancers.get(appId).assignToServers(session);
 
-		// If the load balancer could not assign it...
-		if (session.getAppVmId() == null || session.getDbBalancer() == null) {
-		    canceledSessions.add(session);
-		    CustomLog.printf(Level.SEVERE,
-			    "%s: Session %d could not be assigned to an AS server and is canceled.", toString(),
-			    session.getSessionId());
-		} else {
-		    session.setUserId(getId());
-		    // Let the session prepare the first cloudlets
-		    if (session.areVirtualMachinesReady()) {
-			session.notifyOfTime(CloudSim.clock());
-		    } else {
-			// If the VMs are not yet ready - start the session
-			// later and extend its ideal end
-			session.setIdealEnd(session.getIdealEnd() + stepPeriod);
-			session.notifyOfTime(CloudSim.clock() + stepPeriod);
-		    }
+                // If the load balancer could not assign it...
+                if (session.getAppVmId() == null || session.getDbBalancer() == null) {
+                    canceledSessions.add(session);
+                    CustomLog.printf(Level.SEVERE, "%s: Session %d could not be assigned to an AS server and is canceled.", toString(), session.getSessionId());
+                } else {
+                    session.setUserId(getId());
+                    // Let the session prepare the first cloudlets
+                    if (session.areVirtualMachinesReady()) {
+                        session.notifyOfTime(CloudSim.clock());
+                    } else {
+                        // If the VMs are not yet ready - start the session
+                        // later and extend its ideal end
+                        session.setIdealEnd(session.getIdealEnd() + stepPeriod);
+                        session.notifyOfTime(CloudSim.clock() + stepPeriod);
+                    }
 
-		    activeSessions.put(session.getSessionId(), session);
+                    activeSessions.put(session.getSessionId(), session);
 
-		    // Start the session or schedule it if its VMs are not
-		    // initiated.
-		    if (session.areVirtualMachinesReady()) {
-			updateSessions(session.getSessionId());
-		    } else {
-			send(getId(), stepPeriod, UPDATE_SESSION_TAG, session.getSessionId());
-		    }
-		}
-	    }
-	}
+                    // Start the session or schedule it if its VMs are not
+                    // initiated.
+                    if (session.areVirtualMachinesReady()) {
+                        updateSessions(session.getSessionId());
+                    } else {
+                        send(getId(), stepPeriod, UPDATE_SESSION_TAG, session.getSessionId());
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -237,12 +231,12 @@ public class WebBroker extends MonitoringBorkerEX {
      *            - the delay to submit after.
      */
     public void submitSessionsAtTime(final List<WebSession> webSessions, final long loadBalancerId, final double delay) {
-	Object data = new Object[] { webSessions, loadBalancerId };
-	if (isTimerRunning) {
-	    send(getId(), delay, SUBMIT_SESSION_TAG, data);
-	} else {
-	    presetEvent(getId(), SUBMIT_SESSION_TAG, data, delay);
-	}
+        Object data = new Object[] { webSessions, loadBalancerId };
+        if (isTimerRunning) {
+            send(getId(), delay, SUBMIT_SESSION_TAG, data);
+        } else {
+            presetEvent(getId(), SUBMIT_SESSION_TAG, data, delay);
+        }
     }
 
     /**
@@ -252,8 +246,8 @@ public class WebBroker extends MonitoringBorkerEX {
      *            - the balancer to add. Must not be null.
      */
     public void addLoadBalancer(final ILoadBalancer balancer) {
-	appsToLoadBalancers.put(balancer.getAppId(), balancer);
-	appsToGenerators.put(balancer.getAppId(), new ArrayList<IWorkloadGenerator>());
+        appsToLoadBalancers.put(balancer.getAppId(), balancer);
+        appsToGenerators.put(balancer.getAppId(), new ArrayList<IWorkloadGenerator>());
     }
 
     /**
@@ -264,14 +258,14 @@ public class WebBroker extends MonitoringBorkerEX {
      *            - the entry point. Must not be null.
      */
     public void addEntryPoint(final IEntryPoint entryPoint) {
-	IEntryPoint currEP = entryPoins.get(entryPoint.getAppId());
-	if (entryPoint != entryPoins.get(entryPoint.getAppId())) {
-	    entryPoins.put(entryPoint.getAppId(), entryPoint);
-	    entryPoint.registerBroker(this);
-	    if (currEP != null) {
-		currEP.deregisterBroker(this);
-	    }
-	}
+        IEntryPoint currEP = entryPoins.get(entryPoint.getAppId());
+        if (entryPoint != entryPoins.get(entryPoint.getAppId())) {
+            entryPoins.put(entryPoint.getAppId(), entryPoint);
+            entryPoint.registerBroker(this);
+            if (currEP != null) {
+                currEP.deregisterBroker(this);
+            }
+        }
     }
 
     /**
@@ -281,10 +275,10 @@ public class WebBroker extends MonitoringBorkerEX {
      *            - the entry point. Must not be null.
      */
     public void removeEntryPoint(final IEntryPoint entryPoint) {
-	if (entryPoint == entryPoins.get(entryPoint.getAppId())) {
-	    entryPoins.remove(entryPoint.getAppId());
-	    entryPoint.deregisterBroker(this);
-	}
+        if (entryPoint == entryPoins.get(entryPoint.getAppId())) {
+            entryPoins.remove(entryPoint.getAppId());
+            entryPoint.deregisterBroker(this);
+        }
     }
 
     /**
@@ -297,7 +291,7 @@ public class WebBroker extends MonitoringBorkerEX {
      *            registered before this method is called.
      */
     public void addWorkloadGenerators(final List<? extends IWorkloadGenerator> workloads, final long loadBalancerId) {
-	appsToGenerators.get(loadBalancerId).addAll(workloads);
+        appsToGenerators.get(loadBalancerId).addAll(workloads);
     }
 
     /*
@@ -310,113 +304,108 @@ public class WebBroker extends MonitoringBorkerEX {
     @SuppressWarnings("unchecked")
     @Override
     protected void processOtherEvent(final SimEvent ev) {
-	switch (ev.getTag()) {
-	    case TIMER_TAG:
-		if (CloudSim.clock() < getLifeLength()) {
-		    send(getId(), stepPeriod, TIMER_TAG);
-		    generateWorkload();
-		}
-		break;
-	    case SUBMIT_SESSION_TAG:
-		Object[] data = (Object[]) ev.getData();
-		submitSessions((List<WebSession>) data[0], (Long) data[1]);
-		break;
-	    case UPDATE_SESSION_TAG:
-		Integer sessId = (Integer) ev.getData();
-		updateSessions(sessId);
-		break;
-	    default:
-		super.processOtherEvent(ev);
-	}
+        switch (ev.getTag()) {
+        case TIMER_TAG:
+            if (CloudSim.clock() < getLifeLength()) {
+                send(getId(), stepPeriod, TIMER_TAG);
+                generateWorkload();
+            }
+            break;
+        case SUBMIT_SESSION_TAG:
+            Object[] data = (Object[]) ev.getData();
+            submitSessions((List<WebSession>) data[0], (Long) data[1]);
+            break;
+        case UPDATE_SESSION_TAG:
+            Integer sessId = (Integer) ev.getData();
+            updateSessions(sessId);
+            break;
+        default:
+            super.processOtherEvent(ev);
+        }
     }
 
     private void generateWorkload() {
-	double currTime = CloudSim.clock();
-	for (Map.Entry<Long, List<IWorkloadGenerator>> balancersToWorkloadGens : appsToGenerators.entrySet()) {
-	    long balancerId = balancersToWorkloadGens.getKey();
-	    for (IWorkloadGenerator gen : balancersToWorkloadGens.getValue()) {
-		Map<Double, List<WebSession>> timeToSessions = gen.generateSessions(currTime, stepPeriod);
-		for (Map.Entry<Double, List<WebSession>> sessEntry : timeToSessions.entrySet()) {
-		    if (currTime == sessEntry.getKey()) {
-			submitSessions(sessEntry.getValue(), balancerId);
-		    } else {
-			submitSessionsAtTime(sessEntry.getValue(), balancerId, sessEntry.getKey() - currTime);
-		    }
-		}
-	    }
-	}
+        double currTime = CloudSim.clock();
+        for (Map.Entry<Long, List<IWorkloadGenerator>> balancersToWorkloadGens : appsToGenerators.entrySet()) {
+            long balancerId = balancersToWorkloadGens.getKey();
+            for (IWorkloadGenerator gen : balancersToWorkloadGens.getValue()) {
+                Map<Double, List<WebSession>> timeToSessions = gen.generateSessions(currTime, stepPeriod);
+                for (Map.Entry<Double, List<WebSession>> sessEntry : timeToSessions.entrySet()) {
+                    if (currTime == sessEntry.getKey()) {
+                        submitSessions(sessEntry.getValue(), balancerId);
+                    } else {
+                        submitSessionsAtTime(sessEntry.getValue(), balancerId, sessEntry.getKey() - currTime);
+                    }
+                }
+            }
+        }
     }
 
     private void updateSessions(final Integer... sessionIds) {
-	List<Integer> completedIds = new ArrayList<>();
-	for (Integer id : sessionIds.length == 0 ? activeSessions.keySet() : Arrays.asList(sessionIds)) {
-	    WebSession sess = activeSessions.get(id);
+        List<Integer> completedIds = new ArrayList<>();
+        for (Integer id : sessionIds.length == 0 ? activeSessions.keySet() : Arrays.asList(sessionIds)) {
+            WebSession sess = activeSessions.get(id);
 
-	    // If the session is complete - there is no need to update it.
-	    if (sess == null || sess.isComplete() || sess.isFailed()) {
-		if (sess != null && sess.isFailed()) {
-		    logSessionFailure(sess);
-		}
-		completedIds.add(id);
-		continue;
-	    }
+            // If the session is complete - there is no need to update it.
+            if (sess == null || sess.isComplete() || sess.isFailed()) {
+                if (sess != null && sess.isFailed()) {
+                    logSessionFailure(sess);
+                }
+                completedIds.add(id);
+                continue;
+            }
 
-	    // Check if all VMs for the sessions are set. In the simulation
-	    // start, this may not be so, as the refreshing action of the broker
-	    // may happen before the mapping of VMs to hosts.
-	    if (sess.areVirtualMachinesReady()) {
-		double currTime = CloudSim.clock();
+            // Check if all VMs for the sessions are set. In the simulation
+            // start, this may not be so, as the refreshing action of the broker
+            // may happen before the mapping of VMs to hosts.
+            if (sess.areVirtualMachinesReady()) {
+                double currTime = CloudSim.clock();
 
-		// sess.notifyOfTime(currTime);
-		try {
-		    WebSession.StepCloudlets webCloudlets = sess.pollCloudlets(currTime);
+                // sess.notifyOfTime(currTime);
+                try {
+                    WebSession.StepCloudlets webCloudlets = sess.pollCloudlets(currTime);
 
-		    if (webCloudlets != null) {
+                    if (webCloudlets != null) {
 
-			if (webCloudlets.asCloudlet.getUserId() != sess.getUserId() || sess.getUserId() != getId()) {
-			    throw new IllegalStateException();
-			}
+                        if (webCloudlets.asCloudlet.getUserId() != sess.getUserId() || sess.getUserId() != getId()) {
+                            throw new IllegalStateException();
+                        }
 
-			getCloudletList().add(webCloudlets.asCloudlet);
-			getCloudletList().addAll(webCloudlets.dbCloudlets);
-			submitCloudlets();
+                        getCloudletList().add(webCloudlets.asCloudlet);
+                        getCloudletList().addAll(webCloudlets.dbCloudlets);
+                        submitCloudlets();
 
-			double nextIdealTime = currTime + stepPeriod;
-			sess.notifyOfTime(nextIdealTime);
+                        double nextIdealTime = currTime + stepPeriod;
+                        sess.notifyOfTime(nextIdealTime);
 
-			send(getId(), stepPeriod, UPDATE_SESSION_TAG, sess.getSessionId());
-		    }
-		} catch (SessionFailedException e) {
-		    CustomLog.printf("Broker(%s): Session %d with metadata %s has failed. Details: %s",
-			    this, sess.getSessionId(), Arrays.toString(sess.getMetadata()), e.getMessage());
-		    completedIds.add(sess.getSessionId());
-		}
-	    }
-	}
+                        send(getId(), stepPeriod, UPDATE_SESSION_TAG, sess.getSessionId());
+                    }
+                } catch (SessionFailedException e) {
+                    CustomLog.printf("Broker(%s): Session %d with metadata %s has failed. Details: %s", this, sess.getSessionId(),
+                            Arrays.toString(sess.getMetadata()), e.getMessage());
+                    completedIds.add(sess.getSessionId());
+                }
+            }
+        }
 
-	// Remote completed sessions...
-	for (Integer id : completedIds) {
-	    WebSession sess = activeSessions.remove(id);
-	    if (sess != null) {
-		completedSessions.add(sess);
-	    }
-	}
+        // Remote completed sessions...
+        for (Integer id : completedIds) {
+            WebSession sess = activeSessions.remove(id);
+            if (sess != null) {
+                completedSessions.add(sess);
+            }
+        }
     }
 
     private void logSessionFailure(WebSession sess) {
-	StringBuffer detailsBuffer = new StringBuffer();
-	for (WebCloudlet wc : sess.getFailedCloudlets()) {
-	detailsBuffer.append(String.format(
-		"Cloudlet %d on %s VM/Server %d has status %s ",
-		wc.getCloudletId(),
-		wc.getVmId() == sess.getAppVmId() ? "AS" : "DB",
-		wc.getVmId(),
-		wc.getCloudletStatusString() == null ? String.valueOf(wc.getCloudletStatus()) : wc
-			.getCloudletStatusString()));
-	}
+        StringBuffer detailsBuffer = new StringBuffer();
+        for (WebCloudlet wc : sess.getFailedCloudlets()) {
+            detailsBuffer.append(String.format("Cloudlet %d on %s VM/Server %d has status %s ", wc.getCloudletId(), wc.getVmId() == sess.getAppVmId() ? "AS"
+                    : "DB", wc.getVmId(), wc.getCloudletStatusString() == null ? String.valueOf(wc.getCloudletStatus()) : wc.getCloudletStatusString()));
+        }
 
-	CustomLog.printf("Broker(%s): Session %d with metadata %s has failed. Details: %s",
-	    this, sess.getSessionId(), Arrays.toString(sess.getMetadata()), detailsBuffer);
+        CustomLog.printf("Broker(%s): Session %d with metadata %s has failed. Details: %s", this, sess.getSessionId(), Arrays.toString(sess.getMetadata()),
+                detailsBuffer);
     }
 
     /*
@@ -428,14 +417,14 @@ public class WebBroker extends MonitoringBorkerEX {
      */
     @Override
     protected void processCloudletReturn(final SimEvent ev) {
-	super.processCloudletReturn(ev);
-	Cloudlet cloudlet = (Cloudlet) ev.getData();
-	if (CloudSim.clock() < getLifeLength()) {
-	    // kill the broker only if its life length is over/expired
-	    if (cloudlet instanceof WebCloudlet) {
-		updateSessions(((WebCloudlet) cloudlet).getSessionId());
-	    }
-	}
+        super.processCloudletReturn(ev);
+        Cloudlet cloudlet = (Cloudlet) ev.getData();
+        if (CloudSim.clock() < getLifeLength()) {
+            // kill the broker only if its life length is over/expired
+            if (cloudlet instanceof WebCloudlet) {
+                updateSessions(((WebCloudlet) cloudlet).getSessionId());
+            }
+        }
     }
 
     /*
@@ -445,53 +434,52 @@ public class WebBroker extends MonitoringBorkerEX {
      */
     @Override
     public void startEntity() {
-	Log.printConcatLine(getName(), " is starting...");
-	schedule(getId(), 0, CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST, Arrays.asList(dataCenterId));
+        Log.printConcatLine(getName(), " is starting...");
+        schedule(getId(), 0, CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST, Arrays.asList(dataCenterId));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     protected void processResourceCharacteristicsRequest(final SimEvent ev) {
-	setDatacenterIdsList(ev.getData() == null ? CloudSim.getCloudResourceList() : (List<Integer>) ev.getData());
-	setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
+        setDatacenterIdsList(ev.getData() == null ? CloudSim.getCloudResourceList() : (List<Integer>) ev.getData());
+        setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
 
-	for (Integer datacenterId : getDatacenterIdsList()) {
-	    sendNow(datacenterId, CloudSimTags.RESOURCE_CHARACTERISTICS, getId());
-	}
+        for (Integer datacenterId : getDatacenterIdsList()) {
+            sendNow(datacenterId, CloudSimTags.RESOURCE_CHARACTERISTICS, getId());
+        }
     }
 
     public Set<Integer> getSessionsInServer(int vmId) {
-	Set<Integer> result = new LinkedHashSet<>();
-	for (Map.Entry<Integer, WebSession> e : activeSessions.entrySet()) {
-	    WebSession session = e.getValue();
-	    if (!session.isComplete() && session.getAppVmId() == vmId) {
-		result.add(session.getSessionId());
-	    }
-	}
-	return result;
+        Set<Integer> result = new LinkedHashSet<>();
+        for (Map.Entry<Integer, WebSession> e : activeSessions.entrySet()) {
+            WebSession session = e.getValue();
+            if (!session.isComplete() && session.getAppVmId() == vmId) {
+                result.add(session.getSessionId());
+            }
+        }
+        return result;
     }
 
     public Set<Integer> getUsedASServers() {
-	Set<Integer> result = new HashSet<>();
-	for (Map.Entry<Integer, WebSession> e : activeSessions.entrySet()) {
-	    WebSession session = e.getValue();
-	    if (!session.isComplete()) {
-		result.add(session.getAppVmId());
-	    }
-	}
-	return result;
+        Set<Integer> result = new HashSet<>();
+        for (Map.Entry<Integer, WebSession> e : activeSessions.entrySet()) {
+            WebSession session = e.getValue();
+            if (!session.isComplete()) {
+                result.add(session.getAppVmId());
+            }
+        }
+        return result;
     }
 
     public Map<Integer, Integer> getASServersToNumSessions() {
-	Map<Integer, Integer> result = new HashMap<>();
-	for (Map.Entry<Integer, WebSession> e : activeSessions.entrySet()) {
-	    WebSession session = e.getValue();
-	    if (!session.isComplete()) {
-		result.put(session.getAppVmId(),
-			result.containsKey(session.getAppVmId()) ? result.get(session.getAppVmId()) + 1 : 1);
-	    }
-	}
-	return result;
+        Map<Integer, Integer> result = new HashMap<>();
+        for (Map.Entry<Integer, WebSession> e : activeSessions.entrySet()) {
+            WebSession session = e.getValue();
+            if (!session.isComplete()) {
+                result.put(session.getAppVmId(), result.containsKey(session.getAppVmId()) ? result.get(session.getAppVmId()) + 1 : 1);
+            }
+        }
+        return result;
     }
 
 }

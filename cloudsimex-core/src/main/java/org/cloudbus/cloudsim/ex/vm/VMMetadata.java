@@ -21,7 +21,7 @@ public class VMMetadata implements Cloneable {
      * @return the type of the VM.
      */
     public String getType() {
-	return type;
+        return type;
     }
 
     /**
@@ -31,7 +31,7 @@ public class VMMetadata implements Cloneable {
      *            - the VM type
      */
     public void setType(String type) {
-	this.type = type;
+        this.type = type;
     }
 
     /**
@@ -40,7 +40,7 @@ public class VMMetadata implements Cloneable {
      * @return the OS.
      */
     public String getOS() {
-	return os;
+        return os;
     }
 
     /**
@@ -50,7 +50,7 @@ public class VMMetadata implements Cloneable {
      *            - the os.
      */
     public void setOS(String os) {
-	this.os = os;
+        this.os = os;
     }
 
     /**
@@ -60,18 +60,18 @@ public class VMMetadata implements Cloneable {
      */
     @Override
     public VMMetadata clone() {
-	if (!getClass().equals(VMMetadata.class)) {
-	    throw new IllegalStateException("The operation is undefined for subclass: " + getClass().getCanonicalName());
-	}
-	VMMetadata result = new VMMetadata();
-	for (Field f : getClass().getDeclaredFields()) {
-	    try {
-		// TODO take care of copying collections/arrays
-		f.set(result, f.get(this));
-	    } catch (IllegalAccessException e) {
-		throw new IllegalStateException(e);
-	    }
-	}
-	return result;
+        if (!getClass().equals(VMMetadata.class)) {
+            throw new IllegalStateException("The operation is undefined for subclass: " + getClass().getCanonicalName());
+        }
+        VMMetadata result = new VMMetadata();
+        for (Field f : getClass().getDeclaredFields()) {
+            try {
+                // TODO take care of copying collections/arrays
+                f.set(result, f.get(this));
+            } catch (IllegalAccessException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+        return result;
     }
 }

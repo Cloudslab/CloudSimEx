@@ -48,12 +48,12 @@ import org.cloudbus.cloudsim.ex.util.Textualize;
  * @author nikolay.grozev
  * 
  */
-@Textualize(properties = { "SessionId", "AppVmId", "ReadableStartTime", "StartTime", "FinishTime",
-	"IdealEnd", "Delay", "Complete", "Failed", "SourceIP", "ServerIP" })
+@Textualize(properties = { "SessionId", "AppVmId", "ReadableStartTime", "StartTime", "FinishTime", "IdealEnd", "Delay", "Complete", "Failed", "SourceIP",
+        "ServerIP" })
 public class WebSession {
 
-    private static final Set<Integer> FAIL_CLOUDLET_STATES = new HashSet<Integer>(Arrays.asList(Cloudlet.FAILED,
-	    Cloudlet.FAILED_RESOURCE_UNAVAILABLE, Cloudlet.CANCELED));
+    private static final Set<Integer> FAIL_CLOUDLET_STATES = new HashSet<Integer>(Arrays.asList(Cloudlet.FAILED, Cloudlet.FAILED_RESOURCE_UNAVAILABLE,
+            Cloudlet.CANCELED));
 
     private final IGenerator<? extends WebCloudlet> appServerCloudLets;
     private final IGenerator<? extends Collection<? extends WebCloudlet>> dbServerCloudLets;
@@ -92,21 +92,18 @@ public class WebSession {
      *            - various metadata of the session.
      */
     public WebSession(final IGenerator<? extends WebCloudlet> appServerCloudLets,
-	    final IGenerator<? extends Collection<? extends WebCloudlet>> dbServerCloudLets,
-	    final int userId,
-	    final int numberOfCloudlets,
-	    final double idealEnd,
-	    final String... metadata) {
-	super();
-	sessionId = Id.pollId(getClass());
+            final IGenerator<? extends Collection<? extends WebCloudlet>> dbServerCloudLets, final int userId, final int numberOfCloudlets,
+            final double idealEnd, final String... metadata) {
+        super();
+        sessionId = Id.pollId(getClass());
 
-	this.appServerCloudLets = appServerCloudLets;
-	this.dbServerCloudLets = dbServerCloudLets;
-	this.userId = userId;
+        this.appServerCloudLets = appServerCloudLets;
+        this.dbServerCloudLets = dbServerCloudLets;
+        this.userId = userId;
 
-	this.cloudletsLeft = numberOfCloudlets;
-	this.idealEnd = idealEnd;
-	this.metadata = metadata;
+        this.cloudletsLeft = numberOfCloudlets;
+        this.idealEnd = idealEnd;
+        this.metadata = metadata;
     }
 
     /**
@@ -117,7 +114,7 @@ public class WebSession {
      *         IPv4 or IPv6 addresses.
      */
     public String getSourceIP() {
-	return sourceIP;
+        return sourceIP;
     }
 
     /**
@@ -129,7 +126,7 @@ public class WebSession {
      *            standard dot form for IPv4 or IPv6 addresses.
      */
     public void setSourceIP(final String sourceIP) {
-	this.sourceIP = sourceIP;
+        this.sourceIP = sourceIP;
     }
 
     /**
@@ -140,7 +137,7 @@ public class WebSession {
      *         IPv4 or IPv6 addresses.
      */
     public String getServerIP() {
-	return serverIP;
+        return serverIP;
     }
 
     /**
@@ -152,7 +149,7 @@ public class WebSession {
      *            standard dot form for IPv4 or IPv6 addresses.
      */
     public void setServerIP(final String serverIP) {
-	this.serverIP = serverIP;
+        this.serverIP = serverIP;
     }
 
     /**
@@ -161,15 +158,15 @@ public class WebSession {
      * @return the metadata of this session.
      */
     public String[] getMetadata() {
-	return metadata;
+        return metadata;
     }
 
     public int getUserId() {
-	return userId;
+        return userId;
     }
 
     public void setUserId(final int userId) {
-	this.userId = userId;
+        this.userId = userId;
     }
 
     /**
@@ -182,46 +179,38 @@ public class WebSession {
      */
     public StepCloudlets pollCloudlets(final double currTime) {
 
-	StepCloudlets result = null;
-	boolean appCloudletFinished = currentAppServerCloudLet == null
-		|| currentAppServerCloudLet.isFinished();
-	boolean dbCloudletFinished = currentDBServerCloudLets == null
-		|| areAllCloudletsFinished(currentDBServerCloudLets);
-	boolean appServerNextReady = !appServerCloudLets.isEmpty()
-		&& appServerCloudLets.peek().getIdealStartTime() <= currTime;
-	boolean dbServerNextReady = !dbServerCloudLets.isEmpty()
-		&& getEarliestIdealStartTime(dbServerCloudLets.peek()) <= currTime;
+        StepCloudlets result = null;
+        boolean appCloudletFinished = currentAppServerCloudLet == null || currentAppServerCloudLet.isFinished();
+        boolean dbCloudletFinished = currentDBServerCloudLets == null || areAllCloudletsFinished(currentDBServerCloudLets);
+        boolean appServerNextReady = !appServerCloudLets.isEmpty() && appServerCloudLets.peek().getIdealStartTime() <= currTime;
+        boolean dbServerNextReady = !dbServerCloudLets.isEmpty() && getEarliestIdealStartTime(dbServerCloudLets.peek()) <= currTime;
 
-	if (cloudletsLeft != 0 && appCloudletFinished && !dbCloudletFinished) {
-	    CustomLog.printf(Level.FINE, "Session %d in AS VM %d blocked in DB layer", getSessionId(), appVmId);
-	}
+        if (cloudletsLeft != 0 && appCloudletFinished && !dbCloudletFinished) {
+            CustomLog.printf(Level.FINE, "Session %d in AS VM %d blocked in DB layer", getSessionId(), appVmId);
+        }
 
-	if (cloudletsLeft != 0 && appCloudletFinished && dbCloudletFinished && appServerNextReady && dbServerNextReady) {
-	    result = new StepCloudlets(
-		    appServerCloudLets.poll(),
-		    new ArrayList<>(dbServerCloudLets.poll()));
-	    currentAppServerCloudLet = result.asCloudlet;
-	    currentDBServerCloudLets = result.dbCloudlets;
+        if (cloudletsLeft != 0 && appCloudletFinished && dbCloudletFinished && appServerNextReady && dbServerNextReady) {
+            result = new StepCloudlets(appServerCloudLets.poll(), new ArrayList<>(dbServerCloudLets.poll()));
+            currentAppServerCloudLet = result.asCloudlet;
+            currentDBServerCloudLets = result.dbCloudlets;
 
-	    currentAppServerCloudLet.setVmId(appVmId);
-	    if (assignToServer(dbBalancer, currentDBServerCloudLets)) {
+            currentAppServerCloudLet.setVmId(appVmId);
+            if (assignToServer(dbBalancer, currentDBServerCloudLets)) {
 
-		currentAppServerCloudLet.setSessionId(getSessionId());
-		currentAppServerCloudLet.setUserId(userId);
-		setSessionAndUserIds(getSessionId(), userId, currentDBServerCloudLets);
+                currentAppServerCloudLet.setSessionId(getSessionId());
+                currentAppServerCloudLet.setUserId(userId);
+                setSessionAndUserIds(getSessionId(), userId, currentDBServerCloudLets);
 
-		cloudletsLeft--;
+                cloudletsLeft--;
 
-		if (Double.isNaN(startTime)) {
-		    startTime = Math.min(currentAppServerCloudLet.getIdealStartTime(),
-			    getEarliestIdealStartTime(currentDBServerCloudLets));
-		}
-	    } else {
-		throw new SessionFailedException(sessionId, "The data for web session " + sessionId
-			+ " could not be found.");
-	    }
-	}
-	return result;
+                if (Double.isNaN(startTime)) {
+                    startTime = Math.min(currentAppServerCloudLet.getIdealStartTime(), getEarliestIdealStartTime(currentDBServerCloudLets));
+                }
+            } else {
+                throw new SessionFailedException(sessionId, "The data for web session " + sessionId + " could not be found.");
+            }
+        }
+        return result;
     }
 
     /**
@@ -230,7 +219,7 @@ public class WebSession {
      * @return - the current app server cloudlet
      */
     /* package access */WebCloudlet getCurrentAppServerCloudLet() {
-	return currentAppServerCloudLet;
+        return currentAppServerCloudLet;
     }
 
     /**
@@ -239,7 +228,7 @@ public class WebSession {
      * @return - the current db server cloudlets.
      */
     /* package access */List<? extends WebCloudlet> getCurrentDBServerCloudLets() {
-	return currentDBServerCloudLets;
+        return currentDBServerCloudLets;
     }
 
     /**
@@ -249,8 +238,8 @@ public class WebSession {
      *            - the current CloudSim time.
      */
     public void notifyOfTime(final double time) {
-	appServerCloudLets.notifyOfTime(time);
-	dbServerCloudLets.notifyOfTime(time);
+        appServerCloudLets.notifyOfTime(time);
+        dbServerCloudLets.notifyOfTime(time);
     }
 
     /**
@@ -259,7 +248,7 @@ public class WebSession {
      * @return the id of the VM hosting the application server.
      */
     public Integer getAppVmId() {
-	return appVmId;
+        return appVmId;
     }
 
     /**
@@ -270,7 +259,7 @@ public class WebSession {
      *            - the id of the VM hosting the app server.
      */
     public void setAppVmId(final int appVmId) {
-	this.appVmId = appVmId;
+        this.appVmId = appVmId;
     }
 
     /**
@@ -279,7 +268,7 @@ public class WebSession {
      * @return the balancer of DB cloudlets to the VMs hosting the db server.
      */
     public IDBBalancer getDbBalancer() {
-	return dbBalancer;
+        return dbBalancer;
     }
 
     /**
@@ -290,7 +279,7 @@ public class WebSession {
      *            - the DB VM balancer.
      */
     public void setDbBalancer(final IDBBalancer dbBalancer) {
-	this.dbBalancer = dbBalancer;
+        this.dbBalancer = dbBalancer;
     }
 
     /**
@@ -299,7 +288,7 @@ public class WebSession {
      * @return the id of the session.
      */
     public int getSessionId() {
-	return sessionId;
+        return sessionId;
     }
 
     /**
@@ -310,7 +299,7 @@ public class WebSession {
      *         cloudlet running -1 is returned.
      */
     public double getDelay() {
-	return Math.max(0, getFinishTime() - idealEnd);
+        return Math.max(0, getFinishTime() - idealEnd);
     }
 
     /**
@@ -321,11 +310,10 @@ public class WebSession {
      *         running -1 is returned.
      */
     public double getFinishTime() {
-	double finishAS = currentAppServerCloudLet == null || !currentAppServerCloudLet.isFinished() ? -1
-		: currentAppServerCloudLet.getFinishTime();
-	double finishDB = currentDBServerCloudLets == null || !areAllCloudletsFinished(currentDBServerCloudLets) ? -1
-		: getLatestFinishTime(currentDBServerCloudLets);
-	return Math.max(0, Math.max(finishAS, finishDB));
+        double finishAS = currentAppServerCloudLet == null || !currentAppServerCloudLet.isFinished() ? -1 : currentAppServerCloudLet.getFinishTime();
+        double finishDB = currentDBServerCloudLets == null || !areAllCloudletsFinished(currentDBServerCloudLets) ? -1
+                : getLatestFinishTime(currentDBServerCloudLets);
+        return Math.max(0, Math.max(finishAS, finishDB));
     }
 
     /**
@@ -334,7 +322,7 @@ public class WebSession {
      * @param idealEnd
      */
     public void setIdealEnd(final double idealEnd) {
-	this.idealEnd = idealEnd;
+        this.idealEnd = idealEnd;
     }
 
     /**
@@ -343,7 +331,7 @@ public class WebSession {
      * @return the ideal end time of this session.
      */
     public double getIdealEnd() {
-	return idealEnd;
+        return idealEnd;
     }
 
     /**
@@ -352,7 +340,7 @@ public class WebSession {
      * @return the starting time of the session.
      */
     public double getStartTime() {
-	return startTime;
+        return startTime;
     }
 
     /**
@@ -361,7 +349,7 @@ public class WebSession {
      * @return a readable representation of the start time.
      */
     public String getReadableStartTime() {
-	return TextUtil.getReadableTime(startTime);
+        return TextUtil.getReadableTime(startTime);
     }
 
     /**
@@ -370,11 +358,8 @@ public class WebSession {
      * @return if the session has completed.
      */
     public boolean isComplete() {
-	return cloudletsLeft == 0 &&
-		currentAppServerCloudLet != null &&
-		currentAppServerCloudLet.isFinished() &&
-		currentDBServerCloudLets != null &&
-		areAllCloudletsFinished(currentDBServerCloudLets);
+        return cloudletsLeft == 0 && currentAppServerCloudLet != null && currentAppServerCloudLet.isFinished() && currentDBServerCloudLets != null
+                && areAllCloudletsFinished(currentDBServerCloudLets);
     }
 
     /**
@@ -383,9 +368,8 @@ public class WebSession {
      * @return if the session has failed.
      */
     public boolean isFailed() {
-	return (currentAppServerCloudLet != null &&
-		FAIL_CLOUDLET_STATES.contains(currentAppServerCloudLet.getCloudletStatus())) ||
-		(currentDBServerCloudLets != null && anyCloudletsFailed(currentDBServerCloudLets));
+        return (currentAppServerCloudLet != null && FAIL_CLOUDLET_STATES.contains(currentAppServerCloudLet.getCloudletStatus()))
+                || (currentDBServerCloudLets != null && anyCloudletsFailed(currentDBServerCloudLets));
     }
 
     /**
@@ -396,30 +380,29 @@ public class WebSession {
      *         failure.
      */
     public List<WebCloudlet> getFailedCloudlets() {
-	if (isFailed()) {
-	    List<WebCloudlet> res = new ArrayList<>();
-	    if (currentAppServerCloudLet != null &&
-		    FAIL_CLOUDLET_STATES.contains(currentAppServerCloudLet.getCloudletStatus())) {
-		res.add(currentAppServerCloudLet);
-		for (WebCloudlet wc : currentDBServerCloudLets) {
-		    if (FAIL_CLOUDLET_STATES.contains(wc.getCloudletStatus())) {
-			res.add(wc);
-		    }
-		}
-	    }
-	    return res;
-	} else {
-	    return Collections.<WebCloudlet>emptyList();
-	}
+        if (isFailed()) {
+            List<WebCloudlet> res = new ArrayList<>();
+            if (currentAppServerCloudLet != null && FAIL_CLOUDLET_STATES.contains(currentAppServerCloudLet.getCloudletStatus())) {
+                res.add(currentAppServerCloudLet);
+                for (WebCloudlet wc : currentDBServerCloudLets) {
+                    if (FAIL_CLOUDLET_STATES.contains(wc.getCloudletStatus())) {
+                        res.add(wc);
+                    }
+                }
+            }
+            return res;
+        } else {
+            return Collections.<WebCloudlet> emptyList();
+        }
     }
 
     private boolean anyCloudletsFailed(List<? extends WebCloudlet> currentDBServerCloudLets2) {
-	for (WebCloudlet wc : currentDBServerCloudLets2) {
-	    if (FAIL_CLOUDLET_STATES.contains(wc.getCloudletStatus())) {
-		return true;
-	    }
-	}
-	return false;
+        for (WebCloudlet wc : currentDBServerCloudLets2) {
+            if (FAIL_CLOUDLET_STATES.contains(wc.getCloudletStatus())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -430,62 +413,60 @@ public class WebSession {
      *         that it can execute.
      */
     public boolean areVirtualMachinesReady() {
-	for (HddVm vm : getDbBalancer().getVMs()) {
-	    if (vm.getHost() == null) {
-		return false;
-	    }
-	}
-	return appVmId != null;
+        for (HddVm vm : getDbBalancer().getVMs()) {
+            if (vm.getHost() == null) {
+                return false;
+            }
+        }
+        return appVmId != null;
     }
 
     private static boolean areAllCloudletsFinished(final List<? extends WebCloudlet> cloudlets) {
-	boolean result = true;
-	for (WebCloudlet cl : cloudlets) {
-	    if (!cl.isFinished()) {
-		result = false;
-		break;
-	    }
-	}
-	return result;
+        boolean result = true;
+        for (WebCloudlet cl : cloudlets) {
+            if (!cl.isFinished()) {
+                result = false;
+                break;
+            }
+        }
+        return result;
     }
 
     private static double getLatestFinishTime(final Collection<? extends WebCloudlet> cloudlets) {
-	double result = -1;
-	for (WebCloudlet cl : cloudlets) {
-	    if (cl.getFinishTime() > result) {
-		result = cl.getFinishTime();
-	    }
-	}
-	return result;
+        double result = -1;
+        for (WebCloudlet cl : cloudlets) {
+            if (cl.getFinishTime() > result) {
+                result = cl.getFinishTime();
+            }
+        }
+        return result;
     }
 
     private static double getEarliestIdealStartTime(final Collection<? extends WebCloudlet> cloudlets) {
-	double result = -1;
-	for (WebCloudlet cl : cloudlets) {
-	    if (result == -1 || cl.getIdealStartTime() < result) {
-		result = cl.getIdealStartTime();
-	    }
-	}
-	return result;
+        double result = -1;
+        for (WebCloudlet cl : cloudlets) {
+            if (result == -1 || cl.getIdealStartTime() < result) {
+                result = cl.getIdealStartTime();
+            }
+        }
+        return result;
     }
 
-    private static boolean assignToServer(final IDBBalancer dbBalancer,
-	    final Collection<? extends WebCloudlet> cloudlets) {
-	for (WebCloudlet cl : cloudlets) {
-	    dbBalancer.allocateToServer(cl);
-	    if (cl.getVmId() < 0) {
-		return false;
-	    }
-	}
-	return true;
+    private static boolean assignToServer(final IDBBalancer dbBalancer, final Collection<? extends WebCloudlet> cloudlets) {
+        for (WebCloudlet cl : cloudlets) {
+            dbBalancer.allocateToServer(cl);
+            if (cl.getVmId() < 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    private static void setSessionAndUserIds(final int sessId, final int userId,
-	    final Collection<? extends WebCloudlet> cloudlets) {
-	for (WebCloudlet cl : cloudlets) {
-	    cl.setSessionId(sessId);
-	    cl.setUserId(userId);
-	}
+    private static void setSessionAndUserIds(final int sessId, final int userId, final Collection<? extends WebCloudlet> cloudlets) {
+        for (WebCloudlet cl : cloudlets) {
+            cl.setSessionId(sessId);
+            cl.setUserId(userId);
+        }
     }
 
     /**
@@ -497,20 +478,20 @@ public class WebSession {
      * 
      */
     public static class StepCloudlets {
-	/**
-	 * The app server clouldet for the step.
-	 */
-	public WebCloudlet asCloudlet;
-	/**
-	 * The db cloudlets for the step.
-	 */
-	public List<? extends WebCloudlet> dbCloudlets;
+        /**
+         * The app server clouldet for the step.
+         */
+        public WebCloudlet asCloudlet;
+        /**
+         * The db cloudlets for the step.
+         */
+        public List<? extends WebCloudlet> dbCloudlets;
 
-	public StepCloudlets(final WebCloudlet asCloudlet, final List<? extends WebCloudlet> dbCloudlets) {
-	    super();
-	    this.asCloudlet = asCloudlet;
-	    this.dbCloudlets = dbCloudlets;
-	}
+        public StepCloudlets(final WebCloudlet asCloudlet, final List<? extends WebCloudlet> dbCloudlets) {
+            super();
+            this.asCloudlet = asCloudlet;
+            this.dbCloudlets = dbCloudlets;
+        }
     }
 
 }

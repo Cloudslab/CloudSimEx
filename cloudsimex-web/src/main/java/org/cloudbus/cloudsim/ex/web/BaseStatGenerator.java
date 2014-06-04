@@ -20,8 +20,7 @@ import org.uncommons.maths.number.NumberGenerator;
  * @param <T>
  *            - the actual type of the generated CloudLets.
  */
-public abstract class BaseStatGenerator<T extends Cloudlet> implements
-	IGenerator<T> {
+public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerator<T> {
 
     /** A key for the statistical generator of CPU length of the cloudlet. */
     public static final String CLOUDLET_LENGTH = "CLOUDLET_MIPS";
@@ -55,10 +54,8 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
      * @param data
      *            - the data used by the generator, or null if no data is used.
      */
-    public BaseStatGenerator(
-	    final Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators,
-	    final DataItem data) {
-	this(seqGenerators, -1, -1, data);
+    public BaseStatGenerator(final Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators, final DataItem data) {
+        this(seqGenerators, -1, -1, data);
     }
 
     /**
@@ -79,19 +76,18 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
      * @param data
      *            - the data used by the generator, or null if no data is used.
      */
-    public BaseStatGenerator(
-	    final Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators,
-	    final double startTime, final double endTime, final DataItem data) {
-	this.seqGenerators = seqGenerators;
-	this.startTime = startTime;
-	this.endTime = endTime;
-	this.data = data;
+    public BaseStatGenerator(final Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators, final double startTime, final double endTime,
+            final DataItem data) {
+        this.seqGenerators = seqGenerators;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.data = data;
 
-	if (data == null && seqGenerators.containsKey(CLOUDLET_IO)) {
-	    String errMsg = "IO opeartions should not be provided without data";
-	    CustomLog.print(Level.SEVERE, errMsg);
-	    throw new IllegalArgumentException(errMsg);
-	}
+        if (data == null && seqGenerators.containsKey(CLOUDLET_IO)) {
+            String errMsg = "IO opeartions should not be provided without data";
+            CustomLog.print(Level.SEVERE, errMsg);
+            throw new IllegalArgumentException(errMsg);
+        }
     }
 
     /**
@@ -101,10 +97,10 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
      */
     @Override
     public T peek() {
-	if (peeked == null && !idealStartUpTimes.isEmpty()) {
-	    peeked = create(idealStartUpTimes.poll());
-	}
-	return peeked;
+        if (peeked == null && !idealStartUpTimes.isEmpty()) {
+            peeked = create(idealStartUpTimes.poll());
+        }
+        return peeked;
     }
 
     /**
@@ -114,13 +110,13 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
      */
     @Override
     public T poll() {
-	T result = peeked;
-	if (peeked != null) {
-	    peeked = null;
-	} else if (!idealStartUpTimes.isEmpty()) {
-	    result = create(idealStartUpTimes.poll());
-	}
-	return result;
+        T result = peeked;
+        if (peeked != null) {
+            peeked = null;
+        } else if (!idealStartUpTimes.isEmpty()) {
+            result = create(idealStartUpTimes.poll());
+        }
+        return result;
     }
 
     /**
@@ -130,7 +126,7 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
      */
     @Override
     public boolean isEmpty() {
-	return peek() == null;
+        return peek() == null;
     }
 
     /**
@@ -140,11 +136,9 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
      */
     @Override
     public void notifyOfTime(final double time) {
-	if ((startTime < 0 || startTime <= time)
-		&& (endTime < 0 || endTime >= time)
-		&& (idealStartUpTimes.isEmpty() || idealStartUpTimes.getLast() < time)) {
-	    idealStartUpTimes.offer(time);
-	}
+        if ((startTime < 0 || startTime <= time) && (endTime < 0 || endTime >= time) && (idealStartUpTimes.isEmpty() || idealStartUpTimes.getLast() < time)) {
+            idealStartUpTimes.offer(time);
+        }
     }
 
     /**
@@ -154,7 +148,7 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
      * @return the start time of the generator.
      */
     public double getStartTime() {
-	return startTime;
+        return startTime;
     }
 
     /**
@@ -164,7 +158,7 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
      * @return the end time of the generator.
      */
     public double getEndTime() {
-	return endTime;
+        return endTime;
     }
 
     /**
@@ -175,7 +169,7 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
      *         data.
      */
     public DataItem getData() {
-	return data;
+        return data;
     }
 
     /**
@@ -198,12 +192,12 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
      *         for the key.
      */
     protected Double generateNumericValue(final String key) {
-	Number genValue = !seqGenerators.containsKey(key) ? 0: seqGenerators.get(key).nextValue();
-	if (genValue == null) {
-	    return null;
-	} else {
-	    return Math.max(0, genValue.doubleValue());
-	}
+        Number genValue = !seqGenerators.containsKey(key) ? 0 : seqGenerators.get(key).nextValue();
+        if (genValue == null) {
+            return null;
+        } else {
+            return Math.max(0, genValue.doubleValue());
+        }
     }
 
     /**
@@ -217,13 +211,13 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements
      *         False is returned.
      */
     protected Boolean generateBooleanValue(final String key) {
-	Number genValue = !seqGenerators.containsKey(key) ? 0 : seqGenerators.get(key).nextValue();
-	if(genValue == null) {
-	    return null;
-	} else {
-	    int result = Math.max(0, genValue.intValue());
-	    return result != 1;
-	}
+        Number genValue = !seqGenerators.containsKey(key) ? 0 : seqGenerators.get(key).nextValue();
+        if (genValue == null) {
+            return null;
+        } else {
+            int result = Math.max(0, genValue.intValue());
+            return result != 1;
+        }
     }
 
 }

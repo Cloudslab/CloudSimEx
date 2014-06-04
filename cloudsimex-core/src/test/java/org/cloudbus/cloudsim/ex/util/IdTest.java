@@ -18,42 +18,38 @@ import org.junit.Test;
 public class IdTest {
     @Test
     public void testPollId() {
-	// Test generation of ids for preset entities
-	Set<Integer> cloudletIds = new HashSet<>();
-	cloudletIds.add(Id.pollId(Cloudlet.class));
-	cloudletIds.add(Id.pollId(Cloudlet.class));
-	cloudletIds.add(Id.pollId(CloudLetA.class));
-	cloudletIds.add(Id.pollId(CloudLetA.class));
-	cloudletIds.add(Id.pollId(CloudLetB.class));
-	assertEquals(5, cloudletIds.size());
+        // Test generation of ids for preset entities
+        Set<Integer> cloudletIds = new HashSet<>();
+        cloudletIds.add(Id.pollId(Cloudlet.class));
+        cloudletIds.add(Id.pollId(Cloudlet.class));
+        cloudletIds.add(Id.pollId(CloudLetA.class));
+        cloudletIds.add(Id.pollId(CloudLetA.class));
+        cloudletIds.add(Id.pollId(CloudLetB.class));
+        assertEquals(5, cloudletIds.size());
 
-	// Test generation of ids for miscellaneous entities
-	Set<Integer> ids = new HashSet<>();
-	ids.add(Id.pollId(X.class));
-	ids.add(Id.pollId(Y.class));
-	ids.add(Id.pollId(Object.class));
-	ids.add(Id.pollId(X.class));
-	ids.add(Id.pollId(String.class));
-	ids.add(Id.pollId(Y.class));
-	assertEquals(6, ids.size());
+        // Test generation of ids for miscellaneous entities
+        Set<Integer> ids = new HashSet<>();
+        ids.add(Id.pollId(X.class));
+        ids.add(Id.pollId(Y.class));
+        ids.add(Id.pollId(Object.class));
+        ids.add(Id.pollId(X.class));
+        ids.add(Id.pollId(String.class));
+        ids.add(Id.pollId(Y.class));
+        assertEquals(6, ids.size());
     }
 
     private static class CloudLetA extends Cloudlet {
-	public CloudLetA(int cloudletId, long cloudletLength, int pesNumber, long cloudletFileSize,
-		long cloudletOutputSize, UtilizationModel utilizationModelCpu, UtilizationModel utilizationModelRam,
-		UtilizationModel utilizationModelBw) {
-	    super(cloudletId, cloudletLength, pesNumber, cloudletFileSize, cloudletOutputSize, utilizationModelCpu,
-		    utilizationModelRam, utilizationModelBw);
-	}
+        public CloudLetA(int cloudletId, long cloudletLength, int pesNumber, long cloudletFileSize, long cloudletOutputSize,
+                UtilizationModel utilizationModelCpu, UtilizationModel utilizationModelRam, UtilizationModel utilizationModelBw) {
+            super(cloudletId, cloudletLength, pesNumber, cloudletFileSize, cloudletOutputSize, utilizationModelCpu, utilizationModelRam, utilizationModelBw);
+        }
     }
 
     private static class CloudLetB extends CloudLetA {
-	public CloudLetB(int cloudletId, long cloudletLength, int pesNumber, long cloudletFileSize,
-		long cloudletOutputSize, UtilizationModel utilizationModelCpu, UtilizationModel utilizationModelRam,
-		UtilizationModel utilizationModelBw) {
-	    super(cloudletId, cloudletLength, pesNumber, cloudletFileSize, cloudletOutputSize, utilizationModelCpu,
-		    utilizationModelRam, utilizationModelBw);
-	}
+        public CloudLetB(int cloudletId, long cloudletLength, int pesNumber, long cloudletFileSize, long cloudletOutputSize,
+                UtilizationModel utilizationModelCpu, UtilizationModel utilizationModelRam, UtilizationModel utilizationModelBw) {
+            super(cloudletId, cloudletLength, pesNumber, cloudletFileSize, cloudletOutputSize, utilizationModelCpu, utilizationModelRam, utilizationModelBw);
+        }
     }
 
     private class X {

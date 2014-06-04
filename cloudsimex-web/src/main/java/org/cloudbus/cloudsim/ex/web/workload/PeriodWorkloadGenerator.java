@@ -20,21 +20,21 @@ public class PeriodWorkloadGenerator implements IWorkloadGenerator {
     private final ISessionGenerator sessGen;
 
     public PeriodWorkloadGenerator(final ISessionGenerator sessGen, final double period, final int sessionsNumber) {
-	super();
-	this.sessGen = sessGen;
-	this.period = period;
-	this.sessionsNumber = sessionsNumber;
+        super();
+        this.sessGen = sessGen;
+        this.period = period;
+        this.sessionsNumber = sessionsNumber;
     }
 
     @Override
     public Map<Double, List<WebSession>> generateSessions(final double startTime, final double periodLen) {
-	Map<Double, List<WebSession>> result = new HashMap<>();
-	for (int i = 0; i < periodLen / period && sessionsNumber > 0; i++) {
-	    sessionsNumber--;
-	    double startAt = startTime + i * period;
-	    result.put(startAt, Arrays.asList(sessGen.generateSessionAt(startAt)));
-	}
-	return result;
+        Map<Double, List<WebSession>> result = new HashMap<>();
+        for (int i = 0; i < periodLen / period && sessionsNumber > 0; i++) {
+            sessionsNumber--;
+            double startAt = startTime + i * period;
+            result.put(startAt, Arrays.asList(sessGen.generateSessionAt(startAt)));
+        }
+        return result;
     }
 
 }

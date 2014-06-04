@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.cloudbus.cloudsim.ex.web.WebSession;
 
-
 /**
  * Represents an entry point for an application, which uses multiple clouds
  * (Multi-Cloud). Each entry point is associated with a list of web brokers,

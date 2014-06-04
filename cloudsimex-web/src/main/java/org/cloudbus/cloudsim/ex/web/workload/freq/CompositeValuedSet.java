@@ -23,7 +23,7 @@ public class CompositeValuedSet {
      *            - the intervals that make up the set.
      */
     public CompositeValuedSet(List<FiniteValuedInterval> subintervals) {
-	this.subIntervals = subintervals;
+        this.subIntervals = subintervals;
     }
 
     /**
@@ -34,12 +34,12 @@ public class CompositeValuedSet {
      * @return the value for the x element from its subsets.
      */
     public double getValue(double x) {
-	for (FiniteValuedInterval i : subIntervals) {
-	    if (i.contains(x)) {
-		return i.getValue();
-	    }
-	}
-	throw new IllegalArgumentException("X=" + x + " is not contained in " + toString());
+        for (FiniteValuedInterval i : subIntervals) {
+            if (i.contains(x)) {
+                return i.getValue();
+            }
+        }
+        throw new IllegalArgumentException("X=" + x + " is not contained in " + toString());
     }
 
     /**
@@ -50,12 +50,12 @@ public class CompositeValuedSet {
      * @return if x is contained withing any of the subsets/subintervals.
      */
     public boolean contains(double x) {
-	for (FiniteValuedInterval i : subIntervals) {
-	    if (i.contains(x)) {
-		return true;
-	    }
-	}
-	return false;
+        for (FiniteValuedInterval i : subIntervals) {
+            if (i.contains(x)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -66,7 +66,7 @@ public class CompositeValuedSet {
      * @return a new instance based on the specified textual representations.
      */
     public static CompositeValuedSet createCompositeValuedSet(String... intervals) {
-	return createCompositeValuedSet((byte[]) null, intervals);
+        return createCompositeValuedSet((byte[]) null, intervals);
     }
 
     /**
@@ -79,11 +79,11 @@ public class CompositeValuedSet {
      * @return a new instance based on the specified textual representations.
      */
     public static CompositeValuedSet createCompositeValuedSet(byte[] seed, String... intervals) {
-	List<FiniteValuedInterval> subIntervals = new ArrayList<>();
-	for (String i : intervals) {
-	    subIntervals.add(FiniteValuedInterval.createInterval(i, seed));
-	}
-	return new CompositeValuedSet(subIntervals);
+        List<FiniteValuedInterval> subIntervals = new ArrayList<>();
+        for (String i : intervals) {
+            subIntervals.add(FiniteValuedInterval.createInterval(i, seed));
+        }
+        return new CompositeValuedSet(subIntervals);
     }
 
     /**
@@ -96,19 +96,19 @@ public class CompositeValuedSet {
      * @return a new instance based on the specified textual representations.
      */
     public static CompositeValuedSet createCompositeValuedSet(SeedGenerator seedGen, String... intervals) {
-	List<FiniteValuedInterval> subIntervals = new ArrayList<>();
-	for (String i : intervals) {
-	    subIntervals.add(FiniteValuedInterval.createInterval(i, seedGen));
-	}
-	return new CompositeValuedSet(subIntervals);
+        List<FiniteValuedInterval> subIntervals = new ArrayList<>();
+        for (String i : intervals) {
+            subIntervals.add(FiniteValuedInterval.createInterval(i, seedGen));
+        }
+        return new CompositeValuedSet(subIntervals);
     }
 
     @Override
     public String toString() {
-	StringBuffer buff = new StringBuffer();
-	for (FiniteValuedInterval interval : subIntervals) {
-	    buff.append(interval.toString());
-	}
-	return buff.toString();
+        StringBuffer buff = new StringBuffer();
+        for (FiniteValuedInterval interval : subIntervals) {
+            buff.append(interval.toString());
+        }
+        return buff.toString();
     }
 }

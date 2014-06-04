@@ -31,39 +31,39 @@ public abstract class BaseCustomerVmBillingPolicy implements IVmBillingPolicy {
      *            are per hour/minute etc.
      */
     public BaseCustomerVmBillingPolicy(final Map<Pair<String, String>, BigDecimal> prices) {
-	this.prices = prices;
+        this.prices = prices;
     }
 
     @Override
     public BigDecimal bill(final List<? extends Vm> vms) {
-	BigDecimal result = BigDecimal.ZERO;
-	for (Vm vm : vms) {
-	    if (vm instanceof VMex) {
-		VMex vmEx = (VMex) vm;
-		if (shouldBillVm(vmEx)) {
-		    result = result.add(billSingleVm(vmEx));
-		}
-	    } else {
-		CustomLog.printConcat("Unable to bill VM", vm.getId(), " as it is not of type ", VMex.class.getName());
-	    }
-	}
-	return result;
+        BigDecimal result = BigDecimal.ZERO;
+        for (Vm vm : vms) {
+            if (vm instanceof VMex) {
+                VMex vmEx = (VMex) vm;
+                if (shouldBillVm(vmEx)) {
+                    result = result.add(billSingleVm(vmEx));
+                }
+            } else {
+                CustomLog.printConcat("Unable to bill VM", vm.getId(), " as it is not of type ", VMex.class.getName());
+            }
+        }
+        return result;
     }
 
     @Override
     public BigDecimal bill(final List<? extends Vm> vms, double before) {
-	BigDecimal result = BigDecimal.ZERO;
-	for (Vm vm : vms) {
-	    if (vm instanceof VMex) {
-		VMex vmEx = (VMex) vm;
-		if (shouldBillVm(vmEx)) {
-		    result = result.add(billSingleVmUntil(vmEx, before));
-		}
-	    } else {
-		CustomLog.printConcat("Unable to bill VM", vm.getId(), " as it is not of type ", VMex.class.getName());
-	    }
-	}
-	return result;
+        BigDecimal result = BigDecimal.ZERO;
+        for (Vm vm : vms) {
+            if (vm instanceof VMex) {
+                VMex vmEx = (VMex) vm;
+                if (shouldBillVm(vmEx)) {
+                    result = result.add(billSingleVmUntil(vmEx, before));
+                }
+            } else {
+                CustomLog.printConcat("Unable to bill VM", vm.getId(), " as it is not of type ", VMex.class.getName());
+            }
+        }
+        return result;
     }
 
     /**
@@ -75,7 +75,7 @@ public abstract class BaseCustomerVmBillingPolicy implements IVmBillingPolicy {
      * @return if the VM should be billed.
      */
     public boolean shouldBillVm(final VMex vm) {
-	return keyOf(vm) != null;
+        return keyOf(vm) != null;
     }
 
     /**
@@ -103,27 +103,27 @@ public abstract class BaseCustomerVmBillingPolicy implements IVmBillingPolicy {
      * @return the current simulation time.
      */
     protected double getCurrentTime() {
-	return CloudSim.clock();
+        return CloudSim.clock();
     }
 
     public static ImmutablePair<String, String> keyOf(final VMex vm) {
-	if (vm.getMetadata() != null) {
-	    return ImmutablePair.of(vm.getMetadata().getType(), vm.getMetadata().getOS());
-	}
-	return null;
+        if (vm.getMetadata() != null) {
+            return ImmutablePair.of(vm.getMetadata().getType(), vm.getMetadata().getOS());
+        }
+        return null;
     }
 
     @Override
     public BigDecimal normalisedCostPerMinute(final Vm vm) {
-	BigDecimal result = BigDecimal.valueOf(-1);
-	if (vm instanceof VMex) {
-	    Pair<String, String> key = keyOf((VMex) vm);
-	    try {
-		result = prices.containsKey(key) ? prices.get(key).divide(BigDecimal.valueOf(60d)) : result;
-	    } catch (ArithmeticException ex) {
-		result = prices.containsKey(key) ? BigDecimal.valueOf(prices.get(key).doubleValue() / 60d) : result;
-	    }
-	}
-	return result;
+        BigDecimal result = BigDecimal.valueOf(-1);
+        if (vm instanceof VMex) {
+            Pair<String, String> key = keyOf((VMex) vm);
+            try {
+                result = prices.containsKey(key) ? prices.get(key).divide(BigDecimal.valueOf(60d)) : result;
+            } catch (ArithmeticException ex) {
+                result = prices.containsKey(key) ? BigDecimal.valueOf(prices.get(key).doubleValue() / 60d) : result;
+            }
+        }
+        return result;
     }
 }
