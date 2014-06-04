@@ -41,8 +41,8 @@ public class VMex extends Vm {
      * @param vmm
      * @param cloudletScheduler
      */
-    public VMex(final String name, final int userId, final double mips, final int numberOfPes, final int ram, final long bw, final long size, final String vmm,
-            final CloudletScheduler cloudletScheduler) {
+    public VMex(final String name, final int userId, final double mips, final int numberOfPes, final int ram,
+            final long bw, final long size, final String vmm, final CloudletScheduler cloudletScheduler) {
         this(name, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, new VMMetadata());
 
     }
@@ -62,8 +62,9 @@ public class VMex extends Vm {
      * @param cloudletScheduler
      * @param metadata
      */
-    public VMex(final String name, final int userId, final double mips, final int numberOfPes, final int ram, final long bw, final long size, final String vmm,
-            final CloudletScheduler cloudletScheduler, final VMMetadata metadata) {
+    public VMex(final String name, final int userId, final double mips, final int numberOfPes, final int ram,
+            final long bw, final long size, final String vmm, final CloudletScheduler cloudletScheduler,
+            final VMMetadata metadata) {
         super(Id.pollId(Vm.class), userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
         this.name = name;
         this.metadata = metadata;
@@ -77,7 +78,8 @@ public class VMex extends Vm {
     @Override
     public void setBeingInstantiated(final boolean beingInstantiated) {
         if (status != null && status != VMStatus.INITIALISING) {
-            throw new IllegalStateException("The initiated status can not be set if the VM is in " + status.name() + " state.");
+            throw new IllegalStateException("The initiated status can not be set if the VM is in " + status.name()
+                    + " state.");
         }
 
         super.setBeingInstantiated(beingInstantiated);
@@ -88,7 +90,8 @@ public class VMex extends Vm {
     public boolean isBeingInstantiated() {
         if ((super.isBeingInstantiated() && status != null && status != VMStatus.INITIALISING)
                 || (!super.isBeingInstantiated() && status == VMStatus.INITIALISING)) {
-            throw new IllegalStateException("The initiated states are not in synch. state: " + status.name() + " init flag:" + super.isBeingInstantiated());
+            throw new IllegalStateException("The initiated states are not in synch. state: " + status.name()
+                    + " init flag:" + super.isBeingInstantiated());
         }
         return super.isBeingInstantiated();
     }
@@ -268,7 +271,8 @@ public class VMex extends Vm {
             throw new IllegalStateException("The operation is undefined for subclass: " + getClass().getCanonicalName());
         }
 
-        VMex result = new VMex(getName(), getUserId(), getMips(), getNumberOfPes(), getRam(), getBw(), getSize(), getVmm(), scheduler, getMetadata().clone());
+        VMex result = new VMex(getName(), getUserId(), getMips(), getNumberOfPes(), getRam(), getBw(), getSize(),
+                getVmm(), scheduler, getMetadata().clone());
         return result;
     }
 

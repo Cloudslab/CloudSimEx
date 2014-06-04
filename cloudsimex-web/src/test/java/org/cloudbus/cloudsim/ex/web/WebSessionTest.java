@@ -109,16 +109,18 @@ public class WebSessionTest {
         statGeneratorDB2 = new TestStatGenerator(testGeneratorsDB1, 1, data2);
         onceInThreeGeneratorDB3 = new OnceInThreeGenerator(data1);
 
-        singleDataItemStatSession = new WebSession(statGeneratorAS, new CompositeGenerator<>(statGeneratorDB1), 1, -1, 100);
+        singleDataItemStatSession = new WebSession(statGeneratorAS, new CompositeGenerator<>(statGeneratorDB1), 1, -1,
+                100);
         singleDataItemStatSession.setAppVmId(Id.pollId(Vm.class));
         singleDataItemStatSession.setDbBalancer(dummyBalancer);
 
-        twoDataItemsStatSession = new WebSession(statGeneratorAS, new CompositeGenerator<>(statGeneratorDB1, statGeneratorDB2), 1, numCloudletsInSession2, 100);
+        twoDataItemsStatSession = new WebSession(statGeneratorAS, new CompositeGenerator<>(statGeneratorDB1,
+                statGeneratorDB2), 1, numCloudletsInSession2, 100);
         twoDataItemsStatSession.setAppVmId(Id.pollId(Vm.class));
         twoDataItemsStatSession.setDbBalancer(dummyBalancer);
 
-        twoDataItemsCasuallySession = new WebSession(statGeneratorAS, new CompositeGenerator<>(onceInThreeGeneratorDB3, statGeneratorDB2), 1,
-                numCloudletsInSession2, 100);
+        twoDataItemsCasuallySession = new WebSession(statGeneratorAS, new CompositeGenerator<>(onceInThreeGeneratorDB3,
+                statGeneratorDB2), 1, numCloudletsInSession2, 100);
         twoDataItemsCasuallySession.setAppVmId(Id.pollId(Vm.class));
         twoDataItemsCasuallySession.setDbBalancer(dummyBalancer);
 
@@ -345,8 +347,8 @@ public class WebSessionTest {
     private static class TestWebCloudlet extends WebCloudlet {
         private boolean finished;
 
-        public TestWebCloudlet(final double idealStartTime, final long cloudletLength, final long cloudletIOLength, final int ram, final int userId,
-                final DataItem data) {
+        public TestWebCloudlet(final double idealStartTime, final long cloudletLength, final long cloudletIOLength,
+                final int ram, final int userId, final DataItem data) {
             super(idealStartTime, cloudletLength, cloudletIOLength, ram, userId, false, data);
         }
 
@@ -363,7 +365,8 @@ public class WebSessionTest {
     private static class TestStatGenerator extends BaseStatGenerator<TestWebCloudlet> {
         int userId;
 
-        public TestStatGenerator(final Map<String, NumberGenerator<Double>> randomGenerators, final int userId, final DataItem data) {
+        public TestStatGenerator(final Map<String, NumberGenerator<Double>> randomGenerators, final int userId,
+                final DataItem data) {
             super(randomGenerators, data);
             this.userId = userId;
         }

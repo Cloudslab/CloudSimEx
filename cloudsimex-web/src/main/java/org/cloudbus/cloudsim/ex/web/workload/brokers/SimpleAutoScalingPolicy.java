@@ -29,11 +29,12 @@ public class SimpleAutoScalingPolicy implements IAutoscalingPolicy {
 
     private double lastActionTime = -1;
 
-    public SimpleAutoScalingPolicy(long appId, double scaleUpCPUTrigger, double scaleDownCPUTrigger, double coolDownPeriod) {
+    public SimpleAutoScalingPolicy(long appId, double scaleUpCPUTrigger, double scaleDownCPUTrigger,
+            double coolDownPeriod) {
         super();
         if (scaleUpCPUTrigger < scaleDownCPUTrigger) {
-            throw new IllegalArgumentException("Scale-up ratio should be greater than scale-down. Provided values: " + scaleUpCPUTrigger + "; "
-                    + scaleDownCPUTrigger);
+            throw new IllegalArgumentException("Scale-up ratio should be greater than scale-down. Provided values: "
+                    + scaleUpCPUTrigger + "; " + scaleDownCPUTrigger);
         }
 
         this.scaleUpCPUTrigger = scaleUpCPUTrigger;
@@ -65,8 +66,8 @@ public class SimpleAutoScalingPolicy implements IAutoscalingPolicy {
                 candidateToStop = vm;
                 debugSB.append(vm);
                 debugSB.append("[" + vm.getStatus().name() + "] ");
-                debugSB.append(String.format("cpu(%.2f) ram(%.2f) cdlts(%d);\t", vm.getCPUUtil(), vm.getRAMUtil(), vm.getCloudletScheduler()
-                        .getCloudletExecList().size()));
+                debugSB.append(String.format("cpu(%.2f) ram(%.2f) cdlts(%d);\t", vm.getCPUUtil(), vm.getRAMUtil(), vm
+                        .getCloudletScheduler().getCloudletExecList().size()));
             }
             avgCPU = count == 0 ? 0 : avgCPU / count;
 
@@ -78,15 +79,18 @@ public class SimpleAutoScalingPolicy implements IAutoscalingPolicy {
                 webBroker.createVmsAfter(Arrays.asList(newASServer), 0);
                 lastActionTime = currentTime;
 
-                CustomLog.printf("Simple-Autoscale(%s) Scale-Up: New AS VMs provisioned: %s", webBroker.toString(), newASServer);
+                CustomLog.printf("Simple-Autoscale(%s) Scale-Up: New AS VMs provisioned: %s", webBroker.toString(),
+                        newASServer);
             } else if (avgCPU < scaleDownCPUTrigger && count > 1) {
                 List<HddVm> toStop = Arrays.asList(candidateToStop);
                 webBroker.destroyVMsAfter(toStop, 0);
                 loadBalancer.getAppServers().removeAll(toStop);
                 lastActionTime = currentTime;
 
-                CustomLog.printf("Simple-Autoscale(%s) Scale-Down: AS VMs terminated: %s, sessions to be killed:", webBroker.toString(), toStop.toString(),
-                        webBroker.getSessionsInServer(candidateToStop.getId()));
+                CustomLog
+                        .printf("Simple-Autoscale(%s) Scale-Down: AS VMs terminated: %s, sessions to be killed:",
+                                webBroker.toString(), toStop.toString(),
+                                webBroker.getSessionsInServer(candidateToStop.getId()));
             }
         }
     }

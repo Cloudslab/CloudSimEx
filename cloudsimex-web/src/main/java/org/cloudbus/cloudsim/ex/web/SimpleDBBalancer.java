@@ -62,8 +62,8 @@ public class SimpleDBBalancer extends BaseDBLoadBalancer implements IDBBalancer 
 
         // If the cloudlet has not yet been assigned a VM
         if (cloudlet.getVmId() == -1) {
-            CustomLog.printf("Cloudlet %d could not be assigned a DB VM, since no VM has its data item %d", cloudlet.getCloudletId(), cloudlet.getData()
-                    .getId());
+            CustomLog.printf("Cloudlet %d could not be assigned a DB VM, since no VM has its data item %d",
+                    cloudlet.getCloudletId(), cloudlet.getData().getId());
 
             try {
                 cloudlet.setCloudletStatus(Cloudlet.FAILED);

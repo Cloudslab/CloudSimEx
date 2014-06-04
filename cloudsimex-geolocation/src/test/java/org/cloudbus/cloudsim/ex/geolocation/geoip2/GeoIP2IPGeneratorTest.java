@@ -37,7 +37,8 @@ public class GeoIP2IPGeneratorTest {
     public static void setUpClass() throws Exception {
         CustomLog.configLogger(TestUtil.LOG_PROPS);
         generator = new GeoIP2IPGenerator(COUNTRY_CODES, TEST_FILE, TestUtil.SEED);
-        service = new GeoIP2PingERService(new File("GeoLite2-City.mmdb"), new File("PingTablePingER.tsv"), new File("MonitoringSitesPingER.csv"));
+        service = new GeoIP2PingERService(new File("GeoLite2-City.mmdb"), new File("PingTablePingER.tsv"), new File(
+                "MonitoringSitesPingER.csv"));
     }
 
     @Test

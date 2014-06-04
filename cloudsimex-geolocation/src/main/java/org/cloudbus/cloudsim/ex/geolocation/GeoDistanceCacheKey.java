@@ -16,8 +16,8 @@ public class GeoDistanceCacheKey {
     private static final int CACHE_SIZE = 10_000;
     private static final int INITIAL_CACHE_SIZE = 1_000;
     /** In order to minimise the number of created instances, we keep a cache. */
-    private static final Cache<Integer, GeoDistanceCacheKey> CACHE = CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE)
-            .maximumSize(CACHE_SIZE).build();
+    private static final Cache<Integer, GeoDistanceCacheKey> CACHE = CacheBuilder.newBuilder().concurrencyLevel(1)
+            .initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
 
     private final double lat1;
     private final double lon1;
@@ -62,7 +62,8 @@ public class GeoDistanceCacheKey {
             return true;
         } else {
             GeoDistanceCacheKey other = (GeoDistanceCacheKey) obj;
-            return hashCode == other.hashCode && areEqualCoords(lat1, lon1, lat2, lon2, other.lat1, other.lon1, other.lat2, other.lon2);
+            return hashCode == other.hashCode
+                    && areEqualCoords(lat1, lon1, lat2, lon2, other.lat1, other.lon1, other.lat2, other.lon2);
         }
     }
 
@@ -76,7 +77,8 @@ public class GeoDistanceCacheKey {
         return (int) (lat1 * exp) ^ (int) (lon1 * exp) + (int) (lat2 * exp) ^ (int) (lon2 * exp);
     }
 
-    private static boolean areEqualCoords(double lat1_1, double lon1_1, double lat1_2, double lon1_2, double lat2_1, double lon2_1, double lat2_2, double lon2_2) {
+    private static boolean areEqualCoords(double lat1_1, double lon1_1, double lat1_2, double lon1_2, double lat2_1,
+            double lon2_1, double lat2_2, double lon2_2) {
         boolean match = lat1_1 == lat2_1 && lon1_1 == lon2_1 && lat1_2 == lat2_2 && lon1_2 == lon2_2;
         boolean matchInverse = !match && lat1_1 == lat2_2 && lon1_1 == lon2_2 && lat1_2 == lat2_1 && lon1_2 == lon2_1;
         return match || matchInverse;

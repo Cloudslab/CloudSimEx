@@ -19,8 +19,8 @@ import org.cloudbus.cloudsim.ex.util.Textualize;
  * @author nikolay.grozev
  * 
  */
-@Textualize(properties = { "CloudletId", "SessionId", "Ram", "VmId", "Delay", "IdealStartTime", "ExecStartTime", "CloudletLength", "CloudletIOLength",
-        "ActualCPUTime", "FinishTime", "CloudletStatusString", "Finished" })
+@Textualize(properties = { "CloudletId", "SessionId", "Ram", "VmId", "Delay", "IdealStartTime", "ExecStartTime",
+        "CloudletLength", "CloudletIOLength", "ActualCPUTime", "FinishTime", "CloudletStatusString", "Finished" })
 public class WebCloudlet extends HddCloudlet {
 
     private final double idealStartTime;
@@ -44,8 +44,8 @@ public class WebCloudlet extends HddCloudlet {
      * @param record
      *            - the record flag, as specified by the parent class.
      */
-    public WebCloudlet(final double idealStartTime, final long cloudletLength, final long cloudletIOLength, final double ram, final int userId,
-            final boolean dataModifying, final DataItem data, final boolean record) {
+    public WebCloudlet(final double idealStartTime, final long cloudletLength, final long cloudletIOLength,
+            final double ram, final int userId, final boolean dataModifying, final DataItem data, final boolean record) {
         super(cloudletLength, cloudletIOLength, 1, 1, ram, userId, dataModifying, data, record);
         this.idealStartTime = idealStartTime;
     }
@@ -66,8 +66,8 @@ public class WebCloudlet extends HddCloudlet {
      * @param dataModifying
      *            - whether this cloudlets modifies the data it accesses.
      */
-    public WebCloudlet(final double idealStartTime, final long cloudletLength, final long cloudletIOLength, final double ram, final int userId,
-            final boolean dataModifying, final DataItem data) {
+    public WebCloudlet(final double idealStartTime, final long cloudletLength, final long cloudletIOLength,
+            final double ram, final int userId, final boolean dataModifying, final DataItem data) {
         this(idealStartTime, cloudletLength, cloudletIOLength, ram, userId, dataModifying, data, false);
     }
 

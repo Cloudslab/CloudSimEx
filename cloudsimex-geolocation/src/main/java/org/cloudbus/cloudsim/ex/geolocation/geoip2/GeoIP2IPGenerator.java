@@ -96,14 +96,15 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
     }
 
     private void parseFile() {
-        CustomLog.printf(Level.FINER, "Creating an IP generator from %s for countries %s", originalFile.getAbsolutePath(),
-                Arrays.toString(getCountryCodes().toArray()));
+        CustomLog.printf(Level.FINER, "Creating an IP generator from %s for countries %s",
+                originalFile.getAbsolutePath(), Arrays.toString(getCountryCodes().toArray()));
 
         long accum = 0;
         ranges.clear();
         sumOfRangesLengths = 0;
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(originalFile)); CSVReader csv = new CSVReader(reader, CSV_SEP, QUOTE_SYMBOL)) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(originalFile));
+                CSVReader csv = new CSVReader(reader, CSV_SEP, QUOTE_SYMBOL)) {
             // Read the file line by line
             int lineCount = 0;
             String[] lineElems = csv.readNext();
@@ -117,16 +118,18 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
                     accumRangeLengths.add(accum);
                 }
                 if (++lineCount % 10000 == 0) {
-                    CustomLog.printf(Level.FINER, "%d lines processed from %s", lineCount, originalFile.getAbsolutePath());
+                    CustomLog.printf(Level.FINER, "%d lines processed from %s", lineCount,
+                            originalFile.getAbsolutePath());
                 }
             }
-            CustomLog.printf(Level.FINER, "IP generator from %s for countries %s has %d IP ranges", originalFile.getAbsolutePath(),
-                    Arrays.toString(getCountryCodes().toArray()), ranges.size());
+            CustomLog.printf(Level.FINER, "IP generator from %s for countries %s has %d IP ranges",
+                    originalFile.getAbsolutePath(), Arrays.toString(getCountryCodes().toArray()), ranges.size());
 
             sumOfRangesLengths = accum;
         } catch (IOException e) {
             ranges.clear();
-            String msg = "File: " + Objects.toString(originalFile.getAbsoluteFile()) + " could not be found or read properly. Message: " + e.getMessage();
+            String msg = "File: " + Objects.toString(originalFile.getAbsoluteFile())
+                    + " could not be found or read properly. Message: " + e.getMessage();
             CustomLog.logError(Level.SEVERE, msg, e);
             throw new IllegalArgumentException(msg, e);
         }

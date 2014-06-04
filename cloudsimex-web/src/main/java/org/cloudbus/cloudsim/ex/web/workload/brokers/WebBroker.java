@@ -78,8 +78,9 @@ public class WebBroker extends MonitoringBorkerEX {
      *             - if something goes wrong. See the documentation of the super
      *             class.
      */
-    public WebBroker(final String name, final double refreshPeriod, final double lifeLength, final double monitoringPeriod, final double autoscalePeriod,
-            final int dataCenterId, final String... metadata) throws Exception {
+    public WebBroker(final String name, final double refreshPeriod, final double lifeLength,
+            final double monitoringPeriod, final double autoscalePeriod, final int dataCenterId,
+            final String... metadata) throws Exception {
         super(name, lifeLength, monitoringPeriod, autoscalePeriod);
         this.stepPeriod = refreshPeriod;
         this.dataCenterId = dataCenterId;
@@ -103,7 +104,8 @@ public class WebBroker extends MonitoringBorkerEX {
      *             - if something goes wrong. See the documentation of the super
      *             class.
      */
-    public WebBroker(final String name, final double refreshPeriod, final double lifeLength, final int dataCenterId) throws Exception {
+    public WebBroker(final String name, final double refreshPeriod, final double lifeLength, final int dataCenterId)
+            throws Exception {
         this(name, refreshPeriod, lifeLength, -1, -1, dataCenterId);
     }
 
@@ -169,7 +171,8 @@ public class WebBroker extends MonitoringBorkerEX {
             IEntryPoint entryPoint = entryPoins.get(appId);
 
             for (WebSession sess : webSessions) {
-                CustomLog.printf("[Broker](%s) Session %d has arrived in the Entry Point of %s", toString(), sess.getSessionId(), getName());
+                CustomLog.printf("[Broker](%s) Session %d has arrived in the Entry Point of %s", toString(),
+                        sess.getSessionId(), getName());
             }
             entryPoint.dispatchSessions(webSessions);
         } else {
@@ -193,7 +196,9 @@ public class WebBroker extends MonitoringBorkerEX {
                 // If the load balancer could not assign it...
                 if (session.getAppVmId() == null || session.getDbBalancer() == null) {
                     canceledSessions.add(session);
-                    CustomLog.printf(Level.SEVERE, "%s: Session %d could not be assigned to an AS server and is canceled.", toString(), session.getSessionId());
+                    CustomLog.printf(Level.SEVERE,
+                            "%s: Session %d could not be assigned to an AS server and is canceled.", toString(),
+                            session.getSessionId());
                 } else {
                     session.setUserId(getId());
                     // Let the session prepare the first cloudlets
@@ -381,8 +386,8 @@ public class WebBroker extends MonitoringBorkerEX {
                         send(getId(), stepPeriod, UPDATE_SESSION_TAG, sess.getSessionId());
                     }
                 } catch (SessionFailedException e) {
-                    CustomLog.printf("Broker(%s): Session %d with metadata %s has failed. Details: %s", this, sess.getSessionId(),
-                            Arrays.toString(sess.getMetadata()), e.getMessage());
+                    CustomLog.printf("Broker(%s): Session %d with metadata %s has failed. Details: %s", this,
+                            sess.getSessionId(), Arrays.toString(sess.getMetadata()), e.getMessage());
                     completedIds.add(sess.getSessionId());
                 }
             }
@@ -400,12 +405,17 @@ public class WebBroker extends MonitoringBorkerEX {
     private void logSessionFailure(WebSession sess) {
         StringBuffer detailsBuffer = new StringBuffer();
         for (WebCloudlet wc : sess.getFailedCloudlets()) {
-            detailsBuffer.append(String.format("Cloudlet %d on %s VM/Server %d has status %s ", wc.getCloudletId(), wc.getVmId() == sess.getAppVmId() ? "AS"
-                    : "DB", wc.getVmId(), wc.getCloudletStatusString() == null ? String.valueOf(wc.getCloudletStatus()) : wc.getCloudletStatusString()));
+            detailsBuffer.append(String.format(
+                    "Cloudlet %d on %s VM/Server %d has status %s ",
+                    wc.getCloudletId(),
+                    wc.getVmId() == sess.getAppVmId() ? "AS" : "DB",
+                    wc.getVmId(),
+                    wc.getCloudletStatusString() == null ? String.valueOf(wc.getCloudletStatus()) : wc
+                            .getCloudletStatusString()));
         }
 
-        CustomLog.printf("Broker(%s): Session %d with metadata %s has failed. Details: %s", this, sess.getSessionId(), Arrays.toString(sess.getMetadata()),
-                detailsBuffer);
+        CustomLog.printf("Broker(%s): Session %d with metadata %s has failed. Details: %s", this, sess.getSessionId(),
+                Arrays.toString(sess.getMetadata()), detailsBuffer);
     }
 
     /*
@@ -476,7 +486,8 @@ public class WebBroker extends MonitoringBorkerEX {
         for (Map.Entry<Integer, WebSession> e : activeSessions.entrySet()) {
             WebSession session = e.getValue();
             if (!session.isComplete()) {
-                result.put(session.getAppVmId(), result.containsKey(session.getAppVmId()) ? result.get(session.getAppVmId()) + 1 : 1);
+                result.put(session.getAppVmId(),
+                        result.containsKey(session.getAppVmId()) ? result.get(session.getAppVmId()) + 1 : 1);
             }
         }
         return result;

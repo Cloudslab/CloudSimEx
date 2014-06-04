@@ -22,7 +22,8 @@ public class StatGenerator extends BaseStatGenerator<WebCloudlet> {
      * @param data
      *            - the data used by the generator, or null if no data is used.
      */
-    public StatGenerator(final Map<String, ? extends NumberGenerator<? extends Number>> randomGenerators, final DataItem data) {
+    public StatGenerator(final Map<String, ? extends NumberGenerator<? extends Number>> randomGenerators,
+            final DataItem data) {
         super(randomGenerators, data);
     }
 
@@ -39,8 +40,8 @@ public class StatGenerator extends BaseStatGenerator<WebCloudlet> {
      * @param data
      *            - the data used by the generator, or null if no data is used.
      */
-    public StatGenerator(final Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators, final double startTime, final double endTime,
-            final DataItem data) {
+    public StatGenerator(final Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators,
+            final double startTime, final double endTime, final DataItem data) {
         super(seqGenerators, startTime, endTime, data);
     }
 
@@ -59,7 +60,8 @@ public class StatGenerator extends BaseStatGenerator<WebCloudlet> {
         if (cpuLen == null || ram == null || ioLen == null || modifiesData == null) {
             return null;
         } else {
-            return new WebCloudlet(idealStartTime, cpuLen.longValue(), ioLen.longValue(), ram, -1, modifiesData, getData());
+            return new WebCloudlet(idealStartTime, cpuLen.longValue(), ioLen.longValue(), ram, -1, modifiesData,
+                    getData());
         }
     }
 

@@ -237,7 +237,8 @@ public class CustomLog {
     }
 
     public static boolean isLevelHighEnough(final Level level) {
-        return (level == null && DEFAULT_LEVEL.intValue() >= granularityLevel.intValue()) || (level != null && level.intValue() >= granularityLevel.intValue());
+        return (level == null && DEFAULT_LEVEL.intValue() >= granularityLevel.intValue())
+                || (level != null && level.intValue() >= granularityLevel.intValue());
     }
 
     /**
@@ -362,8 +363,8 @@ public class CustomLog {
             final LinkedHashMap<String, Function<? extends F, String>> virtualProps, final List<F>... lines) {
         if (klass != null) {
             // Print header line
-            CustomLog.printLine(TextUtil.getCaptionLine(klass, TextUtil.DEFAULT_DELIM, properties,
-                    virtualProps.keySet().toArray(new String[virtualProps.size()])));
+            CustomLog.printLine(TextUtil.getCaptionLine(klass, TextUtil.DEFAULT_DELIM, properties, virtualProps
+                    .keySet().toArray(new String[virtualProps.size()])));
         }
 
         // Print details for each element
@@ -398,11 +399,12 @@ public class CustomLog {
     }
 
     @SafeVarargs
-    public static <F> void printResults(final Class<? extends F> klass, final LinkedHashMap<String, Function<? extends F, String>> virtualProps,
-            final List<F>... lines) {
+    public static <F> void printResults(final Class<? extends F> klass,
+            final LinkedHashMap<String, Function<? extends F, String>> virtualProps, final List<F>... lines) {
         if (klass != null) {
             // Print header line
-            CustomLog.printLine(TextUtil.getCaptionLine(klass, TextUtil.DEFAULT_DELIM, null, virtualProps.keySet().toArray(new String[virtualProps.size()])));
+            CustomLog.printLine(TextUtil.getCaptionLine(klass, TextUtil.DEFAULT_DELIM, null, virtualProps.keySet()
+                    .toArray(new String[virtualProps.size()])));
         }
 
         // Print details for each cloudlet
@@ -441,7 +443,8 @@ public class CustomLog {
      * @param list
      *            - list of objects. All objects, must be of type klass.
      */
-    public static void printResults(final Class<?> klass, final String delim, final String[] properties, final List<?>... lines) {
+    public static void printResults(final Class<?> klass, final String delim, final String[] properties,
+            final List<?>... lines) {
         if (klass != null) {
             // Print header line
             printHeader(klass, delim, properties);
@@ -464,7 +467,8 @@ public class CustomLog {
      * @param list
      *            - list of objects. All objects, must be of type klass.
      */
-    public static void printResultsWithoutHeader(final Class<?> klass, final String delim, final String[] properties, final List<?>... lines) {
+    public static void printResultsWithoutHeader(final Class<?> klass, final String delim, final String[] properties,
+            final List<?>... lines) {
         // Print details for each cloudlet
         for (List<?> list : lines) {
             for (Object o : list) {
@@ -555,12 +559,17 @@ public class CustomLog {
      *             - if something goes wrong with the I/O.
      */
     public static void configLogger(final Properties props) throws SecurityException, IOException {
-        final String fileName = props.containsKey(FILE_PATH_PROP_KEY) ? props.getProperty(FILE_PATH_PROP_KEY).toString() : null;
+        final String fileName = props.containsKey(FILE_PATH_PROP_KEY) ? props.getProperty(FILE_PATH_PROP_KEY)
+                .toString() : null;
         final String format = props.getProperty(LOG_FORMAT_PROP_KEY, "getLevel;getMessage").toString().trim();
-        final boolean prefixCloudSimClock = Boolean.parseBoolean(props.getProperty(LOG_CLOUD_SIM_CLOCK_PROP_KEY, "false").toString().trim());
-        final boolean prefixReadableCloudSimClock = Boolean.parseBoolean(props.getProperty(LOG_READABLE_CLOUD_SIM_CLOCK_PROP_KEY, "false").toString().trim());
-        final boolean prefixRealTimeClock = Boolean.parseBoolean(props.getProperty(LOG_CLOUD_REAL_TIME_PROP_KEY, "false").toString().trim());
-        final boolean shutStandardMessages = Boolean.parseBoolean(props.getProperty(SHUT_STANDART_LOGGER_PROP_KEY, "false").toString().trim());
+        final boolean prefixCloudSimClock = Boolean.parseBoolean(props
+                .getProperty(LOG_CLOUD_SIM_CLOCK_PROP_KEY, "false").toString().trim());
+        final boolean prefixReadableCloudSimClock = Boolean.parseBoolean(props
+                .getProperty(LOG_READABLE_CLOUD_SIM_CLOCK_PROP_KEY, "false").toString().trim());
+        final boolean prefixRealTimeClock = Boolean.parseBoolean(props
+                .getProperty(LOG_CLOUD_REAL_TIME_PROP_KEY, "false").toString().trim());
+        final boolean shutStandardMessages = Boolean.parseBoolean(props
+                .getProperty(SHUT_STANDART_LOGGER_PROP_KEY, "false").toString().trim());
         granularityLevel = Level.parse(props.getProperty(LOG_LEVEL_PROP_KEY, DEFAULT_LEVEL.getName()).toString());
         bufferSize = Integer.parseInt(props.getProperty(BUFFER_SIZE_PROP_KEY, "-1").toString().trim());
 
@@ -659,8 +668,8 @@ public class CustomLog {
         private final String format;
         SimpleFormatter defaultFormatter = new SimpleFormatter();
 
-        public CustomFormatter(final boolean prefixCloudSimClock, final boolean prefixReadableCloudSimClock, final boolean prefixRealTimeClock,
-                final String format) {
+        public CustomFormatter(final boolean prefixCloudSimClock, final boolean prefixReadableCloudSimClock,
+                final boolean prefixRealTimeClock, final String format) {
             super();
             this.prefixCloudSimClock = prefixCloudSimClock;
             this.prefixReadableCloudSimClock = prefixReadableCloudSimClock;

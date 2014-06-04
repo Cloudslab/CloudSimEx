@@ -50,7 +50,8 @@ public class MonitoringBorkerEXTest extends BaseDatacenterBrokerTest {
         assertEquals(Cloudlet.SUCCESS, cloudlet1.getCloudletStatus());
         assertEquals(Cloudlet.SUCCESS, cloudlet2.getCloudletStatus());
 
-        for (Map.Entry<Double, Map<Integer, double[]>> e : ((MonitoringBorkerEX) broker).getRecordedUtilisations().entrySet()) {
+        for (Map.Entry<Double, Map<Integer, double[]>> e : ((MonitoringBorkerEX) broker).getRecordedUtilisations()
+                .entrySet()) {
             // In the beginning it will be inaccurate ...
             double time = e.getKey();
             if (time < SUMMARY_PERIOD_LEN) {
@@ -89,10 +90,14 @@ public class MonitoringBorkerEXTest extends BaseDatacenterBrokerTest {
         }
 
         // Test the internal representation of the monitored data.
-        assertEquals(SUMMARY_PERIOD_LEN / MONITORING_PERIOD, (double) ((MonitoredVMex) vm1).getMonitoredData().size(), 1);
-        assertEquals(SUMMARY_PERIOD_LEN / MONITORING_PERIOD, (double) ((MonitoredVMex) vm1).getMonitoredData().dataSize(), 5);
-        assertEquals(SUMMARY_PERIOD_LEN / MONITORING_PERIOD, (double) ((MonitoredVMex) vm2).getMonitoredData().size(), 1);
-        assertEquals(SUMMARY_PERIOD_LEN / MONITORING_PERIOD, (double) ((MonitoredVMex) vm2).getMonitoredData().dataSize(), 5);
+        assertEquals(SUMMARY_PERIOD_LEN / MONITORING_PERIOD, (double) ((MonitoredVMex) vm1).getMonitoredData().size(),
+                1);
+        assertEquals(SUMMARY_PERIOD_LEN / MONITORING_PERIOD, (double) ((MonitoredVMex) vm1).getMonitoredData()
+                .dataSize(), 5);
+        assertEquals(SUMMARY_PERIOD_LEN / MONITORING_PERIOD, (double) ((MonitoredVMex) vm2).getMonitoredData().size(),
+                1);
+        assertEquals(SUMMARY_PERIOD_LEN / MONITORING_PERIOD, (double) ((MonitoredVMex) vm2).getMonitoredData()
+                .dataSize(), 5);
     }
 
     @Test
@@ -121,7 +126,8 @@ public class MonitoringBorkerEXTest extends BaseDatacenterBrokerTest {
         testConstantUtilisation(expecteCPUUtilVM1, expecteCPUUtilVM2, delta, printUtilisation);
     }
 
-    public void testConstantUtilisation(double expecteCPUUtilVM1, double expecteCPUUtilVM2, double delta, boolean printUtilisation) {
+    public void testConstantUtilisation(double expecteCPUUtilVM1, double expecteCPUUtilVM2, double delta,
+            boolean printUtilisation) {
         // Each cloudlet will take only that much seconds
         double cloudletDuration = 0.6;
 
@@ -158,7 +164,8 @@ public class MonitoringBorkerEXTest extends BaseDatacenterBrokerTest {
             assertEquals(Cloudlet.SUCCESS, c.getCloudletStatus());
         }
 
-        for (Map.Entry<Double, Map<Integer, double[]>> e : ((MonitoringBorkerEX) broker).getRecordedUtilisations().entrySet()) {
+        for (Map.Entry<Double, Map<Integer, double[]>> e : ((MonitoringBorkerEX) broker).getRecordedUtilisations()
+                .entrySet()) {
             // In the beginning it will be inaccurate ...
             double time = e.getKey();
             if (time <= SUMMARY_PERIOD_LEN) {
@@ -207,10 +214,14 @@ public class MonitoringBorkerEXTest extends BaseDatacenterBrokerTest {
         }
 
         // Test the internal representation of the monitored data.
-        assertEquals(SUMMARY_PERIOD_LEN / MONITORING_PERIOD, (double) ((MonitoredVMex) vm1).getMonitoredData().size(), 1);
-        assertEquals(SUMMARY_PERIOD_LEN / MONITORING_PERIOD, (double) ((MonitoredVMex) vm1).getMonitoredData().dataSize(), 5);
-        assertEquals(SUMMARY_PERIOD_LEN / MONITORING_PERIOD, (double) ((MonitoredVMex) vm2).getMonitoredData().size(), 1);
-        assertEquals(SUMMARY_PERIOD_LEN / MONITORING_PERIOD, (double) ((MonitoredVMex) vm2).getMonitoredData().dataSize(), 5);
+        assertEquals(SUMMARY_PERIOD_LEN / MONITORING_PERIOD, (double) ((MonitoredVMex) vm1).getMonitoredData().size(),
+                1);
+        assertEquals(SUMMARY_PERIOD_LEN / MONITORING_PERIOD, (double) ((MonitoredVMex) vm1).getMonitoredData()
+                .dataSize(), 5);
+        assertEquals(SUMMARY_PERIOD_LEN / MONITORING_PERIOD, (double) ((MonitoredVMex) vm2).getMonitoredData().size(),
+                1);
+        assertEquals(SUMMARY_PERIOD_LEN / MONITORING_PERIOD, (double) ((MonitoredVMex) vm2).getMonitoredData()
+                .dataSize(), 5);
     }
 
     @Override
@@ -218,7 +229,8 @@ public class MonitoringBorkerEXTest extends BaseDatacenterBrokerTest {
         int pesNumber = 1; // number of cpus
         String vmm = "Xen"; // VMM name
 
-        return new MonitoredVMex("Test", broker.getId(), VM_MIPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm, new CloudletSchedulerTimeShared(), SUMMARY_PERIOD_LEN);
+        return new MonitoredVMex("Test", broker.getId(), VM_MIPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
+                new CloudletSchedulerTimeShared(), SUMMARY_PERIOD_LEN);
     }
 
     @Override

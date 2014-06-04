@@ -19,7 +19,8 @@ import org.uncommons.maths.random.SeedGenerator;
 public class FiniteValuedInterval {
 
     // (\(|\[)(\d+\.?\d*),(\d+\.?\d*)(\)|\])m=(\d+\.?\d*)std=(\d+\.?\d*)
-    private static final Pattern INTERVAL_PATTERN = Pattern.compile("(\\(|\\[)(\\d+\\.?\\d*),(\\d+\\.?\\d*)(\\)|\\])m=(\\d+\\.?\\d*)std=(\\d+\\.?\\d*)");
+    private static final Pattern INTERVAL_PATTERN = Pattern
+            .compile("(\\(|\\[)(\\d+\\.?\\d*),(\\d+\\.?\\d*)(\\)|\\])m=(\\d+\\.?\\d*)std=(\\d+\\.?\\d*)");
 
     private double start;
     private boolean startIncluded;
@@ -48,7 +49,8 @@ public class FiniteValuedInterval {
      * @param seed
      *            - the seed. If null no seed is used.
      */
-    public FiniteValuedInterval(double start, boolean startIncluded, double end, boolean endIncluded, double mean, double stDev, byte[] seed) {
+    public FiniteValuedInterval(double start, boolean startIncluded, double end, boolean endIncluded, double mean,
+            double stDev, byte[] seed) {
         this(start, startIncluded, end, endIncluded, mean, stDev, seed, null);
     }
 
@@ -72,7 +74,8 @@ public class FiniteValuedInterval {
      *            - the seed generator. If null or erronous a default seed gen
      *            is used.
      */
-    public FiniteValuedInterval(double start, boolean startIncluded, double end, boolean endIncluded, double mean, double stDev, SeedGenerator seedGen) {
+    public FiniteValuedInterval(double start, boolean startIncluded, double end, boolean endIncluded, double mean,
+            double stDev, SeedGenerator seedGen) {
         this(start, startIncluded, end, endIncluded, mean, stDev, null, seedGen);
     }
 
@@ -95,12 +98,13 @@ public class FiniteValuedInterval {
      * @param seed
      *            - the seed. If null no seed is used.
      */
-    public FiniteValuedInterval(double start, boolean startIncluded, double end, boolean endIncluded, double mean, double stDev) {
+    public FiniteValuedInterval(double start, boolean startIncluded, double end, boolean endIncluded, double mean,
+            double stDev) {
         this(start, startIncluded, end, endIncluded, mean, stDev, (byte[]) null);
     }
 
-    private FiniteValuedInterval(double start, boolean startIncluded, double end, boolean endIncluded, double mean, double stDev, byte[] seed,
-            SeedGenerator seedGen) {
+    private FiniteValuedInterval(double start, boolean startIncluded, double end, boolean endIncluded, double mean,
+            double stDev, byte[] seed, SeedGenerator seedGen) {
         super();
         if (start > end) {
             throw new IllegalArgumentException("The start of an interval should be smaller than the end.");

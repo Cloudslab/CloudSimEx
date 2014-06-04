@@ -83,12 +83,12 @@ public class SimpleWebLoadBalancerTest {
         String vmm = "Xen"; // VMM name
 
         // create two VMs
-        HddVm appVm1 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-			VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-        HddVm appVm2 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-			VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-        HddVm dbVm = new HddVm("DB-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-			VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
+        HddVm appVm1 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE,
+                vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
+        HddVm appVm2 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE,
+                vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
+        HddVm dbVm = new HddVm("DB-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
+                new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
         // add the VMs to the vmList
         vmlist.add(appVm1);
@@ -104,15 +104,15 @@ public class SimpleWebLoadBalancerTest {
         WebCloudlet session1AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, null);
         // Should take > 10s
         WebCloudlet session1DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, data);
-        WebSession session1 = new WebSession(new IterableGenerator<>(session1AppCloudlet),
-                new CompositeGenerator<>(new IterableGenerator<>(session1DbCloudlet)), broker.getId(), -1, 100);
+        WebSession session1 = new WebSession(new IterableGenerator<>(session1AppCloudlet), new CompositeGenerator<>(
+                new IterableGenerator<>(session1DbCloudlet)), broker.getId(), -1, 100);
 
         // Should take > 10s
         WebCloudlet session2AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, null);
         // Should take > 10s
         WebCloudlet session2DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, data);
-        WebSession session2 = new WebSession(new IterableGenerator<>(session2AppCloudlet),
-                new CompositeGenerator<>(new IterableGenerator<>(session2DbCloudlet)), broker.getId(), -1, 100);
+        WebSession session2 = new WebSession(new IterableGenerator<>(session2AppCloudlet), new CompositeGenerator<>(
+                new IterableGenerator<>(session2DbCloudlet)), broker.getId(), -1, 100);
 
         // Fire it on the 5th sec
         broker.submitSessionsAtTime(Arrays.asList(session1), balancer.getAppId(), 5);
@@ -138,12 +138,12 @@ public class SimpleWebLoadBalancerTest {
         String vmm = "Xen"; // VMM name
 
         // create two VMs
-        HddVm appVm1 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-			VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-        HddVm appVm2 = new HddVm("App-Srv", broker.getId(), VM_MIPS * 2, HOST_MIOPS, pesNumber,
-			VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-        HddVm dbVm = new HddVm("DB-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-			VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
+        HddVm appVm1 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE,
+                vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
+        HddVm appVm2 = new HddVm("App-Srv", broker.getId(), VM_MIPS * 2, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE,
+                vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
+        HddVm dbVm = new HddVm("DB-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
+                new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
         // add the VMs to the vmList
         vmlist.add(appVm1);
@@ -159,22 +159,22 @@ public class SimpleWebLoadBalancerTest {
         WebCloudlet session1AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, null);
         // Should take > 10s
         WebCloudlet session1DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, data);
-        WebSession session1 = new WebSession(new IterableGenerator<>(session1AppCloudlet),
-                new CompositeGenerator<>(new IterableGenerator<>(session1DbCloudlet)), broker.getId(), -1, 100);
+        WebSession session1 = new WebSession(new IterableGenerator<>(session1AppCloudlet), new CompositeGenerator<>(
+                new IterableGenerator<>(session1DbCloudlet)), broker.getId(), -1, 100);
 
         // Should take > 10s
         WebCloudlet session2AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, null);
         // Should take > 10s
         WebCloudlet session2DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, data);
-        WebSession session2 = new WebSession(new IterableGenerator<>(session2AppCloudlet),
-                new CompositeGenerator<>(new IterableGenerator<>(session2DbCloudlet)), broker.getId(), -1, 100);
+        WebSession session2 = new WebSession(new IterableGenerator<>(session2AppCloudlet), new CompositeGenerator<>(
+                new IterableGenerator<>(session2DbCloudlet)), broker.getId(), -1, 100);
 
         // Should take > 10s
         WebCloudlet session3AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, null);
         // Should take > 10s
         WebCloudlet session3DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, data);
-        WebSession session3 = new WebSession(new IterableGenerator<>(session3AppCloudlet),
-                new CompositeGenerator<>(new IterableGenerator<>(session3DbCloudlet)), broker.getId(), -1, 100);
+        WebSession session3 = new WebSession(new IterableGenerator<>(session3AppCloudlet), new CompositeGenerator<>(
+                new IterableGenerator<>(session3DbCloudlet)), broker.getId(), -1, 100);
 
         // Fire it on the 5th sec
         broker.submitSessionsAtTime(Arrays.asList(session1), balancer.getAppId(), 5);
@@ -205,12 +205,12 @@ public class SimpleWebLoadBalancerTest {
         String vmm = "Xen"; // VMM name
 
         // create two VMs
-        HddVm appVm1 = new HddVm("App-Srv", broker.getId(), VM_MIPS * 2, HOST_MIOPS, pesNumber,
-			VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-        HddVm appVm2 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-			VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-        HddVm dbVm = new HddVm("DB-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-			VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
+        HddVm appVm1 = new HddVm("App-Srv", broker.getId(), VM_MIPS * 2, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE,
+                vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
+        HddVm appVm2 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE,
+                vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
+        HddVm dbVm = new HddVm("DB-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
+                new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
         // add the VMs to the vmList
         vmlist.add(appVm1);
@@ -226,22 +226,22 @@ public class SimpleWebLoadBalancerTest {
         WebCloudlet session1AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, VM_RAM * 2, broker.getId(), false, null);
         // Should take > 10s
         WebCloudlet session1DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, data);
-        WebSession session1 = new WebSession(new IterableGenerator<>(session1AppCloudlet),
-                new CompositeGenerator<>(new IterableGenerator<>(session1DbCloudlet)), broker.getId(), -1, 100);
+        WebSession session1 = new WebSession(new IterableGenerator<>(session1AppCloudlet), new CompositeGenerator<>(
+                new IterableGenerator<>(session1DbCloudlet)), broker.getId(), -1, 100);
 
         // Should take > 10s
         WebCloudlet session2AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, null);
         // Should take > 10s
         WebCloudlet session2DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, data);
-        WebSession session2 = new WebSession(new IterableGenerator<>(session2AppCloudlet),
-                new CompositeGenerator<>(new IterableGenerator<>(session2DbCloudlet)), broker.getId(), -1, 100);
+        WebSession session2 = new WebSession(new IterableGenerator<>(session2AppCloudlet), new CompositeGenerator<>(
+                new IterableGenerator<>(session2DbCloudlet)), broker.getId(), -1, 100);
 
         // Should take > 10s
         WebCloudlet session3AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, null);
         // Should take > 10s
         WebCloudlet session3DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, data);
-        WebSession session3 = new WebSession(new IterableGenerator<>(session3AppCloudlet),
-                new CompositeGenerator<>(new IterableGenerator<>(session3DbCloudlet)), broker.getId(), -1, 100);
+        WebSession session3 = new WebSession(new IterableGenerator<>(session3AppCloudlet), new CompositeGenerator<>(
+                new IterableGenerator<>(session3DbCloudlet)), broker.getId(), -1, 100);
 
         // Fire it on the 5th sec
         broker.submitSessionsAtTime(Arrays.asList(session1), balancer.getAppId(), 5);
@@ -272,12 +272,12 @@ public class SimpleWebLoadBalancerTest {
         String vmm = "Xen"; // VMM name
 
         // create two VMs
-        HddVm appVm1 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-			VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-        HddVm appVm2 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-			VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-        HddVm dbVm = new HddVm("DB-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-			VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
+        HddVm appVm1 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE,
+                vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
+        HddVm appVm2 = new HddVm("App-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE,
+                vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
+        HddVm dbVm = new HddVm("DB-Srv", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
+                new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
         // add the VMs to the vmList
         vmlist.add(appVm1);
@@ -293,15 +293,15 @@ public class SimpleWebLoadBalancerTest {
         WebCloudlet session1AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, null);
         // Should take > 10s
         WebCloudlet session1DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, data);
-        WebSession session1 = new WebSession(new IterableGenerator<>(session1AppCloudlet),
-                new CompositeGenerator<>(new IterableGenerator<>(session1DbCloudlet)), broker.getId(), -1, 100);
+        WebSession session1 = new WebSession(new IterableGenerator<>(session1AppCloudlet), new CompositeGenerator<>(
+                new IterableGenerator<>(session1DbCloudlet)), broker.getId(), -1, 100);
 
         // Should take > 10s
         WebCloudlet session2AppCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, null);
         // Should take > 10s
         WebCloudlet session2DbCloudlet = new WebCloudlet(0, VM_SIZE * 10, 10, 10, broker.getId(), false, data);
-        WebSession session2 = new WebSession(new IterableGenerator<>(session2AppCloudlet),
-                new CompositeGenerator<>(new IterableGenerator<>(session2DbCloudlet)), broker.getId(), -1, 100);
+        WebSession session2 = new WebSession(new IterableGenerator<>(session2AppCloudlet), new CompositeGenerator<>(
+                new IterableGenerator<>(session2DbCloudlet)), broker.getId(), -1, 100);
 
         // Fire it on the 5th sec
         double delay = 1; // Give time for the VM to boot...
@@ -326,8 +326,8 @@ public class SimpleWebLoadBalancerTest {
         peList.add(new Pe(Id.pollId(Pe.class), new PeProvisionerSimple(HOST_MIPS)));
         hddList.add(new HddPe(new PeProvisionerSimple(HOST_MIOPS), data));
 
-        hostList.add(new HddHost(new RamProvisionerSimple(HOST_RAM), new BwProvisionerSimple(HOST_BW), HOST_STORAGE, peList, hddList,
-                new VmSchedulerTimeShared(peList), new VmDiskScheduler(hddList)));
+        hostList.add(new HddHost(new RamProvisionerSimple(HOST_RAM), new BwProvisionerSimple(HOST_BW), HOST_STORAGE,
+                peList, hddList, new VmSchedulerTimeShared(peList), new VmDiskScheduler(hddList)));
 
         String arch = "x86";
         String os = "Linux";
@@ -339,12 +339,13 @@ public class SimpleWebLoadBalancerTest {
         double costPerBw = 0.0;
         LinkedList<Storage> storageList = new LinkedList<Storage>();
 
-        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(arch, os, vmm, hostList, time_zone, cost, costPerMem, costPerStorage,
-                costPerBw);
+        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(arch, os, vmm, hostList, time_zone,
+                cost, costPerMem, costPerStorage, costPerBw);
 
         DatacenterEX datacenter = null;
         try {
-            datacenter = new HddDataCenter("TestDatacenter", characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
+            datacenter = new HddDataCenter("TestDatacenter", characteristics, new VmAllocationPolicySimple(hostList),
+                    storageList, 0);
         } catch (Exception e) {
             e.printStackTrace();
         }

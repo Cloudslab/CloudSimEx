@@ -21,8 +21,9 @@ public class IPMetadata {
     private final Double latitude;
     private final Double longitude;
 
-    public IPMetadata(final String continentName, final String continentCode, final String countryName, final String countryIsoCode, final String cityName,
-            final String postalCode, final Double latitude, final Double longitude) {
+    public IPMetadata(final String continentName, final String continentCode, final String countryName,
+            final String countryIsoCode, final String cityName, final String postalCode, final Double latitude,
+            final Double longitude) {
         super();
         this.continentName = continentName;
         this.continentCode = continentCode;
@@ -75,7 +76,8 @@ public class IPMetadata {
         helper.add("Country ISO", countryIsoCode);
         helper.add("City", cityName);
         helper.add("Post.Code", postalCode);
-        helper.add("Coords", latitude == null || longitude == null ? null : String.format("(%.2f,%.2f)", latitude, longitude));
+        helper.add("Coords",
+                latitude == null || longitude == null ? null : String.format("(%.2f,%.2f)", latitude, longitude));
         helper.omitNullValues();
         return helper.toString();
     }

@@ -39,16 +39,20 @@ public class IdTest {
     }
 
     private static class CloudLetA extends Cloudlet {
-        public CloudLetA(int cloudletId, long cloudletLength, int pesNumber, long cloudletFileSize, long cloudletOutputSize,
-                UtilizationModel utilizationModelCpu, UtilizationModel utilizationModelRam, UtilizationModel utilizationModelBw) {
-            super(cloudletId, cloudletLength, pesNumber, cloudletFileSize, cloudletOutputSize, utilizationModelCpu, utilizationModelRam, utilizationModelBw);
+        public CloudLetA(int cloudletId, long cloudletLength, int pesNumber, long cloudletFileSize,
+                long cloudletOutputSize, UtilizationModel utilizationModelCpu, UtilizationModel utilizationModelRam,
+                UtilizationModel utilizationModelBw) {
+            super(cloudletId, cloudletLength, pesNumber, cloudletFileSize, cloudletOutputSize, utilizationModelCpu,
+                    utilizationModelRam, utilizationModelBw);
         }
     }
 
     private static class CloudLetB extends CloudLetA {
-        public CloudLetB(int cloudletId, long cloudletLength, int pesNumber, long cloudletFileSize, long cloudletOutputSize,
-                UtilizationModel utilizationModelCpu, UtilizationModel utilizationModelRam, UtilizationModel utilizationModelBw) {
-            super(cloudletId, cloudletLength, pesNumber, cloudletFileSize, cloudletOutputSize, utilizationModelCpu, utilizationModelRam, utilizationModelBw);
+        public CloudLetB(int cloudletId, long cloudletLength, int pesNumber, long cloudletFileSize,
+                long cloudletOutputSize, UtilizationModel utilizationModelCpu, UtilizationModel utilizationModelRam,
+                UtilizationModel utilizationModelBw) {
+            super(cloudletId, cloudletLength, pesNumber, cloudletFileSize, cloudletOutputSize, utilizationModelCpu,
+                    utilizationModelRam, utilizationModelBw);
         }
     }
 

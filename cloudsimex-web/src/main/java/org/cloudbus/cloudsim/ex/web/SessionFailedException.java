@@ -53,7 +53,8 @@ public class SessionFailedException extends RuntimeException {
      * @param enableSuppression
      * @param writableStackTrace
      */
-    public SessionFailedException(int sessionId, String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public SessionFailedException(int sessionId, String message, Throwable cause, boolean enableSuppression,
+            boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
         this.sessionId = sessionId;
     }

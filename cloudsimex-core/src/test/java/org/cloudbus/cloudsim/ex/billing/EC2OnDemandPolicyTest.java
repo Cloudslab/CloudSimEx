@@ -47,8 +47,9 @@ public class EC2OnDemandPolicyTest extends BaseDatacenterBrokerTest {
         double smallPrice = 0.065;
         double medPrice = 0.130;
 
-        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap.<Pair<String, String>, BigDecimal> builder()
-                .put(of("m1.small", NIX_OS), valueOf(smallPrice)).put(of("m1.medium", NIX_OS), valueOf(medPrice)).build();
+        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap
+                .<Pair<String, String>, BigDecimal> builder().put(of("m1.small", NIX_OS), valueOf(smallPrice))
+                .put(of("m1.medium", NIX_OS), valueOf(medPrice)).build();
         IVmBillingPolicy policy = new EC2OnDemandPolicy(prices);
         broker.setVMBillingPolicy(policy);
         BigDecimal bill = broker.bill();
@@ -60,7 +61,8 @@ public class EC2OnDemandPolicyTest extends BaseDatacenterBrokerTest {
         assertEquals(expectedBill, bill.doubleValue(), 0.01);
 
         // Now test billing before time...
-        assertEquals((smallPrice + medPrice) * 2, policy.bill(Arrays.asList(vm1, vm2), Consts.HOUR * 1.4).doubleValue(), 0.01);
+        assertEquals((smallPrice + medPrice) * 2,
+                policy.bill(Arrays.asList(vm1, vm2), Consts.HOUR * 1.4).doubleValue(), 0.01);
     }
 
     @Test
@@ -80,8 +82,9 @@ public class EC2OnDemandPolicyTest extends BaseDatacenterBrokerTest {
         double smallPrice = 0.065;
         double medPrice = 0.130;
 
-        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap.<Pair<String, String>, BigDecimal> builder()
-                .put(of("m1.small", NIX_OS), valueOf(smallPrice)).put(of("m1.medium", NIX_OS), valueOf(medPrice)).build();
+        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap
+                .<Pair<String, String>, BigDecimal> builder().put(of("m1.small", NIX_OS), valueOf(smallPrice))
+                .put(of("m1.medium", NIX_OS), valueOf(medPrice)).build();
         IVmBillingPolicy policy = new EC2OnDemandPolicy(prices);
         broker.setVMBillingPolicy(policy);
         BigDecimal bill = broker.bill();
@@ -124,8 +127,9 @@ public class EC2OnDemandPolicyTest extends BaseDatacenterBrokerTest {
         double smallPrice = 0.065;
         double medPrice = 0.130;
 
-        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap.<Pair<String, String>, BigDecimal> builder()
-                .put(of("m1.small", NIX_OS), valueOf(smallPrice)).put(of("m1.medium", NIX_OS), valueOf(medPrice)).build();
+        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap
+                .<Pair<String, String>, BigDecimal> builder().put(of("m1.small", NIX_OS), valueOf(smallPrice))
+                .put(of("m1.medium", NIX_OS), valueOf(medPrice)).build();
         IVmBillingPolicy policy = new EC2OnDemandPolicy(prices);
         broker.setVMBillingPolicy(policy);
         BigDecimal bill = broker.bill();
@@ -176,8 +180,9 @@ public class EC2OnDemandPolicyTest extends BaseDatacenterBrokerTest {
             expectedBill += smallPrice * times + medPrice * times;
         }
 
-        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap.<Pair<String, String>, BigDecimal> builder()
-                .put(of("m1.small", NIX_OS), valueOf(smallPrice)).put(of("m1.medium", NIX_OS), valueOf(medPrice)).build();
+        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap
+                .<Pair<String, String>, BigDecimal> builder().put(of("m1.small", NIX_OS), valueOf(smallPrice))
+                .put(of("m1.medium", NIX_OS), valueOf(medPrice)).build();
         IVmBillingPolicy policy = new EC2OnDemandPolicy(prices);
 
         CloudSim.startSimulation();
@@ -199,8 +204,9 @@ public class EC2OnDemandPolicyTest extends BaseDatacenterBrokerTest {
         double smallPrice = 0.065;
         double medPrice = 0.130;
 
-        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap.<Pair<String, String>, BigDecimal> builder()
-                .put(of("m1.small", NIX_OS), valueOf(smallPrice)).put(of("m1.medium", NIX_OS), valueOf(medPrice)).build();
+        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap
+                .<Pair<String, String>, BigDecimal> builder().put(of("m1.small", NIX_OS), valueOf(smallPrice))
+                .put(of("m1.medium", NIX_OS), valueOf(medPrice)).build();
         IVmBillingPolicy policy = new EC2OnDemandPolicy(prices);
         assertEquals(smallPrice / 60, policy.normalisedCostPerMinute(vm1).doubleValue(), 0.01);
         assertEquals(medPrice / 60, policy.normalisedCostPerMinute(vm2).doubleValue(), 0.01);
@@ -209,14 +215,16 @@ public class EC2OnDemandPolicyTest extends BaseDatacenterBrokerTest {
     @Test
     public void testNexChargeTime() {
         final Queue<Double> vmTimes = new LinkedList<>(Arrays.asList(0d, 30d * MINUTE, 100d * MINUTE));
-        VMex vmMock = new VMex("TestVM", broker.getId(), VM_MIPS, 1, VM_RAM, VM_BW, VM_SIZE, "Test", new CloudletSchedulerTimeShared()) {
+        VMex vmMock = new VMex("TestVM", broker.getId(), VM_MIPS, 1, VM_RAM, VM_BW, VM_SIZE, "Test",
+                new CloudletSchedulerTimeShared()) {
             @Override
             protected double getCurrentTime() {
                 return vmTimes.poll();
             }
         };
 
-        final Queue<Double> policyTimes = new LinkedList<>(Arrays.asList(35d * MINUTE + 1, 60d * MINUTE + 1, 91d * MINUTE + 1, 101d * MINUTE + 1));
+        final Queue<Double> policyTimes = new LinkedList<>(Arrays.asList(35d * MINUTE + 1, 60d * MINUTE + 1,
+                91d * MINUTE + 1, 101d * MINUTE + 1));
         IVmBillingPolicy policyMock = new EC2OnDemandPolicy(ImmutableMap.<Pair<String, String>, BigDecimal> of()) {
             @Override
             protected double getCurrentTime() {

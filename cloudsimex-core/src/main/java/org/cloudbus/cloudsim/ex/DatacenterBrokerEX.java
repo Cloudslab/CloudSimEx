@@ -355,10 +355,12 @@ public class DatacenterBrokerEX extends DatacenterBroker {
             }
 
             // Use the standard log for consistency ....
-            Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": VM #", vmId, " has been destroyed in Datacenter #", datacenterId);
+            Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": VM #", vmId,
+                    " has been destroyed in Datacenter #", datacenterId);
         } else {
             // Use the standard log for consistency ....
-            Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Desctuction of VM #", vmId, " failed in Datacenter #", datacenterId);
+            Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Desctuction of VM #", vmId,
+                    " failed in Datacenter #", datacenterId);
         }
 
     }
@@ -380,8 +382,8 @@ public class DatacenterBrokerEX extends DatacenterBroker {
      */
     public void destroyVMList(final List<? extends Vm> vms) {
         if (getVmDestructsAcks() != getVmsDestroyed()) {
-            throw new IllegalStateException("#" + getVmsDestroyed() + " have been marked for termination, but only #" + getVmDestructsAcks()
-                    + " acknowlegdements have been received.");
+            throw new IllegalStateException("#" + getVmsDestroyed() + " have been marked for termination, but only #"
+                    + getVmDestructsAcks() + " acknowlegdements have been received.");
         }
 
         int requestedVmTerminations = 0;
@@ -397,7 +399,8 @@ public class DatacenterBrokerEX extends DatacenterBroker {
             int datacenterId = vm.getHost().getDatacenter().getId();
             String datacenterName = vm.getHost().getDatacenter().getName();
 
-            Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Trying to Destroy VM #", vm.getId(), " in ", datacenterName);
+            Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Trying to Destroy VM #", vm.getId(), " in ",
+                    datacenterName);
 
             // Tell the data centre to destroy it
             sendNow(datacenterId, CloudSimTags.VM_DESTROY_ACK, vm);

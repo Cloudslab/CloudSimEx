@@ -54,7 +54,8 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerato
      * @param data
      *            - the data used by the generator, or null if no data is used.
      */
-    public BaseStatGenerator(final Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators, final DataItem data) {
+    public BaseStatGenerator(final Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators,
+            final DataItem data) {
         this(seqGenerators, -1, -1, data);
     }
 
@@ -76,8 +77,8 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerato
      * @param data
      *            - the data used by the generator, or null if no data is used.
      */
-    public BaseStatGenerator(final Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators, final double startTime, final double endTime,
-            final DataItem data) {
+    public BaseStatGenerator(final Map<String, ? extends NumberGenerator<? extends Number>> seqGenerators,
+            final double startTime, final double endTime, final DataItem data) {
         this.seqGenerators = seqGenerators;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -136,7 +137,8 @@ public abstract class BaseStatGenerator<T extends Cloudlet> implements IGenerato
      */
     @Override
     public void notifyOfTime(final double time) {
-        if ((startTime < 0 || startTime <= time) && (endTime < 0 || endTime >= time) && (idealStartUpTimes.isEmpty() || idealStartUpTimes.getLast() < time)) {
+        if ((startTime < 0 || startTime <= time) && (endTime < 0 || endTime >= time)
+                && (idealStartUpTimes.isEmpty() || idealStartUpTimes.getLast() < time)) {
             idealStartUpTimes.offer(time);
         }
     }

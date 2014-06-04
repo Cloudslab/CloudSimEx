@@ -22,8 +22,9 @@ public class GaussianByTypeBootDelayTest {
 
     private GaussianByTypeBootDelay bootDelay;
 
-    private static final Map<Pair<String, String>, Pair<Double, Double>> DELAY_DEFS = ImmutableMap.<Pair<String, String>, Pair<Double, Double>> builder()
-    // === Standard On-Demand Instances
+    private static final Map<Pair<String, String>, Pair<Double, Double>> DELAY_DEFS = ImmutableMap
+            .<Pair<String, String>, Pair<Double, Double>> builder()
+            // === Standard On-Demand Instances
             .put(of("m1.small", NIX_OS), of(100.0, 5.0)).put(of("m1.xlarge", NIX_OS), of(100.0, 7.0))
 
             // === Micro On-Demand Instances

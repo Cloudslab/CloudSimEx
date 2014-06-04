@@ -73,7 +73,8 @@ public class StatWorkloadGenerator implements IWorkloadGenerator {
         this(null, null, freqFun, sessGen);
     }
 
-    private StatWorkloadGenerator(SeedGenerator seedGen, final byte[] seed, final FrequencyFunction freqFun, final ISessionGenerator sessGen) {
+    private StatWorkloadGenerator(SeedGenerator seedGen, final byte[] seed, final FrequencyFunction freqFun,
+            final ISessionGenerator sessGen) {
         super();
         this.freqFun = freqFun;
         this.sessGen = sessGen;

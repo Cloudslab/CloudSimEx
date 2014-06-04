@@ -62,8 +62,9 @@ public class RoundRobinDBBalancer extends BaseDBLoadBalancer {
         }
 
         if (suitable.isEmpty()) {
-            CustomLog.printf("[RoundRobinDBBalancer:] Cloudlet %d could not be assigned a DB VM, since no VM has its data item %d", cloudlet.getCloudletId(),
-                    cloudlet.getData().getId());
+            CustomLog
+                    .printf("[RoundRobinDBBalancer:] Cloudlet %d could not be assigned a DB VM, since no VM has its data item %d",
+                            cloudlet.getCloudletId(), cloudlet.getData().getId());
 
             try {
                 cloudlet.setCloudletStatus(Cloudlet.FAILED);
@@ -83,8 +84,8 @@ public class RoundRobinDBBalancer extends BaseDBLoadBalancer {
 
             // If the cloudlet has not yet been assigned a VM
             if (cloudlet.getVmId() == -1) {
-                CustomLog.printf("Cloudlet %d could not be assigned a DB VM, since no VM has its data item %d", cloudlet.getCloudletId(), cloudlet.getData()
-                        .getId());
+                CustomLog.printf("Cloudlet %d could not be assigned a DB VM, since no VM has its data item %d",
+                        cloudlet.getCloudletId(), cloudlet.getData().getId());
 
                 try {
                     cloudlet.setCloudletStatus(Cloudlet.FAILED);

@@ -56,16 +56,19 @@ public class HddVm extends MonitoredVMex {
      *            If empty the VM has access to all disks of the host, which i
      *            hosting it at a given time.
      */
-    public HddVm(final String name, final int userId, final double mips, final double ioMips, final int numberOfPes, final int ram, final long bw,
-            final long size, final String vmm, final HddCloudletSchedulerTimeShared cloudletScheduler, final double summaryPeriodLength, final Integer[] hddIds) {
+    public HddVm(final String name, final int userId, final double mips, final double ioMips, final int numberOfPes,
+            final int ram, final long bw, final long size, final String vmm,
+            final HddCloudletSchedulerTimeShared cloudletScheduler, final double summaryPeriodLength,
+            final Integer[] hddIds) {
         super(name, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, summaryPeriodLength);
         this.ioMips = ioMips;
         this.hdds.addAll(Arrays.asList(hddIds));
         cloudletScheduler.setVm(this);
     }
 
-    public HddVm(final String name, final int userId, final double mips, final double ioMips, final int numberOfPes, final int ram, final long bw,
-            final long size, final String vmm, final HddCloudletSchedulerTimeShared cloudletScheduler, final VMMetadata metadata,
+    public HddVm(final String name, final int userId, final double mips, final double ioMips, final int numberOfPes,
+            final int ram, final long bw, final long size, final String vmm,
+            final HddCloudletSchedulerTimeShared cloudletScheduler, final VMMetadata metadata,
             final double summaryPeriodLength, final Integer[] hddIds) {
         super(name, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, metadata, summaryPeriodLength);
         this.ioMips = ioMips;
@@ -100,16 +103,18 @@ public class HddVm extends MonitoredVMex {
      *            If empty the VM has access to all disks of the host, which is
      *            hosting it at a given time.
      */
-    public HddVm(final String name, final int userId, final double mips, final double ioMips, final int numberOfPes, final int ram, final long bw,
-            final long size, final String vmm, final HddCloudletSchedulerTimeShared cloudletScheduler, final Integer[] hddIds) {
+    public HddVm(final String name, final int userId, final double mips, final double ioMips, final int numberOfPes,
+            final int ram, final long bw, final long size, final String vmm,
+            final HddCloudletSchedulerTimeShared cloudletScheduler, final Integer[] hddIds) {
         super(name, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, 5);
         this.ioMips = ioMips;
         this.hdds.addAll(Arrays.asList(hddIds));
         cloudletScheduler.setVm(this);
     }
 
-    public HddVm(final String name, final int userId, final double mips, final double ioMips, final int numberOfPes, final int ram, final long bw,
-            final long size, final String vmm, final HddCloudletSchedulerTimeShared cloudletScheduler, final VMMetadata metadata, final Integer[] hddIds) {
+    public HddVm(final String name, final int userId, final double mips, final double ioMips, final int numberOfPes,
+            final int ram, final long bw, final long size, final String vmm,
+            final HddCloudletSchedulerTimeShared cloudletScheduler, final VMMetadata metadata, final Integer[] hddIds) {
         super(name, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, metadata, 5);
         this.ioMips = ioMips;
         this.hdds.addAll(Arrays.asList(hddIds));
@@ -139,7 +144,8 @@ public class HddVm extends MonitoredVMex {
      *            scheduler.
      * @return
      */
-    public double updateVmProcessing(final double currentTime, final List<Double> mipsShare, final List<Double> iopsShare) {
+    public double updateVmProcessing(final double currentTime, final List<Double> mipsShare,
+            final List<Double> iopsShare) {
         if (mipsShare != null && iopsShare != null) {
             return getCloudletScheduler().updateVmProcessing(currentTime, mipsShare, iopsShare);
         }
@@ -262,8 +268,9 @@ public class HddVm extends MonitoredVMex {
         }
 
         // Does not copy the hard disks.
-        HddVm result = new HddVm(getName(), getUserId(), getMips(), getIoMips(), getNumberOfPes(), getRam(), getBw(), getSize(), getVmm(),
-                (HddCloudletSchedulerTimeShared) scheduler, getMetadata().clone(), getSummaryPeriodLength(), new Integer[0]);
+        HddVm result = new HddVm(getName(), getUserId(), getMips(), getIoMips(), getNumberOfPes(), getRam(), getBw(),
+                getSize(), getVmm(), (HddCloudletSchedulerTimeShared) scheduler, getMetadata().clone(),
+                getSummaryPeriodLength(), new Integer[0]);
         return result;
     }
 

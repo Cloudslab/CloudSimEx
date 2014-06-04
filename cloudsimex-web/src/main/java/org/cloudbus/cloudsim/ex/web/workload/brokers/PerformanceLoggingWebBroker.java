@@ -23,9 +23,11 @@ public class PerformanceLoggingWebBroker extends WebBroker {
 
     protected static final int LOG_TAG = UPDATE_SESSION_TAG + 1;
 
-    private static final List<? extends Class<?>> HEADER_TYPES = Arrays.asList(Double.class, Integer.class, Double.class, Double.class, Double.class);
+    private static final List<? extends Class<?>> HEADER_TYPES = Arrays.asList(Double.class, Integer.class,
+            Double.class, Double.class, Double.class);
 
-    private static final List<String> HEADER_NAMES = Arrays.asList("time", "vmId", "percentCPU", "percentIO", "percentRAM");
+    private static final List<String> HEADER_NAMES = Arrays.asList("time", "vmId", "percentCPU", "percentIO",
+            "percentRAM");
 
     private boolean headerPrinted = false;
     private boolean logStarted = false;
@@ -37,8 +39,9 @@ public class PerformanceLoggingWebBroker extends WebBroker {
 
     private final double idlePeriod;
 
-    public PerformanceLoggingWebBroker(final String name, final double refreshPeriod, final double lifeLength, final double logPeriod, final double offset,
-            final double idlePeriod, Integer dataCenterId) throws Exception {
+    public PerformanceLoggingWebBroker(final String name, final double refreshPeriod, final double lifeLength,
+            final double logPeriod, final double offset, final double idlePeriod, Integer dataCenterId)
+            throws Exception {
         super(name, refreshPeriod, lifeLength, dataCenterId);
         this.logPeriod = logPeriod;
         this.offset = offset;
@@ -80,7 +83,8 @@ public class PerformanceLoggingWebBroker extends WebBroker {
         // If no cloudlet has been submitted or finished - then there is nothing
         // new to log
         double currTime = CloudSim.clock();
-        if (currTime - lastTimeCloudletReturned < getIdlePeriod() && currTime - lastTimeCloudletSubmited < getIdlePeriod()) {
+        if (currTime - lastTimeCloudletReturned < getIdlePeriod()
+                && currTime - lastTimeCloudletSubmited < getIdlePeriod()) {
             for (ILoadBalancer balancer : getLoadBalancers().values()) {
                 for (HddVm vm : balancer.getAppServers()) {
                     logUtilisation(vm);
@@ -108,7 +112,8 @@ public class PerformanceLoggingWebBroker extends WebBroker {
             headerPrinted = true;
         }
 
-        CustomLog.printLine(TextUtil.getTxtLine(Arrays.asList(time, vmId, percentCPU, percentIO, percentRAM), HEADER_NAMES, TextUtil.DEFAULT_DELIM, false));
+        CustomLog.printLine(TextUtil.getTxtLine(Arrays.asList(time, vmId, percentCPU, percentIO, percentRAM),
+                HEADER_NAMES, TextUtil.DEFAULT_DELIM, false));
 
     }
 

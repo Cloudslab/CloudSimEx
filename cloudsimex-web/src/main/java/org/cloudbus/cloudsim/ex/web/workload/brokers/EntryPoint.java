@@ -88,7 +88,8 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
                     if (latency < latencySLA && price != Double.MAX_VALUE) {
                         selectedBroker = eligibleBroker;
                         break;
-                    } else if ((bestLatencySoFar > latency || bestPrice == Double.MAX_VALUE) && (price != Double.MAX_VALUE || selectedBroker == null)) {
+                    } else if ((bestLatencySoFar > latency || bestPrice == Double.MAX_VALUE)
+                            && (price != Double.MAX_VALUE || selectedBroker == null)) {
                         selectedBroker = eligibleBroker;
                         bestLatencySoFar = latency;
                         bestPrice = price;
@@ -110,8 +111,10 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
             WebBroker broker = entry.getKey();
             List<WebSession> sessions = entry.getValue();
             for (WebSession sess : sessions) {
-                CustomLog.printf("[Entry Point] Session %d will be assigned to %s", sess.getSessionId(), broker.toString());
-                CustomLog.printf("[Entry Point] Price estimations: %s", costComparator.getReadableLatestPriceEstimations());
+                CustomLog.printf("[Entry Point] Session %d will be assigned to %s", sess.getSessionId(),
+                        broker.toString());
+                CustomLog.printf("[Entry Point] Price estimations: %s",
+                        costComparator.getReadableLatestPriceEstimations());
             }
             broker.submitSessionsDirectly(sessions, getAppId());
         }
@@ -120,8 +123,8 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
     private List<WebBroker> filterBrokers(final List<WebBroker> brokers2, final WebSession sess, final long appId) {
         List<WebBroker> eligibleBrokers = new ArrayList<>();
         for (WebBroker b : brokers2) {
-            if (sess.getMetadata() != null && sess.getMetadata().length > 0 && b.getMetadata() != null && b.getMetadata().length > 0
-                    && sess.getMetadata()[0].equals(b.getMetadata()[0])) {
+            if (sess.getMetadata() != null && sess.getMetadata().length > 0 && b.getMetadata() != null
+                    && b.getMetadata().length > 0 && sess.getMetadata()[0].equals(b.getMetadata()[0])) {
                 eligibleBrokers.add(b);
             }
         }
@@ -180,7 +183,8 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
                 for (HddVm vm : lb.getAppServers()) {
                     double cpuUtil = vm.getCPUUtil();
                     double ramUtil = vm.getRAMUtil();
-                    if (vm.getStatus() == VMStatus.RUNNING && srvToNumSessions.containsKey(vm.getId()) && (cpuUtil > 0.05 && ramUtil > 0)) {
+                    if (vm.getStatus() == VMStatus.RUNNING && srvToNumSessions.containsKey(vm.getId())
+                            && (cpuUtil > 0.05 && ramUtil > 0)) {
                         numRunning++;
                         int numSessions = srvToNumSessions.get(vm.getId());
                         double nCapacity = numSessions / Math.max(cpuUtil, ramUtil); // f(vm)
@@ -189,11 +193,13 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
                 }
 
                 // sum(1/f(vm)) / |V|
-                double avgSessionsPerVm = numRunning > 0 ? (sumAvg / numRunning) : (latestPriceEstimations.containsKey(b) ? latestPriceEstimations.get(b) : 0);
+                double avgSessionsPerVm = numRunning > 0 ? (sumAvg / numRunning) : (latestPriceEstimations
+                        .containsKey(b) ? latestPriceEstimations.get(b) : 0);
                 res = pricePerMinute.doubleValue() * avgSessionsPerVm; // p *
                                                                        // sum(1/f(vm))
                                                                        // / |V|
-                res = numRunning > 0 ? res : (latestPriceEstimations.containsKey(b) ? latestPriceEstimations.get(b) : 0);
+                res = numRunning > 0 ? res
+                        : (latestPriceEstimations.containsKey(b) ? latestPriceEstimations.get(b) : 0);
 
             }
             if (!latestPriceEstimations.containsKey(b) || latestPriceEstimations.get(b) != res) {
@@ -214,7 +220,8 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
                 ILoadBalancer lb = b.getLoadBalancers().get(appId);
                 for (HddVm db : lb.getDbBalancer().getVMs()) {
                     if (db.getStatus() == VMStatus.INITIALISING
-                            || (db.getStatus() == VMStatus.RUNNING && db.getCPUUtil() < OVERLOAD_UTIL && db.getRAMUtil() < OVERLOAD_UTIL && db.getDiskUtil() < OVERLOAD_UTIL)) {
+                            || (db.getStatus() == VMStatus.RUNNING && db.getCPUUtil() < OVERLOAD_UTIL
+                                    && db.getRAMUtil() < OVERLOAD_UTIL && db.getDiskUtil() < OVERLOAD_UTIL)) {
                         result = false;
                         break;
                     }

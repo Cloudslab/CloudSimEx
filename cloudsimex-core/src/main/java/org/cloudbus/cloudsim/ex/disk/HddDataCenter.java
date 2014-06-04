@@ -36,13 +36,15 @@ public class HddDataCenter extends DatacenterEX {
      * @param schedulingInterval
      * @throws Exception
      */
-    public HddDataCenter(final String name, final DatacenterCharacteristics characteristics, final VmAllocationPolicy vmAllocationPolicy,
-            final List<Storage> storageList, final double schedulingInterval) throws Exception {
+    public HddDataCenter(final String name, final DatacenterCharacteristics characteristics,
+            final VmAllocationPolicy vmAllocationPolicy, final List<Storage> storageList,
+            final double schedulingInterval) throws Exception {
         super(name, characteristics, vmAllocationPolicy, storageList, schedulingInterval);
     }
 
-    public HddDataCenter(final String name, final DatacenterCharacteristics characteristics, final VmAllocationPolicy vmAllocationPolicy,
-            final List<Storage> storageList, final double schedulingInterval, IVMBootDelayDistribution delayDistribution) throws Exception {
+    public HddDataCenter(final String name, final DatacenterCharacteristics characteristics,
+            final VmAllocationPolicy vmAllocationPolicy, final List<Storage> storageList,
+            final double schedulingInterval, IVMBootDelayDistribution delayDistribution) throws Exception {
         super(name, characteristics, vmAllocationPolicy, storageList, schedulingInterval, delayDistribution);
     }
 
@@ -79,15 +81,16 @@ public class HddDataCenter extends DatacenterEX {
                     scheduler.addFailedCloudlet(cl);
                     vm.setOutOfMemory(true);
 
-                    CustomLog.printf("VM/Server %d on host %d in data center %s(%d) is out of memory. " + "It will not be further available", vm.getId(),
-                            host.getId(), getName(), getId());
+                    CustomLog.printf("VM/Server %d on host %d in data center %s(%d) is out of memory. "
+                            + "It will not be further available", vm.getId(), host.getId(), getName(), getId());
                 } else {
                     super.processCloudletSubmit(ev, ack);
                 }
             } else {
                 scheduler.addFailedCloudlet(cl);
-                CustomLog.printf("Cloudlet %d could not be submited because " + "VM/Server %d on host %d in data center %s(%d) is out of memory. ",
-                        cl.getCloudletId(), vm.getId(), host.getId(), getName(), getId());
+                CustomLog.printf("Cloudlet %d could not be submited because "
+                        + "VM/Server %d on host %d in data center %s(%d) is out of memory. ", cl.getCloudletId(),
+                        vm.getId(), host.getId(), getName(), getId());
             }
         } catch (Exception e) {
             CustomLog.logError(Level.SEVERE, "An error occurred when processing cloudlet sbmission", e);

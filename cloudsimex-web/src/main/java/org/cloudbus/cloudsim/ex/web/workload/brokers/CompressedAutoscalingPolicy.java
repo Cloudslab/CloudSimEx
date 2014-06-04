@@ -77,7 +77,8 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
                     appendDebug(debugSB, "[", debug);
                 }
                 appendFormatDebug(debugSB, debug, "%s] ", vm.getStatus());
-                appendFormatDebug(debugSB, debug, "cpu(%.2f) ram(%.2f) cdlts(%d);\t", vmCPU, vmRAM, vm.getCloudletScheduler().getCloudletExecList().size());
+                appendFormatDebug(debugSB, debug, "cpu(%.2f) ram(%.2f) cdlts(%d);\t", vmCPU, vmRAM, vm
+                        .getCloudletScheduler().getCloudletExecList().size());
             }
 
             if (debug) {
@@ -108,7 +109,8 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
                 Collections.sort(freeVms, new CloudPriceComparator(webBroker.getVMBillingPolicy()));
                 for (int i = 0; i < numVmsToStop; i++) {
                     double billTime = webBroker.getVMBillingPolicy().nexChargeTime(freeVms.get(i));
-                    if (freeVms.get(i).getStatus() == VMStatus.RUNNING && billTime - CloudSim.clock() < delta && toStop.size() < numAS - 1) {
+                    if (freeVms.get(i).getStatus() == VMStatus.RUNNING && billTime - CloudSim.clock() < delta
+                            && toStop.size() < numAS - 1) {
                         toStop.add(freeVms.get(i));
                     } else {
                         break;
@@ -116,7 +118,8 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
                 }
 
                 if (!toStop.isEmpty()) {
-                    CustomLog.printf("Autoscale-Policy(%s) Scale-Down: AS VMs terminated: %s", webBroker.toString(), toStop.toString());
+                    CustomLog.printf("Autoscale-Policy(%s) Scale-Down: AS VMs terminated: %s", webBroker.toString(),
+                            toStop.toString());
                     webBroker.destroyVMsAfter(toStop, 0);
                     loadBalancer.getAppServers().removeAll(toStop);
                 }
@@ -145,7 +148,8 @@ public class CompressedAutoscalingPolicy implements IAutoscalingPolicy {
                 newVMs.add(newASServer);
             }
 
-            CustomLog.printf("Autoscale-Policy(%s) Scale-Up: New AS VMs provisioned: %s", webBroker.toString(), newVMs.toString());
+            CustomLog.printf("Autoscale-Policy(%s) Scale-Up: New AS VMs provisioned: %s", webBroker.toString(),
+                    newVMs.toString());
             webBroker.createVmsAfter(newVMs, 0);
         }
     }

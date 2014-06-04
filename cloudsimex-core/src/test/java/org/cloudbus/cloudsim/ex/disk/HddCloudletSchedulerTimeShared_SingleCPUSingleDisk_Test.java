@@ -77,8 +77,8 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
         String vmm = "Xen"; // VMM name
 
         // create two VMs
-        vm1 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(),
-                new Integer[0]);
+        vm1 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
+                new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
         // add the VMs to the vmList
         vmlist.add(vm1);
@@ -116,8 +116,10 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
         double job2TimesMips = 1;
         double job2TimesIOMIPS = 2;
 
-        HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips), (int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId(), false, dataItem1);
-        HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips), (int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId(), false, dataItem1);
+        HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips), (int) (HOST_MIOPS * job1TimesIOMIPS),
+                5, broker.getId(), false, dataItem1);
+        HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips), (int) (HOST_MIOPS * job2TimesIOMIPS),
+                5, broker.getId(), false, dataItem1);
         broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2));
 
         CloudSim.startSimulation();
@@ -143,8 +145,10 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
         double job2TimesMips = 1;
         double job2TimesIOMIPS = 0;
 
-        HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips), (int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId(), false, null);
-        HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips), (int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId(), false, null);
+        HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips), (int) (HOST_MIOPS * job1TimesIOMIPS),
+                5, broker.getId(), false, null);
+        HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips), (int) (HOST_MIOPS * job2TimesIOMIPS),
+                5, broker.getId(), false, null);
         broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2));
 
         CloudSim.startSimulation();
@@ -170,8 +174,10 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
         double job2TimesMips = 0;
         double job2TimesIOMIPS = 2;
 
-        HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips), (int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId(), false, dataItem1);
-        HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips), (int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId(), false, dataItem1);
+        HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips), (int) (HOST_MIOPS * job1TimesIOMIPS),
+                5, broker.getId(), false, dataItem1);
+        HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips), (int) (HOST_MIOPS * job2TimesIOMIPS),
+                5, broker.getId(), false, dataItem1);
         broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2));
 
         CloudSim.startSimulation();
@@ -202,8 +208,10 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
         double job2TimesMips = 0.1;
         double job2TimesIOMIPS = 10;
 
-        HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips), (int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId(), false, dataItem1);
-        HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips), (int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId(), false, dataItem1);
+        HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips), (int) (HOST_MIOPS * job1TimesIOMIPS),
+                5, broker.getId(), false, dataItem1);
+        HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips), (int) (HOST_MIOPS * job2TimesIOMIPS),
+                5, broker.getId(), false, dataItem1);
         broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2));
 
         CloudSim.startSimulation();
@@ -230,8 +238,10 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
         double job2TimesMips = 5;
         double job2TimesIOMIPS = 0.1;
 
-        HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips), (int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId(), false, dataItem1);
-        HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips), (int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId(), false, dataItem1);
+        HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips), (int) (HOST_MIOPS * job1TimesIOMIPS),
+                5, broker.getId(), false, dataItem1);
+        HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips), (int) (HOST_MIOPS * job2TimesIOMIPS),
+                5, broker.getId(), false, dataItem1);
         broker.submitCloudletList(Arrays.asList(cloudlet1, cloudlet2));
 
         CloudSim.startSimulation();
@@ -286,7 +296,8 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
         for (int i = 0; i < jobCount; i++) {
             double jobTimesMips = nextRandBetween(rand, minMipsFactor, maxMipsFactor);
             double jobTimesIOMIPS = nextRandBetween(rand, minMiopsFactor, maxMiopsFactor);
-            jobs.add(new HddCloudlet((int) (VM_MIPS * jobTimesMips), (int) (HOST_MIOPS * jobTimesIOMIPS), 5, broker.getId(), false, dataItem1));
+            jobs.add(new HddCloudlet((int) (VM_MIPS * jobTimesMips), (int) (HOST_MIOPS * jobTimesIOMIPS), 5, broker
+                    .getId(), false, dataItem1));
         }
 
         broker.submitCloudletList(jobs);
@@ -313,7 +324,8 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
     }
 
     private void testSingleCloudlet(final double timesMips, final double timesIOMIPS) {
-        HddCloudlet cloudlet = new HddCloudlet((int) (VM_MIPS * timesMips), (int) (HOST_MIOPS * timesIOMIPS), 5, broker.getId(), false, dataItem1);
+        HddCloudlet cloudlet = new HddCloudlet((int) (VM_MIPS * timesMips), (int) (HOST_MIOPS * timesIOMIPS), 5,
+                broker.getId(), false, dataItem1);
         broker.submitCloudletList(Arrays.asList(cloudlet));
 
         CloudSim.startSimulation();
@@ -339,8 +351,8 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
         dataItem1 = new DataItem(ITEM_SIZE);
         hddList.add(new HddPe(new PeProvisionerSimple(HOST_MIOPS), dataItem1));
 
-        hostList.add(new HddHost(new RamProvisionerSimple(HOST_RAM), new BwProvisionerSimple(HOST_BW), HOST_STORAGE, peList, hddList,
-                new VmSchedulerTimeShared(peList), new VmDiskScheduler(hddList)));
+        hostList.add(new HddHost(new RamProvisionerSimple(HOST_RAM), new BwProvisionerSimple(HOST_BW), HOST_STORAGE,
+                peList, hddList, new VmSchedulerTimeShared(peList), new VmDiskScheduler(hddList)));
 
         String arch = "x86";
         String os = "Linux";
@@ -352,12 +364,13 @@ public class HddCloudletSchedulerTimeShared_SingleCPUSingleDisk_Test {
         double costPerBw = 0.0;
         LinkedList<Storage> storageList = new LinkedList<Storage>();
 
-        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(arch, os, vmm, hostList, time_zone, cost, costPerMem, costPerStorage,
-                costPerBw);
+        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(arch, os, vmm, hostList, time_zone,
+                cost, costPerMem, costPerStorage, costPerBw);
 
         DatacenterEX datacenter = null;
         try {
-            datacenter = new HddDataCenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
+            datacenter = new HddDataCenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList,
+                    0);
         } catch (Exception e) {
             e.printStackTrace();
         }

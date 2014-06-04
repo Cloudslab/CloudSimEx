@@ -53,12 +53,12 @@ import com.maxmind.geoip2.model.City;
 public class GeoIP2PingERService extends BaseGeolocationService implements IGeolocationService, Closeable {
 
     /** In order to minimise the number of created instances, we keep a cache. */
-    private final Cache<String, double[]> coordinatesCache = CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE)
-            .maximumSize(CACHE_SIZE).build();
+    private final Cache<String, double[]> coordinatesCache = CacheBuilder.newBuilder().concurrencyLevel(1)
+            .initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
 
     /** In order to minimise the number of created instances, we keep a cache. */
-    private final Cache<String, Double> ipDistanceCache = CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE)
-            .maximumSize(CACHE_SIZE).build();
+    private final Cache<String, Double> ipDistanceCache = CacheBuilder.newBuilder().concurrencyLevel(1)
+            .initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
 
     // TODO Extract these TSV/CSV constants elsewhere as they can be reused ...
     /** The separator in the tsv file. */
@@ -77,7 +77,8 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
     /** A pattern for a string representing a decimal double number. */
     private static final String DOUBLE_GROUP_PATTERN = "(\\-?\\d+(\\.\\d+)?)";
     /** A regular expression for strings of the format (latitude longitude). */
-    private static Pattern COORD_PATTERN = Pattern.compile("\\(\\s*" + DOUBLE_GROUP_PATTERN + "\\s+" + DOUBLE_GROUP_PATTERN + "\\s*\\)");
+    private static Pattern COORD_PATTERN = Pattern.compile("\\(\\s*" + DOUBLE_GROUP_PATTERN + "\\s+"
+            + DOUBLE_GROUP_PATTERN + "\\s*\\)");
 
     private DatabaseReader reader;
 
@@ -98,8 +99,8 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
      */
     public GeoIP2PingERService(final File geoIP2DB, final File pingErRTTFile, final File pingerMonitoringSitesFile) {
         super();
-        CustomLog.printf(Level.FINER, "Creating an GeoLocation service from %s, %s, %s", geoIP2DB.getAbsolutePath(), pingErRTTFile.getAbsolutePath(),
-                pingerMonitoringSitesFile.getAbsolutePath());
+        CustomLog.printf(Level.FINER, "Creating an GeoLocation service from %s, %s, %s", geoIP2DB.getAbsolutePath(),
+                pingErRTTFile.getAbsolutePath(), pingerMonitoringSitesFile.getAbsolutePath());
         try {
             reader = new DatabaseReader(geoIP2DB);
 
@@ -220,7 +221,8 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
                 CustomLog.logError(Level.SEVERE, msg, e);
                 throw new IllegalArgumentException("Invalid IP", e);
             } catch (IOException e) {
-                String msg = "Could not locate IP: " + Objects.toString(ip) + ", " + "because of I/O error:" + e.getMessage();
+                String msg = "Could not locate IP: " + Objects.toString(ip) + ", " + "because of I/O error:"
+                        + e.getMessage();
                 CustomLog.logError(Level.SEVERE, msg, e);
                 throw new IllegalStateException(e);
             } catch (GeoIp2Exception e) {
@@ -238,8 +240,9 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
         City city;
         try {
             city = reader.city(InetAddress.getByName(ip));
-            return new IPMetadata(city.getContinent().getName(), city.getContinent().getCode(), city.getCountry().getName(), city.getCountry().getIsoCode(),
-                    city.getCity().getName(), city.getPostal().getCode(), city.getLocation().getLatitude(), city.getLocation().getLongitude());
+            return new IPMetadata(city.getContinent().getName(), city.getContinent().getCode(), city.getCountry()
+                    .getName(), city.getCountry().getIsoCode(), city.getCity().getName(), city.getPostal().getCode(),
+                    city.getLocation().getLatitude(), city.getLocation().getLongitude());
         } catch (UnknownHostException e) {
             String msg = "Invalid IP: " + Objects.toString(ip);
             CustomLog.logError(Level.INFO, msg, e);
@@ -333,7 +336,8 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
             double eWeigthedCount = bestDistance / e.accumDistance;
             weigthedCount += eWeigthedCount;
             sumLatencies += e.latency * eWeigthedCount;
-            CustomLog.print(Level.FINEST, String.format("Used nodes %s, %s; Accum Distance %.2f, Latency %.2f, Weigth %.2f ", e.node1, e.node2,
+            CustomLog.print(Level.FINEST, String.format(
+                    "Used nodes %s, %s; Accum Distance %.2f, Latency %.2f, Weigth %.2f ", e.node1, e.node2,
                     e.accumDistance / 1000, e.latency, eWeigthedCount));
         }
         return sumLatencies / weigthedCount;
@@ -366,7 +370,8 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
     public void updateHeap(final MinMaxPriorityQueue<PingERLatencyEntry> heap, final PingERLatencyEntry qEntry) {
         elemsWithMatchingNodes.clear();
         for (PingERLatencyEntry e : heap) {
-            if (qEntry.node1.equals(e.node1) || qEntry.node1.equals(e.node2) || qEntry.node2.equals(e.node1) || qEntry.node2.equals(e.node2)) {
+            if (qEntry.node1.equals(e.node1) || qEntry.node1.equals(e.node2) || qEntry.node2.equals(e.node1)
+                    || qEntry.node2.equals(e.node2)) {
                 elemsWithMatchingNodes.add(e);
             }
         }
@@ -391,8 +396,8 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 
     private static class PingERLatencyEntry implements Comparable<PingERLatencyEntry> {
 
-        public PingERLatencyEntry(final String node1, final double[] coord1, final String node2, final double[] coord2, final double distance,
-                final double latency) {
+        public PingERLatencyEntry(final String node1, final double[] coord1, final String node2, final double[] coord2,
+                final double distance, final double latency) {
             super();
             this.node1 = node1;
             this.coord1 = coord1;
@@ -416,15 +421,16 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 
         @Override
         public String toString() {
-            return String.format("Node1: %s, (%.2f, %.2f), Node2: %s, (%.2f, %.2f), Accum Distance: $.2f, Latency: %.2f", node1, coord1[0], coord1[1], node2,
-                    coord2[0], coord2[1], accumDistance, latency);
+            return String.format(
+                    "Node1: %s, (%.2f, %.2f), Node2: %s, (%.2f, %.2f), Accum Distance: $.2f, Latency: %.2f", node1,
+                    coord1[0], coord1[1], node2, coord2[0], coord2[1], accumDistance, latency);
         }
     }
 
     public static void main(String[] args) throws IOException {
         String ip = "124.168.86.122";
-        try (GeoIP2PingERService service = new GeoIP2PingERService(new File("GeoLite2-City.mmdb"), new File("PingTablePingER.tsv"), new File(
-                "MonitoringSitesPingER.csv"))) {
+        try (GeoIP2PingERService service = new GeoIP2PingERService(new File("GeoLite2-City.mmdb"), new File(
+                "PingTablePingER.tsv"), new File("MonitoringSitesPingER.csv"))) {
             System.out.println(service.getTxtAddress(ip));
         }
     }

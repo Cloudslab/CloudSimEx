@@ -57,7 +57,8 @@ public class GaussianByTypeBootDelay implements IVMBootDelayDistribution {
      *            - a value to be returned when evaluating VMs, which are not
      *            present in the aforementioned mapping.
      */
-    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs, final double defaultVal) {
+    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs,
+            final double defaultVal) {
         this(delayDefs, (byte[]) null, defaultVal);
     }
 
@@ -86,7 +87,8 @@ public class GaussianByTypeBootDelay implements IVMBootDelayDistribution {
      *            seed gen policy is used.
      * @param defaultVal
      */
-    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs, final SeedGenerator seedGen) {
+    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs,
+            final SeedGenerator seedGen) {
         this(delayDefs, seedGen, 0);
     }
 
@@ -101,7 +103,8 @@ public class GaussianByTypeBootDelay implements IVMBootDelayDistribution {
      *            - a value to be returned when evaluating VMs, which are not
      *            present in the aforementioned mapping.
      */
-    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs, final byte[] seed, final double defaultVal) {
+    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs, final byte[] seed,
+            final double defaultVal) {
         this(delayDefs, seed, null, defaultVal);
     }
 
@@ -117,12 +120,13 @@ public class GaussianByTypeBootDelay implements IVMBootDelayDistribution {
      *            - a value to be returned when evaluating VMs, which are not
      *            present in the aforementioned mapping.
      */
-    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs, final SeedGenerator seedGen, final double defaultVal) {
+    public GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs,
+            final SeedGenerator seedGen, final double defaultVal) {
         this(delayDefs, null, seedGen, defaultVal);
     }
 
-    private GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs, final byte[] seed, SeedGenerator seedGen,
-            final double defaultVal) {
+    private GaussianByTypeBootDelay(final Map<Pair<String, String>, Pair<Double, Double>> delayDefs, final byte[] seed,
+            SeedGenerator seedGen, final double defaultVal) {
         Random merseneGenerator = null;
         if (seed == null) {
             try {
@@ -137,7 +141,8 @@ public class GaussianByTypeBootDelay implements IVMBootDelayDistribution {
         this.defaultValue = defaultVal;
 
         for (Map.Entry<Pair<String, String>, Pair<Double, Double>> entry : delayDefs.entrySet()) {
-            this.delayGenerators.put(entry.getKey(), new GaussianGenerator(entry.getValue().getLeft(), entry.getValue().getRight(), merseneGenerator));
+            this.delayGenerators.put(entry.getKey(), new GaussianGenerator(entry.getValue().getLeft(), entry.getValue()
+                    .getRight(), merseneGenerator));
         }
     }
 

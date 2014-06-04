@@ -44,8 +44,9 @@ public class MonitoredVMex extends VMex {
      *            - the historical period, used to determine the utilisation at
      *            runtime.
      */
-    public MonitoredVMex(final String name, final int userId, final double mips, final int numberOfPes, int ram, final long bw, final long size,
-            final String vmm, final CloudletScheduler cloudletScheduler, final double summaryPeriodLength) {
+    public MonitoredVMex(final String name, final int userId, final double mips, final int numberOfPes, int ram,
+            final long bw, final long size, final String vmm, final CloudletScheduler cloudletScheduler,
+            final double summaryPeriodLength) {
         super(name, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
         this.summaryPeriodLength = summaryPeriodLength;
     }
@@ -68,8 +69,9 @@ public class MonitoredVMex extends VMex {
      *            - the historical period, used to determine the utilisation at
      *            runtime.
      */
-    public MonitoredVMex(final String name, final int userId, final double mips, final int numberOfPes, final int ram, final long bw, final long size,
-            final String vmm, final CloudletScheduler cloudletScheduler, final VMMetadata metadata, final double summaryPeriodLength) {
+    public MonitoredVMex(final String name, final int userId, final double mips, final int numberOfPes, final int ram,
+            final long bw, final long size, final String vmm, final CloudletScheduler cloudletScheduler,
+            final VMMetadata metadata, final double summaryPeriodLength) {
         super(name, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, metadata);
         this.summaryPeriodLength = summaryPeriodLength;
     }
@@ -93,8 +95,8 @@ public class MonitoredVMex extends VMex {
         if (summaryPeriodLength >= 0) {
             double currTime = getCurrentTime();
 
-            if (!newPerfDataAvailableFlag && this.lastUtilMeasurement[0] == cpuUtil && this.lastUtilMeasurement[1] == ramUtil
-                    && this.lastUtilMeasurement[2] == diskUtil) {
+            if (!newPerfDataAvailableFlag && this.lastUtilMeasurement[0] == cpuUtil
+                    && this.lastUtilMeasurement[1] == ramUtil && this.lastUtilMeasurement[2] == diskUtil) {
                 this.newPerfDataAvailableFlag = false;
             } else {
                 this.newPerfDataAvailableFlag = true;
@@ -179,8 +181,8 @@ public class MonitoredVMex extends VMex {
             throw new IllegalStateException("The operation is undefined for subclass: " + getClass().getCanonicalName());
         }
 
-        MonitoredVMex result = new MonitoredVMex(getName(), getUserId(), getMips(), getNumberOfPes(), getRam(), getBw(), getSize(), getVmm(), scheduler,
-                getMetadata().clone(), getSummaryPeriodLength());
+        MonitoredVMex result = new MonitoredVMex(getName(), getUserId(), getMips(), getNumberOfPes(), getRam(),
+                getBw(), getSize(), getVmm(), scheduler, getMetadata().clone(), getSummaryPeriodLength());
         return result;
     }
 

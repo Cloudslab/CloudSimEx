@@ -41,11 +41,13 @@ public class SimpleWebLoadBalancer extends BaseWebLoadBalancer implements ILoadB
      *            - the balancer of the DB cloudlets among DB servers. Must not
      *            be null.
      */
-    public SimpleWebLoadBalancer(final long appId, final String ip, final List<HddVm> appServers, final IDBBalancer dbBalancer) {
+    public SimpleWebLoadBalancer(final long appId, final String ip, final List<HddVm> appServers,
+            final IDBBalancer dbBalancer) {
         super(appId, ip, appServers, dbBalancer);
     }
 
-    public SimpleWebLoadBalancer(final long appId, final String ip, final List<HddVm> appServers, final IDBBalancer dbBalancer, WebBroker broker) {
+    public SimpleWebLoadBalancer(final long appId, final String ip, final List<HddVm> appServers,
+            final IDBBalancer dbBalancer, WebBroker broker) {
         super(appId, ip, appServers, dbBalancer);
         this.broker = broker;
     }
@@ -67,17 +69,20 @@ public class SimpleWebLoadBalancer extends BaseWebLoadBalancer implements ILoadB
         if (runingVMs.isEmpty()) {
             for (WebSession session : noAppServSessions) {
                 if (getAppServers().isEmpty()) {
-                    CustomLog.printf(Level.SEVERE, "Simple Load Balancer(%s): session %d cannot be scheduled, as there are no AS servers",
+                    CustomLog.printf(Level.SEVERE,
+                            "Simple Load Balancer(%s): session %d cannot be scheduled, as there are no AS servers",
                             broker == null ? "N/A" : broker, session.getSessionId());
                 } else {
-                    CustomLog.printf(Level.SEVERE,
-                            "[Simple Load Balancer](%s): session %d cannot be scheduled, as all AS servers are either booting or terminated",
-                            broker == null ? "N/A" : broker, session.getSessionId());
+                    CustomLog
+                            .printf(Level.SEVERE,
+                                    "[Simple Load Balancer](%s): session %d cannot be scheduled, as all AS servers are either booting or terminated",
+                                    broker == null ? "N/A" : broker, session.getSessionId());
                 }
             }
         } else {
             @SuppressWarnings("unchecked")
-            Map<Integer, Integer> usedASServers = broker != null ? this.broker.getASServersToNumSessions() : Collections.EMPTY_MAP;
+            Map<Integer, Integer> usedASServers = broker != null ? this.broker.getASServersToNumSessions()
+                    : Collections.EMPTY_MAP;
 
             // Get the VMs which are utilized the least
             debugSB.setLength(0);
@@ -95,8 +100,9 @@ public class SimpleWebLoadBalancer extends BaseWebLoadBalancer implements ILoadB
                     }
                 }
 
-                debugSB.append(String.format("%s[%s] cpu(%.2f), ram(%.2f), cdlts(%d), sess(%d); ", vm, vm.getStatus(), vm.getCPUUtil(), vm.getRAMUtil(), vm
-                        .getCloudletScheduler().getCloudletExecList().size(), !usedASServers.containsKey(vm.getId()) ? 0 : usedASServers.get(vm.getId())));
+                debugSB.append(String.format("%s[%s] cpu(%.2f), ram(%.2f), cdlts(%d), sess(%d); ", vm, vm.getStatus(),
+                        vm.getCPUUtil(), vm.getRAMUtil(), vm.getCloudletScheduler().getCloudletExecList().size(),
+                        !usedASServers.containsKey(vm.getId()) ? 0 : usedASServers.get(vm.getId())));
             }
 
             // Distribute the sessions among the best VMs
@@ -107,11 +113,14 @@ public class SimpleWebLoadBalancer extends BaseWebLoadBalancer implements ILoadB
                     HddVm hostVM = bestVms.get((int) index);
                     session.setAppVmId(hostVM.getId());
 
-                    CustomLog.printf("[Simple Load Balancer(%s): Assigning sesssion %d to %s[%s] cpu(%.2f), ram(%.2f), cdlts(%d), sess(%d);",
-                            broker == null ? "N/A" : broker, session.getSessionId(), hostVM, hostVM.getStatus(), hostVM.getCPUUtil(), hostVM.getRAMUtil(),
-                            hostVM.getCloudletScheduler().getCloudletExecList().size(),
-                            !usedASServers.containsKey(hostVM.getId()) ? 0 : usedASServers.get(hostVM.getId()));
-                    CustomLog.printf("[Simple Load Balancer(%s), Candidate VMs: %s", broker == null ? "N/A" : broker, debugSB);
+                    CustomLog
+                            .printf("[Simple Load Balancer(%s): Assigning sesssion %d to %s[%s] cpu(%.2f), ram(%.2f), cdlts(%d), sess(%d);",
+                                    broker == null ? "N/A" : broker, session.getSessionId(), hostVM,
+                                    hostVM.getStatus(), hostVM.getCPUUtil(), hostVM.getRAMUtil(), hostVM
+                                            .getCloudletScheduler().getCloudletExecList().size(),
+                                    !usedASServers.containsKey(hostVM.getId()) ? 0 : usedASServers.get(hostVM.getId()));
+                    CustomLog.printf("[Simple Load Balancer(%s), Candidate VMs: %s", broker == null ? "N/A" : broker,
+                            debugSB);
 
                 }
             }
@@ -128,8 +137,8 @@ public class SimpleWebLoadBalancer extends BaseWebLoadBalancer implements ILoadB
         // Log the state of the DB servers
         debugSB.setLength(0);
         for (HddVm dbVm : getDbBalancer().getVMs()) {
-            debugSB.append(String.format("%s cpu(%.2f), ram(%.2f), disk(%.2f), cdlts(%d);", dbVm, dbVm.getCPUUtil(), dbVm.getRAMUtil(), dbVm.getDiskUtil(),
-                    dbVm.getCloudletScheduler().getCloudletExecList().size()));
+            debugSB.append(String.format("%s cpu(%.2f), ram(%.2f), disk(%.2f), cdlts(%d);", dbVm, dbVm.getCPUUtil(),
+                    dbVm.getRAMUtil(), dbVm.getDiskUtil(), dbVm.getCloudletScheduler().getCloudletExecList().size()));
         }
         CustomLog.printf("[Simple Load Balancer], DB VMs: %s", debugSB);
 

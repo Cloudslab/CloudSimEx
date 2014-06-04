@@ -41,13 +41,14 @@ public class GeoIP2PingERServiceTest {
     @BeforeClass
     public static void setUp() throws Exception {
         CustomLog.configLogger(TestUtil.LOG_PROPS);
-        service = new GeoIP2PingERService(new File("GeoLite2-City.mmdb"), new File("PingTablePingER.tsv"), new File("MonitoringSitesPingER.csv"));
+        service = new GeoIP2PingERService(new File("GeoLite2-City.mmdb"), new File("PingTablePingER.tsv"), new File(
+                "MonitoringSitesPingER.csv"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testFailedServiceCreation() throws IOException {
-        try (GeoIP2PingERService geoService = new GeoIP2PingERService(new File("./nonexisting"), new File("PingTablePingER.tsv"), new File(
-                "MonitoringSitesPingER.csv"))) {
+        try (GeoIP2PingERService geoService = new GeoIP2PingERService(new File("./nonexisting"), new File(
+                "PingTablePingER.tsv"), new File("MonitoringSitesPingER.csv"))) {
             // pass
         }
     }

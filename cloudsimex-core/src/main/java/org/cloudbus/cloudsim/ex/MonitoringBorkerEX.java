@@ -67,9 +67,11 @@ public class MonitoringBorkerEX extends DatacenterBrokerEX {
      * @throws Exception
      *             - from the superclass.
      */
-    public MonitoringBorkerEX(final String name, final double lifeLength, final double monitoringPeriod, final double autoScalePeriod) throws Exception {
+    public MonitoringBorkerEX(final String name, final double lifeLength, final double monitoringPeriod,
+            final double autoScalePeriod) throws Exception {
         super(name, lifeLength);
-        this.monitoringPeriod = monitoringPeriod <= 0 ? -1 : Math.max(monitoringPeriod, CloudSim.getMinTimeBetweenEvents());
+        this.monitoringPeriod = monitoringPeriod <= 0 ? -1 : Math.max(monitoringPeriod,
+                CloudSim.getMinTimeBetweenEvents());
         this.autoScalePeriod = autoScalePeriod <= 0 ? -1 : Math.max(monitoringPeriod, autoScalePeriod);
     }
 
@@ -221,7 +223,8 @@ public class MonitoringBorkerEX extends DatacenterBrokerEX {
             double expectedWorkloadCPUDuration = (sumCPUCloudLets / vmMips);
             double expectedWorkloadIODuration = vmIOMips == 0 ? 0 : (sumIOCloudLets / vmIOMips);
 
-            vm.updatePerformance(Math.min(1, expectedWorkloadCPUDuration / monitoringPeriod), Math.min(1, vmRam == 0 ? 0 : sumRAMCloudLets / vmRam),
+            vm.updatePerformance(Math.min(1, expectedWorkloadCPUDuration / monitoringPeriod),
+                    Math.min(1, vmRam == 0 ? 0 : sumRAMCloudLets / vmRam),
                     Math.min(1, expectedWorkloadIODuration / monitoringPeriod));
         }
     }

@@ -84,10 +84,10 @@ public class WebSession_TestCloudletsStatus_Test {
         String vmm = "Xen"; // VMM name
 
         // create two VMs
-        vm1 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-			VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
-        vm2 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber,
-			VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(), new Integer[0]);
+        vm1 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
+                new HddCloudletSchedulerTimeShared(), new Integer[0]);
+        vm2 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
+                new HddCloudletSchedulerTimeShared(), new Integer[0]);
 
         // add the VMs to the vmList
         vmlist.add(vm1);
@@ -105,13 +105,17 @@ public class WebSession_TestCloudletsStatus_Test {
         WebCloudlet asCl1 = new WebCloudlet(0, (int) (VM_MIPS * factor1), 0, 10, broker.getId(), false, null);
         WebCloudlet asCl2 = new WebCloudlet(0, (int) (VM_MIPS * factor2), 0, 10, broker.getId(), false, null);
 
-        WebCloudlet dbCl1 = new WebCloudlet(0, (int) (VM_MIPS * factor2), (int) (HOST_MIOPS * factor2), 10, broker.getId(), false, dataItem1);
-        WebCloudlet dbCl2 = new WebCloudlet(0, (int) (VM_MIPS * factor1), (int) (HOST_MIOPS * factor1), 10, broker.getId(), false, dataItem1);
+        WebCloudlet dbCl1 = new WebCloudlet(0, (int) (VM_MIPS * factor2), (int) (HOST_MIOPS * factor2), 10,
+                broker.getId(), false, dataItem1);
+        WebCloudlet dbCl2 = new WebCloudlet(0, (int) (VM_MIPS * factor1), (int) (HOST_MIOPS * factor1), 10,
+                broker.getId(), false, dataItem1);
 
         IGenerator<WebCloudlet> generatorAS = new IterableGenerator<>(Arrays.asList(asCl1, asCl2));
-        CompositeGenerator<WebCloudlet> generatorDB = new CompositeGenerator<>(new IterableGenerator<>(Arrays.asList(dbCl1, dbCl2)));
+        CompositeGenerator<WebCloudlet> generatorDB = new CompositeGenerator<>(new IterableGenerator<>(Arrays.asList(
+                dbCl1, dbCl2)));
 
-        ILoadBalancer balancer = new SimpleWebLoadBalancer(1, "127.0.0.1", Arrays.asList(vm1), new SimpleDBBalancer(vm2));
+        ILoadBalancer balancer = new SimpleWebLoadBalancer(1, "127.0.0.1", Arrays.asList(vm1),
+                new SimpleDBBalancer(vm2));
         broker.addLoadBalancer(balancer);
 
         WebSession session = new WebSession(generatorAS, generatorDB, broker.getId(), 2, -1);
@@ -154,8 +158,8 @@ public class WebSession_TestCloudletsStatus_Test {
         dataItem1 = new DataItem(ITEM_SIZE);
         hddList.add(new HddPe(new PeProvisionerSimple(HOST_MIOPS), dataItem1));
 
-        hostList.add(new HddHost(new RamProvisionerSimple(HOST_RAM), new BwProvisionerSimple(HOST_BW), HOST_STORAGE, peList, hddList,
-                new VmSchedulerTimeShared(peList), new VmDiskScheduler(hddList)));
+        hostList.add(new HddHost(new RamProvisionerSimple(HOST_RAM), new BwProvisionerSimple(HOST_BW), HOST_STORAGE,
+                peList, hddList, new VmSchedulerTimeShared(peList), new VmDiskScheduler(hddList)));
 
         String arch = "x86";
         String os = "Linux";
@@ -167,12 +171,13 @@ public class WebSession_TestCloudletsStatus_Test {
         double costPerBw = 0.0;
         LinkedList<Storage> storageList = new LinkedList<Storage>();
 
-        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(arch, os, vmm, hostList, time_zone, cost, costPerMem, costPerStorage,
-                costPerBw);
+        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(arch, os, vmm, hostList, time_zone,
+                cost, costPerMem, costPerStorage, costPerBw);
 
         DatacenterEX datacenter = null;
         try {
-            datacenter = new HddDataCenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
+            datacenter = new HddDataCenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList,
+                    0);
         } catch (Exception e) {
             e.printStackTrace();
         }

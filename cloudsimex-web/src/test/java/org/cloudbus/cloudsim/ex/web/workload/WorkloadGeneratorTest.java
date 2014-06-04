@@ -47,7 +47,8 @@ public class WorkloadGeneratorTest {
     @Test
     public void testConstantFreqFunScenario() {
         freqFunction = new ConstFreqFunction(FREQ_UNIT, FREQ_VALUE);
-        sessionGenerator = new ConstSessionGenerator(AS_CLOUDLET_LENGTH, AS_RAM, DB_CLOUDLET_LENGTH, DB_RAM, DB_CLOUDLET_IO_LENGTH, false, data, metadata);
+        sessionGenerator = new ConstSessionGenerator(AS_CLOUDLET_LENGTH, AS_RAM, DB_CLOUDLET_LENGTH, DB_RAM,
+                DB_CLOUDLET_IO_LENGTH, false, data, metadata);
 
         workloadGenerator = new StatWorkloadGenerator(TestUtil.SEED_ARRAY, freqFunction, sessionGenerator);
 

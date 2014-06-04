@@ -38,7 +38,8 @@ public class GoogleOnDemandPolicy extends BaseCustomerVmBillingPolicy {
 
     @Override
     public BigDecimal billSingleVmUntil(VMex vm, double endTime) {
-        double time = vm.getEndTime() < 0 || vm.getEndTime() > endTime ? endTime - vm.getStartTime() : vm.getTimeAfterBooting();
+        double time = vm.getEndTime() < 0 || vm.getEndTime() > endTime ? endTime - vm.getStartTime() : vm
+                .getTimeAfterBooting();
         return computeBill(vm, time);
     }
 

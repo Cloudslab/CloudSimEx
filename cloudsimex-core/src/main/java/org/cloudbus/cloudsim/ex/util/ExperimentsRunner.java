@@ -59,7 +59,8 @@ public class ExperimentsRunner {
      * @throws Exception
      *             - if something goes wrong.
      */
-    public static synchronized void runExperiments(final List<ExperimentDefinition> experimentsDefs, final int numFreeCPUs) throws Exception {
+    public static synchronized void runExperiments(final List<ExperimentDefinition> experimentsDefs,
+            final int numFreeCPUs) throws Exception {
 
         if (!experimentsDefs.isEmpty()) {
             // Prints the pid of the current process... so we know who to kill
@@ -86,7 +87,8 @@ public class ExperimentsRunner {
                             resultStatus = 1;
                         }
                         if (resultStatus != 0) {
-                            System.err.println("!!! Experiment " + def.getMainClass().getCanonicalName() + " has failed!!!");
+                            System.err.println("!!! Experiment " + def.getMainClass().getCanonicalName()
+                                    + " has failed!!!");
                         }
                     }
                 };

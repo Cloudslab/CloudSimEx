@@ -43,7 +43,8 @@ public class SimpleWorkloadGenerator implements IWorkloadGenerator {
      * @param count
      *            - the number of generations to do. Null is infinity.
      */
-    public SimpleWorkloadGenerator(final int sessionsNumber, final ISessionGenerator sessGen, final Double startTime, final Double endTime, final Integer count) {
+    public SimpleWorkloadGenerator(final int sessionsNumber, final ISessionGenerator sessGen, final Double startTime,
+            final Double endTime, final Integer count) {
         super();
         this.sessionsNumber = sessionsNumber;
         this.sessGen = sessGen;

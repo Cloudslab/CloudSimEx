@@ -42,7 +42,8 @@ public class RandomIPWorkloadGenerator implements IWorkloadGenerator {
      * @param geoService
      *            - a geolocation service. Must not be null.
      */
-    public RandomIPWorkloadGenerator(final IWorkloadGenerator wrappedGenerator, final IPGenerator ipGen, final IGeolocationService geoService) {
+    public RandomIPWorkloadGenerator(final IWorkloadGenerator wrappedGenerator, final IPGenerator ipGen,
+            final IGeolocationService geoService) {
         super();
         this.wrappedGenerator = wrappedGenerator;
         this.ipGen = ipGen;

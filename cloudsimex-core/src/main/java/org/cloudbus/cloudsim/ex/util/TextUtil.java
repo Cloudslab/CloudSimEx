@@ -70,7 +70,8 @@ public class TextUtil {
      *            - the delimter.
      * @return a line for the headers.
      */
-    public static String getCaptionLine(final List<String> headers, final List<? extends Class<?>> headerClasses, final String delim) {
+    public static String getCaptionLine(final List<String> headers, final List<? extends Class<?>> headerClasses,
+            final String delim) {
         StringBuffer buffer = new StringBuffer();
         int i = 0;
         for (String h : headers) {
@@ -107,7 +108,8 @@ public class TextUtil {
      *            line as well.
      * @return
      */
-    public static String getTxtLine(final List<?> objects, final List<String> headers, final String delimeter, final boolean includeFieldNames) {
+    public static String getTxtLine(final List<?> objects, final List<String> headers, final String delimeter,
+            final boolean includeFieldNames) {
         StringBuffer result = new StringBuffer();
 
         for (int i = 0; i < objects.size(); i++) {
@@ -286,7 +288,8 @@ public class TextUtil {
      *            line as well.
      * @return formated line of text, as described above.
      */
-    public static String getTxtLine(final Object obj, final String delimeter, final String[] properties, final boolean includeFieldNames) {
+    public static String getTxtLine(final Object obj, final String delimeter, final String[] properties,
+            final boolean includeFieldNames) {
         StringBuffer result = new StringBuffer();
         List<Method> methods = extractGetMethodsForClass(obj.getClass(), properties);
         int i = 0;
@@ -347,8 +350,8 @@ public class TextUtil {
      * @return
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static <F> String getTxtLine(final F obj, final String delimeter, final String[] properties, final boolean includeFieldNames,
-            final LinkedHashMap<String, Function<? extends F, String>> virtualProps) {
+    public static <F> String getTxtLine(final F obj, final String delimeter, final String[] properties,
+            final boolean includeFieldNames, final LinkedHashMap<String, Function<? extends F, String>> virtualProps) {
         StringBuffer result = new StringBuffer(getTxtLine(obj, delimeter, properties, includeFieldNames));
         if (!virtualProps.isEmpty()) {
             result.append(delimeter);
@@ -532,7 +535,8 @@ public class TextUtil {
      *            class.
      * @return
      */
-    public static String getCaptionLine(final Class<?> clazz, final String delimeter, final String[] properties, final String[] virtualProps) {
+    public static String getCaptionLine(final Class<?> clazz, final String delimeter, final String[] properties,
+            final String[] virtualProps) {
         StringBuffer result = new StringBuffer(getCaptionLine(clazz, delimeter, properties));
         if (virtualProps.length > 0) {
             result.append(delimeter);
@@ -566,7 +570,8 @@ public class TextUtil {
         Class<?> clazz = clazz1;
 
         Textualize classAnnotation = clazz1.getAnnotation(Textualize.class);
-        String[] allowedProps = properties != null ? properties : classAnnotation != null ? classAnnotation.properties() : null;
+        String[] allowedProps = properties != null ? properties : classAnnotation != null ? classAnnotation
+                .properties() : null;
 
         if (!GET_METHODS.containsKey(clazz)) {
             methods = new ArrayList<>();
@@ -613,7 +618,8 @@ public class TextUtil {
     }
 
     private static String getPropName(final Method getter) {
-        return isBoolGetter(getter) ? getter.getName().substring(2) : isGetter(getter) ? getter.getName().substring(3) : getter.getName();
+        return isBoolGetter(getter) ? getter.getName().substring(2) : isGetter(getter) ? getter.getName().substring(3)
+                : getter.getName();
     }
 
     private static boolean isAllowedGetter(final Method m, final String[] allowedProps) {
@@ -626,13 +632,13 @@ public class TextUtil {
     }
 
     private static boolean isStandardGetter(final Method m) {
-        return Modifier.isPublic(m.getModifiers()) && m.getParameterTypes().length == 0 && m.getName().matches(STANDARD_GET_REGEX)
-                && !Primitives.wrap(m.getReturnType()).equals(Boolean.class);
+        return Modifier.isPublic(m.getModifiers()) && m.getParameterTypes().length == 0
+                && m.getName().matches(STANDARD_GET_REGEX) && !Primitives.wrap(m.getReturnType()).equals(Boolean.class);
     }
 
     private static boolean isBoolGetter(final Method m) {
-        return Modifier.isPublic(m.getModifiers()) && m.getParameterTypes().length == 0 && m.getName().matches(BOOLGET_REGEX)
-                && Primitives.wrap(m.getReturnType()).equals(Boolean.class);
+        return Modifier.isPublic(m.getModifiers()) && m.getParameterTypes().length == 0
+                && m.getName().matches(BOOLGET_REGEX) && Primitives.wrap(m.getReturnType()).equals(Boolean.class);
     }
 
     /**
@@ -656,7 +662,8 @@ public class TextUtil {
         } else if (obj instanceof Collection<?> || obj.getClass().isArray()) {
             result = "[...]";
         } else if (obj instanceof Enum<?>) {
-            result = String.format("%" + getEnumTxtSize(((Enum<?>) obj).getDeclaringClass()) + "s", String.valueOf(obj));
+            result = String
+                    .format("%" + getEnumTxtSize(((Enum<?>) obj).getDeclaringClass()) + "s", String.valueOf(obj));
         } else if (obj instanceof Class) {
             result = ((Class<?>) obj).getSimpleName();
             // If toString is not predefined ...

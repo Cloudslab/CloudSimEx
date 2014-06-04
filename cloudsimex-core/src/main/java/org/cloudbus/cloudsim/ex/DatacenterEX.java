@@ -27,13 +27,14 @@ public class DatacenterEX extends Datacenter {
 
     private IVMBootDelayDistribution delayDistribution = new ConstantVMBootDelay(0);
 
-    public DatacenterEX(String name, DatacenterCharacteristics characteristics, VmAllocationPolicy vmAllocationPolicy, List<Storage> storageList,
-            double schedulingInterval) throws Exception {
+    public DatacenterEX(String name, DatacenterCharacteristics characteristics, VmAllocationPolicy vmAllocationPolicy,
+            List<Storage> storageList, double schedulingInterval) throws Exception {
         super(name, characteristics, vmAllocationPolicy, storageList, schedulingInterval);
     }
 
-    public DatacenterEX(String name, DatacenterCharacteristics characteristics, VmAllocationPolicy vmAllocationPolicy, List<Storage> storageList,
-            double schedulingInterval, IVMBootDelayDistribution delayDistribution) throws Exception {
+    public DatacenterEX(String name, DatacenterCharacteristics characteristics, VmAllocationPolicy vmAllocationPolicy,
+            List<Storage> storageList, double schedulingInterval, IVMBootDelayDistribution delayDistribution)
+            throws Exception {
         super(name, characteristics, vmAllocationPolicy, storageList, schedulingInterval);
         this.delayDistribution = delayDistribution;
     }
@@ -89,7 +90,8 @@ public class DatacenterEX extends Datacenter {
             // vm.setBeingInstantiated(false);
             // }
 
-            vm.updateVmProcessing(CloudSim.clock(), getVmAllocationPolicy().getHost(vm).getVmScheduler().getAllocatedMipsForVm(vm));
+            vm.updateVmProcessing(CloudSim.clock(), getVmAllocationPolicy().getHost(vm).getVmScheduler()
+                    .getAllocatedMipsForVm(vm));
         }
 
     }

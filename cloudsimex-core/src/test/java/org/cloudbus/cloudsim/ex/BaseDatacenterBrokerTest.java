@@ -91,7 +91,8 @@ public abstract class BaseDatacenterBrokerTest {
 
     protected Cloudlet createCloudlet(final double cloudletDuration) {
         UtilizationModel utilizationModel = new UtilizationModelFull();
-        return new Cloudlet(Id.pollId(Cloudlet.class), (int) (VM_MIPS * cloudletDuration), 1, 0, 0, utilizationModel, utilizationModel, utilizationModel);
+        return new Cloudlet(Id.pollId(Cloudlet.class), (int) (VM_MIPS * cloudletDuration), 1, 0, 0, utilizationModel,
+                utilizationModel, utilizationModel);
     }
 
     protected List<Vm> createVms(final int vmNum) {
@@ -106,7 +107,8 @@ public abstract class BaseDatacenterBrokerTest {
         int pesNumber = 1; // number of cpus
         String vmm = "Xen"; // VMM name
 
-        return new VMex("TestVM", broker.getId(), VM_MIPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm, new CloudletSchedulerTimeShared());
+        return new VMex("TestVM", broker.getId(), VM_MIPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
+                new CloudletSchedulerTimeShared());
     }
 
     protected DatacenterEX createDatacenterWithSingleHostAndSingleDisk(final String name) {
@@ -114,8 +116,8 @@ public abstract class BaseDatacenterBrokerTest {
         List<Pe> peList = new ArrayList<>();
 
         peList.add(new Pe(Id.pollId(Pe.class), new PeProvisionerSimple(HOST_MIPS)));
-        hostList.add(new Host(Id.pollId(Host.class), new RamProvisionerSimple(HOST_RAM), new BwProvisionerSimple(HOST_BW), HOST_STORAGE, peList,
-                new VmSchedulerTimeShared(peList)));
+        hostList.add(new Host(Id.pollId(Host.class), new RamProvisionerSimple(HOST_RAM), new BwProvisionerSimple(
+                HOST_BW), HOST_STORAGE, peList, new VmSchedulerTimeShared(peList)));
 
         String arch = "x86";
         String os = "Linux";
@@ -127,8 +129,8 @@ public abstract class BaseDatacenterBrokerTest {
         double costPerBw = 0.0;
         LinkedList<Storage> storageList = new LinkedList<Storage>();
 
-        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(arch, os, vmm, hostList, time_zone, cost, costPerMem, costPerStorage,
-                costPerBw);
+        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(arch, os, vmm, hostList, time_zone,
+                cost, costPerMem, costPerStorage, costPerBw);
 
         DatacenterEX datacenter = null;
         try {

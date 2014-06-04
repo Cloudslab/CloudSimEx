@@ -37,10 +37,12 @@ public class HddCloudlet extends Cloudlet {
      *            - whether this cloudlets modifies the data it accesses.
      * @param record
      */
-    public HddCloudlet(final long cloudletLength, final long cloudletIOLength, final int pesNumber, final int numberOfHddPes, final double ram,
-            final int userId, final boolean dataModifying, final DataItem data, final boolean record) {
+    public HddCloudlet(final long cloudletLength, final long cloudletIOLength, final int pesNumber,
+            final int numberOfHddPes, final double ram, final int userId, final boolean dataModifying,
+            final DataItem data, final boolean record) {
 
-        super(Id.pollId(Cloudlet.class), cloudletLength, pesNumber, 0, 0, UTIL_MODEL_FULL, UTIL_MODEL_FULL, UTIL_MODEL_FULL, record);
+        super(Id.pollId(Cloudlet.class), cloudletLength, pesNumber, 0, 0, UTIL_MODEL_FULL, UTIL_MODEL_FULL,
+                UTIL_MODEL_FULL, record);
         this.ram = ram;
         this.cloudletIOLength = cloudletIOLength;
         this.data = data;
@@ -61,8 +63,8 @@ public class HddCloudlet extends Cloudlet {
      * @param data
      * @param record
      */
-    public HddCloudlet(final long cloudletLength, final long cloudletIOLength, final double ram, final int userId, final boolean dataModifying,
-            final DataItem data, final boolean record) {
+    public HddCloudlet(final long cloudletLength, final long cloudletIOLength, final double ram, final int userId,
+            final boolean dataModifying, final DataItem data, final boolean record) {
         this(cloudletLength, cloudletIOLength, 1, 1, ram, userId, dataModifying, data, record);
     }
 
@@ -77,8 +79,8 @@ public class HddCloudlet extends Cloudlet {
      *            - whether this cloudlets modifies the data it accesses.
      * @param data
      */
-    public HddCloudlet(final long cloudletLength, final long cloudletIOLength, final double ram, final int userId, final boolean dataModifying,
-            final DataItem data) {
+    public HddCloudlet(final long cloudletLength, final long cloudletIOLength, final double ram, final int userId,
+            final boolean dataModifying, final DataItem data) {
         this(cloudletLength, cloudletIOLength, 1, 1, ram, userId, dataModifying, data, false);
     }
 

@@ -47,8 +47,10 @@ public class GoogleOnDemandPolicyTest extends BaseDatacenterBrokerTest {
         double d1PricePerHour = 0.132;
         double d2PricePerHour = 0.265;
 
-        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap.<Pair<String, String>, BigDecimal> builder()
-                .put(of("n1-standard-1-d", NIX_OS), valueOf(d1PricePerHour)).put(of("n1-standard-2-d", NIX_OS), valueOf(d2PricePerHour)).build();
+        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap
+                .<Pair<String, String>, BigDecimal> builder()
+                .put(of("n1-standard-1-d", NIX_OS), valueOf(d1PricePerHour))
+                .put(of("n1-standard-2-d", NIX_OS), valueOf(d2PricePerHour)).build();
         IVmBillingPolicy policy = new GoogleOnDemandPolicy(prices);
         broker.setVMBillingPolicy(policy);
         BigDecimal bill = broker.bill();
@@ -60,8 +62,10 @@ public class GoogleOnDemandPolicyTest extends BaseDatacenterBrokerTest {
         assertEquals(expectedBill, bill.doubleValue(), 0.01);
 
         // Now test billing before time...
-        assertEquals((d1PricePerHour + d2PricePerHour) * 0.4, policy.bill(Arrays.asList(vm1, vm2), Consts.HOUR * 0.4).doubleValue(), 0.01);
-        assertEquals((d1PricePerHour + d2PricePerHour) * (1 / 6d), policy.bill(Arrays.asList(vm1, vm2), Consts.HOUR / 10).doubleValue(), 0.01);
+        assertEquals((d1PricePerHour + d2PricePerHour) * 0.4, policy.bill(Arrays.asList(vm1, vm2), Consts.HOUR * 0.4)
+                .doubleValue(), 0.01);
+        assertEquals((d1PricePerHour + d2PricePerHour) * (1 / 6d),
+                policy.bill(Arrays.asList(vm1, vm2), Consts.HOUR / 10).doubleValue(), 0.01);
     }
 
     @Test
@@ -95,8 +99,9 @@ public class GoogleOnDemandPolicyTest extends BaseDatacenterBrokerTest {
         double d1Price = 0.132;
         double d2Price = 0.265;
 
-        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap.<Pair<String, String>, BigDecimal> builder()
-                .put(of("n1-standard-1-d", NIX_OS), valueOf(d1Price)).put(of("n1-standard-2-d", NIX_OS), valueOf(d2Price)).build();
+        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap
+                .<Pair<String, String>, BigDecimal> builder().put(of("n1-standard-1-d", NIX_OS), valueOf(d1Price))
+                .put(of("n1-standard-2-d", NIX_OS), valueOf(d2Price)).build();
         IVmBillingPolicy policy = new GoogleOnDemandPolicy(prices);
         broker.setVMBillingPolicy(policy);
         BigDecimal bill = broker.bill();
@@ -143,8 +148,9 @@ public class GoogleOnDemandPolicyTest extends BaseDatacenterBrokerTest {
         double d1Price = 0.132;
         double d2Price = 0.265;
 
-        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap.<Pair<String, String>, BigDecimal> builder()
-                .put(of("n1-standard-1-d", NIX_OS), valueOf(d1Price)).put(of("n1-standard-2-d", NIX_OS), valueOf(d2Price)).build();
+        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap
+                .<Pair<String, String>, BigDecimal> builder().put(of("n1-standard-1-d", NIX_OS), valueOf(d1Price))
+                .put(of("n1-standard-2-d", NIX_OS), valueOf(d2Price)).build();
         IVmBillingPolicy policy = new GoogleOnDemandPolicy(prices);
         broker.setVMBillingPolicy(policy);
         BigDecimal bill = broker.bill();
@@ -194,8 +200,9 @@ public class GoogleOnDemandPolicyTest extends BaseDatacenterBrokerTest {
             expectedBill += (d1Price / 60) * times + (d2Price / 60) * times;
         }
 
-        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap.<Pair<String, String>, BigDecimal> builder()
-                .put(of("n1-standard-1-d", NIX_OS), valueOf(d1Price)).put(of("n1-standard-2-d", NIX_OS), valueOf(d2Price)).build();
+        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap
+                .<Pair<String, String>, BigDecimal> builder().put(of("n1-standard-1-d", NIX_OS), valueOf(d1Price))
+                .put(of("n1-standard-2-d", NIX_OS), valueOf(d2Price)).build();
         IVmBillingPolicy policy = new GoogleOnDemandPolicy(prices);
 
         CloudSim.startSimulation();
@@ -217,8 +224,10 @@ public class GoogleOnDemandPolicyTest extends BaseDatacenterBrokerTest {
         double d1PricePerHour = 0.132;
         double d2PricePerHour = 0.265;
 
-        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap.<Pair<String, String>, BigDecimal> builder()
-                .put(of("n1-standard-1-d", NIX_OS), valueOf(d1PricePerHour)).put(of("n1-standard-2-d", NIX_OS), valueOf(d2PricePerHour)).build();
+        ImmutableMap<Pair<String, String>, BigDecimal> prices = ImmutableMap
+                .<Pair<String, String>, BigDecimal> builder()
+                .put(of("n1-standard-1-d", NIX_OS), valueOf(d1PricePerHour))
+                .put(of("n1-standard-2-d", NIX_OS), valueOf(d2PricePerHour)).build();
         IVmBillingPolicy policy = new GoogleOnDemandPolicy(prices);
         assertEquals(d1PricePerHour / 60, policy.normalisedCostPerMinute(vm1).doubleValue(), 0.01);
         assertEquals(d2PricePerHour / 60, policy.normalisedCostPerMinute(vm2).doubleValue(), 0.01);
@@ -227,14 +236,16 @@ public class GoogleOnDemandPolicyTest extends BaseDatacenterBrokerTest {
     @Test
     public void testNexChargeTime() {
         final Queue<Double> vmTimes = new LinkedList<>(Arrays.asList(0d, 30d * MINUTE, 100d * MINUTE));
-        VMex vmMock = new VMex("Test", broker.getId(), VM_MIPS, 1, VM_RAM, VM_BW, VM_SIZE, "Test", new CloudletSchedulerTimeShared()) {
+        VMex vmMock = new VMex("Test", broker.getId(), VM_MIPS, 1, VM_RAM, VM_BW, VM_SIZE, "Test",
+                new CloudletSchedulerTimeShared()) {
             @Override
             protected double getCurrentTime() {
                 return vmTimes.poll();
             }
         };
 
-        final Queue<Double> policyTimes = new LinkedList<>(Arrays.asList(35d * MINUTE + 1, 60d * MINUTE + 1, 91d * MINUTE + 1, 101d * MINUTE + 1));
+        final Queue<Double> policyTimes = new LinkedList<>(Arrays.asList(35d * MINUTE + 1, 60d * MINUTE + 1,
+                91d * MINUTE + 1, 101d * MINUTE + 1));
         IVmBillingPolicy policyMock = new GoogleOnDemandPolicy(ImmutableMap.<Pair<String, String>, BigDecimal> of()) {
             @Override
             protected double getCurrentTime() {

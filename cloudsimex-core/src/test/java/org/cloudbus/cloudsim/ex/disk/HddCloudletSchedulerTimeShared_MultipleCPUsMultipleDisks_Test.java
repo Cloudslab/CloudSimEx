@@ -89,12 +89,12 @@ public class HddCloudletSchedulerTimeShared_MultipleCPUsMultipleDisks_Test {
 
         // create 3 VMs. Vm1 has access to both hdds. Vm2 and Vm3 access only
         // disk 1 and 2 respectively
-        vm1 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(),
-                new Integer[0]);
-        vm2 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(),
-                new Integer[] { disk1.getId() });
-        vm3 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm, new HddCloudletSchedulerTimeShared(),
-                new Integer[] { disk2.getId() });
+        vm1 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
+                new HddCloudletSchedulerTimeShared(), new Integer[0]);
+        vm2 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
+                new HddCloudletSchedulerTimeShared(), new Integer[] { disk1.getId() });
+        vm3 = new HddVm("Test", broker.getId(), VM_MIPS, HOST_MIOPS, pesNumber, VM_RAM, VM_BW, VM_SIZE, vmm,
+                new HddCloudletSchedulerTimeShared(), new Integer[] { disk2.getId() });
 
         // add the VMs to the vmList
         vmlist.add(vm1);
@@ -119,10 +119,14 @@ public class HddCloudletSchedulerTimeShared_MultipleCPUsMultipleDisks_Test {
         double job4TimesMips = 1;
         double job4TimesIOMIPS = 2;
 
-        HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips), (int) (HOST_MIOPS * job1TimesIOMIPS), 5, broker.getId(), false, dataItem_1_1);
-        HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips), (int) (HOST_MIOPS * job2TimesIOMIPS), 5, broker.getId(), false, dataItem_1_2);
-        HddCloudlet cloudlet3 = new HddCloudlet((int) (VM_MIPS * job3TimesMips), (int) (HOST_MIOPS * job3TimesIOMIPS), 5, broker.getId(), false, dataItem_2_2);
-        HddCloudlet cloudlet4 = new HddCloudlet((int) (VM_MIPS * job4TimesMips), (int) (HOST_MIOPS * job4TimesIOMIPS), 5, broker.getId(), false, dataItem_2_2);
+        HddCloudlet cloudlet1 = new HddCloudlet((int) (VM_MIPS * job1TimesMips), (int) (HOST_MIOPS * job1TimesIOMIPS),
+                5, broker.getId(), false, dataItem_1_1);
+        HddCloudlet cloudlet2 = new HddCloudlet((int) (VM_MIPS * job2TimesMips), (int) (HOST_MIOPS * job2TimesIOMIPS),
+                5, broker.getId(), false, dataItem_1_2);
+        HddCloudlet cloudlet3 = new HddCloudlet((int) (VM_MIPS * job3TimesMips), (int) (HOST_MIOPS * job3TimesIOMIPS),
+                5, broker.getId(), false, dataItem_2_2);
+        HddCloudlet cloudlet4 = new HddCloudlet((int) (VM_MIPS * job4TimesMips), (int) (HOST_MIOPS * job4TimesIOMIPS),
+                5, broker.getId(), false, dataItem_2_2);
 
         cloudlet1.setVmId(vm1.getId());
         cloudlet2.setVmId(vm2.getId());
@@ -161,8 +165,8 @@ public class HddCloudletSchedulerTimeShared_MultipleCPUsMultipleDisks_Test {
         hddList.add(disk1);
         hddList.add(disk2);
 
-        hostList.add(new HddHost(new RamProvisionerSimple(HOST_RAM), new BwProvisionerSimple(HOST_BW), HOST_STORAGE, peList, hddList,
-                new VmSchedulerTimeSharedOverSubscription(peList), new VmDiskScheduler(hddList)));
+        hostList.add(new HddHost(new RamProvisionerSimple(HOST_RAM), new BwProvisionerSimple(HOST_BW), HOST_STORAGE,
+                peList, hddList, new VmSchedulerTimeSharedOverSubscription(peList), new VmDiskScheduler(hddList)));
 
         String arch = "x86";
         String os = "Linux";
@@ -174,12 +178,13 @@ public class HddCloudletSchedulerTimeShared_MultipleCPUsMultipleDisks_Test {
         double costPerBw = 0.0;
         LinkedList<Storage> storageList = new LinkedList<Storage>();
 
-        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(arch, os, vmm, hostList, time_zone, cost, costPerMem, costPerStorage,
-                costPerBw);
+        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(arch, os, vmm, hostList, time_zone,
+                cost, costPerMem, costPerStorage, costPerBw);
 
         DatacenterEX datacenter = null;
         try {
-            datacenter = new HddDataCenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
+            datacenter = new HddDataCenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList,
+                    0);
         } catch (Exception e) {
             e.printStackTrace();
         }

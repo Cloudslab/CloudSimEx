@@ -38,8 +38,9 @@ public class HddHost extends Host {
      * @param vmHDDScheduler
      *            - the IO scheduler.
      */
-    public HddHost(final RamProvisioner ramProvisioner, final BwProvisioner bwProvisioner, final long storage, final List<? extends Pe> peList,
-            final List<? extends HddPe> hddList, final VmScheduler vmCPUScheduler, final VmSchedulerWithIndependentPes<HddPe> vmHDDScheduler) {
+    public HddHost(final RamProvisioner ramProvisioner, final BwProvisioner bwProvisioner, final long storage,
+            final List<? extends Pe> peList, final List<? extends HddPe> hddList, final VmScheduler vmCPUScheduler,
+            final VmSchedulerWithIndependentPes<HddPe> vmHDDScheduler) {
         super(Id.pollId(HddHost.class), ramProvisioner, bwProvisioner, storage, peList, vmCPUScheduler);
         this.hddIOScheduler = vmHDDScheduler;
         this.hddList = hddList;
@@ -81,7 +82,8 @@ public class HddHost extends Host {
 
         boolean allocatednOfCPUFlag = super.vmCreate(vm);
         HddVm hddVm = (HddVm) vm;
-        allocationOfHDD = allocatednOfCPUFlag && getHddIOScheduler().allocatePesForVm(hddVm, hddVm.getCurrentRequestedIOMips());
+        allocationOfHDD = allocatednOfCPUFlag
+                && getHddIOScheduler().allocatePesForVm(hddVm, hddVm.getCurrentRequestedIOMips());
 
         if (allocatednOfCPUFlag && !allocationOfHDD) {
             getRamProvisioner().deallocateRamForVm(hddVm);

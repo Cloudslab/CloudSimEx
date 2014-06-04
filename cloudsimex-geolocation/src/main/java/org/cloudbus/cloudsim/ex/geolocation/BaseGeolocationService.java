@@ -17,8 +17,8 @@ public abstract class BaseGeolocationService implements IGeolocationService {
     protected static final int CACHE_SIZE = 1_000_000;
     protected static final int INITIAL_CACHE_SIZE = 100_000;
     /** In order to minimise the number of created instances, we keep a cache. */
-    private final Cache<GeoDistanceCacheKey, Double> distanceCache = 
-		CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
+    private final Cache<GeoDistanceCacheKey, Double> distanceCache = CacheBuilder.newBuilder().concurrencyLevel(1)
+            .initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
     /**
      * We shall consider coordinates differing only after the ROUND_DIGITS
      * significant digit to be equal.
@@ -60,8 +60,8 @@ public abstract class BaseGeolocationService implements IGeolocationService {
         do {
             sinLambda = Math.sin(lambda);
             cosLambda = Math.cos(lambda);
-            sinSigma = Math.sqrt((cosU2 * sinLambda) * (cosU2 * sinLambda) + (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda)
-                    * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda));
+            sinSigma = Math.sqrt((cosU2 * sinLambda) * (cosU2 * sinLambda)
+                    + (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda));
             if (sinSigma == 0)
                 return 0; // co-incident points
             cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda;
@@ -73,7 +73,8 @@ public abstract class BaseGeolocationService implements IGeolocationService {
                 cos2SigmaM = 0; // equatorial line: cosSqAlpha=0 (6)
             double C = f / 16 * cosSqAlpha * (4 + f * (4 - 3 * cosSqAlpha));
             lambdaP = lambda;
-            lambda = L + (1 - C) * f * sinAlpha * (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM)));
+            lambda = L + (1 - C) * f * sinAlpha
+                    * (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM)));
         } while (Math.abs(lambda - lambdaP) > 1e-12 && --iterLimit > 0);
 
         if (iterLimit == 0)
@@ -86,8 +87,8 @@ public abstract class BaseGeolocationService implements IGeolocationService {
                 * sinSigma
                 * (cos2SigmaM + B
                         / 4
-                        * (cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM) - B / 6 * cos2SigmaM * (-3 + 4 * sinSigma * sinSigma)
-                                * (-3 + 4 * cos2SigmaM * cos2SigmaM)));
+                        * (cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM) - B / 6 * cos2SigmaM
+                                * (-3 + 4 * sinSigma * sinSigma) * (-3 + 4 * cos2SigmaM * cos2SigmaM)));
         double dist = b * A * (sigma - deltaSigma);
 
         // CustomLog.printf("Distance between [%.2f, %.2f] and [%.2f, %.2f] is %.3f",

@@ -27,7 +27,8 @@ public class PeriodicStochasticFrequencyFunction extends FrequencyFunction {
     private double nullPoint;
     private CompositeValuedSet valuedSet;
 
-    public PeriodicStochasticFrequencyFunction(double unit, double periodLength, double nullPoint, CompositeValuedSet valuedSet) {
+    public PeriodicStochasticFrequencyFunction(double unit, double periodLength, double nullPoint,
+            CompositeValuedSet valuedSet) {
         super(unit);
         this.periodLength = periodLength;
         this.nullPoint = nullPoint;
