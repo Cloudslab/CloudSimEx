@@ -650,27 +650,31 @@ public class TextUtil {
      */
     public static String toString(final Object obj) {
         String result = "";
-        Class<?> clazz = Primitives.wrap(obj.getClass());
-        if (clazz.equals(Double.class) || clazz.equals(Float.class)) {
-            result = String.format("%" + SIZE_OF_DBL_STRINGS + "s", TextUtil.DEC_FORMAT.format(obj));
-        } else if (clazz.equals(Boolean.class)) {
-            result = String.valueOf(obj);
-        } else if (Number.class.isAssignableFrom(clazz)) {
-            result = String.format("%" + SIZE_OF_INT_STRINGS + "s", obj);
-        } else if (obj instanceof Date) {
-            result = getDateFormat().format(obj);
-        } else if (obj instanceof Collection<?> || obj.getClass().isArray()) {
-            result = "[...]";
-        } else if (obj instanceof Enum<?>) {
-            result = String
-                    .format("%" + getEnumTxtSize(((Enum<?>) obj).getDeclaringClass()) + "s", String.valueOf(obj));
-        } else if (obj instanceof Class) {
-            result = ((Class<?>) obj).getSimpleName();
-            // If toString is not predefined ...
-        } else if (String.valueOf(obj).startsWith(obj.getClass().getCanonicalName() + "@")) {
-            result = "ref<" + obj.hashCode() + ">";
+        if (obj == null) {
+            result = "null";
         } else {
-            result = String.format("%" + SIZE_OF_STRINGS + "s", String.valueOf(obj));
+            Class<?> clazz = Primitives.wrap(obj.getClass());
+            if (clazz.equals(Double.class) || clazz.equals(Float.class)) {
+                result = String.format("%" + SIZE_OF_DBL_STRINGS + "s", TextUtil.DEC_FORMAT.format(obj));
+            } else if (clazz.equals(Boolean.class)) {
+                result = String.valueOf(obj);
+            } else if (Number.class.isAssignableFrom(clazz)) {
+                result = String.format("%" + SIZE_OF_INT_STRINGS + "s", obj);
+            } else if (obj instanceof Date) {
+                result = getDateFormat().format(obj);
+            } else if (obj instanceof Collection<?> || obj.getClass().isArray()) {
+                result = "[...]";
+            } else if (obj instanceof Enum<?>) {
+                result = String.format("%" + getEnumTxtSize(((Enum<?>) obj).getDeclaringClass()) + "s",
+                        String.valueOf(obj));
+            } else if (obj instanceof Class) {
+                result = ((Class<?>) obj).getSimpleName();
+                // If toString is not predefined ...
+            } else if (String.valueOf(obj).startsWith(obj.getClass().getCanonicalName() + "@")) {
+                result = "ref<" + obj.hashCode() + ">";
+            } else {
+                result = String.format("%" + SIZE_OF_STRINGS + "s", String.valueOf(obj));
+            }
         }
         return result;
     }
