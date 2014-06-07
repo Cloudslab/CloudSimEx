@@ -64,6 +64,12 @@ public final class Id {
             result = COUNTERS.get(matchClass);
             COUNTERS.put(matchClass, result + 1);
         }
+
+        if (result < 0) {
+            throw new IllegalStateException("The generated id for class:" + clazz.getName()
+                    + " is negative. Possible integer overflow.");
+        }
+
         return result;
     }
 

@@ -21,6 +21,7 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.primitives.Primitives;
 
 /**
@@ -378,6 +379,35 @@ public class TextUtil {
 
         return result.toString();
     }
+    
+    /**
+     * Converts the specified object to a single line of text by concatenating
+     * its properties and "Virtual Properties". Essentially this methods calls
+     * {@link TextUtil.getTxtLine(final Object obj, final String delimeter,
+     * final String[] properties, final boolean includeFieldNames)} to
+     * textualise the properties and then appends the virtual properties.
+     * 
+     * <br>
+     * <br>
+     * Each virtual property is specified by a name and a function. The function
+     * takes as a parameter the object and returns a string.
+     * 
+     * @param obj
+     *            - the object to extract text from. Must not be null.
+     * @param properties
+     *            - the properties to include in the line. If null all
+     *            properties specified in a {@link Textualize} annotation are
+     *            used. If null and no {@link Textualize} is defined for the
+     *            class - then all properties are used.
+     * @param virtualProps
+     *            - must not be null. The Functions must not throw exceptions or
+     *            modify the state of the object
+     * @return
+     */
+    public static <F> String getTxtLine(final F obj, final String[] properties,
+            final LinkedHashMap<String, Function<? extends F, String>> virtualProps) {
+        return getTxtLine(obj, DEFAULT_DELIM, properties, false, virtualProps);
+    }
 
     /**
      * Converts the specified class to a single line of text. Convenient for
@@ -551,6 +581,46 @@ public class TextUtil {
         return result.toString();
     }
 
+    /**
+     * Converts the specified class to a single line of text by appending its
+     * properties and a set of so-called "virtual properties".
+     * 
+     * @param clazz
+     *            - the class to use to create the line. Must not be null.
+     * @param properties
+     *            - the properties to include in the line. If null all
+     *            properties specified in a {@link Textualize} annotation are
+     *            used. If null and no {@link Textualize} is defined for the
+     *            class - then all properties are used.
+     * @param virtualProps
+     *            - virtual properties, which are not actual properties of the
+     *            class.
+     * @return
+     */
+    public static String getCaptionLine(final Class<?> clazz, final String[] properties, final String[] virtualProps) {
+        return getCaptionLine(clazz, DEFAULT_DELIM, properties, virtualProps);
+    }
+    
+    /**
+     * Converts the specified class to a single line of text by appending its
+     * properties and a set of so-called "virtual properties".
+     * 
+     * @param clazz
+     *            - the class to use to create the line. Must not be null.
+     * @param properties
+     *            - the properties to include in the line. If null all
+     *            properties specified in a {@link Textualize} annotation are
+     *            used. If null and no {@link Textualize} is defined for the
+     *            class - then all properties are used.
+     * @param virtualProps
+     *            - virtual properties, which are not actual properties of the
+     *            class.
+     * @return
+     */
+    public static String getCaptionLine(final Class<?> clazz, final String[] properties, Iterable<String> virtualProps) {
+        return getCaptionLine(clazz, DEFAULT_DELIM, properties, Iterables.toArray(virtualProps, String.class));
+    }
+    
     @SuppressWarnings("unchecked")
     private static String formatHeader(String header, final Class<?> entryType) {
         if (Double.class.equals(entryType) || Float.class.equals(entryType) && header.length() < SIZE_OF_DBL_STRINGS) {
