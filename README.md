@@ -17,3 +17,6 @@ Currently **CloudSimEx** features:
 * MapReduce simulation.
 
 Please visit the wiki to learn more - https://github.com/Cloudslab/CloudSimEx/wiki
+
+Further documentation and tutorials can be found here - http://nikolaygrozev.wordpress.com/category/cloudsimex/
+
