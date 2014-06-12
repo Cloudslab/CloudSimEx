@@ -41,7 +41,7 @@ import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
  * @author nikolay.grozev
  * 
  */
-public class CloudSimDisksExamples {
+public class CloudSimDisksExample {
 
     // CPU capacity of each processor
     private static final int HOST_MIPS = 1000;
