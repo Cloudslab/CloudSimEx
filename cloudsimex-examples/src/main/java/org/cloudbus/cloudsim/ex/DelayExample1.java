@@ -79,7 +79,7 @@ public class DelayExample1 {
         cloudlet.setVmId(vmid);
 
         // submit cloudlet list to the broker with 10 sec Delay
-        broker.submitCloudletList(Arrays.asList(cloudlet), 5);
+        broker.submitCloudletList(Arrays.asList(cloudlet), 10);
 
         // Sixth step: Starts the simulation
         CloudSim.startSimulation();
