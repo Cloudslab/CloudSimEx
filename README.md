@@ -20,3 +20,5 @@ Please visit the wiki to learn more - https://github.com/Cloudslab/CloudSimEx/wi
 
 Further documentation and tutorials can be found here - http://nikolaygrozev.wordpress.com/category/cloudsimex/
 
+This Project is distributed under: Apache License 2.0 
+
