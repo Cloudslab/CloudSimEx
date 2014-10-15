@@ -10,10 +10,10 @@ import java.util.Map;
 import org.cloudbus.cloudsim.ex.util.helpers.TestUtil;
 import org.junit.Test;
 
-public class RandomListGeneratorTest {
+public strictfp class RandomListGeneratorTest {
 
     @Test
-    public void test() {
+    public strictfp void test() {
         String test1 = "Test1";
         double testFreq1 = 11;
 
@@ -44,7 +44,7 @@ public class RandomListGeneratorTest {
 
         // Count the occurrences
         Map<String, Integer> counts = new HashMap<>();
-        int numTests = 1_000;
+        int numTests = 10_000;
         for (int i = 0; i < numTests; i++) {
             String s = gen.poll();
             if (!counts.containsKey(s)) {
