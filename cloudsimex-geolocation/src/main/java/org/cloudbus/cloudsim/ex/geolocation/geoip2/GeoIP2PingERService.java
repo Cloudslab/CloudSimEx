@@ -3,8 +3,9 @@ package org.cloudbus.cloudsim.ex.geolocation.geoip2;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -27,12 +28,16 @@ import org.cloudbus.cloudsim.ex.util.CustomLog;
 
 import au.com.bytecode.opencsv.CSVReader;
 
+import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.MinMaxPriorityQueue;
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
-import com.maxmind.geoip2.model.City;
+import com.maxmind.geoip2.model.CityResponse;
+import com.maxmind.geoip2.record.Location;
+
+import static org.cloudbus.cloudsim.ex.geolocation.geoip2.ResourceUtil.*;
 
 /**
  * 
@@ -42,8 +47,8 @@ import com.maxmind.geoip2.model.City;
  * 
  * <br>
  * <br>
- * The PingER data can be extracted with the following request: <a href=
- * "http://pinger.seecs.edu.pk/cgi-bin/pingtable.pl?format=tsv&file=average_rtt&by=by-node&size=1000&tick=monthly&year=2013&month=08&from=WORLD&to=WORLD&ex=none&dataset=hep&percentage=75%25&filter=on"
+ * Sample PingER data can be extracted with the following request: <a href=
+ * "http://www-wanmon.slac.stanford.edu/cgi-wrap/pingtable.pl?format=tsv&file=average_rtt&by=by-node&size=1000&tick=monthly&year=2014&month=09&from=WORLD&to=WORLD&ex=none&dataset=hep&percentage=75%25&filter=on"
  * >PingER request URL</a>.
  * 
  * 
@@ -51,6 +56,7 @@ import com.maxmind.geoip2.model.City;
  * 
  */
 public class GeoIP2PingERService extends BaseGeolocationService implements IGeolocationService, Closeable {
+
 
     /** In order to minimise the number of created instances, we keep a cache. */
     private final Cache<String, double[]> coordinatesCache = CacheBuilder.newBuilder().concurrencyLevel(1)
@@ -89,6 +95,35 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
      * Constructor.
      * 
      * @param geoIP2DB
+     *            - a stream to a valid mmdb data. Must not be null
+     * @param pingErRTT
+     *            - a stream to a TSV file extracted from the PingER service, containing
+     *            data about RTTs between hosts distributed worldwide. Must not be null
+     * @param pingerMonitoringSites
+     *            - a stream to a CSV file extracted from the PingER service, containing the
+     *            metadata of all hosts. Must not be null
+     */
+    public GeoIP2PingERService(final InputStream geoIP2DB, final InputStream pingErRTT, final InputStream pingerMonitoringSites) {
+        Preconditions.checkNotNull(geoIP2DB);
+        Preconditions.checkNotNull(pingErRTT);
+        Preconditions.checkNotNull(pingerMonitoringSites);
+        
+        CustomLog.printf(Level.FINER, "Creating a GeoLocation service from streams");
+        try {
+            reader = new DatabaseReader.Builder(geoIP2DB).build();
+
+            parsePingER(pingErRTT, pingerMonitoringSites);
+        } catch (IOException e) {
+            String msg = "Invalid file: " + Objects.toString(geoIP2DB) + " Error details:" + e.getMessage();
+            CustomLog.logError(Level.SEVERE, msg, e);
+            throw new IllegalArgumentException(msg, e);
+        }
+    }
+    
+    /**
+     * Constructor.
+     * 
+     * @param geoIP2DB
      *            - a valid file in the mmdb format.
      * @param pingErRTTFile
      *            - a TSV file extracted from the PingER service, containing
@@ -98,23 +133,18 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
      *            metadata of all hosts.
      */
     public GeoIP2PingERService(final File geoIP2DB, final File pingErRTTFile, final File pingerMonitoringSitesFile) {
-        super();
-        CustomLog.printf(Level.FINER, "Creating an GeoLocation service from %s, %s, %s", geoIP2DB.getAbsolutePath(),
-                pingErRTTFile.getAbsolutePath(), pingerMonitoringSitesFile.getAbsolutePath());
-        try {
-            reader = new DatabaseReader(geoIP2DB);
-
-            parsePingER(pingErRTTFile, pingerMonitoringSitesFile);
-        } catch (IOException e) {
-            String msg = "Invalid file: " + Objects.toString(geoIP2DB) + " Error details:" + e.getMessage();
-            CustomLog.logError(Level.SEVERE, msg, e);
-            throw new IllegalArgumentException(msg, e);
-        }
+        this(toStream(geoIP2DB), toStream(pingErRTTFile), toStream(pingerMonitoringSitesFile));
     }
 
-    private void parsePingER(final File pingErRTTFile, final File pingerMonitoringSitesFile) {
-        try (BufferedReader pingsReader = new BufferedReader(new FileReader(pingErRTTFile));
-                BufferedReader nodeDefsReader = new BufferedReader(new FileReader(pingerMonitoringSitesFile))) {
+    public GeoIP2PingERService() {
+        this(classLoad(DEFAULT_GEO_LITE2_CITY_MMDB), 
+                classLoad(DEFAULT_PING_TABLE_PING_ER_TSV), 
+                classLoad(DEFAULT_MONITORING_SITES_PING_ER_CSV));
+    }
+    
+    private void parsePingER(final InputStream pingErRTT, final InputStream pingerMonitoringSites) {
+        try (BufferedReader pingsReader = new BufferedReader(new InputStreamReader(pingErRTT));
+                BufferedReader nodeDefsReader = new BufferedReader(new InputStreamReader(pingerMonitoringSites))) {
             parseNodesDefitions(nodeDefsReader);
             parseInterNodePings(pingsReader);
         } catch (IOException e) {
@@ -212,10 +242,10 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
     public final double[] getCoordinates(final String ip) {
         double[] result = coordinatesCache.getIfPresent(ip);
         if (result == null) { // If not in the cache
-            City city;
+            Location location;
             try {
-                city = reader.city(InetAddress.getByName(ip));
-                result = new double[] { city.getLocation().getLatitude(), city.getLocation().getLongitude() };
+                location = reader.city(InetAddress.getByName(ip)).getLocation();
+                result = new double[] { location.getLatitude(), location.getLongitude() };
             } catch (UnknownHostException e) {
                 String msg = "Invalid IP: " + Objects.toString(ip);
                 CustomLog.logError(Level.SEVERE, msg, e);
@@ -237,7 +267,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 
     @Override
     public IPMetadata getMetaData(final String ip) {
-        City city;
+        CityResponse city;
         try {
             city = reader.city(InetAddress.getByName(ip));
             return new IPMetadata(city.getContinent().getName(), city.getContinent().getCode(), city.getCountry()
@@ -429,8 +459,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
 
     public static void main(String[] args) throws IOException {
         String ip = "124.168.86.122";
-        try (GeoIP2PingERService service = new GeoIP2PingERService(new File("GeoLite2-City.mmdb"), new File(
-                "PingTablePingER.tsv"), new File("MonitoringSitesPingER.csv"))) {
+        try (GeoIP2PingERService service = new GeoIP2PingERService()) {
             System.out.println(service.getTxtAddress(ip));
         }
     }

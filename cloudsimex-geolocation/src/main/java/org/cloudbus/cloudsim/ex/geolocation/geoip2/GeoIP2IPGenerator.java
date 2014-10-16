@@ -2,13 +2,13 @@ package org.cloudbus.cloudsim.ex.geolocation.geoip2;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -17,7 +17,10 @@ import org.cloudbus.cloudsim.ex.geolocation.IPGenerator;
 import org.cloudbus.cloudsim.ex.geolocation.IPUtil;
 import org.cloudbus.cloudsim.ex.util.CustomLog;
 
+import com.google.common.base.Preconditions;
+
 import au.com.bytecode.opencsv.CSVReader;
+import static org.cloudbus.cloudsim.ex.geolocation.geoip2.ResourceUtil.*;
 
 /**
  * An IP generator that generates IPv4 IPs, based on the IP ranges specified in
@@ -34,8 +37,6 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
     /** The quote symbol in the csv and tsv file. */
     private static final char QUOTE_SYMBOL = '\"';
 
-    /** The CSV file in the GeoLite2 format. */
-    private File originalFile;
     /** All ranges specified in the file. */
     private final List<IPRange> ranges = new ArrayList<>();
     /**
@@ -48,19 +49,88 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
     private long sumOfRangesLengths = 0;
 
     /**
+     * Constr. Uses the default embedded data file.
+     * 
+     * @param countryCodes
+     *            - the country codes for this generator.
+     */
+    public GeoIP2IPGenerator(final Set<String> countryCodes) {
+        this(countryCodes, classLoad(DEFAULT_GEO_IP_COUNTRY_CSV));
+    }
+    
+    /**
+     * Constr. Uses the default embedded data file.
+     * 
+     * @param countryCodes
+     *            - the country codes for this generator.
+     * @param seed
+     *            - a seed if we need to get the same behavior again and again.
+     */
+    public GeoIP2IPGenerator(final Set<String> countryCodes, final long seed) {
+        this(countryCodes, classLoad(DEFAULT_GEO_IP_COUNTRY_CSV), seed);
+    }
+    
+    /**
+     * Constr.
+     * 
+     * @param countryCodes
+     *            - the country codes for this generator.
+     * @param is
+     *            - a valid CSV stream as defined by the GeoLite2 format.
+     * @param seed
+     *            - a seed if we need to get the same behavior again and again.
+     */
+    public GeoIP2IPGenerator(final Set<String> countryCodes, final InputStream is, final long seed) {
+        super(countryCodes, seed);
+        Preconditions.checkNotNull(countryCodes);
+        Preconditions.checkArgument(!countryCodes.isEmpty());
+        Preconditions.checkNotNull(is);
+        
+        parseStream(is);
+    }
+
+    /**
+     * Constr.
+     * 
+     * @param countryCodes
+     *            - the country codes for this generator. Must not be null or
+     *            empty.
+     * @param is
+     *            - a valid CSV stream as defined by the GeoLite2 format. Must
+     *            not be null.
+     */
+    public GeoIP2IPGenerator(final Set<String> countryCodes, final InputStream is) {
+        super(countryCodes);
+        Preconditions.checkNotNull(countryCodes);
+        Preconditions.checkArgument(!countryCodes.isEmpty());
+        Preconditions.checkNotNull(is);
+        
+        parseStream(is);
+    }
+    
+    /**
      * Constr.
      * 
      * @param countryCodes
      *            - the country codes for this generator.
      * @param f
-     *            - a valid CSV file as defined by the GeoLite2 format.
+     *            - a valid CSV file as defined by the GeoLite2 format. Must not
+     *            be null. Must be valid.
      * @param seed
      *            - a seed if we need to get the same behavior again and again.
      */
     public GeoIP2IPGenerator(final Set<String> countryCodes, final File f, final long seed) {
         super(countryCodes, seed);
-        originalFile = f;
-        parseFile();
+        
+        Preconditions.checkNotNull(countryCodes);
+        Preconditions.checkArgument(!countryCodes.isEmpty());
+        Preconditions.checkNotNull(f);
+        Preconditions.checkArgument(f.exists());
+        
+        CustomLog.printf(Level.FINER, "Creating an IP generator from %s for countries %s",
+                f.getAbsolutePath(), Arrays.toString(getCountryCodes().toArray()));
+        
+        parseStream(toStream(f));
     }
 
     /**
@@ -69,12 +139,20 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
      * @param countryCodes
      *            - the country codes for this generator.
      * @param f
-     *            - a valid CSV file as defined by the GeoLite2 format.
+     *            - a valid CSV file as defined by the GeoLite2 format. Must not
+     *            be null. Must be valid.
      */
     public GeoIP2IPGenerator(final Set<String> countryCodes, final File f) {
         super(countryCodes);
-        originalFile = f;
-        parseFile();
+        
+        Preconditions.checkNotNull(countryCodes);
+        Preconditions.checkArgument(!countryCodes.isEmpty());
+        Preconditions.checkNotNull(f);
+        Preconditions.checkArgument(f.exists());
+        CustomLog.printf(Level.FINER, "Creating an IP generator from %s for countries %s",
+                f.getAbsolutePath(), Arrays.toString(getCountryCodes().toArray()));
+        
+        parseStream(toStream(f));
     }
 
     /*
@@ -95,15 +173,12 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
         return IPUtil.convertIPv4(ip);
     }
 
-    private void parseFile() {
-        CustomLog.printf(Level.FINER, "Creating an IP generator from %s for countries %s",
-                originalFile.getAbsolutePath(), Arrays.toString(getCountryCodes().toArray()));
-
+    private void parseStream(final InputStream input) {
         long accum = 0;
         ranges.clear();
         sumOfRangesLengths = 0;
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(originalFile));
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                 CSVReader csv = new CSVReader(reader, CSV_SEP, QUOTE_SYMBOL)) {
             // Read the file line by line
             int lineCount = 0;
@@ -118,20 +193,17 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
                     accumRangeLengths.add(accum);
                 }
                 if (++lineCount % 10000 == 0) {
-                    CustomLog.printf(Level.FINER, "%d lines processed from %s", lineCount,
-                            originalFile.getAbsolutePath());
+                    CustomLog.printf(Level.FINER, "%d lines processed from", lineCount);
                 }
             }
-            CustomLog.printf(Level.FINER, "IP generator from %s for countries %s has %d IP ranges",
-                    originalFile.getAbsolutePath(), Arrays.toString(getCountryCodes().toArray()), ranges.size());
+            CustomLog.printf(Level.FINER, "IP generator for countries %s has %d IP ranges",
+                    Arrays.toString(getCountryCodes().toArray()), ranges.size());
 
             sumOfRangesLengths = accum;
         } catch (IOException e) {
             ranges.clear();
-            String msg = "File: " + Objects.toString(originalFile.getAbsoluteFile())
-                    + " could not be found or read properly. Message: " + e.getMessage();
-            CustomLog.logError(Level.SEVERE, msg, e);
-            throw new IllegalArgumentException(msg, e);
+            CustomLog.logError(Level.SEVERE, "Parsing Error", e);
+            throw new IllegalArgumentException("Parsing Error", e);
         }
     }
 

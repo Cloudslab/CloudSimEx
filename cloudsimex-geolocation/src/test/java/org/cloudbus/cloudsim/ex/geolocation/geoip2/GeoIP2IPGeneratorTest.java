@@ -17,9 +17,9 @@ import org.cloudbus.cloudsim.ex.util.helpers.TestUtil;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public strictfp class GeoIP2IPGeneratorTest {
+import static org.cloudbus.cloudsim.ex.geolocation.geoip2.ResourceUtil.*;
 
-    private static File TEST_FILE = new File("test-resources/GeoIPCountryTest.csv");
+public strictfp class GeoIP2IPGeneratorTest {
 
     private static double NUM_AU_IPS_IN_TEST = 1788;
     private static double NUM_CN_IPS_IN_TEST = 59641;
@@ -36,9 +36,10 @@ public strictfp class GeoIP2IPGeneratorTest {
     @BeforeClass
     public strictfp static void setUpClass() throws Exception {
         CustomLog.configLogger(TestUtil.LOG_PROPS);
-        generator = new GeoIP2IPGenerator(COUNTRY_CODES, TEST_FILE, TestUtil.SEED);
-        service = new GeoIP2PingERService(new File("GeoLite2-City.mmdb"), new File("PingTablePingER.tsv"), new File(
-                "MonitoringSitesPingER.csv"));
+        generator = new GeoIP2IPGenerator(COUNTRY_CODES, classLoad("/GeoIPCountryTest.csv"), TestUtil.SEED);
+        service = new GeoIP2PingERService(classLoad(DEFAULT_GEO_LITE2_CITY_MMDB), 
+                classLoad(DEFAULT_PING_TABLE_PING_ER_TSV), 
+                classLoad(DEFAULT_MONITORING_SITES_PING_ER_CSV));
     }
 
     @Test

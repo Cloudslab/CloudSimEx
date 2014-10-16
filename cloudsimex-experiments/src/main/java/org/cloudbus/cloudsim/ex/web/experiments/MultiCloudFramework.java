@@ -116,9 +116,6 @@ public class MultiCloudFramework {
 
     private static final Set<String> US_CODES = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList("US")));
 
-    private static final String GEO_RESOURCE_PATH =
-	    new File(".").getAbsoluteFile().getParentFile().getParentFile().getAbsolutePath()
-		    + "/cloudsimex-geolocation/";
     private GeoIP2IPGenerator euroIPGen;
     private GeoIP2IPGenerator usIPGen;
     private GeoIP2PingERService geoService;
@@ -275,14 +272,9 @@ public class MultiCloudFramework {
 	CustomLog.printLine("");
 
 	CustomLog.print("Step 0: Initialising IP services....");
-	euroIPGen = new GeoIP2IPGenerator(EURO_CODES,
-		new File(GEO_RESOURCE_PATH + "GeoIPCountryWhois.csv"));
-	usIPGen = new GeoIP2IPGenerator(US_CODES,
-		new File(GEO_RESOURCE_PATH + "GeoIPCountryWhois.csv"));
-	geoService = new GeoIP2PingERService(
-		new File(GEO_RESOURCE_PATH + "GeoLite2-City.mmdb"),
-		new File(GEO_RESOURCE_PATH + "PingTablePingER.tsv"),
-		new File(GEO_RESOURCE_PATH + "MonitoringSitesPingER.csv"));
+	euroIPGen = new GeoIP2IPGenerator(EURO_CODES);
+	usIPGen = new GeoIP2IPGenerator(US_CODES);
+	geoService = new GeoIP2PingERService();
 
 	try {
 	    // == == == == == == == == == == == == == == == == == == == == == ==

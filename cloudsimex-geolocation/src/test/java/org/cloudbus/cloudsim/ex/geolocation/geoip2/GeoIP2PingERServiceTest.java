@@ -12,6 +12,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static org.cloudbus.cloudsim.ex.geolocation.geoip2.ResourceUtil.*;
+
 public class GeoIP2PingERServiceTest {
 
     private static final String MELBOURNE_IP = "128.250.180.0";
@@ -41,8 +43,10 @@ public class GeoIP2PingERServiceTest {
     @BeforeClass
     public static void setUp() throws Exception {
         CustomLog.configLogger(TestUtil.LOG_PROPS);
-        service = new GeoIP2PingERService(new File("GeoLite2-City.mmdb"), new File("PingTablePingER.tsv"), new File(
-                "MonitoringSitesPingER.csv"));
+        service = new GeoIP2PingERService(
+                classLoad(DEFAULT_GEO_LITE2_CITY_MMDB),
+                classLoad(DEFAULT_PING_TABLE_PING_ER_TSV),
+                classLoad(DEFAULT_MONITORING_SITES_PING_ER_CSV));
     }
 
     @Test(expected = IllegalArgumentException.class)
