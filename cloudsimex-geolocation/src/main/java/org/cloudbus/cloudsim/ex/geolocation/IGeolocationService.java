@@ -1,5 +1,7 @@
 package org.cloudbus.cloudsim.ex.geolocation;
 
+import java.io.Closeable;
+
 /**
  * Implements functionalities for extracting geographical location of servers
  * based on their IPs and computing different measures based on that.
@@ -15,7 +17,7 @@ package org.cloudbus.cloudsim.ex.geolocation;
  * @author nikolay.grozev
  * 
  */
-public interface IGeolocationService {
+public interface IGeolocationService extends Closeable {
 
     /**
      * Returns estimation of the geographical the latitude and the longitude of

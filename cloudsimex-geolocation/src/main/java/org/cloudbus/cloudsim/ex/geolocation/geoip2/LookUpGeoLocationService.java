@@ -1,5 +1,6 @@
 package org.cloudbus.cloudsim.ex.geolocation.geoip2;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.cloudbus.cloudsim.ex.geolocation.BaseGeolocationService;
@@ -14,9 +15,9 @@ import org.cloudbus.cloudsim.ex.geolocation.IPMetadata;
  */
 public class LookUpGeoLocationService extends BaseGeolocationService {
 
-    final private Map<String, IPMetadata> metadataCache;
-    final private Map<String, Double> latencyCache;
-    final private Map<String, double[]> coordinatesCache;
+    private Map<String, IPMetadata> metadataCache;
+    private Map<String, Double> latencyCache;
+    private Map<String, double[]> coordinatesCache;
 
     /**
      * Constr.
@@ -56,5 +57,12 @@ public class LookUpGeoLocationService extends BaseGeolocationService {
         } else {
             return latencyCache.get(ip2 + ip1);
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        metadataCache = null;
+        latencyCache = null;
+        coordinatesCache = null;
     }
 }
