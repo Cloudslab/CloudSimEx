@@ -28,10 +28,13 @@ public class BB {
 	Standard, Decision;
     }
 
+    @SuppressWarnings("unused")
     private Request request;
+    @SuppressWarnings("unused")
     private Cloud cloud;
     private int loggingFrequent = 250000;
 
+    @SuppressWarnings("deprecation")
     public Boolean runAlgorithm(Cloud cloud, Request request, int numCostTrees, boolean enablePerfTree,
 	    long forceToAceeptAnySolutionTimeMillis, long forceToExitTimeMillis, BacktrackingType backtrackingType) {
 	this.request = request;

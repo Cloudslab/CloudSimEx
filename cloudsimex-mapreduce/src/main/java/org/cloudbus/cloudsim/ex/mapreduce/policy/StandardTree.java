@@ -24,6 +24,7 @@ import org.cloudbus.cloudsim.ex.util.CustomLog;
 public class StandardTree implements Runnable {
     public static boolean enableProgressBar = true;
     private Request request;
+    @SuppressWarnings("unused")
     private Cloud cloud;
 
     private PredictionEngine predictionEngine;

@@ -48,7 +48,7 @@ public class MapTask extends Task
 
 	String currentVmTypeName = vm.name;
 
-	for (List<Object> throughputs_vm_ds : cloud.throughputs_ds_vm)
+	for (List<?> throughputs_vm_ds : cloud.throughputs_ds_vm)
 	{
 	    String source_dataSource = (String) throughputs_vm_ds.get(0);
 	    String destination_vm = (String) throughputs_vm_ds.get(1);
@@ -117,7 +117,7 @@ public class MapTask extends Task
 	    if (currentVmTypeName.equals(reduceVmTypeName))
 		return 0;
 
-	    for (List<Object> throughputs_vm_vm : cloud.throughputs_vm_vm)
+	    for (List<?> throughputs_vm_vm : cloud.throughputs_vm_vm)
 	    {
 		String source_vm = (String) throughputs_vm_vm.get(0);
 		String destination_vm = (String) throughputs_vm_vm.get(1);

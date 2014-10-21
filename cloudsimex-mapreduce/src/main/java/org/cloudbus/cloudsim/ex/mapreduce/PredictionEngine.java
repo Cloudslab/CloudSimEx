@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.Cloud;
 import org.cloudbus.cloudsim.ex.mapreduce.models.cloud.VmInstance;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Job;
@@ -15,7 +14,6 @@ import org.cloudbus.cloudsim.ex.mapreduce.models.request.MapTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.ReduceTask;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Request;
 import org.cloudbus.cloudsim.ex.mapreduce.models.request.Task;
-import org.cloudbus.cloudsim.ex.util.CustomLog;
 
 public class PredictionEngine
 {
@@ -120,7 +118,7 @@ public class PredictionEngine
 
 	String currentVmTypeName = vm.name;
 
-	for (List<Object> throughputs_vm_ds : cloud.throughputs_ds_vm)
+	for (List<?> throughputs_vm_ds : cloud.throughputs_ds_vm)
 	{
 	    String source_dataSource = (String) throughputs_vm_ds.get(0);
 	    String destination_vm = (String) throughputs_vm_ds.get(1);
@@ -171,7 +169,7 @@ public class PredictionEngine
 	    if (currentVmTypeName.equals(reduceVmTypeName))
 		return 0;
 
-	    for (List<Object> throughputs_vm_vm : cloud.throughputs_vm_vm)
+	    for (List<?> throughputs_vm_vm : cloud.throughputs_vm_vm)
 	    {
 		String source_vm = (String) throughputs_vm_vm.get(0);
 		String destination_vm = (String) throughputs_vm_vm.get(1);

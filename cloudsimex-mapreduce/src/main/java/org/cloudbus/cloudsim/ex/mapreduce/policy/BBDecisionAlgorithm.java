@@ -14,6 +14,7 @@ import org.cloudbus.cloudsim.ex.util.CustomLog;
 public class BBDecisionAlgorithm {
     private Request request;
     private Cloud cloud;
+    @SuppressWarnings("unused")
     private PredictionEngine predictionEngine;
     private List<VmInstance> nVMs;
     private ArrayList<ArrayList<VmInstance>> vmGroupByType = new ArrayList<ArrayList<VmInstance>>();
@@ -21,9 +22,11 @@ public class BBDecisionAlgorithm {
     private double solutionCost;
     private double solutionExecutionTime;
     private Integer[] solutionVector = null;
+    @SuppressWarnings("unused")
     private int logginCounter;
     private int loggingFrequent;
 
+    @SuppressWarnings("unused")
     private long startRunningTime;
     private long forceToAceeptAnySolutionTimeMillis;
     private long forceToExitTimeMillis;

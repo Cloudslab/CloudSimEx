@@ -11,8 +11,8 @@ public class Cloud {
     public List<PublicCloudDatacenter> publicCloudDatacenters;
     public List<PrivateCloudDatacenter> privateCloudDatacenters;
     public List<DataSource> dataSources;
-    public List<List> throughputs_vm_vm;
-    public List<List> throughputs_ds_vm;
+    public List<List<?>> throughputs_vm_vm;
+    public List<List<?>> throughputs_ds_vm;
 
     public static int brokerID = -1;
 

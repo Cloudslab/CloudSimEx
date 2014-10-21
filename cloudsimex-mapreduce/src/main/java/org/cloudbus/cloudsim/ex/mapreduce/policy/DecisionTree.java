@@ -18,6 +18,7 @@ public class DecisionTree implements Runnable
     private Integer vmId;
 
     private Request request;
+    @SuppressWarnings("unused")
     private Cloud cloud;
     private PredictionEngine predictionEngine;
     private List<VmInstance> nVMs;
