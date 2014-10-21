@@ -225,7 +225,7 @@ public class GeoIP2IPGenerator extends BaseIPGenerator implements IPGenerator {
 
         @Override
         public String toString() {
-            return String.format("[$d,%d]", from, to);
+            return String.format("[%d,%d]", from, to);
         }
     }
 }

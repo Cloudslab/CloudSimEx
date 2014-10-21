@@ -142,8 +142,7 @@ public class CompressLoadBalancer extends BaseWebLoadBalancer implements ILoadBa
         int secsToKeep = 60;
         if (noAppServSessions == null || !noAppServSessions.isEmpty()) {
             secsToArrivals.put(time,
-                    !secsToArrivals.containsKey(time) ? noAppServSessions.size() : secsToArrivals.get(time)
-                            + noAppServSessions.size());
+                    !secsToArrivals.containsKey(time) ? 0 : secsToArrivals.get(time));
         }
         for (Iterator<Integer> iter = secsToArrivals.keySet().iterator(); iter.hasNext();) {
             int recorededTime = iter.next();

@@ -202,7 +202,7 @@ public class EntryPoint extends BaseEntryPoint implements IEntryPoint {
                         : (latestPriceEstimations.containsKey(b) ? latestPriceEstimations.get(b) : 0);
 
             }
-            if (!latestPriceEstimations.containsKey(b) || latestPriceEstimations.get(b) != res) {
+            if (!latestPriceEstimations.containsKey(b) || Math.abs(latestPriceEstimations.get(b) - res) > 0.01 ) {
                 // res = latestPriceEstimations.containsKey(b) ? (res +
                 // latestPriceEstimations.get(b))/2 : res;
 

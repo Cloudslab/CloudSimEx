@@ -452,7 +452,7 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
         @Override
         public String toString() {
             return String.format(
-                    "Node1: %s, (%.2f, %.2f), Node2: %s, (%.2f, %.2f), Accum Distance: $.2f, Latency: %.2f", node1,
+                    "Node1: %s, (%.2f, %.2f), Node2: %s, (%.2f, %.2f), Accum Distance: %.2f, Latency: %.2f", node1,
                     coord1[0], coord1[1], node2, coord2[0], coord2[1], accumDistance, latency);
         }
     }

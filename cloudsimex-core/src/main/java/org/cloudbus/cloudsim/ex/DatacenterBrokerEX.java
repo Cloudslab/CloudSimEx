@@ -432,7 +432,7 @@ public class DatacenterBrokerEX extends DatacenterBroker {
         List<Vm> toBill = new ArrayList<>();
 
         for (Vm vm : getVmList()) {
-            if (dcIds.isEmpty() || dcIds.contains(getVmsToDatacentersMap().get(vm))) {
+            if (dcIds.isEmpty() || dcIds.contains(getVmsToDatacentersMap().get(vm.getId()))) {
                 toBill.add(vm);
             }
         }

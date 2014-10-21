@@ -41,10 +41,12 @@ public class GeneratorsUtil {
     }
 
     public static Map<String, List<Double>> parseReader(final BufferedReader br) throws IOException {
-        String line = br.readLine();
         List<String> headers = new ArrayList<>();
-        for (String s : line.replaceAll("\"", "").replace("\\s+", "").split(",")) {
-            headers.add(s.trim());
+        String line = br.readLine();
+        if (line != null) {
+	        for (String s : line.replaceAll("\"", "").replace("\\s+", "").split(",")) {
+	            headers.add(s.trim());
+	        }
         }
 
         Map<String, List<Double>> values = new HashMap<String, List<Double>>();

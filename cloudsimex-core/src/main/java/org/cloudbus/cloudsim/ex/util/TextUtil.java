@@ -653,7 +653,7 @@ public class TextUtil {
                 List<Method> copyofMethods = new ArrayList<>(methods);
                 for (Method method : copyofMethods)
                     for (Method clazzMethod : clazzMethods) {
-                        if (clazzMethod.getName() == method.getName())
+                        if (clazzMethod.getName().equals(method.getName()))
                             methods.remove(method);
                     }
 

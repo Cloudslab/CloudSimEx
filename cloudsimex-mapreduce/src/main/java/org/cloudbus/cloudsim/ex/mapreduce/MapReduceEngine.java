@@ -135,7 +135,7 @@ public class MapReduceEngine extends DatacenterBroker {
 		+ requestString + " ===========");
 	Log.printLine(getName() + " is searching for the optimal Resource Set...");
 	request.setAlgoStartTime(System.currentTimeMillis());
-	if (!policy.runAlgorithm(cloud, request))
+	if (policy == null || !policy.runAlgorithm(cloud, request))
 	    Log.printLine(" =========== ERROR: THE ALGORITHM COULD NOT FIND VMs FOR REQUEST: " + request.id
 		    + " ===========");
 	else

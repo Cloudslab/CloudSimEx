@@ -427,7 +427,17 @@ public class CustomLog {
      *            - list of objects. All objects, must be of type klass.
      */
     public static void printResults(final Class<?> klass, final String delim, final List<?>... lines) {
-        printResults(klass, delim, lines);
+    	if (klass != null) {
+            // Print header line
+            CustomLog.printLine(TextUtil.getCaptionLine(klass, delim, null));
+        }
+
+        // Print details for each cloudlet
+        for (List<?> list : lines) {
+            for (Object o : list) {
+                CustomLog.print(TextUtil.getTxtLine(o, delim, null, false));
+            }
+        }
     }
 
     /**

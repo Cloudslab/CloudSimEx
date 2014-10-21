@@ -187,7 +187,7 @@ public class Request extends SimEvent {
 	this.jobFile = jobFile;
     }
 
-    public String getLogMessage() {
+    public synchronized String getLogMessage() {
 	return logMessage;
     }
 
@@ -291,7 +291,7 @@ public class Request extends SimEvent {
     }
 
     private Job readJobYAML(String jobFile) {
-	Job job = new Job();
+	new Job();
 
 	Yaml yaml = new Yaml();
 	InputStream document = null;
