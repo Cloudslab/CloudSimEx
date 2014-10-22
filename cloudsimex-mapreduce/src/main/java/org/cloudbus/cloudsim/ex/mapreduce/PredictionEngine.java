@@ -122,7 +122,7 @@ public class PredictionEngine
 	{
 	    String source_dataSource = (String) throughputs_vm_ds.get(0);
 	    String destination_vm = (String) throughputs_vm_ds.get(1);
-	    double throughputInMegaBit = (double) throughputs_vm_ds.get(2);
+	    double throughputInMegaBit = (Double) throughputs_vm_ds.get(2);
 
 	    if (destination_vm.equals(currentVmTypeName) && source_dataSource.equals(request.job.dataSourceName))
 		return task.dSize / (throughputInMegaBit / 8.0);
@@ -173,7 +173,7 @@ public class PredictionEngine
 	    {
 		String source_vm = (String) throughputs_vm_vm.get(0);
 		String destination_vm = (String) throughputs_vm_vm.get(1);
-		double throughputInMegaBit = (double) throughputs_vm_vm.get(2);
+		double throughputInMegaBit = (Double) throughputs_vm_vm.get(2);
 
 		if (source_vm.equals(currentVmTypeName) && destination_vm.equals(reduceVmTypeName))
 		{
