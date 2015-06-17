@@ -65,4 +65,9 @@ public class LookUpGeoLocationService extends BaseGeolocationService {
         latencyCache = null;
         coordinatesCache = null;
     }
+
+	@Override
+	public double latency(double[] reqCoord1, double[] reqCoord2) {
+		throw new UnsupportedOperationException("Not supported yet ... ");
+	}
 }

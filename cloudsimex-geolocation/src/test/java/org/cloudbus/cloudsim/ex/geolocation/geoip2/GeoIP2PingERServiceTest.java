@@ -44,7 +44,7 @@ public class GeoIP2PingERServiceTest {
     public static void setUp() throws Exception {
         CustomLog.configLogger(TestUtil.LOG_PROPS);
         service = new GeoIP2PingERService(
-                classLoad(DEFAULT_GEO_LITE2_CITY_MMDB),
+                classLoad(TEST_GEO_LITE2_CITY_MMDB),
                 classLoad(DEFAULT_PING_TABLE_PING_ER_TSV),
                 classLoad(DEFAULT_MONITORING_SITES_PING_ER_CSV));
     }

@@ -26,6 +26,8 @@ public final class ResourceUtil {
     /** Default resource. */
     public static final String DEFAULT_GEO_LITE2_CITY_MMDB = "/GeoLite2-City.mmdb";
     /** Default resource. */
+    public static final String TEST_GEO_LITE2_CITY_MMDB = "/Test_GeoLite2-City.mmdb";
+    /** Default resource. */
     public static final String DEFAULT_PING_TABLE_PING_ER_TSV = "/PingTablePingER.tsv";
     /** Default resource. */
     public static final String DEFAULT_MONITORING_SITES_PING_ER_CSV = "/MonitoringSitesPingER.csv";

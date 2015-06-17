@@ -296,8 +296,20 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
         if (cached != null) {
             return cached;
         }
+        // The coordinates of the requested IPs
+        final double[] reqCoord1 = getCoordinates(ip1);
+        final double[] reqCoord2 = getCoordinates(ip2);
 
-        // Set up the heap...
+        double result = latency(reqCoord1, reqCoord2);
+        CustomLog.print(Level.FINEST, String.format("Latency betweeen %s and %s is %.2f", ip1, ip2, result));
+
+        ipDistanceCache.put(key, result);
+        return result;
+    }
+
+    @Override
+    public double latency(final double[] reqCoord1, final double[] reqCoord2) {
+		// Set up the heap...
         @SuppressWarnings("rawtypes")
         MinMaxPriorityQueue.Builder builderRaw = MinMaxPriorityQueue.maximumSize(NUM_APPROX_FOR_LATENCY_ESTIMATION);
         @SuppressWarnings({ "unchecked" })
@@ -309,9 +321,6 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
         // in the queue.
         MinMaxPriorityQueue<PingERLatencyEntry> heap = builder.create();
 
-        // The coordinates of the requested IPs
-        final double[] reqCoord1 = getCoordinates(ip1);
-        final double[] reqCoord2 = getCoordinates(ip2);
 
         // Loop through the latencies and put them in the priority queue.
         for (Map.Entry<Pair<String, String>, Double> el : latencyTable.entrySet()) {
@@ -349,13 +358,9 @@ public class GeoIP2PingERService extends BaseGeolocationService implements IGeol
             updateHeap(heap, qEntry);
         }
 
-        CustomLog.printLine(Level.FINEST, "");
         double result = weigthedAverage(heap);
-        CustomLog.print(Level.FINEST, String.format("Latency betweeen %s and %s is %.2f", ip1, ip2, result));
-
-        ipDistanceCache.put(key, result);
-        return result;
-    }
+		return result;
+	}
 
     public double weigthedAverage(final MinMaxPriorityQueue<PingERLatencyEntry> heap) {
         double sumLatencies = 0;

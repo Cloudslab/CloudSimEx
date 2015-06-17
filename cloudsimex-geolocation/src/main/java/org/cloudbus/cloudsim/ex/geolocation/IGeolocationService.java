@@ -92,6 +92,19 @@ public interface IGeolocationService extends Closeable {
     double latency(String ip1, String ip2);
 
     /**
+     * Returns an estimation of the latency between the two IPs, measured in ms.
+     * 
+     * @param reqCoord1
+     *            - the latitude and longitude of the first point. Must be valid
+     *            coordinates.
+     * @param reqCoord2
+     *            - the latitude and longitude of the second point. Must be
+     *            valid coordinates.
+     * @return an estimation of the latency between the two IPs, measured in ms.
+     */
+	double latency(double[] reqCoord1, double[] reqCoord2);
+    
+    /**
      * Returns a textual representation of the location of the ip - useful for
      * debug purposes.
      * 
