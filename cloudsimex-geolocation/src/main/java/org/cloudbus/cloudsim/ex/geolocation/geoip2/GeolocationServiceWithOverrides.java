@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.cloudbus.cloudsim.ex.geolocation.BaseGeolocationService;
 import org.cloudbus.cloudsim.ex.geolocation.IGeolocationService;
@@ -56,6 +57,8 @@ public class GeolocationServiceWithOverrides extends BaseGeolocationService impl
             Boolean nonMatched = nonMatchedIps.getIfPresent(ip);
             // If not matched yet and previously unseen
             if (nonMatched == null) {
+                Logger l = Logger.getLogger(getClass().getCanonicalName());
+                l.warning("\nScanning for: " + ip + "\n\n");
                 for (OverrideRule overrideRule : rules) {
                     if (overrideRule.matches(ip)) {
                         rule = overrideRule;
