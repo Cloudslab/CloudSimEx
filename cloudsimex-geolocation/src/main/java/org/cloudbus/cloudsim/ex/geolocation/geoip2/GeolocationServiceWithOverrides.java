@@ -5,11 +5,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.cloudbus.cloudsim.ex.geolocation.BaseGeolocationService;
 import org.cloudbus.cloudsim.ex.geolocation.IGeolocationService;
 import org.cloudbus.cloudsim.ex.geolocation.IPMetadata;
+import org.cloudbus.cloudsim.ex.util.CustomLog;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
@@ -36,6 +38,10 @@ public class GeolocationServiceWithOverrides extends BaseGeolocationService impl
     private final Cache<String, Boolean> nonMatchedIps = CacheBuilder.newBuilder().concurrencyLevel(1)
             .initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
 
+    /** In order to minimise the number of created instances, we keep a cache. */
+    private final Cache<String, Double> ipDistanceCache = CacheBuilder.newBuilder().concurrencyLevel(1)
+            .initialCapacity(INITIAL_CACHE_SIZE).maximumSize(CACHE_SIZE).build();
+    
     /**
      * Ctor.
      * 
@@ -100,7 +106,14 @@ public class GeolocationServiceWithOverrides extends BaseGeolocationService impl
 
     @Override
     public double latency(String ip1, String ip2) {
-        return nested.latency(getCoordinates(ip1), getCoordinates(ip2));
+        String key = ip1 + ip2;
+        Double cached = ipDistanceCache.getIfPresent(key);
+        if (cached != null) {
+            return cached;
+        }
+        double result = nested.latency(getCoordinates(ip1), getCoordinates(ip2));
+        ipDistanceCache.put(key, result);
+        return result;
     }
 
     @Override
